@@ -1,5 +1,5 @@
 {
-  description = "COMP4078: Programs, Proofs and Types";
+  description = "MSc Project on Traced Monoidal Categories";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
