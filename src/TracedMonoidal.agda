@@ -49,7 +49,7 @@ record BalancedMonoidal : Set (levelOfTerm M) where
     twistComposition :
         θ {A ⊗₀ B}
       ≈ c {B} {A} ∘ θ {B} ⊗₁ θ {A} ∘ c {A} {B}
-    twistIdentity : θ {A} ≈ id A
+    twistIdentity : θ {A} ≈ Category.id C {A}
 
 
 
