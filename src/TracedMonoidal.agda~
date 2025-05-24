@@ -1,4 +1,0 @@
-module TracedMonoidal {o ℓ e} {C : Category o ℓ e} {M : Monoidal C} where
-
-open import Categories.Category
-open import Categories.Category.Monoidal.Traced {o ℓ e} {C : Category o ℓ e} {M : Monoidal C}
