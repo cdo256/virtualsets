@@ -1,0 +1,7 @@
+name: tmc
+include:
+  src
+depend:
+  standard-library
+  agda-categories
+
