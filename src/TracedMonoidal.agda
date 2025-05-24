@@ -51,21 +51,41 @@ record BalancedMonoidal : Set (levelOfTerm M) where
       ≈ c {B} {A} ∘ θ {B} ⊗₁ θ {A} ∘ c {A} {B}
     twistIdentity : θ {A} ≈ Category.id C {A}
 
+record LeftTrace : Set (levelOfTerm M) where
+  field
+    braided : Braided
 
+  open Braided braided public
 
--- record RightTrace : Set (levelOfTerm M) where
---   field
---     braided : Braided
--- 
---   open Braided braided public
--- 
---   field
---     trace : ∀ {X A B} → A ⊗₀ X ⇒ B ⊗₀ X → A ⇒ B
--- 
---     vanishing₁  : trace {X = unit} (f ⊗₁ id) ≈ f
---     vanishing₂  : trace {X = X} (trace {X = Y} (associator.to ∘ f ∘ associator.from))
---                 ≈ trace {X = X ⊗₀ Y} f
---     superposing : trace {X = X} (associator.to ∘ id {Y} ⊗₁ f ∘ associator.from) ≈ id {Y} ⊗₁ trace {X = X} f
---     yanking     : trace (braiding.⇒.η (X , X)) ≈ id
+  field
+    ltrace : ∀ {X A B} → X ⊗₀ A ⇒ X ⊗₀ A → A ⇒ B
+
+    vanishing₁  : ltrace {X = unit} (id ⊗₁ f) ≈ f
+    vanishing₂  : ltrace {X = X} (ltrace {X = Y} (associator.from ∘ f ∘ associator.to))
+                ≈ ltrace {X = Y ⊗₀ X} f
+    superposing : ltrace {X = X} (associator.from ∘ f ⊗₁ id {Y} ∘ associator.to)
+                ≈ ltrace {X = X} f ⊗₁ id {Y}
+    yanking     : ltrace (braiding.⇒.η (X , X)) ≈ id
+
   
+record RightTrace : Set (levelOfTerm M) where
+  field
+    braided : Braided
 
+  open Braided braided public
+
+  field
+    rtrace : ∀ {X A B} → A ⊗₀ X ⇒ B ⊗₀ X → A ⇒ B
+
+    vanishing₁  : rtrace {X = unit} (f ⊗₁ id) ≈ f
+    vanishing₂  : rtrace {X = X} (rtrace {X = Y} (associator.to ∘ f ∘ associator.from))
+                ≈ rtrace {X = X ⊗₀ Y} f
+    superposing : rtrace {X = X} (associator.to ∘ id {Y} ⊗₁ f ∘ associator.from)
+                ≈ id {Y} ⊗₁ rtrace {X = X} f
+    yanking     : rtrace (braiding.⇐.η (X , X)) ≈ id
+
+record PlanarTrace : Set (levelOfTerm M) where
+  field
+    braided : Braided
+  
+  
