@@ -12,8 +12,6 @@ open import Level
 
 open import Data.Product using (_,_)
 
-
-
 open import Categories.NaturalTransformation.NaturalIsomorphism
    using (NaturalIsomorphism)
  
@@ -52,7 +50,7 @@ record BraidedLeftTrace : Set (levelOfTerm Br) where
   open Braided Br public
 
   field
-    ltrace : ∀ {X A B} → X ⊗₀ A ⇒ X ⊗₀ A → A ⇒ B
+    ltrace : ∀ {X A B} → X ⊗₀ A ⇒ X ⊗₀ B → A ⇒ B
 
     lvanishing₁  : ltrace {X = unit} (id ⊗₁ f) ≈ f
     lvanishing₂  : ltrace {X = X} (ltrace {X = Y} (associator.from ∘ f ∘ associator.to))
@@ -81,3 +79,19 @@ record BraidedPlanarTrace : Set (levelOfTerm Br) where
   field
     lt : BraidedLeftTrace
     rt : BraidedRightTrace 
+
+record BraidedSphericalTrace : Set (levelOfTerm Br) where
+  open Braided Br public
+
+  field
+    lt : BraidedLeftTrace
+    rt : BraidedRightTrace
+
+  open BraidedLeftTrace using (ltrace)
+  open BraidedRightTrace using (rtrace)
+
+  --- TODO
+  -- field
+  --   wrap : ∀ {X A B} → (f : X ⊗₀ A ⇒ X ⊗₀ B)
+  --       → (ltrace lt) f ≈ (rtrace rt) (braiding.⇐.η ∘ f ∘ braiding.⇒.η)
+
