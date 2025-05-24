@@ -30,7 +30,6 @@ private
 record BalancedMonoidal : Set (levelOfTerm Br) where
   module braided = Braided Br
   open braided public
-    -- using (_⊗₀_; _⊗₁_) renaming (B to c)
  
   field
     twist : NaturalIsomorphism (idF {C = C}) (idF {C = C}) 
@@ -49,7 +48,7 @@ record BalancedMonoidal : Set (levelOfTerm Br) where
       ≈ c {B} {A} ∘ θ {B} ⊗₁ θ {A} ∘ c {A} {B}
     twistIdentity : θ {A} ≈ Category.id C {A}
 
-record LeftTrace : Set (levelOfTerm Br) where
+record BraidedLeftTrace : Set (levelOfTerm Br) where
   open Braided Br public
 
   field
@@ -63,7 +62,7 @@ record LeftTrace : Set (levelOfTerm Br) where
     lyanking     : ltrace (braiding.⇒.η (X , X)) ≈ id
 
   
-record RightTrace : Set (levelOfTerm Br) where
+record BraidedRightTrace : Set (levelOfTerm Br) where
   open Braided Br public
 
   field
@@ -76,11 +75,9 @@ record RightTrace : Set (levelOfTerm Br) where
                  ≈ id {Y} ⊗₁ rtrace {X = X} f
     ryanking     : rtrace (braiding.⇐.η (X , X)) ≈ id
 
-record PlanarTrace : Set (levelOfTerm Br) where
+record BraidedPlanarTrace : Set (levelOfTerm Br) where
   open Braided Br public
 
   field
-    lt : LeftTrace
-    rt : RightTrace 
-   
-  
+    lt : BraidedLeftTrace
+    rt : BraidedRightTrace 
