@@ -1,3 +1,6 @@
 [submodule "catlib"]
 	path = catlib
 	url = https://github.com/agda/agda-categories.git
+[submodule "stdlib"]
+	path = stdlib
+	url = https://github.com/agda/agda-stdlib.git
