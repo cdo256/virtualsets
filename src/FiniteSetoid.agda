@@ -19,6 +19,7 @@ open import Data.Sum.Base
 open import Relation.Binary.Definitions
   using (Reflexive; Symmetric; Transitive)
 import Data.Sum.Relation.Binary.Pointwise
+open import Data.List.Relation.Unary.Enumerates.Setoid
 --  using (Pointwise)
 
 private
@@ -30,16 +31,15 @@ module _ (S : Setoid c ℓ) where
     renaming (Carrier to A)
   open import Data.List.Membership.Setoid S
 
-  AllIn : (xs : List A) → Set (c ⊔ ℓ)
-  AllIn xs = ∀ (a : A) → a ∈ xs
-
   IsFiniteSetoid : Set (c ⊔ ℓ)
-  IsFiniteSetoid =  Σ[ xs ∈ List A ] AllIn xs
+  IsFiniteSetoid =  Σ[ xs ∈ List A ] IsEnumeration S xs
 
 record FiniteSetoid c ℓ : Set (lsuc (c ⊔ ℓ)) where
+  open Setoid
   field
-    setoid : Setoid c ℓ
-    isFinite : IsFiniteSetoid setoid
+    S : Setoid c ℓ
+    enum : List (Carrier S)
+    isEnum : IsEnumeration S enum 
 
 emptySetoid : Setoid 0ℓ 0ℓ
 emptySetoid = record
@@ -51,12 +51,13 @@ emptySetoid = record
 emptyFiniteSetoid : FiniteSetoid 0ℓ 0ℓ
 emptyFiniteSetoid = record
   { setoid = emptySetoid
-  ; isFinite = [] , λ ()
+  ; enum = []
+  ; isEnum = λ ()
   }
 
 module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
-  open FiniteSetoid S using () renaming (setoid to S'; isFinite to SFinite)
-  open FiniteSetoid T using () renaming (setoid to T'; isFinite to TFinite)
+  open FiniteSetoid S using () renaming (S to S'; isFinite to SFinite)
+  open FiniteSetoid T using () renaming (S to T'; isFinite to TFinite)
   open Setoid S' using ()
     renaming (Carrier to A; _≈_ to _≈₁_; isEquivalence to equiv₁)
   open Setoid T' using ()
@@ -68,22 +69,17 @@ module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
       using (∈-++⁺ˡ)
   open import Data.List.Membership.Setoid (S' ⊎ₛ T')
     using (_∈_)
-  
-  xs : List A
-  xs = proj₁ SFinite
-  ys : List B
-  ys = proj₁ TFinite
 
-  zs : List (A ⊎ B)
-  zs = Data.List.map inj₁ xs ++ Data.List.map inj₂ ys
-  isFinite : AllIn (S' ⊎ₛ T') zs
-  isFinite (inj₁ x) with (x ∈ xs)
-  ... | z = {!!}
-  isFinite (inj₂ y) = {!!}
+  enum : List (A ⊎ B)
+  enum = ?
+  isEnum : IsEnumeration (S' ⊎ₛ T') enum
+  isEnum = ?
+  
   plus : FiniteSetoid _ _
   plus = record
     { setoid = S' ⊎ₛ T'
-    ; isFinite = zs , λ a → {!!}
+    ; enum = ?
+    ; isEnum = ?
     }
 
 -- _+_ : FiniteSetoid c ℓ → FiniteSetoid c ℓ → FiniteSetoid c ℓ
