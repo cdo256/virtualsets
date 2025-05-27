@@ -55,31 +55,33 @@ emptyFiniteSetoid = record
   ; isEnum = λ ()
   }
 
-module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
-  open FiniteSetoid S using () renaming (S to S'; isFinite to SFinite)
-  open FiniteSetoid T using () renaming (S to T'; isFinite to TFinite)
-  open Setoid S' using ()
-    renaming (Carrier to A; _≈_ to _≈₁_; isEquivalence to equiv₁)
-  open Setoid T' using ()
-    renaming (Carrier to B; _≈_ to _≈₂_; isEquivalence to equiv₂)
+module _ (S₁ : FiniteSetoid c ℓ) (S₂ : FiniteSetoid c ℓ) where
+  open FiniteSetoid S₁ using ()
+    renaming (S to T₁; enum to enum₁; isEnum to isEnum₁)
+  open FiniteSetoid S₂ using ()
+    renaming (S to T₂; enum to enum₂; isEnum to isEnum₂)
+  open Setoid T₂ using ()
+    renaming (Carrier to A₁; _≈_ to _≈₁_; isEquivalence to equiv₁)
+  open Setoid T₁ using ()
+    renaming (Carrier to A₂; _≈_ to _≈₂_; isEquivalence to equiv₂)
 
   open Data.Sum.Relation.Binary.Pointwise
       using (Pointwise; ⊎-isEquivalence; _⊎ₛ_)
   open import Data.List.Membership.Propositional.Properties
       using (∈-++⁺ˡ)
-  open import Data.List.Membership.Setoid (S' ⊎ₛ T')
+  open import Data.List.Membership.Setoid (T₁ ⊎ₛ T₂)
     using (_∈_)
 
-  enum : List (A ⊎ B)
+  enum : List (A₁ ⊎ A₂)
   enum = ?
-  isEnum : IsEnumeration (S' ⊎ₛ T') enum
-  isEnum = ?
+  -- isEnum : IsEnumeration (T₁ ⊎ₛ T₂) enum
+  -- isEnum = {!!}
   
   plus : FiniteSetoid _ _
   plus = record
-    { setoid = S' ⊎ₛ T'
-    ; enum = ?
-    ; isEnum = ?
+    { setoid = T₁ ⊎ₛ T₂
+    ; enum = {!!}
+    ; isEnum = {!!}
     }
 
 -- _+_ : FiniteSetoid c ℓ → FiniteSetoid c ℓ → FiniteSetoid c ℓ
