@@ -62,32 +62,33 @@ module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
 
   private
     open Data.Sum.Relation.Binary.Pointwise
-      using (Pointwise; ⊎-isEquivalence)
+      using (Pointwise; ⊎-isEquivalence; _⊎ₛ_)
+    open import Data.List.Membership.Propositional.Properties
+      using (∈-++⁺ˡ) 
     C : Set c
     C = A ⊎ B
-    eq : C → C → Set (c ⊔ ℓ) 
-    eq = Pointwise _≈₁_ _≈₂_
-    isEquivalence : IsEquivalence eq
+    _≈_ : C → C → Set _
+    _≈_ = Pointwise _≈₁_ _≈₂_
+    isEquivalence : IsEquivalence _≈_
     isEquivalence = ⊎-isEquivalence equiv₁ equiv₂
-
     zs : List C
     zs = Data.List.map inj₁ (proj₁ SFinite) ++ Data.List.map inj₂ (proj₁ TFinite)
+    isFinite : AllIn (S' ⊎ₛ T') zs 
+    isFinite (inj₁ x) with SFinite
+    ... | xs , allIn with allIn x
+    ... | z , (eq , isIn) = {!!}
+    isFinite (inj₂ y) = {!!}
     
-    -- ys, allIn₂ = TFinite
 
-  -- plus : FiniteSetoid c ℓ
-  -- plus = record
-  --   { setoid = record
-  --     { Carrier = A ⊎ B
-  --     ; _≈_ = eq
-  --     ; isEquivalence = record
-  --       { refl = ?
-  --       ; sym = {!!}
-  --       ; trans = ?
-  --       }
-  --     }
-  --   ; isFinite = {!!} , {!!}
-  --   }
+  plus : FiniteSetoid _ _
+  plus = record
+    { setoid = record
+      { Carrier = A ⊎ B
+      ; _≈_ = _≈_
+      ; isEquivalence = isEquivalence
+      }
+    ; isFinite = zs , λ a → {!!}
+    }
 
 -- _+_ : FiniteSetoid c ℓ → FiniteSetoid c ℓ → FiniteSetoid c ℓ
 -- _+_ = plus
