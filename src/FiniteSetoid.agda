@@ -82,11 +82,7 @@ module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
 
   plus : FiniteSetoid _ _
   plus = record
-    { setoid = record
-      { Carrier = A ⊎ B
-      ; _≈_ = _≈_
-      ; isEquivalence = isEquivalence
-      }
+    { setoid = S' ⊎ₛ T'
     ; isFinite = zs , λ a → {!!}
     }
 
