@@ -65,13 +65,7 @@ module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
       using (Pointwise; ⊎-isEquivalence; _⊎ₛ_)
     open import Data.List.Membership.Propositional.Properties
       using (∈-++⁺ˡ) 
-    C : Set c
-    C = A ⊎ B
-    _≈_ : C → C → Set _
-    _≈_ = Pointwise _≈₁_ _≈₂_
-    isEquivalence : IsEquivalence _≈_
-    isEquivalence = ⊎-isEquivalence equiv₁ equiv₂
-    zs : List C
+    zs : List (A ⊎ B)
     zs = Data.List.map inj₁ (proj₁ SFinite) ++ Data.List.map inj₂ (proj₁ TFinite)
     isFinite : AllIn (S' ⊎ₛ T') zs 
     isFinite (inj₁ x) with SFinite
