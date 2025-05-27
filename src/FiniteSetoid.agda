@@ -17,8 +17,8 @@ open import Data.Empty
 open import Data.Sum.Base
 open import Relation.Binary.Definitions
   using (Reflexive; Symmetric; Transitive)
-open import Data.Sum.Relation.Binary.Pointwise
-  using (Pointwise)
+import Data.Sum.Relation.Binary.Pointwise
+--  using (Pointwise)
 
 private
   variable
@@ -61,13 +61,17 @@ module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
     renaming (Carrier to B; _≈_ to _≈₂_; isEquivalence to equiv₂)
 
   private
-    open IsEquivalence
-    pointwise : A ⊎ B → A ⊎ B → Set (c ⊔ ℓ)
-    pointwise = Pointwise _≈₁_ _≈₂_
-    eq : A ⊎ B → A ⊎ B → Set (c ⊔ ℓ) 
-    eq x y = pointwise 
-    -- zs : List (A ⊎ B)
-    -- zs = Data.List.map inj₁ (proj₁ SFinite) ++ Data.List.map inj₂ (proj₁ TFinite)
+    open Data.Sum.Relation.Binary.Pointwise
+      using (Pointwise; ⊎-isEquivalence)
+    C : Set c
+    C = A ⊎ B
+    eq : C → C → Set (c ⊔ ℓ) 
+    eq = Pointwise _≈₁_ _≈₂_
+    isEquivalence : IsEquivalence eq
+    isEquivalence = ⊎-isEquivalence equiv₁ equiv₂
+
+    zs : List C
+    zs = Data.List.map inj₁ (proj₁ SFinite) ++ Data.List.map inj₂ (proj₁ TFinite)
     
     -- ys, allIn₂ = TFinite
 
