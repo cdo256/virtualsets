@@ -62,26 +62,28 @@ module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
 
   private
     open IsEquivalence
+    pointwise : A ⊎ B → A ⊎ B → Set (c ⊔ ℓ)
+    pointwise = Pointwise _≈₁_ _≈₂_
     eq : A ⊎ B → A ⊎ B → Set (c ⊔ ℓ) 
-    eq = Pointwise _≈₁_ _≈₂_
+    eq x y = pointwise 
     -- zs : List (A ⊎ B)
     -- zs = Data.List.map inj₁ (proj₁ SFinite) ++ Data.List.map inj₂ (proj₁ TFinite)
     
     -- ys, allIn₂ = TFinite
 
-  plus : FiniteSetoid c ℓ
-  plus = record
-    { setoid = record
-      { Carrier = A ⊎ B
-      ; _≈_ = eq
-      ; isEquivalence = record
-        { refl = ?
-        ; sym = {!!}
-        ; trans = ?
-        }
-      }
-    ; isFinite = {!!} , {!!}
-    }
+  -- plus : FiniteSetoid c ℓ
+  -- plus = record
+  --   { setoid = record
+  --     { Carrier = A ⊎ B
+  --     ; _≈_ = eq
+  --     ; isEquivalence = record
+  --       { refl = ?
+  --       ; sym = {!!}
+  --       ; trans = ?
+  --       }
+  --     }
+  --   ; isFinite = {!!} , {!!}
+  --   }
 
 -- _+_ : FiniteSetoid c ℓ → FiniteSetoid c ℓ → FiniteSetoid c ℓ
 -- _+_ = plus
