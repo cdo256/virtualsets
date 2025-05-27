@@ -6,6 +6,7 @@ import Data.List
 open Data.List
 open import Data.List.Relation.Unary.All
 open import Data.List.Membership.Propositional
+  hiding (_∈_)
 open import Data.Product
 open import Relation.Binary.Bundles
 open import Relation.Binary.Structures
@@ -27,17 +28,18 @@ private
 module _ (S : Setoid c ℓ) where
   open Setoid S
     renaming (Carrier to A)
+  open import Data.List.Membership.Setoid S
 
-  AllIn : (xs : List (Setoid.Carrier S)) → Set (c ⊔ ℓ)
-  AllIn xs = ∀ (a : A) → Σ[ b ∈ A ] a ≈ b × b ∈ xs 
+  AllIn : (xs : List A) → Set (c ⊔ ℓ)
+  AllIn xs = ∀ (a : A) → a ∈ xs
 
-  IsFiniteSetoid : Set (c ⊔ ℓ) 
+  IsFiniteSetoid : Set (c ⊔ ℓ)
   IsFiniteSetoid =  Σ[ xs ∈ List A ] AllIn xs
 
 record FiniteSetoid c ℓ : Set (lsuc (c ⊔ ℓ)) where
   field
     setoid : Setoid c ℓ
-    isFinite : IsFiniteSetoid setoid 
+    isFinite : IsFiniteSetoid setoid
 
 emptySetoid : Setoid 0ℓ 0ℓ
 emptySetoid = record
@@ -49,7 +51,7 @@ emptySetoid = record
 emptyFiniteSetoid : FiniteSetoid 0ℓ 0ℓ
 emptyFiniteSetoid = record
   { setoid = emptySetoid
-  ; isFinite = [] , λ () 
+  ; isFinite = [] , λ ()
   }
 
 module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
@@ -60,20 +62,24 @@ module _ (S : FiniteSetoid c ℓ) (T : FiniteSetoid c ℓ) where
   open Setoid T' using ()
     renaming (Carrier to B; _≈_ to _≈₂_; isEquivalence to equiv₂)
 
-  private
-    open Data.Sum.Relation.Binary.Pointwise
+  open Data.Sum.Relation.Binary.Pointwise
       using (Pointwise; ⊎-isEquivalence; _⊎ₛ_)
-    open import Data.List.Membership.Propositional.Properties
-      using (∈-++⁺ˡ) 
-    zs : List (A ⊎ B)
-    zs = Data.List.map inj₁ (proj₁ SFinite) ++ Data.List.map inj₂ (proj₁ TFinite)
-    isFinite : AllIn (S' ⊎ₛ T') zs 
-    isFinite (inj₁ x) with SFinite
-    ... | xs , allIn with allIn x
-    ... | z , (eq , isIn) = {!!}
-    isFinite (inj₂ y) = {!!}
-    
+  open import Data.List.Membership.Propositional.Properties
+      using (∈-++⁺ˡ)
+  open import Data.List.Membership.Setoid (S' ⊎ₛ T')
+    using (_∈_)
+  
+  xs : List A
+  xs = proj₁ SFinite
+  ys : List B
+  ys = proj₁ TFinite
 
+  zs : List (A ⊎ B)
+  zs = Data.List.map inj₁ xs ++ Data.List.map inj₂ ys
+  isFinite : AllIn (S' ⊎ₛ T') zs
+  isFinite (inj₁ x) with (x ∈ xs)
+  ... | z = {!!}
+  isFinite (inj₂ y) = {!!}
   plus : FiniteSetoid _ _
   plus = record
     { setoid = S' ⊎ₛ T'
