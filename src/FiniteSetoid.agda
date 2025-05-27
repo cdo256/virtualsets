@@ -1,35 +1,24 @@
 module FiniteSetoid where
 
-open import Data.Nat
-  hiding (_⊔_; _+_)
-import Data.List
-open Data.List
-open import Data.List.Relation.Unary.All
-open import Data.List.Membership.Propositional
-  hiding (_∈_)
-open import Data.Product
-open import Relation.Binary.Bundles
-open import Relation.Binary.Structures
-  using (IsEquivalence)
-open import Level
-  using (_⊔_; 0ℓ; Lift; lift)
-  renaming (suc to lsuc)
-open import Data.Empty
-open import Data.Sum.Base
-open import Relation.Binary.Definitions
-  using (Reflexive; Symmetric; Transitive)
-import Data.Sum.Relation.Binary.Pointwise
-open import Data.List.Relation.Unary.Enumerates.Setoid
---  using (Pointwise)
+open import Data.Empty using (⊥) 
+open import Data.List using (List; []; _∷_) 
+open import Data.List.Relation.Unary.Enumerates.Setoid using (IsEnumeration) 
+open import Data.Product using (Σ-syntax) 
+open import Data.Sum.Base using (_⊎_) 
+open import Data.Sum.Relation.Binary.Pointwise using () 
+open import Level using (_⊔_; 0ℓ; Lift; lift) renaming (suc to lsuc)
+open import Relation.Binary.Bundles using (Setoid) 
+open import Relation.Binary.Definitions using (Reflexive; Symmetric; Transitive)
+open import Relation.Binary.Structures using (IsEquivalence)
 
 private
   variable
     c ℓ : Level.Level
 
 module _ (S : Setoid c ℓ) where
-  open Setoid S
+  open Setoid S using () 
     renaming (Carrier to A)
-  open import Data.List.Membership.Setoid S
+  open import Data.List.Membership.Setoid S using () 
 
   IsFiniteSetoid : Set (c ⊔ ℓ)
   IsFiniteSetoid =  Σ[ xs ∈ List A ] IsEnumeration S xs
@@ -50,7 +39,7 @@ emptySetoid = record
 
 emptyFiniteSetoid : FiniteSetoid 0ℓ 0ℓ
 emptyFiniteSetoid = record
-  { setoid = emptySetoid
+  { S = emptySetoid
   ; enum = []
   ; isEnum = λ ()
   }
@@ -71,15 +60,16 @@ module _ (S₁ : FiniteSetoid c ℓ) (S₂ : FiniteSetoid c ℓ) where
       using (∈-++⁺ˡ)
   open import Data.List.Membership.Setoid (T₁ ⊎ₛ T₂)
     using (_∈_)
+  open import Data.List.Base using () 
 
   enum : List (A₁ ⊎ A₂)
-  enum = ?
+  enum = {!map inj₁ enum₁ ++ map inj₂ enum₂!}
   -- isEnum : IsEnumeration (T₁ ⊎ₛ T₂) enum
   -- isEnum = {!!}
   
   plus : FiniteSetoid _ _
   plus = record
-    { setoid = T₁ ⊎ₛ T₂
+    { S = T₁ ⊎ₛ T₂
     ; enum = {!!}
     ; isEnum = {!!}
     }
