@@ -2,7 +2,7 @@ module Subsetoid where
 
 open import Data.Empty using (⊥)
 open import Data.Unit.Base using (⊤; tt)
-open import Data.Product.Base using (_×_; _,_; Σ-syntax; ∃; uncurry; swap)
+open import Data.Product.Base using (_×_; _,_; Σ-syntax; ∃; uncurry; swap; Σ)
 open import Data.Sum.Base using (_⊎_; [_,_])
 open import Function.Base using (_∘_; _|>_)
 open import Level using (Level; _⊔_; 0ℓ; suc; Lift)
@@ -112,3 +112,17 @@ module _ {S : Setoid a ℓ} where
 
   _≐_ : Pred S → Pred S → Set _
   P ≐ Q = (P ⊆ Q) × (Q ⊆ P)
+
+  module _  (P : Pred S) where
+    open Pred P renaming (P to P')
+
+    restrict : Setoid _ _
+    restrict = record
+        { Carrier = Σ A P'
+        ; _≈_ = λ (x , _) (y , _) → x ≈ y 
+        ; isEquivalence = record
+          { refl = refl
+          ; sym = sym
+          ; trans = trans
+          }
+        }
