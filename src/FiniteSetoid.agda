@@ -6,13 +6,19 @@ open import Data.List.Relation.Unary.Enumerates.Setoid
   using (IsEnumeration)
 open import Data.List.Relation.Unary.Enumerates.Setoid.Properties
   using (++⁺)
-open import Data.Product using (Σ-syntax)
+open import Data.Product
+  using (Σ-syntax; _,_; proj₁; proj₂)
 open import Data.Sum.Base using (_⊎_; inj₁; inj₂)
 open import Data.Sum.Relation.Binary.Pointwise using ()
 open import Level using (_⊔_; 0ℓ; Lift; lift) renaming (suc to lsuc)
 open import Relation.Binary.Bundles using (Setoid)
+open import Relation.Binary.Core using (Rel)
 open import Relation.Binary.Definitions using (Reflexive; Symmetric; Transitive)
+open import Relation.Binary.PropositionalEquality
+  using (_≡_) renaming (isEquivalence to ≡isEquiv)
 open import Relation.Binary.Structures using (IsEquivalence)
+
+open import FiniteSet using (FiniteSet)
 
 private
   variable
@@ -36,8 +42,8 @@ record FiniteSetoid c ℓ : Set (lsuc (c ⊔ ℓ)) where
 emptySetoid : Setoid 0ℓ 0ℓ
 emptySetoid = record
   { Carrier = ⊥
-  ; _≈_ = _
-  ; isEquivalence =  _
+  ; _≈_ = _≡_
+  ; isEquivalence = ≡isEquiv
   }
 
 emptyFiniteSetoid : FiniteSetoid 0ℓ 0ℓ
@@ -59,8 +65,8 @@ module _ (S₁ : FiniteSetoid c ℓ) (S₂ : FiniteSetoid c ℓ) where
 
   open Data.Sum.Relation.Binary.Pointwise
       using (Pointwise; ⊎-isEquivalence; _⊎ₛ_)
-  open import Data.List.Membership.Propositional.Properties
-      using (∈-++⁺ˡ)
+  -- open import Data.List.Membership.Propositional.Properties
+  --     using (∈-++⁺ˡ)
   open import Data.List.Membership.Setoid (T₁ ⊎ₛ T₂)
     using (_∈_)
   open import Data.List.Base using ()
@@ -79,3 +85,46 @@ module _ (S₁ : FiniteSetoid c ℓ) (S₂ : FiniteSetoid c ℓ) where
 
 _+_ : FiniteSetoid c ℓ → FiniteSetoid c ℓ → FiniteSetoid _ _
 S + T = plus S T
+
+module _ (T : FiniteSetoid c ℓ) where
+  open FiniteSetoid T using (S; enum)
+  open Setoid S using (_≈_)
+    renaming (Carrier to A; isEquivalence to equiv)
+  -- open import Relation.Binary
+  open import Relation.Binary.Definitions
+    using (_Respects_; Reflexive; Symmetric; Transitive)
+  open import Relation.Binary.Structures
+    using (IsEquivalence)
+  open IsEquivalence equiv
+  open import Relation.Unary using (Pred)
+  open import Function.Definitions using (Congruent)
+
+  module _ (P : Pred A ℓ) {resp : P Respects _≈_} where
+    Y : Set (c ⊔ ℓ)
+    Y = Σ[ x ∈ A ] P x
+    _≈'_ : Rel Y ℓ
+    x ≈' y = (proj₁ x) ≈ (proj₁ y)
+    cong' : Congruent _≈'_ _≈_ proj₁
+    cong' eq = eq
+    equiv' : IsEquivalence _≈'_
+    equiv' = record
+      { refl = λ {x} → refl
+      ; sym = λ {x} {y} → sym
+      ; trans = λ {i} {j} {k} → trans
+      }
+
+    Subset : FiniteSetoid (c ⊔ ℓ) ℓ
+    Subset = record
+        { S = record
+          { Carrier = Y
+          ; _≈_ = _≈'_
+          ; isEquivalence = equiv'
+          }
+        ; enum = {!enum!}
+        ; isEnum = {!!}
+        }
+
+-- : FiniteSetoid c ℓ → FiniteSetoid _ _ 
+
+-- FiniteSet→FiniteSetoid : (S : FiniteSet c) → {_≈_ : Rel (FiniteSet.Carrier S) ℓ} → {} → FiniteSetoid c c
+-- FiniteSet→FiniteSetoid S = {!!}
