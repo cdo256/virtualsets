@@ -27,7 +27,7 @@ module _ {X Y Z : FiniteSetoid c ℓ} where
   Y' = FiniteSetoid.S Y
   Z' = FiniteSetoid.S Z
 
-  f : (Y : FiniteSetoid c ℓ) → (S : → Set _) → Set _ 
+  f : (Y : FiniteSetoid c ℓ) → (S : Fun  → Set _) → Set _ 
   
 -- _-_ : Func X' Y' → Injection Z' X' → Func 
     
