@@ -1,31 +1,31 @@
 module FiniteSet where
 
--- open import Data.Nat
---   hiding (_⊔_)
--- open import Data.Fin
+open import Data.Empty
 open import Data.List
   using (List; []; _∷_; filter; map)
+import Data.List.Membership.Setoid
 open import Data.List.NonEmpty
   using (List⁺) renaming (_∷_ to _∷⁺_)
 open import Data.List.Relation.Unary.All as All
   using (All; all?)
 open import Data.List.Relation.Unary.Any as Any
   using (Any; map; here; there)
-import Data.List.Membership.Setoid
-open import Data.Product using (Σ-syntax; _×_; proj₁; proj₂)
-open import Data.Product.Base as Product using (∃; _×_; _,_)
-open import Data.Sum using (inj₁; inj₂)
+open import Data.Product
+  using (Σ-syntax; _×_; proj₁; proj₂)
+open import Data.Product.Base as Product
+  using (∃; _×_; _,_)
+open import Data.Sum
+  using (inj₁; inj₂)
 open import Level
-  using (_⊔_; 0ℓ)
-  renaming (suc to lsuc)
-open import Data.Empty
-open import Relation.Binary.Definitions using (Decidable)
--- open import Relation.Binary.Structures using (IsDecidable)
-open import Relation.Binary.Bundles using (DecSetoid)
-open import Relation.Nullary.Negation using (¬_)
--- open import Relation.Unary using (Pred; Decidable)
+  using (_⊔_; 0ℓ) renaming (suc to lsuc)
+open import Relation.Binary.Bundles
+  using (DecSetoid)
+open import Relation.Binary.Definitions
+  using (Decidable)
 open import Relation.Nullary.Decidable.Core
   using (yes; no; _×-dec_ )
+open import Relation.Nullary.Negation
+  using (¬_)
 
 private
   variable
