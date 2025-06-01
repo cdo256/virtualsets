@@ -27,7 +27,8 @@ open import Relation.Binary.Bundles
 -- open import Relation.Nullary.Negation
 --   using (¬_)
 
-open import FiniteSet
+open import FiniteSetoid.Base
+open import FIniteSetoid.Properties
 
 private
   variable

@@ -2,7 +2,7 @@ open import Categories.Category
 open import Categories.Category.Monoidal 
 open import Categories.Category.Monoidal.Braided
 
-module TracedMonoidal {o ℓ e} {C : Category o ℓ e} {M : Monoidal C} {Br : Braided M} where
+module Category.TracedMonoidal {o ℓ e} {C : Category o ℓ e} {M : Monoidal C} {Br : Braided M} where
 
 open import Categories.Category.Monoidal.Traced
 
