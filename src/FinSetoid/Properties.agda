@@ -91,9 +91,15 @@ module _ {Dom : DecSetoid c ℓ} where
           ⊆-resp-∈ (there p∈qs) (q∈rs All.∷ qs⊆rs)
     All.∷ ⊆-trans {ps} {q ∷ qs} {rs} ps⊆qs (q∈rs All.∷ qs⊆rs)
 
-  simpleUnion≐∪ : (P Q : FiniteSet) → simpleUnion P Q ≐ P ∪ Q
-  simpleUnion≐∪ ps [] = Q⊆P++Q [] ps , {!!}
-  simpleUnion≐∪ ps (q ∷ qs) = {!!}
+  ++≐∪ : (P Q : FiniteSet) → Q ++ P ≐ P ∪ Q
+  ++≐∪ ps [] = Q⊆P++Q [] ps , Q⊆P++Q [] ps
+  ++≐∪ ps (q ∷ qs) with q ∈? ps
+  ... | yes q∈ps = {!!} , {!!}
+        where Q⊆Q++ps : ps ⊆ (q ∷ qs) ++ ps
+              Q⊆Q++ps = Q⊆P++Q (q ∷ qs) ps
+              qs⊆qs∪ps : qs ++ ps ⊆ ps ∪ qs 
+              qs⊆qs∪ps = proj₁ (++≐∪ ps {!qs!})
+  ... | no _ = {!!}
 
   result2 : (P Q : FiniteSet) → (x : D) → x ∈ P → x ∈ P ∪ Q
   result2 P [] x x∈P = x∈P
