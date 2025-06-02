@@ -77,10 +77,10 @@ module _ {Dom : DecSetoid c ℓ} where
   ⊆-refl {P} = Q⊆P++Q [] P
 
   ⊆-resp-∈ : {x : D} → {P Q : List D} → x ∈ P → P ⊆ Q → x ∈ Q
-  ⊆-resp-∈ {x} {p ∷ ps} {[]} (here p≈q) (() All.∷ ps⊆[])
-  ⊆-resp-∈ {x} {p ∷ ps} {qs} (here x≈p) (p∈qs All.∷ _) = ∈-resp-≈ (sym x≈p) p∈qs 
-  ⊆-resp-∈ {x} {p ∷ ps} {qs} (there p∈qs) (_ All.∷ P⊆Q) =
-    ⊆-resp-∈ {x} {ps} {qs} p∈qs P⊆Q
+  ⊆-resp-∈ {x} {p ∷ ps} {qs} (here x≈p) (p∈qs All.∷ _) =
+    ∈-resp-≈ (sym x≈p) p∈qs 
+  ⊆-resp-∈ {x} {p ∷ ps} {qs} (there p∈qs) (_ All.∷ ps⊆qs) =
+    ⊆-resp-∈ {x} {ps} {qs} p∈qs ps⊆qs
 
   -- Probably could tidy this up a bit.
   ⊆-trans : {P Q R : List D} → P ⊆ Q → Q ⊆ R → P ⊆ R
