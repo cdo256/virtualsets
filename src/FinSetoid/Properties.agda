@@ -3,7 +3,7 @@ module FinSetoid.Properties where
 open import Data.Empty
   using (⊥; ⊥-elim)
 open import Data.List
-  using (List; []; _∷_; filter; map)
+  using (List; []; _∷_; _++_; filter; map)
 import Data.List.Membership.Setoid
 open import Data.List.NonEmpty
   using (List⁺) renaming (_∷_ to _∷⁺_)
@@ -31,8 +31,17 @@ open import Relation.Nullary.Decidable.Core
   using (yes; no; _×-dec_ )
 open import Relation.Nullary.Negation
   using (¬_)
+open import Relation.Binary.Definitions
+  using (Reflexive; Transitive; Antisymmetric;
+         _Respectsˡ_; _Respectsʳ_; _Respects_;
+         Decidable)
 open import Relation.Binary.Structures
   using (IsEquivalence)
+import Relation.Binary.PropositionalEquality.Core as ≡
+  using (refl; sym; trans; cong; subst)
+open import Relation.Binary.PropositionalEquality.Core
+  using (_≡_; _≢_)
+
 
 open import FinSetoid.Base
 
@@ -44,35 +53,88 @@ module _ {Dom : DecSetoid c ℓ} where
   open DecSetoid Dom renaming (Carrier to D) 
   open import Data.List.Membership.DecSetoid Dom
 
-  ≈-preserves-∈ : {P : FiniteSet} → {x y : D} → x ≈ y → x ∈ P → y ∈ P
-  ≈-preserves-∈ {p ∷ ps} x≈y (here x≈p) = here (trans (sym x≈y) x≈p)
-  ≈-preserves-∈ {p ∷ ps} x≈y (there x∈P) = there (≈-preserves-∈ x≈y x∈P)
+  open import Data.List.Properties using (++-assoc)
 
-  ∪-preserves-∈ˡ : {P Q : FiniteSet} → {x : D} → x ∈ P → x ∈ P ∪ Q
-  ∪-preserves-∈ˡ {ps} {[]} {x} x∈P = x∈P
-  ∪-preserves-∈ˡ {ps} {q ∷ qs} {x} x∈P with q ∈? ps
-  ∪-preserves-∈ˡ {ps} {q ∷ qs} {x} x∈P  | yes q∈ps
-                 with ∪-preserves-∈ˡ {P = ps} {Q = qs} x∈P 
-  ∪-preserves-∈ˡ {ps} {q ∷ qs} {x} x∈P  | yes q∈ps | A = {!A!}
-  ∪-preserves-∈ˡ {ps} {q ∷ qs} {x} x∈P  | no _  = ∪-preserves-∈ˡ {!!} -- {P = q ∷ ps} {Q = qs} (there x∈P)
+  ∈-resp-≈ : {P : FiniteSet} → {x y : D} → x ≈ y → x ∈ P → y ∈ P
+  ∈-resp-≈ {p ∷ ps} x≈y (here x≈p) = here (trans (sym x≈y) x≈p)
+  ∈-resp-≈ {p ∷ ps} x≈y (there x∈P) = there (∈-resp-≈ x≈y x∈P)
 
-  ∪-preserves-∈ʳ : {P Q : FiniteSet} → {x : D} → x ∈ Q → x ∈ P ∪ Q
-  ∪-preserves-∈ʳ {ps} {q ∷ qs} {x} x∈Q with (q ∈? ps)
-  ∪-preserves-∈ʳ {ps} {q ∷ qs} {x} (here x≈q) | yes q∈ps = 
+  x∈P++x++Q : (ps qs : List D) → (x : D) → x ∈ ps ++ (x ∷ qs)
+  x∈P++x++Q [] qs x = here refl
+  x∈P++x++Q (p ∷ ps) qs x = there (x∈P++x++Q ps qs x)
+  
+
+  Q⊆P++Q : (ps qs : List D) → qs ⊆ (ps ++ qs)
+  Q⊆P++Q [] [] = All.[]
+  Q⊆P++Q [] (q ∷ qs) = here refl All.∷ Q⊆P++Q (q ∷ []) qs
+  Q⊆P++Q (p ∷ ps) [] = All.[]
+  Q⊆P++Q (p ∷ ps) (q ∷ qs)  =
+    there (x∈P++x++Q ps qs q) All.∷ ≡.subst (λ xs → qs ⊆ (p ∷ xs)) (++-assoc ps (q ∷ []) qs) recurse
+      where recurse : qs ⊆ (p ∷ ps ++ (q ∷ [])) ++ qs
+            recurse = (Q⊆P++Q (p ∷ ps ++ (q ∷ [])) qs)
+
+  ⊆-refl : {P : FiniteSet} → P ⊆ P
+  ⊆-refl {P} = Q⊆P++Q [] P
+
+  ⊆-resp-∈ : {x : D} → {P Q : List D} → x ∈ P → P ⊆ Q → x ∈ Q
+  ⊆-resp-∈ {x} {p ∷ ps} {[]} (here p≈q) (() All.∷ ps⊆[])
+  ⊆-resp-∈ {x} {p ∷ ps} {qs} (here x≈p) (p∈qs All.∷ _) = ∈-resp-≈ (sym x≈p) p∈qs 
+  ⊆-resp-∈ {x} {p ∷ ps} {qs} (there p∈qs) (_ All.∷ P⊆Q) =
+    ⊆-resp-∈ {x} {ps} {qs} p∈qs P⊆Q
+
+  -- Probably could tidy this up a bit.
+  ⊆-trans : {P Q R : List D} → P ⊆ Q → Q ⊆ R → P ⊆ R
+  ⊆-trans All.[] qs⊆rs = All.[]
+  ⊆-trans {p ∷ ps} {q ∷ qs} {rs} (here p≈q All.∷ ps⊆qqs) (q∈rs All.∷ qs⊆rs)
+    = ∈-resp-≈ p≈q q∈rs All.∷ ⊆-trans ps⊆qqs (q∈rs All.∷ qs⊆rs)
+  ⊆-trans {p ∷ ps} {q ∷ qs} {rs} (there p∈qs All.∷ ps⊆qs) (q∈rs All.∷ qs⊆rs) =
+          ⊆-resp-∈ (there p∈qs) (q∈rs All.∷ qs⊆rs)
+    All.∷ ⊆-trans {ps} {q ∷ qs} {rs} ps⊆qs (q∈rs All.∷ qs⊆rs)
+
+  simpleUnion≐∪ : (P Q : FiniteSet) → simpleUnion P Q ≐ P ∪ Q
+  simpleUnion≐∪ ps [] = Q⊆P++Q [] ps , {!!}
+  simpleUnion≐∪ ps (q ∷ qs) = {!!}
+
+  result2 : (P Q : FiniteSet) → (x : D) → x ∈ P → x ∈ P ∪ Q
+  result2 P [] x x∈P = x∈P
+  result2 (p ∷ ps) (q ∷ Q) x x∈P with x ≟ q | result2 (p ∷ ps) Q
+  result2 (p ∷ ps) (q ∷ Q) x (here x≈p) | yes x≈q | A = {!!}
+  result2 (p ∷ ps) (q ∷ Q) x (there x∈P) | yes x≈q | A = {!!}
+  ... | no x≈q | A = {!there ?!}
+
+  result1 : {P Q : FiniteSet} → {x q : D} → q ∈ P → x ∈ P ∪ (q ∷ Q) → x ∈ P ∪ Q
+  result1 {P} {Q} {x} {q} q∈P x∈P∪qQ with (x ∈? P)
+  result1 {p ∷ ps} {_} {_} {_} q∈P x∈P∪qQ | yes (here x≈p) = {!!}
+  result1 {P} {_} {_} {_} q∈P x∈P∪qQ | yes (there x∈P) = {!!}
+  result1 {P} {Q} {x} {q} q∈P x∈P∪qQ | no _ = {!!}
+
+  ∪-transports-∈ˡ : {P Q : FiniteSet} → {x : D} → x ∈ P → x ∈ P ∪ Q
+  ∪-transports-∈ˡ {ps} {[]} {x} x∈P = x∈P
+  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P with q ∈? ps
+  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P  | yes q∈ps
+                 with ∪-transports-∈ˡ {P = ps} {Q = qs} x∈P | x ≟ q
+  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P  | yes q∈ps | A | yes x≈q =
+    let x∈ps = ∈-resp-≈ (sym x≈q) q∈ps in {!A!}
+  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P  | yes q∈ps | A | no _ = {!!}
+  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P  | no _  = ∪-transports-∈ˡ {!!} -- {P = q ∷ ps} {Q = qs} (there x∈P)
+
+  ∪-transports-∈ʳ : {P Q : FiniteSet} → {x : D} → x ∈ Q → x ∈ P ∪ Q
+  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} x∈Q with (q ∈? ps)
+  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (here x≈q) | yes q∈ps = 
     let
       x∈ps : x ∈ ps
-      x∈ps = ≈-preserves-∈ (sym x≈q) q∈ps
-    in {!!} -- ∪-preserves-∈ˡ {Q = qs} x∈ps
-  ∪-preserves-∈ʳ {ps} {q ∷ qs} {x} (there x∈qs) | yes _ =
-    {!!} -- ∪-preserves-∈ʳ {Q = qs} x∈qs
-  ∪-preserves-∈ʳ {ps} {q ∷ qs} {x} (here x≈q) | no _ =
-    {!!} -- ∪-preserves-∈ˡ{P = q ∷ ps} {Q = qs} (here x≈q)
-  ∪-preserves-∈ʳ {ps} {q ∷ qs} {x} (there x∈qs) | no _ =
-    {!!} -- ∪-preserves-∈ʳ {P = q ∷ ps} {Q = qs} x∈qs
+      x∈ps = ∈-resp-≈ (sym x≈q) q∈ps
+    in {!!} -- ∪-transports-∈ˡ {Q = qs} x∈ps
+  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (there x∈qs) | yes _ =
+    {!!} -- ∪-transports-∈ʳ {Q = qs} x∈qs
+  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (here x≈q) | no _ =
+    {!!} -- ∪-transports-∈ˡ{P = q ∷ ps} {Q = qs} (here x≈q)
+  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (there x∈qs) | no _ =
+    {!!} -- ∪-transports-∈ʳ {P = q ∷ ps} {Q = qs} x∈qs
 
 --   ⊎→∪ : {P Q : FiniteSet} → {x : D} → x ∈ P ⊎ x ∈ Q → x ∈ P ∪ Q
---   ⊎→∪ (inj₁ x∈P) = ∪-preserves-∈ˡ x∈P
---   ⊎→∪ (inj₂ x∈Q) = ∪-preserves-∈ʳ x∈Q
+--   ⊎→∪ (inj₁ x∈P) = ∪-transports-∈ˡ x∈P
+--   ⊎→∪ (inj₂ x∈Q) = ∪-transports-∈ʳ x∈Q
 -- 
 --   ∪→⊎ : {P Q : FiniteSet} → {x : D} → x ∈ P ∪ Q → x ∈ P ⊎ x ∈ Q
 --   ∪→⊎ {P = ps} {Q = []} x∈P∪Q = inj₁ x∈P∪Q
@@ -109,7 +171,7 @@ module _ {Dom : DecSetoid c ℓ} where
 --   ⊆→∈→∈ : (P Q : FiniteSet) → P ⊆ Q → (∀ (x : D) → x ∈ P → x ∈ Q)
 -- 
 --   ⊆→∈→∈ (p ∷ ps) qs (p∈qs All.∷ ps⊆qs) x (here x≈p) =
---     ≈-preserves-∈ (sym x≈p) p∈qs
+--     ∈-resp-≈ (sym x≈p) p∈qs
 --   ⊆→∈→∈ (p ∷ ps) qs (p∈qs All.∷ ps⊆qs) x (there x∈ps) =
 --     ⊆→∈→∈ ps qs ps⊆qs x x∈ps
 -- 
@@ -117,8 +179,8 @@ module _ {Dom : DecSetoid c ℓ} where
 --   ∪-commutes′ P Q = ∈→∈→⊆ (P ∪ Q) (Q ∪ P) f
 --     where f : ∀ (x : D) → x ∈ P ∪ Q → x ∈ Q ∪ P
 --           f x x∈P∪Q with ∪→⊎ x∈P∪Q
---           ... | inj₁ x∈P = ∪-preserves-∈ʳ x∈P
---           ... | inj₂ x∈Q = ∪-preserves-∈ˡ x∈Q
+--           ... | inj₁ x∈P = ∪-transports-∈ʳ x∈P
+--           ... | inj₂ x∈Q = ∪-transports-∈ˡ x∈Q
 --   ∪-commutes : (P Q : FiniteSet) → P ∪ Q ≐ Q ∪ P
 --   ∪-commutes P Q = ∪-commutes′ P Q , ∪-commutes′ Q P
   
