@@ -28,11 +28,16 @@ open import Relation.Binary.Definitions
 open import Relation.Binary.Morphism.Bundles 
   using (SetoidHomomorphism)
 open import Relation.Nullary.Decidable.Core
-  using (yes; no; _×-dec_ )
+  using (yes; no; _×-dec_; Dec)
 open import Relation.Nullary.Negation
   using (¬_)
 open import Relation.Binary.Structures
   using (IsEquivalence)
+import Relation.Binary.PropositionalEquality.Core as ≡
+  using (refl; sym; trans; cong; subst)
+open import Relation.Binary.PropositionalEquality.Core
+  using (_≡_; _≢_)
+
 
 private
   variable
@@ -98,10 +103,15 @@ module _ {Dom : DecSetoid c ℓ} where
 
   -- \un
   _∪_ : FiniteSet → FiniteSet → FiniteSet
+  un₁ : (P Q : FiniteSet) → (q : D) → q ∈ P → FiniteSet 
+  un₂ : (P Q : FiniteSet) → (q : D) → q ∉ P → FiniteSet 
+  un₃ : (P Q : FiniteSet) → (q : D) → Dec (q ∈ P) → FiniteSet
+  un₁ P Q q _ = P ∪ Q
+  un₂ P Q q _ = q ∷ (P ∪ Q)
+  un₃ P Q q (yes q∈P) = un₁ P Q q q∈P
+  un₃ P Q q (no q∉P) = un₂ P Q q q∉P
   P ∪ [] = P
-  P ∪ (q ∷ Q) with (q ∈? P)
-  ... | yes z = P ∪ Q
-  ... | no z = q ∷ (P ∪ Q)
+  P ∪ (q ∷ Q) = un₃ P Q q (q ∈? P)
 
   -- \cap
   _∩_ : FiniteSet → FiniteSet → FiniteSet
