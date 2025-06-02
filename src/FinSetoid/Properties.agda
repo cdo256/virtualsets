@@ -76,11 +76,11 @@ module _ {Dom : DecSetoid c ℓ} where
   ⊆-refl : {P : FiniteSet} → P ⊆ P
   ⊆-refl {P} = Q⊆P++Q [] P
 
-  ⊆-resp-∈ : {x : D} → {P Q : List D} → x ∈ P → P ⊆ Q → x ∈ Q
-  ⊆-resp-∈ {x} {p ∷ ps} {qs} (here x≈p) (p∈qs All.∷ _) =
+  ⊆-resp-∈ : {P Q : List D} → P ⊆ Q → (x : D) → x ∈ P → x ∈ Q
+  ⊆-resp-∈ {p ∷ ps} {qs} (p∈qs All.∷ _) x (here x≈p) =
     ∈-resp-≈ (sym x≈p) p∈qs 
-  ⊆-resp-∈ {x} {p ∷ ps} {qs} (there p∈qs) (_ All.∷ ps⊆qs) =
-    ⊆-resp-∈ {x} {ps} {qs} p∈qs ps⊆qs
+  ⊆-resp-∈ {p ∷ ps} {qs} (_ All.∷ ps⊆qs) x (there p∈qs) =
+    ⊆-resp-∈ {ps} {qs} ps⊆qs x p∈qs
 
   -- Probably could tidy this up a bit.
   ⊆-trans : {P Q R : List D} → P ⊆ Q → Q ⊆ R → P ⊆ R
@@ -88,7 +88,7 @@ module _ {Dom : DecSetoid c ℓ} where
   ⊆-trans {p ∷ ps} {q ∷ qs} {rs} (here p≈q All.∷ ps⊆qqs) (q∈rs All.∷ qs⊆rs)
     = ∈-resp-≈ p≈q q∈rs All.∷ ⊆-trans ps⊆qqs (q∈rs All.∷ qs⊆rs)
   ⊆-trans {p ∷ ps} {q ∷ qs} {rs} (there p∈qs All.∷ ps⊆qs) (q∈rs All.∷ qs⊆rs) =
-          ⊆-resp-∈ (there p∈qs) (q∈rs All.∷ qs⊆rs)
+          ⊆-resp-∈ (q∈rs All.∷ qs⊆rs) p (there p∈qs)
     All.∷ ⊆-trans {ps} {q ∷ qs} {rs} ps⊆qs (q∈rs All.∷ qs⊆rs)
 
   ++≐∪ : (P Q : FiniteSet) → Q ++ P ≐ P ∪ Q
