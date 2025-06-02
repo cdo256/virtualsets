@@ -92,13 +92,17 @@ module _ {Dom : DecSetoid c ℓ} where
   infixr 6 _∪_
   infixr 6 _∖_
 
+  simpleUnion : FiniteSet → FiniteSet → FiniteSet
+  simpleUnion P [] = P
+  simpleUnion P (q ∷ Q) = q ∷ (simpleUnion P Q)
+
   -- \un
   _∪_ : FiniteSet → FiniteSet → FiniteSet
   P ∪ [] = P
-  P ∪ (x ∷ Q) with (x ∈? P)
+  P ∪ (q ∷ Q) with (q ∈? P)
   ... | yes z = P ∪ Q
-  ... | no z = x ∷ (P ∪ Q)
-  
+  ... | no z = q ∷ (P ∪ Q)
+
   -- \cap
   _∩_ : FiniteSet → FiniteSet → FiniteSet
   P ∩ Q = filter (_∈? Q) P
