@@ -62,7 +62,6 @@ module _ {Dom : DecSetoid c ℓ} where
   x∈P++x++Q : (ps qs : List D) → (x : D) → x ∈ ps ++ (x ∷ qs)
   x∈P++x++Q [] qs x = here refl
   x∈P++x++Q (p ∷ ps) qs x = there (x∈P++x++Q ps qs x)
-  
 
   Q⊆P++Q : (ps qs : List D) → qs ⊆ (ps ++ qs)
   Q⊆P++Q [] [] = All.[]
@@ -76,11 +75,26 @@ module _ {Dom : DecSetoid c ℓ} where
   ⊆-refl : {P : FiniteSet} → P ⊆ P
   ⊆-refl {P} = Q⊆P++Q [] P
 
-  ⊆-resp-∈ : {P Q : List D} → P ⊆ Q → (x : D) → x ∈ P → x ∈ Q
-  ⊆-resp-∈ {p ∷ ps} {qs} (p∈qs All.∷ _) x (here x≈p) =
-    ∈-resp-≈ (sym x≈p) p∈qs 
-  ⊆-resp-∈ {p ∷ ps} {qs} (_ All.∷ ps⊆qs) x (there p∈qs) =
-    ⊆-resp-∈ {ps} {qs} ps⊆qs x p∈qs
+  ∅⊆P : (P : FiniteSet) → ∅ ⊆ P
+  ∅⊆P P = All.[]
+
+  ∈→⊆ : (P : FiniteSet) → (x : D) → x ∈ P → ｛ x ｝ ⊆ P
+  ∈→⊆ ps x x∈ps = x∈ps All.∷ All.[]
+
+  ⊆→∈ : (P : FiniteSet) → (x : D) → ｛ x ｝ ⊆ P → x ∈ P
+  ⊆→∈ P x (x∈P All.∷ _) = x∈P
+
+  ∈→∈→⊆ : (P Q : FiniteSet) → (∀ (x : D) → x ∈ P → x ∈ Q) → P ⊆ Q
+  ∈→∈→⊆ [] qs f = All.[]
+  ∈→∈→⊆ (p ∷ ps) qs f = f p (here refl) All.∷ ∈→∈→⊆ ps qs f′
+    where f′ : ∀ (x : D) → x ∈ ps → x ∈ qs
+          f′ x x∈ps = f x (there x∈ps)
+
+  ⊆→∈→∈ : {P Q : FiniteSet} → P ⊆ Q → (∀ (x : D) → x ∈ P → x ∈ Q)
+  ⊆→∈→∈ {p ∷ ps} {qs} (p∈qs All.∷ ps⊆qs) x (here x≈p) =
+    ∈-resp-≈ (sym x≈p) p∈qs
+  ⊆→∈→∈ {p ∷ ps} {qs} (p∈qs All.∷ ps⊆qs) x (there x∈ps) =
+    ⊆→∈→∈ {ps} {qs} ps⊆qs x x∈ps
 
   -- Probably could tidy this up a bit.
   ⊆-trans : {P Q R : List D} → P ⊆ Q → Q ⊆ R → P ⊆ R
@@ -88,8 +102,15 @@ module _ {Dom : DecSetoid c ℓ} where
   ⊆-trans {p ∷ ps} {q ∷ qs} {rs} (here p≈q All.∷ ps⊆qqs) (q∈rs All.∷ qs⊆rs)
     = ∈-resp-≈ p≈q q∈rs All.∷ ⊆-trans ps⊆qqs (q∈rs All.∷ qs⊆rs)
   ⊆-trans {p ∷ ps} {q ∷ qs} {rs} (there p∈qs All.∷ ps⊆qs) (q∈rs All.∷ qs⊆rs) =
-          ⊆-resp-∈ (q∈rs All.∷ qs⊆rs) p (there p∈qs)
+          ⊆→∈→∈ (q∈rs All.∷ qs⊆rs) p (there p∈qs)
     All.∷ ⊆-trans {ps} {q ∷ qs} {rs} ps⊆qs (q∈rs All.∷ qs⊆rs)
+
+  ++⇒∪ : {P Q : FiniteSet} → {x : D} → x ∈ Q ++ P → x ∈ P ∪ Q
+  ++⇒∪ {ps} {[]} {x} x∈Q++P = x∈Q++P
+  ++⇒∪ {ps} {q ∷ qs} {x} (here x≈q) with x ∈? ps
+  ... | yes x∈ps = {!!}
+  ... | no _ = {!!}
+  ++⇒∪ {ps} {q ∷ qs} {x} (there x∈Q++P) = {!!}
 
   ++≐∪ : (P Q : FiniteSet) → Q ++ P ≐ P ∪ Q
   ++≐∪ ps [] = Q⊆P++Q [] ps , Q⊆P++Q [] ps
@@ -100,13 +121,6 @@ module _ {Dom : DecSetoid c ℓ} where
               qs⊆qs∪ps : qs ++ ps ⊆ ps ∪ qs 
               qs⊆qs∪ps = proj₁ (++≐∪ ps {!qs!})
   ... | no _ = {!!}
-
-  result2 : (P Q : FiniteSet) → (x : D) → x ∈ P → x ∈ P ∪ Q
-  result2 P [] x x∈P = x∈P
-  result2 (p ∷ ps) (q ∷ Q) x x∈P with x ≟ q | result2 (p ∷ ps) Q
-  result2 (p ∷ ps) (q ∷ Q) x (here x≈p) | yes x≈q | A = {!!}
-  result2 (p ∷ ps) (q ∷ Q) x (there x∈P) | yes x≈q | A = {!!}
-  ... | no x≈q | A = {!there ?!}
 
   result1 : {P Q : FiniteSet} → {x q : D} → q ∈ P → x ∈ P ∪ (q ∷ Q) → x ∈ P ∪ Q
   result1 {P} {Q} {x} {q} q∈P x∈P∪qQ with (x ∈? P)
@@ -158,28 +172,6 @@ module _ {Dom : DecSetoid c ℓ} where
 --   ∪→⊎ {P = ps} {q ∷ qs} {x = x} x∈P∪Q | no _ | no ¬x≈q | inj₁ (there x∈ps) =
 --     inj₁ x∈ps
 --   ∪→⊎ {P = ps} {q ∷ qs} {x = x} x∈P∪Q | no _ | no _ | inj₂ x∈qs = inj₂ (there x∈qs)
--- 
---   ∅⊆P : (P : FiniteSet) → ∅ ⊆ P
---   ∅⊆P P = All.[]
--- 
---   ∈→⊆ : (P : FiniteSet) → (x : D) → x ∈ P → ｛ x ｝ ⊆ P
---   ∈→⊆ ps x x∈ps = x∈ps All.∷ All.[]
--- 
---   ⊆→∈ : (P : FiniteSet) → (x : D) → ｛ x ｝ ⊆ P → x ∈ P
---   ⊆→∈ P x (x∈P All.∷ _) = x∈P
--- 
---   ∈→∈→⊆ : (P Q : FiniteSet) → (∀ (x : D) → x ∈ P → x ∈ Q) → P ⊆ Q
---   ∈→∈→⊆ [] qs f = All.[]
---   ∈→∈→⊆ (p ∷ ps) qs f = f p (here refl) All.∷ ∈→∈→⊆ ps qs f′
---     where f′ : ∀ (x : D) → x ∈ ps → x ∈ qs
---           f′ x x∈ps = f x (there x∈ps)
--- 
---   ⊆→∈→∈ : (P Q : FiniteSet) → P ⊆ Q → (∀ (x : D) → x ∈ P → x ∈ Q)
--- 
---   ⊆→∈→∈ (p ∷ ps) qs (p∈qs All.∷ ps⊆qs) x (here x≈p) =
---     ∈-resp-≈ (sym x≈p) p∈qs
---   ⊆→∈→∈ (p ∷ ps) qs (p∈qs All.∷ ps⊆qs) x (there x∈ps) =
---     ⊆→∈→∈ ps qs ps⊆qs x x∈ps
 -- 
 --   ∪-commutes′ : (P Q : FiniteSet) → P ∪ Q ⊆ Q ∪ P
 --   ∪-commutes′ P Q = ∈→∈→⊆ (P ∪ Q) (Q ∪ P) f
