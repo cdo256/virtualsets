@@ -28,7 +28,7 @@ open import Relation.Binary.Definitions
 open import Relation.Binary.Morphism.Bundles 
   using (SetoidHomomorphism)
 open import Relation.Nullary.Decidable.Core
-  using (yes; no; _×-dec_ )
+  using (yes; no; _×-dec_; Dec)
 open import Relation.Nullary.Negation
   using (¬_)
 open import Relation.Binary.Definitions
@@ -105,6 +105,48 @@ module _ {Dom : DecSetoid c ℓ} where
           ⊆→∈→∈ (q∈rs All.∷ qs⊆rs) p (there p∈qs)
     All.∷ ⊆-trans {ps} {q ∷ qs} {rs} ps⊆qs (q∈rs All.∷ qs⊆rs)
 
+  -- The slow and painful way...
+  lemma1 : (ps qs : List D) → (q x : D) → (q∈ps : q ∈ ps) → x ∈ ps → x ∈ un₁ ps qs q q∈ps
+  lemma2 : (ps qs : List D) → (q x : D) → (q∉ps : q ∉ ps) → x ∈ ps → x ∈ un₂ ps qs q q∉ps
+  lemma3 : (ps qs : List D) → (q x : D) → (q∈ps? : Dec (q ∈ ps)) → x ∈ ps → x ∈ un₃ ps qs q q∈ps?
+  lemma4 : (ps qs : List D) → (q x : D) → x ∈ ps → x ∈ ps ∪ (q ∷ qs)
+  lemma5 : (ps qs : List D) → (x : D) → x ∈ ps → x ∈ ps ∪ qs
+  lemma1 ps qs q x q∈ps x∈ps = lemma5 ps qs x x∈ps
+  lemma2 ps qs q x q∉ps x∈ps with x ≟ q
+  ... | yes x≈q = here x≈q
+  ... | no x≉q = there (lemma5 ps qs x x∈ps)
+  lemma3 ps qs q x (yes q∈ps) x∈ps = lemma1 ps qs q x q∈ps x∈ps
+  lemma3 ps qs q x (no q∉ps) x∈ps = lemma2 ps qs q x q∉ps x∈ps
+  lemma4 ps qs q x x∈ps = lemma3 ps qs q x (q ∈? ps) x∈ps
+  lemma5 ps [] x x∈ps = x∈ps
+  lemma5 ps (q ∷ qs) x x∈ps = lemma4 ps qs q x x∈ps
+
+  -- lemma6 : (ps qs : List D) → (q x : D) → (q∈ps : q ∈ ps) → x ∈ ps → x ∈ un₁ ps qs q q∈ps
+  -- lemma7 : (ps qs : List D) → (q x : D) → (q∉ps : q ∉ ps) → x ∈ ps → x ∈ un₂ ps qs q q∉ps
+  -- lemma8 : (ps qs : List D) → (q x : D) → (q∈ps? : Dec (q ∈ ps)) → x ∈ ps → x ∈ un₃ ps qs q q∈ps?
+  -- lemma9 : (ps qs : List D) → (q x : D) → x ∈ ps → x ∈ ps ∪ (q ∷ qs)
+  -- lemma10 : (ps qs : List D) → (x : D) → x ∈ ps → x ∈ ps ∪ qs
+  -- lemma6 ps qs q x q∈ps x∈ps = lemma10 ps qs x x∈ps
+  -- lemma7 ps qs q x q∉ps x∈ps with x ≟ q
+  -- ... | yes x≈q = here x≈q
+  -- ... | no x≉q = there (lemma10 ps qs x x∈ps)
+  -- lemma8 ps qs q x (yes q∈ps) x∈ps = lemma1 ps qs q x q∈ps x∈ps
+  -- lemma8 ps qs q x (no q∉ps) x∈ps = lemma2 ps qs q x q∉ps x∈ps
+  -- lemma9 ps qs q x x∈ps = lemma3 ps qs q x (q ∈? ps) x∈ps
+  -- lemma10 ps [] x x∈ps = x∈ps
+  -- lemma10 ps (q ∷ qs) x x∈ps = lemma9 ps qs q x x∈ps
+
+
+  ∪-transports-∈ˡ : {P Q : FiniteSet} → {x : D} → x ∈ P → x ∈ P ∪ Q
+  ∪-transports-∈ˡ {P} {Q} {x} x∈P = lemma5 P Q x x∈P
+
+  ∪-transports-∈ʳ : {P Q : FiniteSet} → {x : D} → x ∈ Q → x ∈ P ∪ Q
+  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (here x≈q) with q ∈? ps
+  ... | yes q∈ps = ≡.subst {!!} {!!} {!!}
+  ... | no  q∉ps = {!!}
+  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (there x∈qs) = {!!}
+  
+
   ++⇒∪ : {P Q : FiniteSet} → {x : D} → x ∈ Q ++ P → x ∈ P ∪ Q
   ++⇒∪ {ps} {[]} {x} x∈Q++P = x∈Q++P
   ++⇒∪ {ps} {q ∷ qs} {x} (here x≈q) with x ∈? ps
@@ -128,29 +170,6 @@ module _ {Dom : DecSetoid c ℓ} where
   result1 {P} {_} {_} {_} q∈P x∈P∪qQ | yes (there x∈P) = {!!}
   result1 {P} {Q} {x} {q} q∈P x∈P∪qQ | no _ = {!!}
 
-  ∪-transports-∈ˡ : {P Q : FiniteSet} → {x : D} → x ∈ P → x ∈ P ∪ Q
-  ∪-transports-∈ˡ {ps} {[]} {x} x∈P = x∈P
-  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P with q ∈? ps
-  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P  | yes q∈ps
-                 with ∪-transports-∈ˡ {P = ps} {Q = qs} x∈P | x ≟ q
-  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P  | yes q∈ps | A | yes x≈q =
-    let x∈ps = ∈-resp-≈ (sym x≈q) q∈ps in {!A!}
-  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P  | yes q∈ps | A | no _ = {!!}
-  ∪-transports-∈ˡ {ps} {q ∷ qs} {x} x∈P  | no _  = ∪-transports-∈ˡ {!!} -- {P = q ∷ ps} {Q = qs} (there x∈P)
-
-  ∪-transports-∈ʳ : {P Q : FiniteSet} → {x : D} → x ∈ Q → x ∈ P ∪ Q
-  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} x∈Q with (q ∈? ps)
-  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (here x≈q) | yes q∈ps = 
-    let
-      x∈ps : x ∈ ps
-      x∈ps = ∈-resp-≈ (sym x≈q) q∈ps
-    in {!!} -- ∪-transports-∈ˡ {Q = qs} x∈ps
-  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (there x∈qs) | yes _ =
-    {!!} -- ∪-transports-∈ʳ {Q = qs} x∈qs
-  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (here x≈q) | no _ =
-    {!!} -- ∪-transports-∈ˡ{P = q ∷ ps} {Q = qs} (here x≈q)
-  ∪-transports-∈ʳ {ps} {q ∷ qs} {x} (there x∈qs) | no _ =
-    {!!} -- ∪-transports-∈ʳ {P = q ∷ ps} {Q = qs} x∈qs
 
 --   ⊎→∪ : {P Q : FiniteSet} → {x : D} → x ∈ P ⊎ x ∈ Q → x ∈ P ∪ Q
 --   ⊎→∪ (inj₁ x∈P) = ∪-transports-∈ˡ x∈P
