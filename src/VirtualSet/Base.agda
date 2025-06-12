@@ -1,4 +1,4 @@
-module VirtualSet where
+module VirtualSet.Base where
 
 -- open import Data.Empty
 -- open import Data.List
@@ -27,8 +27,10 @@ open import Relation.Binary.Bundles
 -- open import Relation.Nullary.Negation
 --   using (¬_)
 
-open import FiniteSetoid.Base
-open import FIniteSetoid.Properties
+open import Data.Fin
+  using (Fin) renaming (zero to zeroF; suc to sucF)
+open import Data.Nat
+  using (ℕ) renaming (zero to zeroℕ; suc to sucℕ; _+_ to _+ℕ_)
 
 private
   variable
@@ -38,18 +40,7 @@ module _ {Dom : DecSetoid c ℓ} where
   open DecSetoid Dom renaming (Carrier to D) 
   open import Data.List.Membership.DecSetoid Dom
   
-  module _ {A X Y : FiniteSet} {_ : disjoint A X} {_ : disjoint A Y}
-           (f : X ∪ A →′ Y ∪ A) (A : FiniteSet) where
-    _-′_ : (X →′ Y)
-    _-′_ = record
-      { ⟦_⟧ = g
-      ; isRelHomomorphism = {!!}
-      }
-      where
-        g : toSet X → toSet Y
-        g (x , px) = {!!}
-
-
-    f′ : toSet X → toSet Y
-    f′ (a , pa) with ⟦ f ⟧ (a , pa)
-    ... | z = {!!}
+  module _ {l m n : ℕ} 
+           (f : Fin (l +ℕ n) → Fin (m +ℕ n)) where
+    _-′_ : Fin l → Fin m
+    _-′_ = {!!}
