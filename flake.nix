@@ -1,5 +1,5 @@
 {
-  description = "MSc Project on Traced Monoidal Categories";
+  description = "MSc Project on Virtual Sets";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
@@ -17,8 +17,9 @@
         { pkgs, ... }:
         let
           agda = pkgs.agda.withPackages (ps: [
-            ps.standard-library
-            ps.agda-categories
+            ps._1lab
+            #ps.standard-library
+            #ps.agda-categories
           ]);
           just-agda-base = inputs.just-agda.packages.${pkgs.system}.default;
           just-agda = just-agda-base.override { inherit agda; };
