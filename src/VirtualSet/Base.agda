@@ -29,18 +29,16 @@ open import Relation.Binary.Bundles
 
 open import Data.Fin
   using (Fin) renaming (zero to zeroF; suc to sucF)
+open import Data.Nat.Properties
+  using (+-commutative)
 open import Data.Nat
-  using (ℕ) renaming (zero to zeroℕ; suc to sucℕ; _+_ to _+ℕ_)
+  using (ℕ)
+  renaming (zero to zeroℕ; suc to sucℕ; _+_ to _+ℕ_)
 
 private
   variable
     c ℓ : Level.Level
-
-module _ {Dom : DecSetoid c ℓ} where
-  open DecSetoid Dom renaming (Carrier to D) 
-  open import Data.List.Membership.DecSetoid Dom
   
-  module _ {l m n : ℕ} 
-           (f : Fin (l +ℕ n) → Fin (m +ℕ n)) where
-    _-′_ : Fin l → Fin m
-    _-′_ = {!!}
+_-A : {l m n : ℕ} (f : Fin (l +ℕ n) → Fin (m +ℕ n)) → Fin l → Fin m
+_-A {n = zeroℕ} f a rewrite (+-commutative ? ?) = {!f a!}
+_-A {n = sucℕ n} f a = {!!}

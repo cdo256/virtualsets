@@ -5,6 +5,8 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     just-agda.url = "github:cdo256/just-agda";
+    _1lab.url = "github:the1lab/1lab";
+    _1lab.flake = false;
   };
 
   outputs =
