@@ -105,6 +105,22 @@ del-inj (s a) (s b₁ , sa≢sb₁) (s b₂ , sa≢sb₂) b₁'≡b₂'
                       (b₂ , λ a≡b₂ → sa≢sb₂ (≡.cong s a≡b₂))
                       (suc-injective b₁'≡b₂'))
 
+add-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
+        → (b₁ b₂ : Fin x)
+        → proj₁ (add a b₁) ≡ proj₁ (add a b₂)
+        → b₁ ≡ b₂
+add-inj z z z c₁≡c₂ = ≡.refl
+add-inj z (s b₁) (s b₂) c₁≡c₂
+  with add z b₁ | inspect (add z) b₁ | add z b₂ | inspect (add z) b₂
+... | c₁ , z≢c₁ | [ eq₁ ] | c₂ , z≢c₂ | [ eq₂ ] = suc-injective c₁≡c₂
+add-inj (s a) z z c₁≡c₂ = ≡.refl
+add-inj (s a) (s b₁) (s b₂) c₁≡c₂
+  with add (s a) (s b₁) | inspect (add (s a)) (s b₁) | add (s a) (s b₂) | inspect (add (s a)) (s b₂)
+... | s c₁ , sa≢sc₁ | [ eq₁ ] | s c₂ , sa≢sc₂ | [ eq₂ ] =
+  ≡.cong s (add-inj a b₁ b₂ (suc-injective c₁≡c₂))
+
+
+
 module _ {x y : ℕ} (f : Fin (ℕ.suc x) → Fin (ℕ.suc y)) (inj : injective f) where
   sub : Σ[ f' ∈ (Fin x → Fin y) ] injective f'
   sub =
