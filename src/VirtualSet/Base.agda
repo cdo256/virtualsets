@@ -65,8 +65,7 @@ del-zero-suc b a≢b with del z (s b , a≢b) | inspect (del z) (s b , a≢b)
 ... | s X | [ eq ] = ≡.sym eq
 
 del-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
-        → (B₁ : Σ[ b₁ ∈ Fin (ℕ.suc x) ] a ≢ b₁)
-        → (B₂ : Σ[ b₂ ∈ Fin (ℕ.suc x) ] a ≢ b₂)
+        → (B₁ B₂ : Σ[ b ∈ Fin (ℕ.suc x) ] a ≢ b)
         → del a B₁ ≡ del a B₂
         → proj₁ B₁ ≡ proj₁ B₂
 del-inj z (z , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
@@ -119,26 +118,30 @@ add-inj (s a) (s b₁) (s b₂) c₁≡c₂
 ... | s c₁ , sa≢sc₁ | [ eq₁ ] | s c₂ , sa≢sc₂ | [ eq₂ ] =
   ≡.cong s (add-inj a b₁ b₂ (suc-injective c₁≡c₂))
 
-
-
 module _ {x y : ℕ} (f : Fin (ℕ.suc x) → Fin (ℕ.suc y)) (inj : injective f) where
+
+  f' : Fin x → Fin y
+  f' i =
+    let (j , 0≢j) = add z i 
+    in del (f z) (f j , λ f0≡fj → 0≢j (inj z j f0≡fj))
+
+  comp : (ai : (b₁ b₂ : Fin x) → proj₁ (add z b₁) ≡ proj₁ (add z b₂) → b₁ ≡ b₂)
+       → (di : (B₁ B₂ : Σ[ b ∈ Fin (ℕ.suc y) ] f z ≢ b)
+             → del (f z) B₁ ≡ del (f z) B₂ → proj₁ B₁ ≡ proj₁ B₂)
+       → injective f'
+  comp ai di b₁ b₂ f'b₁≡f'b₂ =
+    let
+      (c₁ , z≢c₁) = add z b₁
+      (c₂ , z≢c₂) = add z b₂
+    in
+    ai b₁ b₂
+       (inj c₁ c₂
+            (di (f c₁ , λ fz≡fc₁ → z≢c₁ (inj z c₁ fz≡fc₁))
+                (f c₂ , λ fz≡fc₂ → z≢c₂ (inj z c₂ fz≡fc₂))
+                f'b₁≡f'b₂))
+
   sub : Σ[ f' ∈ (Fin x → Fin y) ] injective f'
-  sub =
-    let f' : Fin x → Fin y
-        f' i =
-          let (j , 0≢j) = add z i 
-              k = f j
-              l = del (f z) (k , λ f0≡fj → 0≢j (inj z j f0≡fj))
-          in l
-    in f' , (λ a b f'a≡f'b →
-      let (a₁ , 0≢a₁) = add z a
-          (b₁ , 0≢b₁) = add z b 
-          a₂ = f a₁
-          b₂ = f b₁
-          a₃ = del (f z) (a₂ , (λ f0≡fa₁ → 0≢a₁ (inj z a₁ f0≡fa₁)))
-          b₃ = del (f z) (b₂ , (λ f0≡fb₁ → 0≢b₁ (inj z b₁ f0≡fb₁)))
-          X = inj a₁ b₁ {!!}
-      in {!!})
+  sub = f' , comp (add-inj z) (del-inj {!f z!})
 
 --with (i ≟ z)
 --... | yes i≡0 = {!!}
