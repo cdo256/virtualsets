@@ -3,9 +3,9 @@ module VirtualSet.Base where
 open import Data.Empty
   using (⊥; ⊥-elim)
 open import Data.Fin
-  using (Fin)
+  using (Fin) renaming (suc to s; zero to z)
 open import Data.Fin.Properties
-  using (_≟_)
+  using (_≟_; 0≢1+n; suc-injective)
 open import Data.Nat
   using (ℕ; _+_)
 open import Data.Product
@@ -43,92 +43,88 @@ injective {X} {Y} f = ∀ (a b : X) → f a ≡ f b → a ≡ b
 
 module _ {x : ℕ} where
 
-suc-injective : ∀ {w : ℕ} → injective {X = Fin w} Fin.suc
-suc-injective _ _ ≡.refl = ≡.refl
-
 add : {x : ℕ} → (a : Fin (ℕ.suc x)) → (b : Fin x) → (Σ[ c ∈ Fin (ℕ.suc x) ] a ≢ c)
-add {ℕ.suc x} Fin.zero b = Fin.suc b , λ ()
-add {ℕ.suc x} (Fin.suc a) Fin.zero = Fin.zero , λ ()
-add {ℕ.suc x} (Fin.suc a) (Fin.suc b) =
+add {ℕ.suc x} z b = s b , λ ()
+add {ℕ.suc x} (s a) z = z , λ ()
+add {ℕ.suc x} (s a) (s b) =
   let
     (c , a≢c) = add a b
-  in Fin.suc (proj₁ (add a b)) , λ a'≡c' → a≢c (suc-injective a c a'≡c')
+  in s (proj₁ (add a b)) , λ a'≡c' → a≢c (suc-injective a'≡c')
 
 del : {x : ℕ} → (a : Fin (ℕ.suc x)) → (Σ[ b ∈ Fin (ℕ.suc x) ] a ≢ b) → Fin x
-del {ℕ.zero} Fin.zero (Fin.zero , 0≢0) = ⊥-elim (0≢0 ≡.refl)
-del {ℕ.suc x} Fin.zero (Fin.zero , 0≢0) = ⊥-elim (0≢0 ≡.refl)
-del {ℕ.suc x} Fin.zero (Fin.suc b , a≢b) = b
-del {ℕ.suc x} (Fin.suc a) (Fin.zero , a≢b) = Fin.zero
-del {ℕ.suc x} (Fin.suc a) (Fin.suc b , a'≢b') =
-  Fin.suc (del {x} a (b , λ a≡b → ⊥-elim (a'≢b' (≡.cong Fin.suc a≡b))))
+del {ℕ.zero} z (z , 0≢0) = ⊥-elim (0≢0 ≡.refl)
+del {ℕ.suc x} z (z , 0≢0) = ⊥-elim (0≢0 ≡.refl)
+del {ℕ.suc x} z (s b , a≢b) = b
+del {ℕ.suc x} (s a) (z , a≢b) = z
+del {ℕ.suc x} (s a) (s b , a'≢b') =
+  s (del {x} a (b , λ a≡b → ⊥-elim (a'≢b' (≡.cong s a≡b))))
 
-del-zero-suc : ∀ {x} (b : Fin x) (a≢b : Fin.zero ≢ Fin.suc b) → del Fin.zero (Fin.suc b , a≢b) ≡ b
-del-zero-suc b a≢b with del Fin.zero (Fin.suc b , a≢b) | inspect (del Fin.zero) (Fin.suc b , a≢b)
-... | Fin.zero | [ eq ] = ≡.sym eq
-... | Fin.suc X | [ eq ] = ≡.sym eq
+del-zero-suc : ∀ {x} (b : Fin x) (a≢b : z ≢ s b) → del z (s b , a≢b) ≡ b
+del-zero-suc b a≢b with del z (s b , a≢b) | inspect (del z) (s b , a≢b)
+... | z | [ eq ] = ≡.sym eq
+... | s X | [ eq ] = ≡.sym eq
 
 del-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
         → (B₁ : Σ[ b₁ ∈ Fin (ℕ.suc x) ] a ≢ b₁)
         → (B₂ : Σ[ b₂ ∈ Fin (ℕ.suc x) ] a ≢ b₂)
         → del a B₁ ≡ del a B₂
         → proj₁ B₁ ≡ proj₁ B₂
-del-inj Fin.zero (Fin.zero , a≢b₁) (Fin.zero , a≢b₂) b₁'≡b₂' =
+del-inj z (z , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₁ ≡.refl)
-del-inj Fin.zero (Fin.zero , a≢b₁) (Fin.suc b₂ , a≢b₂) b₁'≡b₂' =
+del-inj z (z , a≢b₁) (s b₂ , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₁ ≡.refl)
-del-inj Fin.zero (Fin.suc b₁ , a≢b₁) (Fin.zero , a≢b₂) b₁'≡b₂' =
+del-inj z (s b₁ , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₂ ≡.refl)
-del-inj Fin.zero (Fin.suc b₁ , a≢b₁) (Fin.suc b₂ , a≢b₂) b₁'≡b₂' =
-  let b₁' = del Fin.zero (Fin.suc b₁ , a≢b₁)
-      b₂' = del Fin.zero (Fin.suc b₂ , a≢b₂)
+del-inj z (s b₁ , a≢b₁) (s b₂ , a≢b₂) b₁'≡b₂' =
+  let b₁' = del z (s b₁ , a≢b₁)
+      b₂' = del z (s b₂ , a≢b₂)
       b₁'≡b₁ : b₁' ≡ b₁
       b₁'≡b₁ = del-zero-suc b₁ a≢b₁
       b₂'≡b₂ : b₂' ≡ b₂
       b₂'≡b₂ = del-zero-suc b₂ a≢b₂
   in begin
-      Fin.suc b₁
-    ≡⟨ ≡.cong Fin.suc (≡.sym b₁'≡b₁) ⟩
-      Fin.suc b₁'
-    ≡⟨ ≡.cong Fin.suc b₁'≡b₂' ⟩
-      Fin.suc b₂'
-    ≡⟨ ≡.cong Fin.suc b₂'≡b₂ ⟩
-      Fin.suc b₂ ∎
-del-inj (Fin.suc a) (Fin.zero , a≢b₁) (Fin.zero , a≢b₂) b₁'≡b₂' = ≡.refl
-del-inj (Fin.suc a) (Fin.zero , a≢b₁) (Fin.suc b₂ , a≢b₂) b₁'≡b₂'
-  with del (Fin.suc a) (Fin.zero , a≢b₁) | inspect (del (Fin.suc a)) (Fin.zero , a≢b₁) | del (Fin.suc a) (Fin.suc , a≢b₂) | inspect (del (Fin.suc a)) (Fin.suc b₂ , a≢b₂)
-... | Fin.zero | [ eq ] | A | B = {!!}
-... | Fin.suc X | Y | A | B = {!!}
-  -- let b₁' = del (Fin.suc a) (Fin.zero , a≢b₁)
-  --     b₂' = del (Fin.suc a) (Fin.suc b₂ , a≢b₂)
-  --     b₂'≡b₂ : b₂' ≡ b₂
-  --     b₂'≡b₂ = del-zero-suc b₂ a≢b₂
-  -- in begin
-  --     ?
-  --   ≡⟨ ? ⟩
-  --     ? ∎
-del-inj (Fin.suc a) (Fin.suc b₁ , a≢b₁) (Fin.zero , a≢b₂) b₁'≡b₂' = {!!}
-del-inj (Fin.suc a) (Fin.suc b₁ , a≢b₁) (Fin.suc b₂ , a≢b₂) b₁'≡b₂' = {!!}
+      s b₁
+    ≡⟨ ≡.cong s (≡.sym b₁'≡b₁) ⟩
+      s b₁'
+    ≡⟨ ≡.cong s b₁'≡b₂' ⟩
+      s b₂'
+    ≡⟨ ≡.cong s b₂'≡b₂ ⟩
+      s b₂ ∎
+del-inj (s a) (z , a≢b₁) (z , a≢b₂) b₁'≡b₂' = ≡.refl
+del-inj (s a) (z , a≢b₁) (s b₂ , a≢b₂) b₁'≡b₂'
+  with del (s a) (z , a≢b₁) | inspect (del (s a)) (z , a≢b₁) | del (s a) (s b₂  , a≢b₂) | inspect (del (s a)) (s b₂ , a≢b₂)
+... | z | [ eq₁ ] | z | ()
+... | z | _ | s _ | _ = ⊥-elim (0≢1+n b₁'≡b₂')
+... | s X | () | _ | _
+del-inj (s a) (s b₁ , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
+  ≡.sym (del-inj (s a) (z , a≢b₂) (s b₁ , a≢b₁) (≡.sym b₁'≡b₂'))
+del-inj (s a) (s b₁ , sa≢sb₁) (s b₂ , sa≢sb₂) b₁'≡b₂'
+  with del (s a) (s b₁ , sa≢sb₁) | inspect (del (s a)) (s b₁ , sa≢sb₁) | del (s a) (s b₂  , sa≢sb₂) | inspect (del (s a)) (s b₂ , sa≢sb₂) | b₁'≡b₂'
+... | s c₁ | [ eq₁ ] | s c₂ | [ eq₂ ] | _ =
+  ≡.cong s (del-inj a (b₁ , λ a≡b₁ → sa≢sb₁ (≡.cong s a≡b₁))
+                      (b₂ , λ a≡b₂ → sa≢sb₂ (≡.cong s a≡b₂))
+                      (suc-injective b₁'≡b₂'))
 
 module _ {x y : ℕ} (f : Fin (ℕ.suc x) → Fin (ℕ.suc y)) (inj : injective f) where
   sub : Σ[ f' ∈ (Fin x → Fin y) ] injective f'
   sub =
     let f' : Fin x → Fin y
         f' i =
-          let (j , 0≢j) = add Fin.zero i 
+          let (j , 0≢j) = add z i 
               k = f j
-              l = del (f Fin.zero) (k , λ f0≡fj → 0≢j (inj Fin.zero j f0≡fj))
+              l = del (f z) (k , λ f0≡fj → 0≢j (inj z j f0≡fj))
           in l
     in f' , (λ a b f'a≡f'b →
-      let (a₁ , 0≢a₁) = add Fin.zero a
-          (b₁ , 0≢b₁) = add Fin.zero b 
+      let (a₁ , 0≢a₁) = add z a
+          (b₁ , 0≢b₁) = add z b 
           a₂ = f a₁
           b₂ = f b₁
-          a₃ = del (f Fin.zero) (a₂ , (λ f0≡fa₁ → 0≢a₁ (inj Fin.zero a₁ f0≡fa₁)))
-          b₃ = del (f Fin.zero) (b₂ , (λ f0≡fb₁ → 0≢b₁ (inj Fin.zero b₁ f0≡fb₁)))
+          a₃ = del (f z) (a₂ , (λ f0≡fa₁ → 0≢a₁ (inj z a₁ f0≡fa₁)))
+          b₃ = del (f z) (b₂ , (λ f0≡fb₁ → 0≢b₁ (inj z b₁ f0≡fb₁)))
           X = inj a₁ b₁ {!!}
       in {!!})
 
---with (i ≟ Fin.zero)
+--with (i ≟ z)
 --... | yes i≡0 = {!!}
 --... | no i≢0 = {!!}
 
