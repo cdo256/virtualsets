@@ -30,6 +30,8 @@ open import Relation.Binary.PropositionalEquality.Properties
   using (module ≡-Reasoning)
 open import Relation.Binary.PropositionalEquality
   using (inspect; [_])
+open import Function.Base
+  using (_∘_)
 open import Function.Bundles
   using (_↣_; _↔_)
 
@@ -169,12 +171,71 @@ X + Y = X +ℕ Y
 ⊎→+ (ℕ.suc X) Y (inj₂ b) = 
   s (⊎→+ X Y (inj₂ b)) 
 
+{- I was able to make it work and I'm now stuck on showing that two functions are inverses of eachother. 
+The funciton below is meant to show that ⊎→+ X Y ∘ +→⊎ X Y = id, although it's represented a little differently in the standard library:
+
+Inverseˡ : (A → B) → (B → A) → Set _
+Inverseˡ f g = ∀ {x y} → y ≈₁ g x → f y ≈₂ x
+
+Inverseʳ : (A → B) → (B → A) → Set _
+Inverseʳ f g = ∀ {x y} → y ≈₂ f x → g y ≈₁ x
+
+Inverseᵇ : (A → B) → (B → A) → Set _
+Inverseᵇ f g = Inverseˡ f g × Inverseʳ f g
+
+I have used the inspect pattern below to try to rewrite the functions so I can use the recursive case, but I don't quite seem to get there.
+The specific case I'm on should be impossible, but I can't find the contradiction in the assumptions.
+
+Goal: +→⊎ (ℕ.suc X) Y z₂ ≡ inj₁ (s E)
+————————————————————————————————————————————————————————————
+eq  : z₂ ≡ s (⊎→+ X Y (inj₁ E))
+E   : Fin X
+eq₂ : ⊎→+ (ℕ.suc X) Y z₁ ≡ z
+eq₁ : +→⊎ (ℕ.suc X) Y z₂ ≡ inj₁ z
+z₂  : Fin (ℕ.suc X + Y)
+z₁  : Fin (ℕ.suc X) ⊎ Fin Y
+Y   : SomeFin
+X   : ℕ
+
+-}
+
+invˡ' : {X Y : SomeFin} → ∀ {z₁ z₂} → z₂ ≡ ⊎→+ X Y z₁ → +→⊎ X Y z₂ ≡ z₁ 
+invˡ' {ℕ.zero} {Y} {inj₂ a} {b} eq = ≡.cong inj₂ eq
+invˡ' {ℕ.suc X} {Y} {inj₁ z} {b} eq with inspect = {!!}
+invˡ' {ℕ.suc X} {Y} {inj₁ (s a)} {b} eq = {!!}
+invˡ' {ℕ.suc X} {Y} {inj₂ a} {b} eq = {!!}
+
+
 invˡ : {X Y : SomeFin} → ∀ {z₁ z₂} → z₂ ≡ ⊎→+ X Y z₁ → +→⊎ X Y z₂ ≡ z₁ 
 invˡ {ℕ.zero} {Y} {inj₂ z₁} {z₂} z₂≡z₁ = ≡.cong inj₂ z₂≡z₁
-invˡ {ℕ.suc X} {Y} {z₁} {z₂} eq
-  with +→⊎ (ℕ.suc X) Y z₂ | inspect (+→⊎ (ℕ.suc X) Y) z₂ | ⊎→+ (ℕ.suc X) Y z₁ | inspect (⊎→+ (ℕ.suc X) Y) z₁ 
-... | A | B | C | D = {!!}
-
+invˡ {ℕ.suc X} {Y} {inj₁ z} {z} eq = ≡.refl
+invˡ {ℕ.suc X} {Y} {inj₁ (s z₁)} {s z₂} eq
+  with +→⊎ (ℕ.suc X) Y (s z₂) | inspect (+→⊎ (ℕ.suc X) Y) (s z₂)
+     | ⊎→+ (ℕ.suc X) Y (inj₁ (s z₁)) | inspect (⊎→+ (ℕ.suc X) Y) (inj₁ (s z₁))
+... | inj₁ z | [ eq₁ ] | s C | [ eq₂ ] = {!!}
+... | inj₁ (s A) | [ eq₁ ] | s C | [ eq₂ ] = ≡.cong (inj₁ ∘ s) {!!}
+... | inj₂ A | [ eq₁ ] | s C | [ eq₂ ] = {!!}
+-- Goal z₁ ≡ z₃, This should be obvious
+-- ... | inj₁ (s z₁) | [ eq₁ ] = ≡.cong (inj₁ ∘ s) {!!}
+-- ... | inj₂ y | [ eq₁ ] = ⊥-elim {!!}
+invˡ {ℕ.suc X} {Y} {inj₂ z₁} {z₂} eq = {!!}
+--   with +→⊎ (ℕ.suc X) Y z₂ | inspect (+→⊎ (ℕ.suc X) Y) z₂
+--      | ⊎→+ (ℕ.suc X) Y z₁ | inspect (⊎→+ (ℕ.suc X) Y) z₁
+--      | z₁ | z₂ | +→⊎ X Y F
+-- ... | inj₁ z | [ eq₁ ] | z | [ eq₂ ] | inj₁ z | z | G = ≡.refl
+-- ... | inj₁ z | [ eq₁ ] | z | [ eq₂ ] | inj₁ (s E) | s F | G =
+--   begin
+--       +→⊎ (ℕ.suc X) Y (s F)
+--     ≡⟨ {!!} ⟩
+--       inj₁ (s E) ∎
+-- ... | inj₁ z | [ eq₁ ] | z | [ eq₂ ] | inj₂ E | F | G =
+--   begin
+--       {!!}
+--     ≡⟨ {!!} ⟩
+--       {!!} ∎
+-- ... | inj₁ (s A) | [ eq₁ ] | z | [ eq₂ ] | E | F | G = {!!}
+-- ... | inj₁ A | [ eq₁ ] | s C | [ eq₂ ] | E | F | G = {!!}
+-- ... | inj₂ A | [ eq₁ ] | C | [ eq₂ ] | E | F | G = {!!}
 
 
 -- invˡ {ℕ.suc X} {Y} {inj₁ (s x)} {s y} eq
