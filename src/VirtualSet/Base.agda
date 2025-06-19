@@ -7,13 +7,13 @@ open import Data.Fin
 open import Data.Fin.Properties
   using (_≟_; 0≢1+n; suc-injective)
 open import Data.Nat
-  using (ℕ; _+_)
+  using (ℕ) renaming (_+_ to _+ℕ_)
 open import Data.Product
-  using (Σ-syntax; _×_; proj₁; proj₂)
+  using (Σ; Σ-syntax; _×_; proj₁; proj₂)
 open import Data.Product.Base as Product
   using (∃; _×_; _,_)
 open import Data.Sum
-  using (inj₁; inj₂)
+  using (inj₁; inj₂; _⊎_)
 open import Level
   using (_⊔_; 0ℓ) renaming (suc to lsuc)
 open import Relation.Binary.Structures
@@ -30,18 +30,19 @@ open import Relation.Binary.PropositionalEquality.Properties
   using (module ≡-Reasoning)
 open import Relation.Binary.PropositionalEquality
   using (inspect; [_])
+open import Function.Bundles
+  using (_↣_; _↔_)
 
 
 open ≡-Reasoning
-
 private
   variable
     c ℓ : Level.Level
 
+
+
 injective : {X Y : Set} → (f : X → Y) → Set
 injective {X} {Y} f = ∀ (a b : X) → f a ≡ f b → a ≡ b
-
-module _ {x : ℕ} where
 
 add : {x : ℕ} → (a : Fin (ℕ.suc x)) → (b : Fin x) → (Σ[ c ∈ Fin (ℕ.suc x) ] a ≢ c)
 add {ℕ.suc x} z b = s b , λ ()
@@ -141,14 +142,69 @@ module _ {x y : ℕ} (f : Fin (ℕ.suc x) → Fin (ℕ.suc y)) (inj : injective 
                 f'b₁≡f'b₂))
 
   sub : Σ[ f' ∈ (Fin x → Fin y) ] injective f'
-  sub = f' , comp (add-inj z) (del-inj {!f z!})
+  sub = f' , comp (add-inj z) (del-inj (f z))
 
---with (i ≟ z)
---... | yes i≡0 = {!!}
---... | no i≢0 = {!!}
+infix 5 ⟦_⟧
+infix 10 _!_$_
+infix 80 SFin_
 
-_-A : {x y a : ℕ} → (f : Fin (a + x) → Fin (a + y)) → {inj : injective f}
+SomeFin : Set
+SomeFin = ℕ
+
+_+_ : SomeFin → SomeFin → SomeFin
+X + Y = X +ℕ Y
+
++→⊎ : (X Y : SomeFin) → Fin (X + Y) → (Fin X ⊎ Fin Y)
++→⊎ ℕ.zero Y w = inj₂ w
++→⊎ (ℕ.suc X) Y z = inj₁ z
++→⊎ (ℕ.suc X) Y (s w) with +→⊎ X Y w
+... | inj₁ a = inj₁ (s a)
+... | inj₂ b = inj₂ b
+
+⊎→+ : (X Y : SomeFin) → (Fin X ⊎ Fin Y) → Fin (X + Y)
+⊎→+ ℕ.zero Y (inj₂ w) = w
+⊎→+ (ℕ.suc X) Y (inj₁ z) = z
+⊎→+ (ℕ.suc X) Y (inj₁ (s a)) =
+  s (⊎→+ X Y (inj₁ a)) 
+⊎→+ (ℕ.suc X) Y (inj₂ b) = 
+  s (⊎→+ X Y (inj₂ b)) 
+
+invˡ : {X Y : SomeFin} → ∀ {z₁ z₂} → z₂ ≡ ⊎→+ X Y z₁ → +→⊎ X Y z₂ ≡ z₁ 
+invˡ {ℕ.zero} {Y} {inj₂ z₁} {z₂} z₂≡z₁ = ≡.cong inj₂ z₂≡z₁
+invˡ {ℕ.suc X} {Y} {z₁} {z₂} eq
+  with +→⊎ (ℕ.suc X) Y z₂ | inspect (+→⊎ (ℕ.suc X) Y) z₂ | ⊎→+ (ℕ.suc X) Y z₁ | inspect (⊎→+ (ℕ.suc X) Y) z₁ 
+... | A | B | C | D = {!!}
+
+
+
+-- invˡ {ℕ.suc X} {Y} {inj₁ (s x)} {s y} eq
+--   with +→⊎ X Y y | inspect (+→⊎ X Y) y | invˡ {X} {Y} {inj₁ x}
+-- ... | inj₁ y' | [ eq₂ ] | _ = ≡.cong (λ i → inj₁ (s i)) {!!}
+-- ... | inj₂ y' | [ eq₂ ] | D = {!!}
+-- invˡ {ℕ.suc X} {Y} {inj₂ x} {y} eq = {!!}
+
+invʳ : {X Y : SomeFin} → ∀ {x y} → y ≡ +→⊎ X Y x → ⊎→+ X Y y ≡ x
+invʳ {X} {Y} w = {!!}
+
+
+⊎↔+ : ∀ (X Y : SomeFin) → Fin (X + Y) ↔ (Fin X ⊎ Fin Y)
+⊎↔+ X Y =
+  record
+    { to =  +→⊎ X Y
+    ; from = ⊎→+ X Y
+    ; to-cong = ≡.cong (+→⊎ X Y) 
+    ; from-cong = ≡.cong (⊎→+ X Y)
+    ; inverse = invˡ , invʳ
+    }
+
+{-
+_-A : {x y a : ℕ} → (f : Fin (a +ℕ x) → Fin (a +ℕ y)) → {inj : injective f}
     → Σ[ f' ∈ (Fin x → Fin y) ] injective f'
 _-A {a = ℕ.zero} f {inj} = f , inj
-_-A {a = ℕ.suc a} f = {!!}
-
+_-A {x} {y} {a = ℕ.suc a} f {inj} =
+  let F = sub {x = a +ℕ x} {y = a +ℕ y} f inj
+      f₂ = proj₁ F
+      inj₂ = proj₂ F
+  in
+    proj₁ (f₂ -A) , proj₂ (f₂ -A)
+-- -}
