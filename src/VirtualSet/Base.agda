@@ -5,7 +5,7 @@ open import Data.Empty
 open import Data.Fin
   using (Fin) renaming (suc to s; zero to z)
 open import Data.Fin.Properties
-  using (_≟_; 0≢1+n; suc-injective)
+  using (_≟_; 0≢1+n; suc-injective; +↔⊎)
 open import Data.Nat
   using (ℕ) renaming (_+_ to _+ℕ_)
 open import Data.Product
@@ -33,18 +33,15 @@ open import Relation.Binary.PropositionalEquality
 open import Function.Base
   using (_∘_)
 open import Function.Bundles
-  using (_↣_; _↔_)
+  using (_↣_; _↔_; Injection)
+open import Function.Definitions
+  using (Injective; Congruent)
 
 
 open ≡-Reasoning
 private
   variable
     c ℓ : Level.Level
-
-
-
-injective : {X Y : Set} → (f : X → Y) → Set
-injective {X} {Y} f = ∀ (a b : X) → f a ≡ f b → a ≡ b
 
 add : {x : ℕ} → (a : Fin (ℕ.suc x)) → (b : Fin x) → (Σ[ c ∈ Fin (ℕ.suc x) ] a ≢ c)
 add {ℕ.suc x} z b = s b , λ ()
@@ -121,151 +118,48 @@ add-inj (s a) (s b₁) (s b₂) c₁≡c₂
 ... | s c₁ , sa≢sc₁ | [ eq₁ ] | s c₂ , sa≢sc₂ | [ eq₂ ] =
   ≡.cong s (add-inj a b₁ b₂ (suc-injective c₁≡c₂))
 
-module _ {x y : ℕ} (f : Fin (ℕ.suc x) → Fin (ℕ.suc y)) (inj : injective f) where
+SomeFin : Set
+SomeFin = ℕ
+
+_∖_ : (A : SomeFin) → (a : Fin A) → Set
+A ∖ a = Σ[ b ∈ Fin A ] a ≢ b
+
+open Injection
+
+module _ {x y : ℕ} (f : Fin (ℕ.suc x) ↣ Fin (ℕ.suc y)) where
 
   f' : Fin x → Fin y
   f' i =
     let (j , 0≢j) = add z i 
-    in del (f z) (f j , λ f0≡fj → 0≢j (inj z j f0≡fj))
+    in del (to f z) (to f j , λ f0≡fj → 0≢j (injective f f0≡fj))
 
   comp : (ai : (b₁ b₂ : Fin x) → proj₁ (add z b₁) ≡ proj₁ (add z b₂) → b₁ ≡ b₂)
-       → (di : (B₁ B₂ : Σ[ b ∈ Fin (ℕ.suc y) ] f z ≢ b)
-             → del (f z) B₁ ≡ del (f z) B₂ → proj₁ B₁ ≡ proj₁ B₂)
-       → injective f'
-  comp ai di b₁ b₂ f'b₁≡f'b₂ =
+       → (di : (B₁ B₂ : (ℕ.suc y) ∖ to f z)
+             → del (to f z) B₁ ≡ del (to f z) B₂ → proj₁ B₁ ≡ proj₁ B₂)
+       → Injective _≡_ _≡_ f'
+  comp ai di {b₁} {b₂} f'b₁≡f'b₂ =
     let
       (c₁ , z≢c₁) = add z b₁
       (c₂ , z≢c₂) = add z b₂
     in
     ai b₁ b₂
-       (inj c₁ c₂
-            (di (f c₁ , λ fz≡fc₁ → z≢c₁ (inj z c₁ fz≡fc₁))
-                (f c₂ , λ fz≡fc₂ → z≢c₂ (inj z c₂ fz≡fc₂))
+       (injective f {c₁} {c₂}
+            (di (to f c₁ , λ fz≡fc₁ → z≢c₁ (injective f {z} {c₁} fz≡fc₁))
+                (to f c₂ , λ fz≡fc₂ → z≢c₂ (injective f {z} {c₂} fz≡fc₂))
                 f'b₁≡f'b₂))
 
-  sub : Σ[ f' ∈ (Fin x → Fin y) ] injective f'
-  sub = f' , comp (add-inj z) (del-inj (f z))
-
-infix 5 ⟦_⟧
-infix 10 _!_$_
-infix 80 SFin_
-
-SomeFin : Set
-SomeFin = ℕ
+  sub : Fin x ↣ Fin y
+  sub = record
+    { to = f'
+    ; cong = ≡.cong f'
+    ; injective = comp (add-inj z) (del-inj (to f z))
+    }
 
 _+_ : SomeFin → SomeFin → SomeFin
 X + Y = X +ℕ Y
 
-+→⊎ : (X Y : SomeFin) → Fin (X + Y) → (Fin X ⊎ Fin Y)
-+→⊎ ℕ.zero Y w = inj₂ w
-+→⊎ (ℕ.suc X) Y z = inj₁ z
-+→⊎ (ℕ.suc X) Y (s w) with +→⊎ X Y w
-... | inj₁ a = inj₁ (s a)
-... | inj₂ b = inj₂ b
-
-⊎→+ : (X Y : SomeFin) → (Fin X ⊎ Fin Y) → Fin (X + Y)
-⊎→+ ℕ.zero Y (inj₂ w) = w
-⊎→+ (ℕ.suc X) Y (inj₁ z) = z
-⊎→+ (ℕ.suc X) Y (inj₁ (s a)) =
-  s (⊎→+ X Y (inj₁ a)) 
-⊎→+ (ℕ.suc X) Y (inj₂ b) = 
-  s (⊎→+ X Y (inj₂ b)) 
-
-{- I was able to make it work and I'm now stuck on showing that two functions are inverses of eachother. 
-The funciton below is meant to show that ⊎→+ X Y ∘ +→⊎ X Y = id, although it's represented a little differently in the standard library:
-
-Inverseˡ : (A → B) → (B → A) → Set _
-Inverseˡ f g = ∀ {x y} → y ≈₁ g x → f y ≈₂ x
-
-Inverseʳ : (A → B) → (B → A) → Set _
-Inverseʳ f g = ∀ {x y} → y ≈₂ f x → g y ≈₁ x
-
-Inverseᵇ : (A → B) → (B → A) → Set _
-Inverseᵇ f g = Inverseˡ f g × Inverseʳ f g
-
-I have used the inspect pattern below to try to rewrite the functions so I can use the recursive case, but I don't quite seem to get there.
-The specific case I'm on should be impossible, but I can't find the contradiction in the assumptions.
-
-Goal: +→⊎ (ℕ.suc X) Y z₂ ≡ inj₁ (s E)
-————————————————————————————————————————————————————————————
-eq  : z₂ ≡ s (⊎→+ X Y (inj₁ E))
-E   : Fin X
-eq₂ : ⊎→+ (ℕ.suc X) Y z₁ ≡ z
-eq₁ : +→⊎ (ℕ.suc X) Y z₂ ≡ inj₁ z
-z₂  : Fin (ℕ.suc X + Y)
-z₁  : Fin (ℕ.suc X) ⊎ Fin Y
-Y   : SomeFin
-X   : ℕ
-
--}
-
-invˡ' : {X Y : SomeFin} → ∀ {z₁ z₂} → z₂ ≡ ⊎→+ X Y z₁ → +→⊎ X Y z₂ ≡ z₁ 
-invˡ' {ℕ.zero} {Y} {inj₂ a} {b} eq = ≡.cong inj₂ eq
-invˡ' {ℕ.suc X} {Y} {inj₁ z} {b} eq with inspect = {!!}
-invˡ' {ℕ.suc X} {Y} {inj₁ (s a)} {b} eq = {!!}
-invˡ' {ℕ.suc X} {Y} {inj₂ a} {b} eq = {!!}
-
-
-invˡ : {X Y : SomeFin} → ∀ {z₁ z₂} → z₂ ≡ ⊎→+ X Y z₁ → +→⊎ X Y z₂ ≡ z₁ 
-invˡ {ℕ.zero} {Y} {inj₂ z₁} {z₂} z₂≡z₁ = ≡.cong inj₂ z₂≡z₁
-invˡ {ℕ.suc X} {Y} {inj₁ z} {z} eq = ≡.refl
-invˡ {ℕ.suc X} {Y} {inj₁ (s z₁)} {s z₂} eq
-  with +→⊎ (ℕ.suc X) Y (s z₂) | inspect (+→⊎ (ℕ.suc X) Y) (s z₂)
-     | ⊎→+ (ℕ.suc X) Y (inj₁ (s z₁)) | inspect (⊎→+ (ℕ.suc X) Y) (inj₁ (s z₁))
-... | inj₁ z | [ eq₁ ] | s C | [ eq₂ ] = {!!}
-... | inj₁ (s A) | [ eq₁ ] | s C | [ eq₂ ] = ≡.cong (inj₁ ∘ s) {!!}
-... | inj₂ A | [ eq₁ ] | s C | [ eq₂ ] = {!!}
--- Goal z₁ ≡ z₃, This should be obvious
--- ... | inj₁ (s z₁) | [ eq₁ ] = ≡.cong (inj₁ ∘ s) {!!}
--- ... | inj₂ y | [ eq₁ ] = ⊥-elim {!!}
-invˡ {ℕ.suc X} {Y} {inj₂ z₁} {z₂} eq = {!!}
---   with +→⊎ (ℕ.suc X) Y z₂ | inspect (+→⊎ (ℕ.suc X) Y) z₂
---      | ⊎→+ (ℕ.suc X) Y z₁ | inspect (⊎→+ (ℕ.suc X) Y) z₁
---      | z₁ | z₂ | +→⊎ X Y F
--- ... | inj₁ z | [ eq₁ ] | z | [ eq₂ ] | inj₁ z | z | G = ≡.refl
--- ... | inj₁ z | [ eq₁ ] | z | [ eq₂ ] | inj₁ (s E) | s F | G =
---   begin
---       +→⊎ (ℕ.suc X) Y (s F)
---     ≡⟨ {!!} ⟩
---       inj₁ (s E) ∎
--- ... | inj₁ z | [ eq₁ ] | z | [ eq₂ ] | inj₂ E | F | G =
---   begin
---       {!!}
---     ≡⟨ {!!} ⟩
---       {!!} ∎
--- ... | inj₁ (s A) | [ eq₁ ] | z | [ eq₂ ] | E | F | G = {!!}
--- ... | inj₁ A | [ eq₁ ] | s C | [ eq₂ ] | E | F | G = {!!}
--- ... | inj₂ A | [ eq₁ ] | C | [ eq₂ ] | E | F | G = {!!}
-
-
--- invˡ {ℕ.suc X} {Y} {inj₁ (s x)} {s y} eq
---   with +→⊎ X Y y | inspect (+→⊎ X Y) y | invˡ {X} {Y} {inj₁ x}
--- ... | inj₁ y' | [ eq₂ ] | _ = ≡.cong (λ i → inj₁ (s i)) {!!}
--- ... | inj₂ y' | [ eq₂ ] | D = {!!}
--- invˡ {ℕ.suc X} {Y} {inj₂ x} {y} eq = {!!}
-
-invʳ : {X Y : SomeFin} → ∀ {x y} → y ≡ +→⊎ X Y x → ⊎→+ X Y y ≡ x
-invʳ {X} {Y} w = {!!}
-
-
-⊎↔+ : ∀ (X Y : SomeFin) → Fin (X + Y) ↔ (Fin X ⊎ Fin Y)
-⊎↔+ X Y =
-  record
-    { to =  +→⊎ X Y
-    ; from = ⊎→+ X Y
-    ; to-cong = ≡.cong (+→⊎ X Y) 
-    ; from-cong = ≡.cong (⊎→+ X Y)
-    ; inverse = invˡ , invʳ
-    }
-
-{-
-_-A : {x y a : ℕ} → (f : Fin (a +ℕ x) → Fin (a +ℕ y)) → {inj : injective f}
-    → Σ[ f' ∈ (Fin x → Fin y) ] injective f'
-_-A {a = ℕ.zero} f {inj} = f , inj
-_-A {x} {y} {a = ℕ.suc a} f {inj} =
-  let F = sub {x = a +ℕ x} {y = a +ℕ y} f inj
-      f₂ = proj₁ F
-      inj₂ = proj₂ F
-  in
-    proj₁ (f₂ -A) , proj₂ (f₂ -A)
--- -}
+_-_ : {A' X Y : SomeFin} → (f : Fin (A' + X) ↣ Fin (A' + Y))
+    → (A : SomeFin) → {A ≡ A'}
+    → Fin X ↣ Fin Y
+_-_ {ℕ.zero} {X} {Y} f ℕ.zero = f
+_-_ {ℕ.suc A'} {X} {Y} f (ℕ.suc A) = (sub f - A)
