@@ -6,6 +6,8 @@ open import Data.Fin
   using (Fin) renaming (suc to s; zero to z)
 open import Data.Fin.Properties
   using (_≟_; 0≢1+n; suc-injective; +↔⊎)
+import Data.Nat.Properties
+  using (+-comm)
 open import Data.Nat
   using (ℕ) renaming (_+_ to _+ℕ_)
 open import Data.Product
@@ -158,8 +160,35 @@ module _ {x y : ℕ} (f : Fin (ℕ.suc x) ↣ Fin (ℕ.suc y)) where
 _+_ : SomeFin → SomeFin → SomeFin
 X + Y = X +ℕ Y
 
-_-_ : {A' X Y : SomeFin} → (f : Fin (A' + X) ↣ Fin (A' + Y))
+sym-sub : {A' X Y : SomeFin} → (f : Fin (A' + X) ↣ Fin (A' + Y))
     → (A : SomeFin) → {A ≡ A'}
     → Fin X ↣ Fin Y
-_-_ {ℕ.zero} {X} {Y} f ℕ.zero = f
-_-_ {ℕ.suc A'} {X} {Y} f (ℕ.suc A) = (sub f - A)
+sym-sub {ℕ.zero} {X} {Y} f ℕ.zero = f
+sym-sub {ℕ.suc A'} {X} {Y} f (ℕ.suc A) = (sym-sub (sub f) A)
+
++-comm : ∀ (A B : SomeFin) → A + B ≡ B + A
++-comm = Data.Nat.Properties.+-comm
+
+_-_ : {A' X Y : SomeFin} → (f : Fin (X + A') ↣ Fin (Y + A'))
+    → (A : SomeFin) → {A ≡ A'}
+    → Fin X ↣ Fin Y
+_-_ {A'} {X} {Y} f A =
+  sym-sub (≡.subst (λ h → Fin (A' + X) ↣ Fin h) (+-comm Y A') (≡.subst (λ h → Fin h ↣ Fin (Y + A')) (+-comm X A') f)) A
+  -- sym-sub (record
+  --   { to = λ x → {!!}
+  --   ; cong = {!!}
+  --   ; injective = {!!}
+  --   }) A
+
+_⊙_ : ∀ {X Y Z} → (Fin Y ↣ Fin Z) → (Fin X ↣ Fin Y) → (Fin X ↣ Fin Z)
+_⊙_ g f = record
+  { to = to g ∘ to f 
+  ; cong = cong g ∘ cong f
+  ; injective = injective f ∘ injective g
+  }
+
+module theorem12 where
+  private
+    variable A B X Y Z : SomeFin
+
+  -- lemma1 : (f : Fin (Y + A) → Fin (Z + A)) → (g : Fin X → Fin Y) → (f ⊙ (g + A)) - A ≡ (f - A) ⊙ g 
