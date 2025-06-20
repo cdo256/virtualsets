@@ -3,13 +3,13 @@ module VirtualSet.Base where
 open import Data.Empty
   using (⊥; ⊥-elim)
 open import Data.Fin
-  using (Fin) renaming (suc to sꟳ; zero to z)
+  using (Fin) renaming (suc to sꟳ; zero to zꟳ)
 open import Data.Fin.Properties
   using (_≟_; 0≢1+n; suc-injective; +↔⊎)
 import Data.Nat.Properties
   using (+-comm; +-suc)
 open import Data.Nat
-  using (ℕ) renaming (_+_ to _+ℕ_)
+  using (ℕ) renaming (_+_ to _+ℕ_; suc to sᴺ; zero to zᴺ)
 open import Data.Product
   using (Σ; Σ-syntax; _×_; proj₁; proj₂)
 open import Data.Product.Base as Product
@@ -50,40 +50,40 @@ private
   variable
     c ℓ : Level.Level
 
-add : {x : ℕ} → (a : Fin (ℕ.suc x)) → (b : Fin x) → (Σ[ c ∈ Fin (ℕ.suc x) ] a ≢ c)
-add {ℕ.suc x} z b = sꟳ b , λ ()
-add {ℕ.suc x} (sꟳ a) z = z , λ ()
-add {ℕ.suc x} (sꟳ a) (sꟳ b) =
+add : {x : ℕ} → (a : Fin (sᴺ x)) → (b : Fin x) → (Σ[ c ∈ Fin (sᴺ x) ] a ≢ c)
+add {sᴺ x} zꟳ b = sꟳ b , λ ()
+add {sᴺ x} (sꟳ a) zꟳ = zꟳ , λ ()
+add {sᴺ x} (sꟳ a) (sꟳ b) =
   let
     (c , a≢c) = add a b
   in sꟳ (proj₁ (add a b)) , λ a'≡c' → a≢c (suc-injective a'≡c')
 
-del : {x : ℕ} → (a : Fin (ℕ.suc x)) → (Σ[ b ∈ Fin (ℕ.suc x) ] a ≢ b) → Fin x
-del {ℕ.zero} z (z , 0≢0) = ⊥-elim (0≢0 ≡.refl)
-del {ℕ.suc x} z (z , 0≢0) = ⊥-elim (0≢0 ≡.refl)
-del {ℕ.suc x} z (sꟳ b , a≢b) = b
-del {ℕ.suc x} (sꟳ a) (z , a≢b) = z
-del {ℕ.suc x} (sꟳ a) (sꟳ b , a'≢b') =
+del : {x : ℕ} → (a : Fin (sᴺ x)) → (Σ[ b ∈ Fin (sᴺ x) ] a ≢ b) → Fin x
+del {ℕ.zero} zꟳ (zꟳ , 0≢0) = ⊥-elim (0≢0 ≡.refl)
+del {sᴺ x} zꟳ (zꟳ , 0≢0) = ⊥-elim (0≢0 ≡.refl)
+del {sᴺ x} zꟳ (sꟳ b , a≢b) = b
+del {sᴺ x} (sꟳ a) (zꟳ , a≢b) = zꟳ
+del {sᴺ x} (sꟳ a) (sꟳ b , a'≢b') =
   sꟳ (del {x} a (b , λ a≡b → ⊥-elim (a'≢b' (≡.cong sꟳ a≡b))))
 
-del-zero-suc : ∀ {x} (b : Fin x) (a≢b : z ≢ sꟳ b) → del z (sꟳ b , a≢b) ≡ b
-del-zero-suc b a≢b with del z (sꟳ b , a≢b) | inspect (del z) (sꟳ b , a≢b)
-... | z | [ eq ] = ≡.sym eq
+del-zero-suc : ∀ {x} (b : Fin x) (a≢b : zꟳ ≢ sꟳ b) → del zꟳ (sꟳ b , a≢b) ≡ b
+del-zero-suc b a≢b with del zꟳ (sꟳ b , a≢b) | inspect (del zꟳ) (sꟳ b , a≢b)
+... | zꟳ | [ eq ] = ≡.sym eq
 ... | sꟳ X | [ eq ] = ≡.sym eq
 
-del-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
-        → (B₁ B₂ : Σ[ b ∈ Fin (ℕ.suc x) ] a ≢ b)
+del-inj : {x : ℕ} → (a : Fin (sᴺ x))
+        → (B₁ B₂ : Σ[ b ∈ Fin (sᴺ x) ] a ≢ b)
         → del a B₁ ≡ del a B₂
         → proj₁ B₁ ≡ proj₁ B₂
-del-inj z (z , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
+del-inj zꟳ (zꟳ , a≢b₁) (zꟳ , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₁ ≡.refl)
-del-inj z (z , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂' =
+del-inj zꟳ (zꟳ , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₁ ≡.refl)
-del-inj z (sꟳ b₁ , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
+del-inj zꟳ (sꟳ b₁ , a≢b₁) (zꟳ , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₂ ≡.refl)
-del-inj z (sꟳ b₁ , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂' =
-  let b₁' = del z (sꟳ b₁ , a≢b₁)
-      b₂' = del z (sꟳ b₂ , a≢b₂)
+del-inj zꟳ (sꟳ b₁ , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂' =
+  let b₁' = del zꟳ (sꟳ b₁ , a≢b₁)
+      b₂' = del zꟳ (sꟳ b₂ , a≢b₂)
       b₁'≡b₁ : b₁' ≡ b₁
       b₁'≡b₁ = del-zero-suc b₁ a≢b₁
       b₂'≡b₂ : b₂' ≡ b₂
@@ -96,14 +96,14 @@ del-inj z (sꟳ b₁ , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂' =
       sꟳ b₂'
     ≡⟨ ≡.cong sꟳ b₂'≡b₂ ⟩
       sꟳ b₂ ∎
-del-inj (sꟳ a) (z , a≢b₁) (z , a≢b₂) b₁'≡b₂' = ≡.refl
-del-inj (sꟳ a) (z , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂'
-  with del (sꟳ a) (z , a≢b₁) | inspect (del (sꟳ a)) (z , a≢b₁) | del (sꟳ a) (sꟳ b₂  , a≢b₂) | inspect (del (sꟳ a)) (sꟳ b₂ , a≢b₂)
-... | z | [ eq₁ ] | z | ()
-... | z | _ | sꟳ _ | _ = ⊥-elim (0≢1+n b₁'≡b₂')
+del-inj (sꟳ a) (zꟳ , a≢b₁) (zꟳ , a≢b₂) b₁'≡b₂' = ≡.refl
+del-inj (sꟳ a) (zꟳ , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂'
+  with del (sꟳ a) (zꟳ , a≢b₁) | inspect (del (sꟳ a)) (zꟳ , a≢b₁) | del (sꟳ a) (sꟳ b₂  , a≢b₂) | inspect (del (sꟳ a)) (sꟳ b₂ , a≢b₂)
+... | zꟳ | [ eq₁ ] | zꟳ | ()
+... | zꟳ | _ | sꟳ _ | _ = ⊥-elim (0≢1+n b₁'≡b₂')
 ... | sꟳ X | () | _ | _
-del-inj (sꟳ a) (sꟳ b₁ , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
-  ≡.sym (del-inj (sꟳ a) (z , a≢b₂) (sꟳ b₁ , a≢b₁) (≡.sym b₁'≡b₂'))
+del-inj (sꟳ a) (sꟳ b₁ , a≢b₁) (zꟳ , a≢b₂) b₁'≡b₂' =
+  ≡.sym (del-inj (sꟳ a) (zꟳ , a≢b₂) (sꟳ b₁ , a≢b₁) (≡.sym b₁'≡b₂'))
 del-inj (sꟳ a) (sꟳ b₁ , sa≢sb₁) (sꟳ b₂ , sa≢sb₂) b₁'≡b₂'
   with del (sꟳ a) (sꟳ b₁ , sa≢sb₁) | inspect (del (sꟳ a)) (sꟳ b₁ , sa≢sb₁) | del (sꟳ a) (sꟳ b₂  , sa≢sb₂) | inspect (del (sꟳ a)) (sꟳ b₂ , sa≢sb₂) | b₁'≡b₂'
 ... | sꟳ c₁ | [ eq₁ ] | sꟳ c₂ | [ eq₂ ] | _ =
@@ -111,15 +111,15 @@ del-inj (sꟳ a) (sꟳ b₁ , sa≢sb₁) (sꟳ b₂ , sa≢sb₂) b₁'≡b₂'
                       (b₂ , λ a≡b₂ → sa≢sb₂ (≡.cong sꟳ a≡b₂))
                       (suc-injective b₁'≡b₂'))
 
-add-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
+add-inj : {x : ℕ} → (a : Fin (sᴺ x))
         → (b₁ b₂ : Fin x)
         → proj₁ (add a b₁) ≡ proj₁ (add a b₂)
         → b₁ ≡ b₂
-add-inj z z z c₁≡c₂ = ≡.refl
-add-inj z (sꟳ b₁) (sꟳ b₂) c₁≡c₂
-  with add z b₁ | inspect (add z) b₁ | add z b₂ | inspect (add z) b₂
+add-inj zꟳ zꟳ zꟳ c₁≡c₂ = ≡.refl
+add-inj zꟳ (sꟳ b₁) (sꟳ b₂) c₁≡c₂
+  with add zꟳ b₁ | inspect (add zꟳ) b₁ | add zꟳ b₂ | inspect (add zꟳ) b₂
 ... | c₁ , z≢c₁ | [ eq₁ ] | c₂ , z≢c₂ | [ eq₂ ] = suc-injective c₁≡c₂
-add-inj (sꟳ a) z z c₁≡c₂ = ≡.refl
+add-inj (sꟳ a) zꟳ zꟳ c₁≡c₂ = ≡.refl
 add-inj (sꟳ a) (sꟳ b₁) (sꟳ b₂) c₁≡c₂
   with add (sꟳ a) (sꟳ b₁) | inspect (add (sꟳ a)) (sꟳ b₁) | add (sꟳ a) (sꟳ b₂) | inspect (add (sꟳ a)) (sꟳ b₂)
 ... | sꟳ c₁ , sa≢sc₁ | [ eq₁ ] | sꟳ c₂ , sa≢sc₂ | [ eq₂ ] =
@@ -131,34 +131,34 @@ SomeFin = ℕ
 _∖_ : (A : SomeFin) → (a : Fin A) → Set
 A ∖ a = Σ[ b ∈ Fin A ] a ≢ b
 
-module _ {x y : ℕ} (f : Fin (ℕ.suc x) ↣ Fin (ℕ.suc y)) where
+module _ {x y : ℕ} (f : Fin (sᴺ x) ↣ Fin (sᴺ y)) where
   open Injection
 
   f' : Fin x → Fin y
   f' i =
-    let (j , 0≢j) = add z i 
-    in del (to f z) (to f j , λ f0≡fj → 0≢j (injective f f0≡fj))
+    let (j , 0≢j) = add zꟳ i 
+    in del (to f zꟳ) (to f j , λ f0≡fj → 0≢j (injective f f0≡fj))
 
-  comp : (ai : (b₁ b₂ : Fin x) → proj₁ (add z b₁) ≡ proj₁ (add z b₂) → b₁ ≡ b₂)
-       → (di : (B₁ B₂ : (ℕ.suc y) ∖ to f z)
-             → del (to f z) B₁ ≡ del (to f z) B₂ → proj₁ B₁ ≡ proj₁ B₂)
+  comp : (ai : (b₁ b₂ : Fin x) → proj₁ (add zꟳ b₁) ≡ proj₁ (add zꟳ b₂) → b₁ ≡ b₂)
+       → (di : (B₁ B₂ : (sᴺ y) ∖ to f zꟳ)
+             → del (to f zꟳ) B₁ ≡ del (to f zꟳ) B₂ → proj₁ B₁ ≡ proj₁ B₂)
        → Injective _≡_ _≡_ f'
   comp ai di {b₁} {b₂} f'b₁≡f'b₂ =
     let
-      (c₁ , z≢c₁) = add z b₁
-      (c₂ , z≢c₂) = add z b₂
+      (c₁ , z≢c₁) = add zꟳ b₁
+      (c₂ , z≢c₂) = add zꟳ b₂
     in
     ai b₁ b₂
        (injective f {c₁} {c₂}
-            (di (to f c₁ , λ fz≡fc₁ → z≢c₁ (injective f {z} {c₁} fz≡fc₁))
-                (to f c₂ , λ fz≡fc₂ → z≢c₂ (injective f {z} {c₂} fz≡fc₂))
+            (di (to f c₁ , λ fz≡fc₁ → z≢c₁ (injective f {zꟳ} {c₁} fz≡fc₁))
+                (to f c₂ , λ fz≡fc₂ → z≢c₂ (injective f {zꟳ} {c₂} fz≡fc₂))
                 f'b₁≡f'b₂))
 
   sub : Fin x ↣ Fin y
   sub = record
     { to = f'
     ; cong = ≡.cong f'
-    ; injective = comp (add-inj z) (del-inj (to f z))
+    ; injective = comp (add-inj zꟳ) (del-inj (to f zꟳ))
     }
 
 infixl 6 _+_ _+ᶠ_ _-ᶠ_
@@ -169,15 +169,15 @@ sym-sub : {A' X Y : SomeFin} → (f : Fin (A' + X) ↣ Fin (A' + Y))
     → (A : SomeFin) → {A ≡ A'}
     → Fin X ↣ Fin Y
 sym-sub {ℕ.zero} {X} {Y} f ℕ.zero = f
-sym-sub {ℕ.suc A'} {X} {Y} f (ℕ.suc A) = (sym-sub (sub f) A)
+sym-sub {sᴺ A'} {X} {Y} f (sᴺ A) = (sym-sub (sub f) A)
 
 +-comm : ∀ (A B : SomeFin) → A + B ≡ B + A
 +-comm = Data.Nat.Properties.+-comm
 
 +-identityʳ : ∀ (x : SomeFin) → x + ℕ.zero ≡ x
 +-identityʳ ℕ.zero = ≡.refl
-+-identityʳ (ℕ.suc n) =
-  ≡.cong ℕ.suc (+-identityʳ n)
++-identityʳ (sᴺ n) =
+  ≡.cong sᴺ (+-identityʳ n)
 
 swap : ∀ {A B} → Fin (A + B) → Fin (B + A)
 swap {A} {B} =
@@ -188,29 +188,29 @@ swap {A} {B} =
 -- swap : ∀ {A B} → Fin (A + B) → Fin (B + A)
 -- swap {ℕ.zero} {B} x =
 --   ≡.subst Fin (+-comm ℕ.zero B) x
--- swap {ℕ.suc A} {ℕ.zero} x =
---   ≡.subst Fin (+-comm (ℕ.suc A) ℕ.zero) x
--- swap {ℕ.suc A} {ℕ.suc B} z = sꟳ (swap {ℕ.suc A} {B} z)
--- swap {ℕ.suc A} {ℕ.suc B} (sꟳ x) =
---   sꟳ (swap {ℕ.suc A} {B}
+-- swap {sᴺ A} {ℕ.zero} x =
+--   ≡.subst Fin (+-comm (sᴺ A) ℕ.zero) x
+-- swap {sᴺ A} {sᴺ B} zꟳ = sꟳ (swap {sᴺ A} {B} zꟳ)
+-- swap {sᴺ A} {sᴺ B} (sꟳ x) =
+--   sꟳ (swap {sᴺ A} {B}
 --           (≡.subst Fin (Data.Nat.Properties.+-suc A B) x))
 
 -- swap-involutive : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap {B} {A}) (swap {A} {B})
 -- swap-involutive {A} {B} {x} {y} = {!inv!}
 --   where inv : ∀ {A B x} → swap {B} {A} (swap {A} {B} x) ≡ x
---         inv {ℕ.zero} {ℕ.suc B} {z} = 
+--         inv {ℕ.zero} {sᴺ B} {zꟳ} = 
 --           begin
---               swap (swap z)
+--               swap (swap zꟳ)
 --             ≡⟨ ≡.refl ⟩
---               swap {ℕ.suc B} {ℕ.zero} (swap {ℕ.zero} {ℕ.suc B} z)
+--               swap {sᴺ B} {ℕ.zero} (swap {ℕ.zero} {sᴺ B} zꟳ)
 --             ≡⟨ ≡.cong swap ≡.refl ⟩
---               swap {ℕ.suc B} {ℕ.zero} (≡.subst Fin (+-comm ℕ.zero (ℕ.suc B)) z)
+--               swap {sᴺ B} {ℕ.zero} (≡.subst Fin (+-comm ℕ.zero (sᴺ B)) zꟳ)
 --             ≡⟨ {!!} ⟩
 --               {!!}
 --             ≡⟨ {!!} ⟩
---               z ∎
---         inv {ℕ.zero} {ℕ.suc B} {sꟳ x} = {!!}
---         inv {ℕ.suc A} {B} {x} = {!!}
+--               zꟳ ∎
+--         inv {ℕ.zero} {sᴺ B} {sꟳ x} = {!!}
+--         inv {sᴺ A} {B} {x} = {!!}
 {-
 commutate : ∀ {A B : SomeFin} → Fin (A + B) ↣ Fin (B + A)
 commutate {A} {B} = record
@@ -222,16 +222,16 @@ commutate {A} {B} = record
     f : ∀ {A B} → Fin (A + B) → Fin (B + A)
     f {ℕ.zero} {B} x =
       ≡.subst Fin (+-comm ℕ.zero B) x
-    f {ℕ.suc A} {ℕ.zero} x =
-      ≡.subst Fin (+-comm (ℕ.suc A) ℕ.zero) x
-    f {ℕ.suc A} {ℕ.suc B} z = sꟳ (f {ℕ.suc A} {B} z)
-    f {ℕ.suc A} {ℕ.suc B} (sꟳ x) =
-      sꟳ (f {ℕ.suc A} {B}
+    f {sᴺ A} {ℕ.zero} x =
+      ≡.subst Fin (+-comm (sᴺ A) ℕ.zero) x
+    f {sᴺ A} {sᴺ B} zꟳ = sꟳ (f {sᴺ A} {B} zꟳ)
+    f {sᴺ A} {sᴺ B} (sꟳ x) =
+      sꟳ (f {sᴺ A} {B}
            (≡.subst Fin (Data.Nat.Properties.+-suc A B) x))
     inj : ∀ {A B} → Injective _≡_ _≡_ (f {A} {B})
-    inj {ℕ.zero} {ℕ.suc B} {x} {y} fx≡fy = {!!}
-    inj {ℕ.suc A} {ℕ.zero} {x} {y} fx≡fy = {!!}
-    inj {ℕ.suc A} {ℕ.suc B} {x} {y} fx≡fy = {!!}
+    inj {ℕ.zero} {sᴺ B} {x} {y} fx≡fy = {!!}
+    inj {sᴺ A} {ℕ.zero} {x} {y} fx≡fy = {!!}
+    inj {sᴺ A} {sᴺ B} {x} {y} fx≡fy = {!!}
 
 _-ᶠ_ : {A' X Y : SomeFin} → (f : Fin (X + A') ↣ Fin (Y + A'))
     → (A : SomeFin) → {A ≡ A'}
@@ -247,7 +247,7 @@ _-ᶠ_ {A'} {X} {Y} f A =
 
 _+ᶠ-sym_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (A + X) ↣ Fin (A + Y)
 _+ᶠ-sym_ {X} {Y} g ℕ.zero = g
-_+ᶠ-sym_ {X} {Y} g (ℕ.suc A) =
+_+ᶠ-sym_ {X} {Y} g (sᴺ A) =
     record
       { to = g''
       ; cong = ≡.cong g''
@@ -255,11 +255,11 @@ _+ᶠ-sym_ {X} {Y} g (ℕ.suc A) =
       }
      where
        g' = g +ᶠ-sym A
-       g'' : Fin (ℕ.suc A + X) → Fin (ℕ.suc A + Y)
-       g'' z = z
+       g'' : Fin (sᴺ A + X) → Fin (sᴺ A + Y)
+       g'' zꟳ = zꟳ
        g'' (sꟳ a) = sꟳ (to g' a)
        inj : Injective _≡_ _≡_ g''
-       inj {z} {z} eq = ≡.refl
+       inj {zꟳ} {zꟳ} eq = ≡.refl
        inj {sꟳ x} {sꟳ y} eq =
          begin
               sꟳ x
@@ -274,7 +274,7 @@ _+ᶠ_ {X} {Y} g A =
              (≡.sym (+-comm X A))
        (g +ᶠ-sym A))
 
-_⊙_ : ∀ {X Y Z} → (Fin Y ↣ Fin Z) → (Fin X ↣ Fin Y) → (Fin X ↣ Fin Z)
+_⊙_ : ∀ {X Y zꟳ} → (Fin Y ↣ Fin zꟳ) → (Fin X ↣ Fin Y) → (Fin X ↣ Fin zꟳ)
 _⊙_ g f = record
   { to = to g ∘ to f 
   ; cong = cong g ∘ cong f
@@ -283,7 +283,7 @@ _⊙_ g f = record
 
 module theorem1-2 where
   private
-    variable A B X Y Z : SomeFin
+    variable A B X Y zꟳ : SomeFin
 
   lemma1-3 : ∀ (f : Fin X ↣ Fin Y) → (f +ᶠ A) -ᶠ A ≡ f
   lemma1-3 {A = ℕ.zero} f = 
@@ -294,12 +294,12 @@ module theorem1-2 where
       ≡⟨ {!!} ⟩
         f ∎
 
-  lemma1-3 {A = ℕ.suc A} f = {!!}
+  lemma1-3 {A = sᴺ A} f = {!!}
 
   --lemma1-3 : ∀ {X Y : SomeFin} → (f : Fin (X + 0) ↣ Fin (Y + 0)) → (f -ᶠ 0) ≡ f
 
-  --lemma1 : ∀ {A X Y Z} → (f : Fin (Y + A) ↣ Fin (Z + A)) → (g : Fin X ↣ Fin Y) → (f ⊙ (g +ᶠ A)) -ᶠ A ≡ (f -ᶠ A) ⊙ g 
-  --lemma1 {ℕ.zero} {X} {Y} {Z} f g = 
+  --lemma1 : ∀ {A X Y zꟳ} → (f : Fin (Y + A) ↣ Fin (zꟳ + A)) → (g : Fin X ↣ Fin Y) → (f ⊙ (g +ᶠ A)) -ᶠ A ≡ (f -ᶠ A) ⊙ g 
+  --lemma1 {ℕ.zero} {X} {Y} {zꟳ} f g = 
   --  begin
   --      ((f ⊙ (g +ᶠ 0)) -ᶠ 0)
   --    ≡⟨ {!!} ⟩
@@ -307,7 +307,7 @@ module theorem1-2 where
   --    ≡⟨ {!!} ⟩
   --      ((f -ᶠ 0) ⊙ g ) ∎
 
-  --lemma1 {ℕ.suc A} {X} {Y} {Z} f g = {!!}
+  --lemma1 {sᴺ A} {X} {Y} {zꟳ} f g = {!!}
   --  -- begin
   --  --     ((f ⊙ (g +ᶠ A)) -ᶠ A)
   --  --   ≡⟨ {!!} ⟩
