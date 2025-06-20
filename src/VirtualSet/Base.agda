@@ -7,7 +7,7 @@ open import Data.Fin
 open import Data.Fin.Properties
   using (_≟_; 0≢1+n; suc-injective; +↔⊎)
 import Data.Nat.Properties
-  using (+-comm)
+  using (+-comm; +-suc)
 open import Data.Nat
   using (ℕ) renaming (_+_ to _+ℕ_)
 open import Data.Product
@@ -15,7 +15,9 @@ open import Data.Product
 open import Data.Product.Base as Product
   using (∃; _×_; _,_)
 open import Data.Sum
-  using (inj₁; inj₂; _⊎_)
+  using (inj₁; inj₂; _⊎_) renaming (swap to ⊎-swap)
+open import Data.Sum.Properties
+  using () renaming (swap-↔ to ⊎-swap-↔)
 open import Level
   using (_⊔_; 0ℓ) renaming (suc to lsuc)
 open import Relation.Binary.Structures
@@ -33,13 +35,14 @@ open import Relation.Binary.PropositionalEquality.Properties
 open import Relation.Binary.PropositionalEquality
   using (inspect; [_])
 open import Function.Base
-  using (_∘_)
+  using (_∘_; id)
 open import Function.Bundles
   using (_↣_; _↔_; Injection)
 open import Algebra.Definitions
   using (RightIdentity)
 open import Function.Definitions
-  using (Injective; Congruent)
+  using (Injective; Congruent;
+         Inverseˡ; Inverseʳ; Inverseᵇ)
 
 
 open ≡-Reasoning
@@ -159,6 +162,7 @@ module _ {x y : ℕ} (f : Fin (ℕ.suc x) ↣ Fin (ℕ.suc y)) where
     ; injective = comp (add-inj z) (del-inj (to f z))
     }
 
+infixl 6 _+_ _+ᶠ_ _-ᶠ_
 _+_ : SomeFin → SomeFin → SomeFin
 X + Y = X +ℕ Y
 
@@ -175,6 +179,76 @@ sym-sub {ℕ.suc A'} {X} {Y} f (ℕ.suc A) = (sym-sub (sub f) A)
 +-identityʳ ℕ.zero = ≡.refl
 +-identityʳ (ℕ.suc n) =
   ≡.cong ℕ.suc (+-identityʳ n)
+
+swap-⊎ : ∀ {A B} → A ⊎ B → B ⊎ A
+swap-⊎ {A} {B} (inj₁ a) = inj₂ a
+swap-⊎ {A} {B} (inj₂ b) = inj₁ b
+
+swap-⊎-inv : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap-⊎ {A} {B}) (swap-⊎ {B} {A})
+swap-⊎-inv {A} {B} {inj₁ x} {inj₂ y} y≡wx =
+  ≡.cong inj₁ {!!}
+swap-⊎-inv {A} {B} {inj₂ x} {inj₁ x₁} y≡wx = {!!}
+
+swap-⊎↔ : ∀ {A B} → (A ⊎ B) ↔ (B ⊎ A)
+swap-⊎↔ {A} {B} = record
+  { to = swap-⊎ {A} {B}
+  ; from = swap-⊎ {B} {A}
+  ; to-cong = ≡.cong swap-⊎
+  ; from-cong = ≡.cong swap-⊎
+  ; inverse = {!!}
+  }
+
+swap : ∀ {A B} → Fin (A + B) → Fin (B + A)
+swap {A} {B} = {!!}
+
+
+-- swap : ∀ {A B} → Fin (A + B) → Fin (B + A)
+-- swap {ℕ.zero} {B} x =
+--   ≡.subst Fin (+-comm ℕ.zero B) x
+-- swap {ℕ.suc A} {ℕ.zero} x =
+--   ≡.subst Fin (+-comm (ℕ.suc A) ℕ.zero) x
+-- swap {ℕ.suc A} {ℕ.suc B} z = s (swap {ℕ.suc A} {B} z)
+-- swap {ℕ.suc A} {ℕ.suc B} (s x) =
+--   s (swap {ℕ.suc A} {B}
+--           (≡.subst Fin (Data.Nat.Properties.+-suc A B) x))
+
+-- swap-involutive : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap {B} {A}) (swap {A} {B})
+-- swap-involutive {A} {B} {x} {y} = {!inv!}
+--   where inv : ∀ {A B x} → swap {B} {A} (swap {A} {B} x) ≡ x
+--         inv {ℕ.zero} {ℕ.suc B} {z} = 
+--           begin
+--               swap (swap z)
+--             ≡⟨ ≡.refl ⟩
+--               swap {ℕ.suc B} {ℕ.zero} (swap {ℕ.zero} {ℕ.suc B} z)
+--             ≡⟨ ≡.cong swap ≡.refl ⟩
+--               swap {ℕ.suc B} {ℕ.zero} (≡.subst Fin (+-comm ℕ.zero (ℕ.suc B)) z)
+--             ≡⟨ {!!} ⟩
+--               {!!}
+--             ≡⟨ {!!} ⟩
+--               z ∎
+--         inv {ℕ.zero} {ℕ.suc B} {s x} = {!!}
+--         inv {ℕ.suc A} {B} {x} = {!!}
+
+commutate : ∀ {A B : SomeFin} → Fin (A + B) ↣ Fin (B + A)
+commutate {A} {B} = record
+  { to = f
+  ; cong = λ eq → ≡.refl
+  ; injective = λ {x} {y} eq → {!!}
+  }
+  where
+    f : ∀ {A B} → Fin (A + B) → Fin (B + A)
+    f {ℕ.zero} {B} x =
+      ≡.subst Fin (+-comm ℕ.zero B) x
+    f {ℕ.suc A} {ℕ.zero} x =
+      ≡.subst Fin (+-comm (ℕ.suc A) ℕ.zero) x
+    f {ℕ.suc A} {ℕ.suc B} z = s (f {ℕ.suc A} {B} z)
+    f {ℕ.suc A} {ℕ.suc B} (s x) =
+      s (f {ℕ.suc A} {B}
+           (≡.subst Fin (Data.Nat.Properties.+-suc A B) x))
+    inj : ∀ {A B} → Injective _≡_ _≡_ (f {A} {B})
+    inj {ℕ.zero} {ℕ.suc B} {x} {y} fx≡fy = {!!}
+    inj {ℕ.suc A} {ℕ.zero} {x} {y} fx≡fy = {!!}
+    inj {ℕ.suc A} {ℕ.suc B} {x} {y} fx≡fy = {!!}
 
 _-ᶠ_ : {A' X Y : SomeFin} → (f : Fin (X + A') ↣ Fin (Y + A'))
     → (A : SomeFin) → {A ≡ A'}
@@ -224,9 +298,34 @@ _⊙_ g f = record
   ; injective = injective f ∘ injective g
   }
 
--- module theorem12 where
---   private
---     variable A B X Y Z : SomeFin
+module theorem1-2 where
+  private
+    variable A B X Y Z : SomeFin
 
---   lemma1 : (f : Fin (Y + A) ↣ Fin (Z + A)) → (g : Fin X ↣ Fin Y) → (f ⊙ (g +ᶠ A)) -ᶠ A ≡ (f -ᶠ A) ⊙ g 
---   lemma1 = {!!}
+  lemma1-3 : ∀ (f : Fin X ↣ Fin Y) → (f +ᶠ A) -ᶠ A ≡ f
+  lemma1-3 {A = ℕ.zero} f = 
+    begin
+        f +ᶠ ℕ.zero -ᶠ ℕ.zero
+      ≡⟨ {!!} ⟩
+        {!!}
+      ≡⟨ {!!} ⟩
+        f ∎
+
+  lemma1-3 {A = ℕ.suc A} f = {!!}
+
+  --lemma1-3 : ∀ {X Y : SomeFin} → (f : Fin (X + 0) ↣ Fin (Y + 0)) → (f -ᶠ 0) ≡ f
+
+  --lemma1 : ∀ {A X Y Z} → (f : Fin (Y + A) ↣ Fin (Z + A)) → (g : Fin X ↣ Fin Y) → (f ⊙ (g +ᶠ A)) -ᶠ A ≡ (f -ᶠ A) ⊙ g 
+  --lemma1 {ℕ.zero} {X} {Y} {Z} f g = 
+  --  begin
+  --      ((f ⊙ (g +ᶠ 0)) -ᶠ 0)
+  --    ≡⟨ {!!} ⟩
+  --      {!!}
+  --    ≡⟨ {!!} ⟩
+  --      ((f -ᶠ 0) ⊙ g ) ∎
+
+  --lemma1 {ℕ.suc A} {X} {Y} {Z} f g = {!!}
+  --  -- begin
+  --  --     ((f ⊙ (g +ᶠ A)) -ᶠ A)
+  --  --   ≡⟨ {!!} ⟩
+  --  --     ((f -ᶠ A) ⊙ g ) ∎
