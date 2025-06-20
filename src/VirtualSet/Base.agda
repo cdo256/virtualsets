@@ -3,7 +3,7 @@ module VirtualSet.Base where
 open import Data.Empty
   using (⊥; ⊥-elim)
 open import Data.Fin
-  using (Fin) renaming (suc to s; zero to z)
+  using (Fin) renaming (suc to sꟳ; zero to z)
 open import Data.Fin.Properties
   using (_≟_; 0≢1+n; suc-injective; +↔⊎)
 import Data.Nat.Properties
@@ -51,25 +51,25 @@ private
     c ℓ : Level.Level
 
 add : {x : ℕ} → (a : Fin (ℕ.suc x)) → (b : Fin x) → (Σ[ c ∈ Fin (ℕ.suc x) ] a ≢ c)
-add {ℕ.suc x} z b = s b , λ ()
-add {ℕ.suc x} (s a) z = z , λ ()
-add {ℕ.suc x} (s a) (s b) =
+add {ℕ.suc x} z b = sꟳ b , λ ()
+add {ℕ.suc x} (sꟳ a) z = z , λ ()
+add {ℕ.suc x} (sꟳ a) (sꟳ b) =
   let
     (c , a≢c) = add a b
-  in s (proj₁ (add a b)) , λ a'≡c' → a≢c (suc-injective a'≡c')
+  in sꟳ (proj₁ (add a b)) , λ a'≡c' → a≢c (suc-injective a'≡c')
 
 del : {x : ℕ} → (a : Fin (ℕ.suc x)) → (Σ[ b ∈ Fin (ℕ.suc x) ] a ≢ b) → Fin x
 del {ℕ.zero} z (z , 0≢0) = ⊥-elim (0≢0 ≡.refl)
 del {ℕ.suc x} z (z , 0≢0) = ⊥-elim (0≢0 ≡.refl)
-del {ℕ.suc x} z (s b , a≢b) = b
-del {ℕ.suc x} (s a) (z , a≢b) = z
-del {ℕ.suc x} (s a) (s b , a'≢b') =
-  s (del {x} a (b , λ a≡b → ⊥-elim (a'≢b' (≡.cong s a≡b))))
+del {ℕ.suc x} z (sꟳ b , a≢b) = b
+del {ℕ.suc x} (sꟳ a) (z , a≢b) = z
+del {ℕ.suc x} (sꟳ a) (sꟳ b , a'≢b') =
+  sꟳ (del {x} a (b , λ a≡b → ⊥-elim (a'≢b' (≡.cong sꟳ a≡b))))
 
-del-zero-suc : ∀ {x} (b : Fin x) (a≢b : z ≢ s b) → del z (s b , a≢b) ≡ b
-del-zero-suc b a≢b with del z (s b , a≢b) | inspect (del z) (s b , a≢b)
+del-zero-suc : ∀ {x} (b : Fin x) (a≢b : z ≢ sꟳ b) → del z (sꟳ b , a≢b) ≡ b
+del-zero-suc b a≢b with del z (sꟳ b , a≢b) | inspect (del z) (sꟳ b , a≢b)
 ... | z | [ eq ] = ≡.sym eq
-... | s X | [ eq ] = ≡.sym eq
+... | sꟳ X | [ eq ] = ≡.sym eq
 
 del-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
         → (B₁ B₂ : Σ[ b ∈ Fin (ℕ.suc x) ] a ≢ b)
@@ -77,38 +77,38 @@ del-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
         → proj₁ B₁ ≡ proj₁ B₂
 del-inj z (z , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₁ ≡.refl)
-del-inj z (z , a≢b₁) (s b₂ , a≢b₂) b₁'≡b₂' =
+del-inj z (z , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₁ ≡.refl)
-del-inj z (s b₁ , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
+del-inj z (sꟳ b₁ , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₂ ≡.refl)
-del-inj z (s b₁ , a≢b₁) (s b₂ , a≢b₂) b₁'≡b₂' =
-  let b₁' = del z (s b₁ , a≢b₁)
-      b₂' = del z (s b₂ , a≢b₂)
+del-inj z (sꟳ b₁ , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂' =
+  let b₁' = del z (sꟳ b₁ , a≢b₁)
+      b₂' = del z (sꟳ b₂ , a≢b₂)
       b₁'≡b₁ : b₁' ≡ b₁
       b₁'≡b₁ = del-zero-suc b₁ a≢b₁
       b₂'≡b₂ : b₂' ≡ b₂
       b₂'≡b₂ = del-zero-suc b₂ a≢b₂
   in begin
-      s b₁
-    ≡⟨ ≡.cong s (≡.sym b₁'≡b₁) ⟩
-      s b₁'
-    ≡⟨ ≡.cong s b₁'≡b₂' ⟩
-      s b₂'
-    ≡⟨ ≡.cong s b₂'≡b₂ ⟩
-      s b₂ ∎
-del-inj (s a) (z , a≢b₁) (z , a≢b₂) b₁'≡b₂' = ≡.refl
-del-inj (s a) (z , a≢b₁) (s b₂ , a≢b₂) b₁'≡b₂'
-  with del (s a) (z , a≢b₁) | inspect (del (s a)) (z , a≢b₁) | del (s a) (s b₂  , a≢b₂) | inspect (del (s a)) (s b₂ , a≢b₂)
+      sꟳ b₁
+    ≡⟨ ≡.cong sꟳ (≡.sym b₁'≡b₁) ⟩
+      sꟳ b₁'
+    ≡⟨ ≡.cong sꟳ b₁'≡b₂' ⟩
+      sꟳ b₂'
+    ≡⟨ ≡.cong sꟳ b₂'≡b₂ ⟩
+      sꟳ b₂ ∎
+del-inj (sꟳ a) (z , a≢b₁) (z , a≢b₂) b₁'≡b₂' = ≡.refl
+del-inj (sꟳ a) (z , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂'
+  with del (sꟳ a) (z , a≢b₁) | inspect (del (sꟳ a)) (z , a≢b₁) | del (sꟳ a) (sꟳ b₂  , a≢b₂) | inspect (del (sꟳ a)) (sꟳ b₂ , a≢b₂)
 ... | z | [ eq₁ ] | z | ()
-... | z | _ | s _ | _ = ⊥-elim (0≢1+n b₁'≡b₂')
-... | s X | () | _ | _
-del-inj (s a) (s b₁ , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
-  ≡.sym (del-inj (s a) (z , a≢b₂) (s b₁ , a≢b₁) (≡.sym b₁'≡b₂'))
-del-inj (s a) (s b₁ , sa≢sb₁) (s b₂ , sa≢sb₂) b₁'≡b₂'
-  with del (s a) (s b₁ , sa≢sb₁) | inspect (del (s a)) (s b₁ , sa≢sb₁) | del (s a) (s b₂  , sa≢sb₂) | inspect (del (s a)) (s b₂ , sa≢sb₂) | b₁'≡b₂'
-... | s c₁ | [ eq₁ ] | s c₂ | [ eq₂ ] | _ =
-  ≡.cong s (del-inj a (b₁ , λ a≡b₁ → sa≢sb₁ (≡.cong s a≡b₁))
-                      (b₂ , λ a≡b₂ → sa≢sb₂ (≡.cong s a≡b₂))
+... | z | _ | sꟳ _ | _ = ⊥-elim (0≢1+n b₁'≡b₂')
+... | sꟳ X | () | _ | _
+del-inj (sꟳ a) (sꟳ b₁ , a≢b₁) (z , a≢b₂) b₁'≡b₂' =
+  ≡.sym (del-inj (sꟳ a) (z , a≢b₂) (sꟳ b₁ , a≢b₁) (≡.sym b₁'≡b₂'))
+del-inj (sꟳ a) (sꟳ b₁ , sa≢sb₁) (sꟳ b₂ , sa≢sb₂) b₁'≡b₂'
+  with del (sꟳ a) (sꟳ b₁ , sa≢sb₁) | inspect (del (sꟳ a)) (sꟳ b₁ , sa≢sb₁) | del (sꟳ a) (sꟳ b₂  , sa≢sb₂) | inspect (del (sꟳ a)) (sꟳ b₂ , sa≢sb₂) | b₁'≡b₂'
+... | sꟳ c₁ | [ eq₁ ] | sꟳ c₂ | [ eq₂ ] | _ =
+  ≡.cong sꟳ (del-inj a (b₁ , λ a≡b₁ → sa≢sb₁ (≡.cong sꟳ a≡b₁))
+                      (b₂ , λ a≡b₂ → sa≢sb₂ (≡.cong sꟳ a≡b₂))
                       (suc-injective b₁'≡b₂'))
 
 add-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
@@ -116,21 +116,20 @@ add-inj : {x : ℕ} → (a : Fin (ℕ.suc x))
         → proj₁ (add a b₁) ≡ proj₁ (add a b₂)
         → b₁ ≡ b₂
 add-inj z z z c₁≡c₂ = ≡.refl
-add-inj z (s b₁) (s b₂) c₁≡c₂
+add-inj z (sꟳ b₁) (sꟳ b₂) c₁≡c₂
   with add z b₁ | inspect (add z) b₁ | add z b₂ | inspect (add z) b₂
 ... | c₁ , z≢c₁ | [ eq₁ ] | c₂ , z≢c₂ | [ eq₂ ] = suc-injective c₁≡c₂
-add-inj (s a) z z c₁≡c₂ = ≡.refl
-add-inj (s a) (s b₁) (s b₂) c₁≡c₂
-  with add (s a) (s b₁) | inspect (add (s a)) (s b₁) | add (s a) (s b₂) | inspect (add (s a)) (s b₂)
-... | s c₁ , sa≢sc₁ | [ eq₁ ] | s c₂ , sa≢sc₂ | [ eq₂ ] =
-  ≡.cong s (add-inj a b₁ b₂ (suc-injective c₁≡c₂))
+add-inj (sꟳ a) z z c₁≡c₂ = ≡.refl
+add-inj (sꟳ a) (sꟳ b₁) (sꟳ b₂) c₁≡c₂
+  with add (sꟳ a) (sꟳ b₁) | inspect (add (sꟳ a)) (sꟳ b₁) | add (sꟳ a) (sꟳ b₂) | inspect (add (sꟳ a)) (sꟳ b₂)
+... | sꟳ c₁ , sa≢sc₁ | [ eq₁ ] | sꟳ c₂ , sa≢sc₂ | [ eq₂ ] =
+  ≡.cong sꟳ (add-inj a b₁ b₂ (suc-injective c₁≡c₂))
 
 SomeFin : Set
 SomeFin = ℕ
 
 _∖_ : (A : SomeFin) → (a : Fin A) → Set
 A ∖ a = Σ[ b ∈ Fin A ] a ≢ b
-
 
 module _ {x y : ℕ} (f : Fin (ℕ.suc x) ↣ Fin (ℕ.suc y)) where
   open Injection
@@ -191,9 +190,9 @@ swap {A} {B} =
 --   ≡.subst Fin (+-comm ℕ.zero B) x
 -- swap {ℕ.suc A} {ℕ.zero} x =
 --   ≡.subst Fin (+-comm (ℕ.suc A) ℕ.zero) x
--- swap {ℕ.suc A} {ℕ.suc B} z = s (swap {ℕ.suc A} {B} z)
--- swap {ℕ.suc A} {ℕ.suc B} (s x) =
---   s (swap {ℕ.suc A} {B}
+-- swap {ℕ.suc A} {ℕ.suc B} z = sꟳ (swap {ℕ.suc A} {B} z)
+-- swap {ℕ.suc A} {ℕ.suc B} (sꟳ x) =
+--   sꟳ (swap {ℕ.suc A} {B}
 --           (≡.subst Fin (Data.Nat.Properties.+-suc A B) x))
 
 -- swap-involutive : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap {B} {A}) (swap {A} {B})
@@ -210,9 +209,9 @@ swap {A} {B} =
 --               {!!}
 --             ≡⟨ {!!} ⟩
 --               z ∎
---         inv {ℕ.zero} {ℕ.suc B} {s x} = {!!}
+--         inv {ℕ.zero} {ℕ.suc B} {sꟳ x} = {!!}
 --         inv {ℕ.suc A} {B} {x} = {!!}
-
+{-
 commutate : ∀ {A B : SomeFin} → Fin (A + B) ↣ Fin (B + A)
 commutate {A} {B} = record
   { to = f
@@ -225,9 +224,9 @@ commutate {A} {B} = record
       ≡.subst Fin (+-comm ℕ.zero B) x
     f {ℕ.suc A} {ℕ.zero} x =
       ≡.subst Fin (+-comm (ℕ.suc A) ℕ.zero) x
-    f {ℕ.suc A} {ℕ.suc B} z = s (f {ℕ.suc A} {B} z)
-    f {ℕ.suc A} {ℕ.suc B} (s x) =
-      s (f {ℕ.suc A} {B}
+    f {ℕ.suc A} {ℕ.suc B} z = sꟳ (f {ℕ.suc A} {B} z)
+    f {ℕ.suc A} {ℕ.suc B} (sꟳ x) =
+      sꟳ (f {ℕ.suc A} {B}
            (≡.subst Fin (Data.Nat.Properties.+-suc A B) x))
     inj : ∀ {A B} → Injective _≡_ _≡_ (f {A} {B})
     inj {ℕ.zero} {ℕ.suc B} {x} {y} fx≡fy = {!!}
@@ -258,14 +257,14 @@ _+ᶠ-sym_ {X} {Y} g (ℕ.suc A) =
        g' = g +ᶠ-sym A
        g'' : Fin (ℕ.suc A + X) → Fin (ℕ.suc A + Y)
        g'' z = z
-       g'' (s a) = s (to g' a)
+       g'' (sꟳ a) = sꟳ (to g' a)
        inj : Injective _≡_ _≡_ g''
        inj {z} {z} eq = ≡.refl
-       inj {s x} {s y} eq =
+       inj {sꟳ x} {sꟳ y} eq =
          begin
-              s x
-            ≡⟨ ≡.cong s (injective g' (suc-injective eq)) ⟩
-              s y ∎
+              sꟳ x
+            ≡⟨ ≡.cong sꟳ (injective g' (suc-injective eq)) ⟩
+              sꟳ y ∎
 
 _+ᶠ_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (X + A) ↣ Fin (Y + A)
 _+ᶠ_ {X} {Y} g A =
@@ -313,3 +312,4 @@ module theorem1-2 where
   --  --     ((f ⊙ (g +ᶠ A)) -ᶠ A)
   --  --   ≡⟨ {!!} ⟩
   --  --     ((f -ᶠ A) ⊙ g ) ∎
+-- -}
