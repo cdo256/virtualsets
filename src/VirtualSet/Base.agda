@@ -36,6 +36,8 @@ open import Function.Base
   using (_∘_)
 open import Function.Bundles
   using (_↣_; _↔_; Injection)
+open import Algebra.Definitions
+  using (RightIdentity)
 open import Function.Definitions
   using (Injective; Congruent)
 
@@ -169,16 +171,51 @@ sym-sub {ℕ.suc A'} {X} {Y} f (ℕ.suc A) = (sym-sub (sub f) A)
 +-comm : ∀ (A B : SomeFin) → A + B ≡ B + A
 +-comm = Data.Nat.Properties.+-comm
 
-_-_ : {A' X Y : SomeFin} → (f : Fin (X + A') ↣ Fin (Y + A'))
++-identityʳ : ∀ (x : SomeFin) → x + ℕ.zero ≡ x
++-identityʳ ℕ.zero = ≡.refl
++-identityʳ (ℕ.suc n) =
+  ≡.cong ℕ.suc (+-identityʳ n)
+
+_-ᶠ_ : {A' X Y : SomeFin} → (f : Fin (X + A') ↣ Fin (Y + A'))
     → (A : SomeFin) → {A ≡ A'}
     → Fin X ↣ Fin Y
-_-_ {A'} {X} {Y} f A =
+_-ᶠ_ {A'} {X} {Y} f A =
   sym-sub (≡.subst (λ h → Fin (A' + X) ↣ Fin h) (+-comm Y A') (≡.subst (λ h → Fin h ↣ Fin (Y + A')) (+-comm X A') f)) A
-  -- sym-sub (record
-  --   { to = λ x → {!!}
-  --   ; cong = {!!}
-  --   ; injective = {!!}
-  --   }) A
+
+-- ≡.subst (λ h → Fin (X + ℕ.zero) ↣ Fin h)
+--         (≡.sym (+-identityʳ Y))
+--   (≡.subst (λ h → Fin h ↣ Fin Y)
+--            (≡.sym (+-identityʳ X))
+
+
+_+ᶠ-sym_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (A + X) ↣ Fin (A + Y)
+_+ᶠ-sym_ {X} {Y} g ℕ.zero = g
+_+ᶠ-sym_ {X} {Y} g (ℕ.suc A) =
+    record
+      { to = g''
+      ; cong = ≡.cong g''
+      ; injective = inj
+      }
+     where
+       g' = g +ᶠ-sym A
+       g'' : Fin (ℕ.suc A + X) → Fin (ℕ.suc A + Y)
+       g'' z = z
+       g'' (s a) = s (to g' a)
+       inj : Injective _≡_ _≡_ g''
+       inj {z} {z} eq = ≡.refl
+       inj {s x} {s y} eq =
+         begin
+              s x
+            ≡⟨ ≡.cong s (injective g' (suc-injective eq)) ⟩
+              s y ∎
+
+_+ᶠ_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (X + A) ↣ Fin (Y + A)
+_+ᶠ_ {X} {Y} g A =
+  ≡.subst (λ h → Fin (X + A) ↣ Fin h)
+          (≡.sym (+-comm Y A))
+    (≡.subst (λ h → Fin h ↣ Fin (A + Y))
+             (≡.sym (+-comm X A))
+       (g +ᶠ-sym A))
 
 _⊙_ : ∀ {X Y Z} → (Fin Y ↣ Fin Z) → (Fin X ↣ Fin Y) → (Fin X ↣ Fin Z)
 _⊙_ g f = record
@@ -187,8 +224,9 @@ _⊙_ g f = record
   ; injective = injective f ∘ injective g
   }
 
-module theorem12 where
-  private
-    variable A B X Y Z : SomeFin
+-- module theorem12 where
+--   private
+--     variable A B X Y Z : SomeFin
 
-  -- lemma1 : (f : Fin (Y + A) → Fin (Z + A)) → (g : Fin X → Fin Y) → (f ⊙ (g + A)) - A ≡ (f - A) ⊙ g 
+--   lemma1 : (f : Fin (Y + A) ↣ Fin (Z + A)) → (g : Fin X ↣ Fin Y) → (f ⊙ (g +ᶠ A)) -ᶠ A ≡ (f -ᶠ A) ⊙ g 
+--   lemma1 = {!!}
