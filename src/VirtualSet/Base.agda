@@ -131,9 +131,9 @@ SomeFin = ℕ
 _∖_ : (A : SomeFin) → (a : Fin A) → Set
 A ∖ a = Σ[ b ∈ Fin A ] a ≢ b
 
-open Injection
 
 module _ {x y : ℕ} (f : Fin (ℕ.suc x) ↣ Fin (ℕ.suc y)) where
+  open Injection
 
   f' : Fin x → Fin y
   f' i =
@@ -180,26 +180,10 @@ sym-sub {ℕ.suc A'} {X} {Y} f (ℕ.suc A) = (sym-sub (sub f) A)
 +-identityʳ (ℕ.suc n) =
   ≡.cong ℕ.suc (+-identityʳ n)
 
-swap-⊎ : ∀ {A B} → A ⊎ B → B ⊎ A
-swap-⊎ {A} {B} (inj₁ a) = inj₂ a
-swap-⊎ {A} {B} (inj₂ b) = inj₁ b
-
-swap-⊎-inv : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap-⊎ {A} {B}) (swap-⊎ {B} {A})
-swap-⊎-inv {A} {B} {inj₁ x} {inj₂ y} y≡wx =
-  ≡.cong inj₁ {!!}
-swap-⊎-inv {A} {B} {inj₂ x} {inj₁ x₁} y≡wx = {!!}
-
-swap-⊎↔ : ∀ {A B} → (A ⊎ B) ↔ (B ⊎ A)
-swap-⊎↔ {A} {B} = record
-  { to = swap-⊎ {A} {B}
-  ; from = swap-⊎ {B} {A}
-  ; to-cong = ≡.cong swap-⊎
-  ; from-cong = ≡.cong swap-⊎
-  ; inverse = {!!}
-  }
-
 swap : ∀ {A B} → Fin (A + B) → Fin (B + A)
-swap {A} {B} = {!!}
+swap {A} {B} =
+  let foo = +↔⊎
+  in {!!} ∘ {!!}
 
 
 -- swap : ∀ {A B} → Fin (A + B) → Fin (B + A)
