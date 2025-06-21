@@ -283,6 +283,33 @@ module _  where
       ≡⟨ ≡.refl ⟩
         from R (to R a) ∎
 
+module _ where
+  open Inverse
+
+  swap : ∀ {A B} → ⟦ A + B ⟧ ↔ ⟦ B + A ⟧
+  swap = (flip-↔ +↔⊎) ↔∘↔ ⊎-swap-↔ ↔∘↔ +↔⊎
+
+  swap-involutive : ∀ {A B : SomeFin} {x} → ↔-IsId (swap ↔∘↔ swap)
+  proj₁ (swap-involutive {A} {B} {x} a) = 
+    begin
+        to (swap ↔∘↔ swap) a
+      ≡⟨ ≡.refl ⟩
+       ((to swap) ∘ (to swap)) a
+      ≡⟨ ≡.refl ⟩
+       to swap (to swap a)
+      ≡⟨ ≡.refl ⟩
+        to (((flip-↔ +↔⊎) ↔∘↔ ⊎-swap-↔) ↔∘↔ +↔⊎)
+       (to (((flip-↔ +↔⊎) ↔∘↔ ⊎-swap-↔) ↔∘↔ +↔⊎) a)
+      ≡⟨ ≡.refl ⟩
+         (to (flip-↔ +↔⊎) ∘ to ⊎-swap-↔ ∘ to +↔⊎)
+        ((to (flip-↔ +↔⊎) ∘ to ⊎-swap-↔ ∘ to +↔⊎) a)
+      ≡⟨ ≡.refl ⟩
+        ((to (flip-↔ +↔⊎) ∘ to ⊎-swap-↔ ∘ to +↔⊎) ∘
+         (to (flip-↔ +↔⊎) ∘ to ⊎-swap-↔ ∘ to +↔⊎)) a
+      ≡⟨ {!!} ⟩
+        a ∎
+  proj₂ (swap-involutive {A} {B} {x} a) = {!!}
+
 -- swap-involutive : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap {B} {A}) (swap {A} {B})
 -- swap-involutive {A} {B} {x} {y} = {!inv!}
 --   where inv : ∀ {A B x} → swap {B} {A} (swap {A} {B} x) ≡ x
