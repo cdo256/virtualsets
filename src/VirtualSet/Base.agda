@@ -182,21 +182,91 @@ sym-sub {sᴺ A'} {X} {Y} f (sᴺ A) = (sym-sub (sub f) A)
 +-identityʳ (sᴺ n) =
   ≡.cong sᴺ (+-identityʳ n)
 
-swap : ∀ {A B} → Fin (A + B) → Fin (B + A)
-swap {A} {B} =
-  let foo = +↔⊎
-  in {!!} ∘ {!!}
 
+module _ {A B C D : Set} where
+  open Inverse
+  flip-↔ : (A ↔ B) → (B ↔ A)
+  flip-↔ A↔B = record
+    { to = from A↔B
+    ; from = to A↔B
+    ; to-cong = from-cong A↔B
+    ; from-cong = to-cong A↔B
+    ; inverse = (proj₂ (inverse A↔B)) , (proj₁ (inverse A↔B))
+    }
 
--- swap : ∀ {A B} → Fin (A + B) → Fin (B + A)
--- swap {ℕ.zero} {B} x =
---   ≡.subst Fin (+-comm ℕ.zero B) x
--- swap {sᴺ A} {ℕ.zero} x =
---   ≡.subst Fin (+-comm (sᴺ A) ℕ.zero) x
--- swap {sᴺ A} {sᴺ B} zꟳ = sꟳ (swap {sᴺ A} {B} zꟳ)
--- swap {sᴺ A} {sᴺ B} (sꟳ x) =
---   sꟳ (swap {sᴺ A} {B}
---           (≡.subst Fin (Data.Nat.Properties.+-suc A B) x))
+  infixl 9 _↔∘↔_
+
+  _↔∘↔_ : (B ↔ C) → (A ↔ B) → (A ↔ C)
+  B↔C ↔∘↔ A↔B  = record
+    { to = to B↔C ∘ to A↔B 
+    ; from = from A↔B ∘ from B↔C
+    ; to-cong = to-cong B↔C ∘ to-cong A↔B 
+    ; from-cong = from-cong A↔B ∘ from-cong B↔C 
+    ; inverse = proj₁ (inverse B↔C) ∘ proj₁ (inverse A↔B)
+              , proj₂ (inverse A↔B) ∘ proj₂ (inverse B↔C) }
+
+  ↔-IsId : ∀ {A} → (R : A ↔ A) → Set _
+  ↔-IsId {A} R = ∀ (a : A) → to R a ≡ a × a ≡ from R a
+             
+module _ {A B C D : Set} where
+  open Inverse
+
+  ∘-assoc : (C→D : C → D) → (B→C : B → C) → (A→B : A → B)
+          → (C→D ∘ B→C) ∘ A→B ≡ C→D ∘ (B→C ∘ A→B)
+  ∘-assoc C→D B→C A→B = ≡.cong (λ _ x → C→D (B→C (A→B x))) ≡.refl
+
+  ↔∘↔-assoc : (C↔D : C ↔ D) → (B↔C : B ↔ C) → (A↔B : A ↔ B)
+            → (C↔D ↔∘↔ B↔C) ↔∘↔ A↔B ≡ C↔D ↔∘↔ (B↔C ↔∘↔ A↔B)
+  ↔∘↔-assoc C↔D B↔C A↔B =
+    begin
+        (C↔D ↔∘↔ B↔C) ↔∘↔ A↔B
+      ≡⟨ ≡.refl ⟩
+        B↔D ↔∘↔ A↔B
+      ≡⟨ ≡.refl ⟩
+        A↔D₁
+      ≡⟨ ≡.refl ⟩
+        A↔D₂
+      ≡⟨ ≡.refl ⟩
+        C↔D ↔∘↔ A↔C 
+      ≡⟨ ≡.refl ⟩
+        C↔D ↔∘↔ (B↔C ↔∘↔ A↔B) ∎
+    where
+      A↔C : A ↔ C
+      A↔C = record
+        { to = to B↔C ∘ to A↔B
+        ; from = from A↔B ∘ from B↔C
+        ; to-cong = to-cong B↔C ∘ to-cong A↔B 
+        ; from-cong = from-cong A↔B ∘ from-cong B↔C
+        ; inverse = proj₁ (inverse B↔C) ∘ proj₁ (inverse A↔B)
+                  , proj₂ (inverse A↔B) ∘ proj₂ (inverse B↔C)
+        }
+      B↔D : B ↔ D
+      B↔D = record
+        { to = to C↔D ∘ to B↔C
+        ; from = from B↔C ∘ from C↔D
+        ; to-cong = to-cong C↔D ∘ to-cong B↔C 
+        ; from-cong = from-cong B↔C ∘ from-cong C↔D
+        ; inverse = proj₁ (inverse C↔D) ∘ proj₁ (inverse B↔C)
+                  , proj₂ (inverse B↔C) ∘ proj₂ (inverse C↔D)
+        }
+      A↔D₁ : A ↔ D
+      A↔D₁ = record
+        { to = (to C↔D ∘ to B↔C) ∘ to A↔B
+        ; from = from A↔B ∘ (from B↔C ∘ from C↔D)
+        ; to-cong = (to-cong C↔D ∘ to-cong B↔C) ∘ to-cong A↔B
+        ; from-cong = from-cong A↔B ∘ (from-cong B↔C ∘ from-cong C↔D)
+        ; inverse = (proj₁ (inverse C↔D) ∘ proj₁ (inverse B↔C)) ∘ proj₁ (inverse A↔B)
+                  , proj₂ (inverse A↔B) ∘ (proj₂ (inverse B↔C) ∘ proj₂ (inverse C↔D))
+        }
+      A↔D₂ : A ↔ D
+      A↔D₂ = record
+        { to = to C↔D ∘ (to B↔C ∘ to A↔B)
+        ; from = (from A↔B ∘ from B↔C) ∘ from C↔D
+        ; to-cong = to-cong C↔D ∘ (to-cong B↔C ∘ to-cong A↔B)
+        ; from-cong = (from-cong A↔B ∘ from-cong B↔C) ∘ from-cong C↔D
+        ; inverse = proj₁ (inverse C↔D) ∘ (proj₁ (inverse B↔C) ∘ proj₁ (inverse A↔B))
+                  , (proj₂ (inverse A↔B) ∘ proj₂ (inverse B↔C)) ∘ proj₂ (inverse C↔D)
+        }
 
 -- swap-involutive : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap {B} {A}) (swap {A} {B})
 -- swap-involutive {A} {B} {x} {y} = {!inv!}
