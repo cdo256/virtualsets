@@ -50,7 +50,16 @@ private
   variable
     c ℓ : Level.Level
 
-add : {x : ℕ} → (a : Fin (sᴺ x)) → (b : Fin x) → (Σ[ c ∈ Fin (sᴺ x) ] a ≢ c)
+SomeFin : Set
+SomeFin = ℕ
+
+⟦_⟧ : (n : SomeFin) → Set
+⟦ n ⟧ = Fin n
+
+_∖_ : (A : SomeFin) → (a : Fin A) → Set
+A ∖ a = Σ[ b ∈ Fin A ] a ≢ b
+
+add : {x : ℕ} → (a : ⟦ sᴺ x ⟧) → ⟦ x ⟧ → (sᴺ x ∖  a) 
 add {sᴺ x} zꟳ b = sꟳ b , λ ()
 add {sᴺ x} (sꟳ a) zꟳ = zꟳ , λ ()
 add {sᴺ x} (sꟳ a) (sꟳ b) =
@@ -58,7 +67,7 @@ add {sᴺ x} (sꟳ a) (sꟳ b) =
     (c , a≢c) = add a b
   in sꟳ (proj₁ (add a b)) , λ a'≡c' → a≢c (suc-injective a'≡c')
 
-del : {x : ℕ} → (a : Fin (sᴺ x)) → (Σ[ b ∈ Fin (sᴺ x) ] a ≢ b) → Fin x
+del : {x : ℕ} → (a : ⟦ sᴺ x ⟧) → (sᴺ x ∖ a) → ⟦ x ⟧
 del {ℕ.zero} zꟳ (zꟳ , 0≢0) = ⊥-elim (0≢0 ≡.refl)
 del {sᴺ x} zꟳ (zꟳ , 0≢0) = ⊥-elim (0≢0 ≡.refl)
 del {sᴺ x} zꟳ (sꟳ b , a≢b) = b
@@ -66,13 +75,13 @@ del {sᴺ x} (sꟳ a) (zꟳ , a≢b) = zꟳ
 del {sᴺ x} (sꟳ a) (sꟳ b , a'≢b') =
   sꟳ (del {x} a (b , λ a≡b → ⊥-elim (a'≢b' (≡.cong sꟳ a≡b))))
 
-del-zero-suc : ∀ {x} (b : Fin x) (a≢b : zꟳ ≢ sꟳ b) → del zꟳ (sꟳ b , a≢b) ≡ b
+del-zero-suc : ∀ {x} (b : ⟦ x ⟧) (a≢b : zꟳ ≢ sꟳ b) → del zꟳ (sꟳ b , a≢b) ≡ b
 del-zero-suc b a≢b with del zꟳ (sꟳ b , a≢b) | inspect (del zꟳ) (sꟳ b , a≢b)
 ... | zꟳ | [ eq ] = ≡.sym eq
 ... | sꟳ X | [ eq ] = ≡.sym eq
 
-del-inj : {x : ℕ} → (a : Fin (sᴺ x))
-        → (B₁ B₂ : Σ[ b ∈ Fin (sᴺ x) ] a ≢ b)
+del-inj : {x : ℕ} → (a : ⟦ sᴺ x ⟧)
+        → (B₁ B₂ : (sᴺ x ∖ a))
         → del a B₁ ≡ del a B₂
         → proj₁ B₁ ≡ proj₁ B₂
 del-inj zꟳ (zꟳ , a≢b₁) (zꟳ , a≢b₂) b₁'≡b₂' =
@@ -111,7 +120,7 @@ del-inj (sꟳ a) (sꟳ b₁ , sa≢sb₁) (sꟳ b₂ , sa≢sb₂) b₁'≡b₂'
                       (b₂ , λ a≡b₂ → sa≢sb₂ (≡.cong sꟳ a≡b₂))
                       (suc-injective b₁'≡b₂'))
 
-add-inj : {x : ℕ} → (a : Fin (sᴺ x))
+add-inj : {x : ℕ} → (a : ⟦ sᴺ x ⟧)
         → (b₁ b₂ : Fin x)
         → proj₁ (add a b₁) ≡ proj₁ (add a b₂)
         → b₁ ≡ b₂
@@ -125,13 +134,7 @@ add-inj (sꟳ a) (sꟳ b₁) (sꟳ b₂) c₁≡c₂
 ... | sꟳ c₁ , sa≢sc₁ | [ eq₁ ] | sꟳ c₂ , sa≢sc₂ | [ eq₂ ] =
   ≡.cong sꟳ (add-inj a b₁ b₂ (suc-injective c₁≡c₂))
 
-SomeFin : Set
-SomeFin = ℕ
-
-_∖_ : (A : SomeFin) → (a : Fin A) → Set
-A ∖ a = Σ[ b ∈ Fin A ] a ≢ b
-
-module _ {x y : ℕ} (f : Fin (sᴺ x) ↣ Fin (sᴺ y)) where
+module _ {x y : ℕ} (f : ⟦ sᴺ x ⟧ ↣ ⟦ sᴺ y ⟧) where
   open Injection
 
   f' : Fin x → Fin y
@@ -139,7 +142,7 @@ module _ {x y : ℕ} (f : Fin (sᴺ x) ↣ Fin (sᴺ y)) where
     let (j , 0≢j) = add zꟳ i 
     in del (to f zꟳ) (to f j , λ f0≡fj → 0≢j (injective f f0≡fj))
 
-  comp : (ai : (b₁ b₂ : Fin x) → proj₁ (add zꟳ b₁) ≡ proj₁ (add zꟳ b₂) → b₁ ≡ b₂)
+  comp : (ai : (b₁ b₂ : ⟦ x ⟧) → proj₁ (add zꟳ b₁) ≡ proj₁ (add zꟳ b₂) → b₁ ≡ b₂)
        → (di : (B₁ B₂ : (sᴺ y) ∖ to f zꟳ)
              → del (to f zꟳ) B₁ ≡ del (to f zꟳ) B₂ → proj₁ B₁ ≡ proj₁ B₂)
        → Injective _≡_ _≡_ f'
@@ -154,7 +157,7 @@ module _ {x y : ℕ} (f : Fin (sᴺ x) ↣ Fin (sᴺ y)) where
                 (to f c₂ , λ fz≡fc₂ → z≢c₂ (injective f {zꟳ} {c₂} fz≡fc₂))
                 f'b₁≡f'b₂))
 
-  sub : Fin x ↣ Fin y
+  sub : ⟦ x ⟧ ↣ ⟦ y ⟧
   sub = record
     { to = f'
     ; cong = ≡.cong f'
@@ -165,9 +168,9 @@ infixl 6 _+_ _+ᶠ_ _-ᶠ_
 _+_ : SomeFin → SomeFin → SomeFin
 X + Y = X +ℕ Y
 
-sym-sub : {A' X Y : SomeFin} → (f : Fin (A' + X) ↣ Fin (A' + Y))
+sym-sub : {A' X Y : SomeFin} → (f : ⟦ A' + X ⟧ ↣ ⟦ A' + Y ⟧)
     → (A : SomeFin) → {A ≡ A'}
-    → Fin X ↣ Fin Y
+    → ⟦ X ⟧ ↣ ⟦ Y ⟧
 sym-sub {ℕ.zero} {X} {Y} f ℕ.zero = f
 sym-sub {sᴺ A'} {X} {Y} f (sᴺ A) = (sym-sub (sub f) A)
 
