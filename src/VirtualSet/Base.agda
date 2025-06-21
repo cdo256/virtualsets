@@ -37,13 +37,12 @@ open import Relation.Binary.PropositionalEquality
 open import Function.Base
   using (_∘_; id)
 open import Function.Bundles
-  using (_↣_; _↔_; Injection)
+  using (_↣_; _↔_; Injection; Inverse)
 open import Algebra.Definitions
   using (RightIdentity)
 open import Function.Definitions
   using (Injective; Congruent;
          Inverseˡ; Inverseʳ; Inverseᵇ)
-
 
 open ≡-Reasoning
 private
