@@ -315,18 +315,95 @@ module _ where
   swap-involutive : ∀ {A B : SomeFin} {x} → ↔-IsId (swap ↔∘↔ swap)
   swap-involutive {A} {B} {x} = flip-IsId swap
 
-_-ᶠ_ : {A' X Y : SomeFin} → (f : ⟦ X + A' ⟧ ↣ ⟦ Y + A' ⟧)
-    → (A : SomeFin) → {A ≡ A'}
-    → ⟦ X ⟧ ↣ ⟦ Y ⟧
-_-ᶠ_ {A'} {X} {Y} f A =
-  let g = (↔to↣ (swap {Y} {A'})) ↣∘↣ f ↣∘↣ (↔to↣ (swap {A'} {X}))
-  in sym-sub g A
+  inj₁-injective : ∀ {A} {x y : A} → inj₁ x ≡ inj₁ y → x ≡ y
+  inj₁-injective ≡.refl = ≡.refl
+  inj₂-injective : ∀ {A} {x y : A} → inj₂ x ≡ inj₂ y → x ≡ y
+  inj₂-injective ≡.refl = ≡.refl
+
+  map↣⊎ : ∀ {A B C D} → (A ↣ B) → (C ↣ D) → ((A ⊎ C) ↣ (B ⊎ D))
+  map↣⊎ {A} {B} {C} {D} f g = record
+    { to = h
+    ; cong = ≡.cong h
+    ; injective = inj
+    }
+    where open Injection
+          h : (A ⊎ C) → (B ⊎ D)
+          h (inj₁ a) = inj₁ (to f a)
+          h (inj₂ c) = inj₂ (to g c)
+          inj : ∀ {x y} → h x ≡ h y → x ≡ y
+          inj {inj₁ x} {inj₁ y} =
+            ≡.cong inj₁ ∘ injective f ∘ inj₁-injective
+          inj {inj₂ x} {inj₂ y} =
+            ≡.cong inj₂ ∘ injective g ∘ inj₂-injective
+
+  id↣ : ∀ {A} → A ↣ A
+  id↣ {A} = record
+    { to = id
+    ; cong = id
+    ; injective = id
+    }
+
+  ⊎⊥ˡ : ∀ {A} → (A ⊎ ⟦ zᴺ ⟧) ↔ A
+  ⊎⊥ˡ {A} = record
+    { to = f
+    ; from = inj₁
+    ; to-cong = f-cong
+    ; from-cong = ≡.cong inj₁
+    ; inverse = invˡ , invʳ
+    }
+    where
+      f : (A ⊎ ⟦ zᴺ ⟧) → A
+      f (inj₁ x) = x 
+      f-cong : {x' y' : A ⊎ ⟦ zᴺ ⟧} → x' ≡ y' → f x' ≡ f y' 
+      f-cong {inj₁ x} {inj₁ y} = inj₁-injective
+      invˡ : ∀ {x} {y} → y ≡ inj₁ x → f y ≡ x
+      invˡ {x} {inj₁ y} = inj₁-injective
+      invʳ : ∀ {x} {y} → y ≡ f x → inj₁ y ≡ x
+      invʳ {inj₁ x} {y} = ≡.cong inj₁
+      
+  ⊎⊥ʳ : ∀ {A} → (⟦ zᴺ ⟧ ⊎ A) ↔ A
+  ⊎⊥ʳ {A} = record
+    { to = f
+    ; from = inj₂
+    ; to-cong = f-cong
+    ; from-cong = ≡.cong inj₂
+    ; inverse = invˡ , invʳ
+    }
+    where
+      f : (⟦ zᴺ ⟧ ⊎ A) → A
+      f (inj₂ x) = x 
+      f-cong : {x' y' : ⟦ zᴺ ⟧ ⊎ A} → x' ≡ y' → f x' ≡ f y' 
+      f-cong {inj₂ x} {inj₂ y} = inj₂-injective
+      invˡ : ∀ {x} {y} → y ≡ inj₂ x → f y ≡ x
+      invˡ {x} {inj₂ y} = inj₂-injective
+      invʳ : ∀ {x} {y} → y ≡ f x → inj₂ y ≡ x
+      invʳ {inj₂ x} {y} = ≡.cong inj₂
+
+
+module _ where
+  open Injection 
+
+  _-ᶠ_ : {A' X Y : SomeFin} → (f : ⟦ X ⟧ ⊎ ⟦ A' ⟧ ↣ ⟦ Y ⟧ ⊎ ⟦ A' ⟧)
+      → (A : SomeFin) → {A ≡ A'}
+      → ⟦ X ⟧ ↣ ⟦ Y ⟧
+  f -ᶠ zᴺ = {!f!}
+  f -ᶠ (sᴺ A) = {!!}
+  -- _-ᶠ_ {A'} {X} {Y} f A =
+  --   let g = (↔to↣ (swap {Y} {A'})) ↣∘↣ f ↣∘↣ (↔to↣ (swap {A'} {X}))
+  --   in sym-sub g A
+
+
+  _+ᶠ-sym_ : ∀ {X Y : SomeFin} (g : ⟦ X ⟧ ↣ ⟦ Y ⟧) → (A : SomeFin)
+          → ⟦ X + A ⟧ ↣ ⟦ Y + A ⟧
+  _+ᶠ-sym_ {X} {Y} g A = ↔to↣ (flip-↔ +↔⊎) ↣∘↣ map↣⊎ g (id↣ {⟦ A ⟧}) ↣∘↣ ↔to↣ +↔⊎
 
 {-
-
-_+ᶠ-sym_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (A + X) ↣ Fin (A + Y)
-_+ᶠ-sym_ {X} {Y} g ℕ.zero = g
-_+ᶠ-sym_ {X} {Y} g (sᴺ A) =
+  _+ᶠ-sym_ : ∀ {X Y : SomeFin} (g : ⟦ X ⟧ ↣ ⟦ Y ⟧) → (A : SomeFin)
+          → ⟦ A + X ⟧ ↣ ⟦ A + Y ⟧
+  _+ᶠ-sym_ {X} {Y} g ℕ.zero = g
+  _+ᶠ-sym_ {X} {Y} g (sᴺ A) = ↔to↣ (flip-↔ +↔⊎) ↣∘↣ map↣⊎ (id↣ {⟦ 1 ⟧}) (g +ᶠ-sym A) ↣∘↣ ↔to↣ +↔⊎
+-}
+{-
     record
       { to = g''
       ; cong = ≡.cong g''
