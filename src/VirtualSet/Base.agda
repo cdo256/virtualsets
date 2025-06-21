@@ -195,7 +195,7 @@ module _ {A B C D : Set} where
     ; inverse = (proj₂ (inverse A↔B)) , (proj₁ (inverse A↔B))
     }
 
-  infixl 9 _↔∘↔_
+  infixl 9 _↔∘↔_ _↣∘↣_
 
   _↔∘↔_ : (B ↔ C) → (A ↔ B) → (A ↔ C)
   B↔C ↔∘↔ A↔B  = record
@@ -224,8 +224,7 @@ module _ {A B C D : Set} where
   B↔C ↣∘↣ A↔B  = record
     { to = to B↔C ∘ to A↔B 
     ; cong = cong B↔C ∘ cong A↔B 
-    ; from-cong = from-cong A↔B ∘ from-cong B↔C 
-    ; injective = {!!}
+    ; injective = injective A↔B ∘ injective B↔C
     }
 
   ↔-IsId : ∀ {A} → (R : A ↔ A) → Set _
@@ -296,7 +295,7 @@ module _  where
 
   double-flip : ∀ {A B} (R : A ↔ B) → (flip-↔ (flip-↔ R)) ≡ R
   double-flip R = ≡.refl
-
+  
   flip-IsId : ∀ {A B} (R : A ↔ B) → ↔-IsId ((flip-↔ R) ↔∘↔ R)
   proj₁ (flip-IsId {A} {B} R a) = proj₂ (inverse R) {a} {to R a} ≡.refl
   proj₂ (flip-IsId {A} {B} R a) =
@@ -316,33 +315,14 @@ module _ where
   swap-involutive : ∀ {A B : SomeFin} {x} → ↔-IsId (swap ↔∘↔ swap)
   swap-involutive {A} {B} {x} = flip-IsId swap
 
-commutate : ∀ {A B : SomeFin} → Fin (A + B) ↣ Fin (B + A)
-commutate {A} {B} = record
-  { to = f
-  ; cong = λ eq → ≡.refl
-  ; injective = λ {x} {y} eq → {!!}
-  }
-  where
-    f : ∀ {A B} → Fin (A + B) → Fin (B + A)
-    f = {!!}
-    inj : ∀ {A B} → Injective _≡_ _≡_ (f {A} {B})
-    inj {ℕ.zero} {sᴺ B} {x} {y} fx≡fy = {!!}
-    inj {sᴺ A} {ℕ.zero} {x} {y} fx≡fy = {!!}
-    inj {sᴺ A} {sᴺ B} {x} {y} fx≡fy = {!!}
+_-ᶠ_ : {A' X Y : SomeFin} → (f : ⟦ X + A' ⟧ ↣ ⟦ Y + A' ⟧)
+    → (A : SomeFin) → {A ≡ A'}
+    → ⟦ X ⟧ ↣ ⟦ Y ⟧
+_-ᶠ_ {A'} {X} {Y} f A =
+  let g = (↔to↣ (swap {Y} {A'})) ↣∘↣ f ↣∘↣ (↔to↣ (swap {A'} {X}))
+  in sym-sub g A
 
 {-
-
-_-ᶠ_ : {A' X Y : SomeFin} → (f : Fin (X + A') ↣ Fin (Y + A'))
-    → (A : SomeFin) → {A ≡ A'}
-    → Fin X ↣ Fin Y
-_-ᶠ_ {A'} {X} {Y} f A =
-  sym-sub (≡.subst (λ h → Fin (A' + X) ↣ Fin h) (+-comm Y A') (≡.subst (λ h → Fin h ↣ Fin (Y + A')) (+-comm X A') f)) A
-
--- ≡.subst (λ h → Fin (X + ℕ.zero) ↣ Fin h)
---         (≡.sym (+-identityʳ Y))
---   (≡.subst (λ h → Fin h ↣ Fin Y)
---            (≡.sym (+-identityʳ X))
-
 
 _+ᶠ-sym_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (A + X) ↣ Fin (A + Y)
 _+ᶠ-sym_ {X} {Y} g ℕ.zero = g
