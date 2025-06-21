@@ -267,6 +267,22 @@ module _ {A B C D : Set} where
                   , (proj₂ (inverse A↔B) ∘ proj₂ (inverse B↔C)) ∘ proj₂ (inverse C↔D)
         }
 
+module _  where
+  open Inverse
+
+  double-flip : ∀ {A B} (R : A ↔ B) → (flip-↔ (flip-↔ R)) ≡ R
+  double-flip R = ≡.refl
+
+  flip-IsId : ∀ {A B} (R : A ↔ B) → ↔-IsId ((flip-↔ R) ↔∘↔ R)
+  proj₁ (flip-IsId {A} {B} R a) = proj₂ (inverse R) {a} {to R a} ≡.refl
+  proj₂ (flip-IsId {A} {B} R a) =
+    begin
+        a
+      ≡⟨ ≡.sym (proj₁ (inverse (flip-↔ R)) ≡.refl) ⟩
+        to (flip-↔ R) (from (flip-↔ R) a)
+      ≡⟨ ≡.refl ⟩
+        from R (to R a) ∎
+
 -- swap-involutive : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap {B} {A}) (swap {A} {B})
 -- swap-involutive {A} {B} {x} {y} = {!inv!}
 --   where inv : ∀ {A B x} → swap {B} {A} (swap {A} {B} x) ≡ x
