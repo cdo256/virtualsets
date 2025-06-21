@@ -184,6 +184,8 @@ sym-sub {sᴺ A'} {X} {Y} f (sᴺ A) = (sym-sub (sub f) A)
 
 module _ {A B C D : Set} where
   open Inverse
+  open Injection
+  
   flip-↔ : (A ↔ B) → (B ↔ A)
   flip-↔ A↔B = record
     { to = from A↔B
@@ -202,7 +204,29 @@ module _ {A B C D : Set} where
     ; to-cong = to-cong B↔C ∘ to-cong A↔B 
     ; from-cong = from-cong A↔B ∘ from-cong B↔C 
     ; inverse = proj₁ (inverse B↔C) ∘ proj₁ (inverse A↔B)
-              , proj₂ (inverse A↔B) ∘ proj₂ (inverse B↔C) }
+              , proj₂ (inverse A↔B) ∘ proj₂ (inverse B↔C)
+    }
+
+  ↔to↣ : (A ↔ B) → (A ↣ B)
+  ↔to↣ R = record
+    { to = Inverse.to R 
+    ; cong = to-cong R 
+    ; injective = λ {x} {y} Rx≡Ry → 
+      begin
+          x
+        ≡⟨ ≡.sym ((proj₂ (inverse R) {x} {to R y}) (≡.sym Rx≡Ry)) ⟩
+          R .from (to R y)
+        ≡⟨ (proj₂ (inverse R)) ≡.refl ⟩
+          y ∎
+    }
+
+  _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
+  B↔C ↣∘↣ A↔B  = record
+    { to = to B↔C ∘ to A↔B 
+    ; cong = cong B↔C ∘ cong A↔B 
+    ; from-cong = from-cong A↔B ∘ from-cong B↔C 
+    ; injective = {!!}
+    }
 
   ↔-IsId : ∀ {A} → (R : A ↔ A) → Set _
   ↔-IsId {A} R = ∀ (a : A) → to R a ≡ a × a ≡ from R a
@@ -290,25 +314,8 @@ module _ where
   swap = (flip-↔ +↔⊎) ↔∘↔ ⊎-swap-↔ ↔∘↔ +↔⊎
 
   swap-involutive : ∀ {A B : SomeFin} {x} → ↔-IsId (swap ↔∘↔ swap)
-  swap-involutive {A} {B} {x} = flip-IsId {!swap!}
+  swap-involutive {A} {B} {x} = flip-IsId swap
 
--- swap-involutive : ∀ {A B} → Inverseˡ _≡_ _≡_ (swap {B} {A}) (swap {A} {B})
--- swap-involutive {A} {B} {x} {y} = {!inv!}
---   where inv : ∀ {A B x} → swap {B} {A} (swap {A} {B} x) ≡ x
---         inv {ℕ.zero} {sᴺ B} {zꟳ} = 
---           begin
---               swap (swap zꟳ)
---             ≡⟨ ≡.refl ⟩
---               swap {sᴺ B} {ℕ.zero} (swap {ℕ.zero} {sᴺ B} zꟳ)
---             ≡⟨ ≡.cong swap ≡.refl ⟩
---               swap {sᴺ B} {ℕ.zero} (≡.subst Fin (+-comm ℕ.zero (sᴺ B)) zꟳ)
---             ≡⟨ {!!} ⟩
---               {!!}
---             ≡⟨ {!!} ⟩
---               zꟳ ∎
---         inv {ℕ.zero} {sᴺ B} {sꟳ x} = {!!}
---         inv {sᴺ A} {B} {x} = {!!}
-{-
 commutate : ∀ {A B : SomeFin} → Fin (A + B) ↣ Fin (B + A)
 commutate {A} {B} = record
   { to = f
@@ -317,18 +324,13 @@ commutate {A} {B} = record
   }
   where
     f : ∀ {A B} → Fin (A + B) → Fin (B + A)
-    f {ℕ.zero} {B} x =
-      ≡.subst Fin (+-comm ℕ.zero B) x
-    f {sᴺ A} {ℕ.zero} x =
-      ≡.subst Fin (+-comm (sᴺ A) ℕ.zero) x
-    f {sᴺ A} {sᴺ B} zꟳ = sꟳ (f {sᴺ A} {B} zꟳ)
-    f {sᴺ A} {sᴺ B} (sꟳ x) =
-      sꟳ (f {sᴺ A} {B}
-           (≡.subst Fin (Data.Nat.Properties.+-suc A B) x))
+    f = {!!}
     inj : ∀ {A B} → Injective _≡_ _≡_ (f {A} {B})
     inj {ℕ.zero} {sᴺ B} {x} {y} fx≡fy = {!!}
     inj {sᴺ A} {ℕ.zero} {x} {y} fx≡fy = {!!}
     inj {sᴺ A} {sᴺ B} {x} {y} fx≡fy = {!!}
+
+{-
 
 _-ᶠ_ : {A' X Y : SomeFin} → (f : Fin (X + A') ↣ Fin (Y + A'))
     → (A : SomeFin) → {A ≡ A'}
