@@ -19,7 +19,7 @@ open import Data.Sum
 open import Data.Sum.Properties
   using () renaming (swap-↔ to ⊎-swap-↔)
 open import Level
-  using (_⊔_; 0ℓ) renaming (suc to lsuc)
+  using (Setω; _⊔_; 0ℓ) renaming (suc to lsuc)
 open import Relation.Binary.Structures
   using (IsEquivalence)
 import Relation.Binary.PropositionalEquality.Core as ≡
@@ -43,22 +43,24 @@ open import Algebra.Definitions
 open import Function.Definitions
   using (Injective; Congruent;
          Inverseˡ; Inverseʳ; Inverseᵇ)
+ 
+-- open import Cubical.HITs.SetQuotients.Base
 
 open ≡-Reasoning
 private
   variable
     c ℓ : Level.Level
 
-SomeFin : Set
+SomeFin : Setω
 SomeFin = ℕ
 
-⟦_⟧ : (n : SomeFin) → Set
+⟦_⟧ : (n : SomeFin) → Setω
 ⟦ n ⟧ = Fin n
 
--- _∖_ : (A : SomeFin) → (a : Fin A) → Set
+-- _∖_ : (A : SomeFin) → (a : Fin A) → Setω
 -- A ∖ a = Σ[ b ∈ Fin A ] .(a ≢ b)
 
-record _∖_ (A : SomeFin) (a : Fin A) : Set where
+record _∖_ (A : SomeFin) (a : Fin A) : Setω where
   constructor _,_
   field
     val : Fin A
@@ -189,7 +191,7 @@ sym-sub {sᴺ A'} {X} {Y} f (sᴺ A) = (sym-sub (sub f) A)
   ≡.cong sᴺ (+-identityʳ n)
 
 
-module _ {A B C D : Set} where
+module _ {A B C D : Setω} where
   open Inverse
   open Injection
   
@@ -234,10 +236,10 @@ module _ {A B C D : Set} where
     ; injective = injective A↔B ∘ injective B↔C
     }
 
-  ↔-IsId : ∀ {A} → (R : A ↔ A) → Set _
+  ↔-IsId : ∀ {A} → (R : A ↔ A) → Setω
   ↔-IsId {A} R = ∀ (a : A) → to R a ≡ a × a ≡ from R a
              
-module _ {A B C D : Set} where
+module _ {A B C D : Setω} where
   open Inverse
 
   ∘-assoc : (C→D : C → D) → (B→C : B → C) → (A→B : A → B)

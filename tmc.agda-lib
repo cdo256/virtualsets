@@ -4,4 +4,12 @@ include:
 depend:
   standard-library
   agda-categories
-
+  cubical
+flags:
+  --cubical
+  --no-load-primitives
+  --postfix-projections
+  --rewriting
+  --guardedness
+  --two-level
+  -W noUnsupportedIndexedMatch

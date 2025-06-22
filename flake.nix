@@ -19,6 +19,7 @@
           agda = pkgs.agda.withPackages (ps: [
             ps.standard-library
             ps.agda-categories
+            ps.cubical
           ]);
           just-agda-base = inputs.just-agda.packages.${pkgs.system}.default;
           just-agda = just-agda-base.override { inherit agda; };
