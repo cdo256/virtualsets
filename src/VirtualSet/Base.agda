@@ -55,8 +55,15 @@ SomeFin = ℕ
 ⟦_⟧ : (n : SomeFin) → Set
 ⟦ n ⟧ = Fin n
 
-_∖_ : (A : SomeFin) → (a : Fin A) → Set
-A ∖ a = Σ[ b ∈ Fin A ] a ≢ b
+-- _∖_ : (A : SomeFin) → (a : Fin A) → Set
+-- A ∖ a = Σ[ b ∈ Fin A ] .(a ≢ b)
+
+record _∖_ (A : SomeFin) (a : Fin A) : Set where
+  constructor _,_
+  field
+    val : Fin A
+    .≠ : a ≢ val
+open _∖_
 
 add : {x : ℕ} → (a : ⟦ sᴺ x ⟧) → ⟦ x ⟧ → (sᴺ x ∖  a) 
 add {sᴺ x} zꟳ b = sꟳ b , λ ()
@@ -64,7 +71,7 @@ add {sᴺ x} (sꟳ a) zꟳ = zꟳ , λ ()
 add {sᴺ x} (sꟳ a) (sꟳ b) =
   let
     (c , a≢c) = add a b
-  in sꟳ (proj₁ (add a b)) , λ a'≡c' → a≢c (suc-injective a'≡c')
+  in sꟳ (val (add a b)) , λ a'≡c' → a≢c (suc-injective a'≡c')
 
 del : {x : ℕ} → (a : ⟦ sᴺ x ⟧) → (sᴺ x ∖ a) → ⟦ x ⟧
 del {ℕ.zero} zꟳ (zꟳ , 0≢0) = ⊥-elim (0≢0 ≡.refl)
@@ -82,7 +89,7 @@ del-zero-suc b a≢b with del zꟳ (sꟳ b , a≢b) | inspect (del zꟳ) (sꟳ b
 del-inj : {x : ℕ} → (a : ⟦ sᴺ x ⟧)
         → (B₁ B₂ : (sᴺ x ∖ a))
         → del a B₁ ≡ del a B₂
-        → proj₁ B₁ ≡ proj₁ B₂
+        → val B₁ ≡ val B₂
 del-inj zꟳ (zꟳ , a≢b₁) (zꟳ , a≢b₂) b₁'≡b₂' =
   ⊥-elim (a≢b₁ ≡.refl)
 del-inj zꟳ (zꟳ , a≢b₁) (sꟳ b₂ , a≢b₂) b₁'≡b₂' =
@@ -121,7 +128,7 @@ del-inj (sꟳ a) (sꟳ b₁ , sa≢sb₁) (sꟳ b₂ , sa≢sb₂) b₁'≡b₂'
 
 add-inj : {x : ℕ} → (a : ⟦ sᴺ x ⟧)
         → (b₁ b₂ : Fin x)
-        → proj₁ (add a b₁) ≡ proj₁ (add a b₂)
+        → val (add a b₁) ≡ val (add a b₂)
         → b₁ ≡ b₂
 add-inj zꟳ zꟳ zꟳ c₁≡c₂ = ≡.refl
 add-inj zꟳ (sꟳ b₁) (sꟳ b₂) c₁≡c₂
@@ -141,9 +148,9 @@ module _ {x y : ℕ} (f : ⟦ sᴺ x ⟧ ↣ ⟦ sᴺ y ⟧) where
     let (j , 0≢j) = add zꟳ i 
     in del (to f zꟳ) (to f j , λ f0≡fj → 0≢j (injective f f0≡fj))
 
-  comp : (ai : (b₁ b₂ : ⟦ x ⟧) → proj₁ (add zꟳ b₁) ≡ proj₁ (add zꟳ b₂) → b₁ ≡ b₂)
+  comp : (ai : (b₁ b₂ : ⟦ x ⟧) → val (add zꟳ b₁) ≡ val (add zꟳ b₂) → b₁ ≡ b₂)
        → (di : (B₁ B₂ : (sᴺ y) ∖ to f zꟳ)
-             → del (to f zꟳ) B₁ ≡ del (to f zꟳ) B₂ → proj₁ B₁ ≡ proj₁ B₂)
+             → del (to f zꟳ) B₁ ≡ del (to f zꟳ) B₂ → val B₁ ≡ val B₂)
        → Injective _≡_ _≡_ f'
   comp ai di {b₁} {b₂} f'b₁≡f'b₂ =
     let
@@ -383,11 +390,47 @@ module _ where
 module _ where
   open Injection 
 
-  _-ᶠ_ : {A' X Y : SomeFin} → (f : ⟦ X ⟧ ⊎ ⟦ A' ⟧ ↣ ⟦ Y ⟧ ⊎ ⟦ A' ⟧)
+  splice : {X : SomeFin} → (a : ⟦ sᴺ X ⟧) → ⟦ X ⟧ ↔ (sᴺ X ∖ a)
+  splice {X} a = record
+    { to = add a
+    ; from = del a 
+    ; to-cong = ≡.cong (add a)
+    ; from-cong = ≡.cong (del a)
+    ; inverse = {!!} , {!!}
+    }
+
+  splice-inverseˡ : {X : SomeFin} → (a : ⟦ sᴺ X ⟧) → Inverseˡ _≡_ _≡_ (del a) (add a)
+  splice-inverseˡ {zᴺ} a {()} {y} y≡x+
+  splice-inverseˡ {sᴺ X} zꟳ {zꟳ} {sꟳ y , y'≢0} y≡x+ = {!!}
+  splice-inverseˡ {sᴺ X} (sꟳ a) {zꟳ} {zꟳ , 0≢a'} y≡x+ = ≡.refl
+  splice-inverseˡ {sᴺ X} zꟳ {sꟳ x} {sꟳ (sꟳ y) , y≢0} =
+    λ L → 
+      {!!} ( ≡.cong inj₁ L)
+         
+     -- ≡.cong sꟳ {!suc-injective (suc-injective (inj₁-injective!} --  (≡.cong inj₁ {!y≡x+!})
+  splice-inverseˡ {sᴺ X} (sꟳ a) {sꟳ x} {sꟳ y , y'≢a'} y≡x+ = {!!}
+    -- begin
+    --     del a y
+    --   ≡⟨ {!!} ⟩
+    --     x ∎
+
+-- dec : ∀ {X Y : SomeFin} → ((⟦ X ⟧ ⊎ ⟦ 1 ⟧) ↣ (⟦ Y ⟧ ⊎ ⟦ 1 ⟧))
+--     → (⟦ X ⟧ ↣ ⟦ Y ⟧)
+-- dec {X} {Y} f = {!!}
+--     where
+--       g : ⟦ X ⟧ → ⟦ Y ⟧
+--       g x = {!!}
+
+{-
+  _-ᶠ_ : {A' X Y : SomeFin} → (f : (⟦ X ⟧ ⊎ ⟦ A' ⟧) ↣ (⟦ Y ⟧ ⊎ ⟦ A' ⟧))
       → (A : SomeFin) → {A ≡ A'}
       → ⟦ X ⟧ ↣ ⟦ Y ⟧
-  f -ᶠ zᴺ = {!f!}
-  f -ᶠ (sᴺ A) = {!!}
+  _-ᶠ_ {A' = zᴺ} f zᴺ = ↔to↣ ⊎⊥ˡ ↣∘↣ f ↣∘↣ ↔to↣ (flip-↔ ⊎⊥ˡ)
+  _-ᶠ_ {A' = sᴺ A'} {X} {Y} f (sᴺ A) {eq} = _-ᶠ_ {A'} g A 
+    where
+      g : (⟦ X ⟧ ⊎ ⟦ A' ⟧) ↣ (⟦ Y ⟧ ⊎ ⟦ A' ⟧)
+      g = map↣⊎ id↣ {!add!}  ↣∘↣ f ↣∘↣ map↣⊎ id↣ {!!}
+
   -- _-ᶠ_ {A'} {X} {Y} f A =
   --   let g = (↔to↣ (swap {Y} {A'})) ↣∘↣ f ↣∘↣ (↔to↣ (swap {A'} {X}))
   --   in sym-sub g A
@@ -468,4 +511,5 @@ module theorem1-2 where
   --  --     ((f ⊙ (g +ᶠ A)) -ᶠ A)
   --  --   ≡⟨ {!!} ⟩
   --  --     ((f -ᶠ A) ⊙ g ) ∎
+-- -}
 -- -}
