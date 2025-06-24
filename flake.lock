@@ -1,23 +1,5 @@
 {
   "nodes": {
-    "_1lab": {
-      "inputs": {
-        "flake-parts": "flake-parts",
-        "nixpkgs": "nixpkgs"
-      },
-      "locked": {
-        "dirtyRev": "05671ef988415d6eb4807dd30a7c1d6497cde6ec-dirty",
-        "dirtyShortRev": "05671ef9-dirty",
-        "lastModified": 1750790480,
-        "narHash": "sha256-JLpRYJgHcC/urtMSqdYMjhOqLJ0cXsAKvS2VWOcFw8Q=",
-        "type": "git",
-        "url": "file:///home/cdo/src/1lab"
-      },
-      "original": {
-        "type": "git",
-        "url": "file:///home/cdo/src/1lab"
-      }
-    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -41,24 +23,6 @@
         "nixpkgs-lib": "nixpkgs-lib_2"
       },
       "locked": {
-        "lastModified": 1749398372,
-        "narHash": "sha256-tYBdgS56eXYaWVW3fsnPQ/nFlgWi/Z2Ymhyu21zVM98=",
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "rev": "9305fe4e5c2a6fcf5ba6a3ff155720fbe4076569",
-        "type": "github"
-      },
-      "original": {
-        "owner": "hercules-ci",
-        "repo": "flake-parts",
-        "type": "github"
-      }
-    },
-    "flake-parts_3": {
-      "inputs": {
-        "nixpkgs-lib": "nixpkgs-lib_3"
-      },
-      "locked": {
         "lastModified": 1743550720,
         "narHash": "sha256-hIshGgKZCgWh6AYJpJmRgFdR3WUbkY04o82X05xqQiY=",
         "owner": "hercules-ci",
@@ -72,36 +36,55 @@
         "type": "github"
       }
     },
-    "just-agda": {
+    "flake-parts_3": {
       "inputs": {
-        "flake-parts": "flake-parts_3",
-        "nixpkgs": "nixpkgs_2"
+        "nixpkgs-lib": "nixpkgs-lib_3"
       },
       "locked": {
-        "lastModified": 1750071413,
-        "narHash": "sha256-HAceiw/D/udA3D4dBjjfusbi35l8HrK9Z8l7ZzxSpRU=",
-        "owner": "cdo256",
-        "repo": "just-agda",
-        "rev": "5dcd4abf60696eb5520e528258f3344e896aa65c",
+        "lastModified": 1749398372,
+        "narHash": "sha256-tYBdgS56eXYaWVW3fsnPQ/nFlgWi/Z2Ymhyu21zVM98=",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
+        "rev": "9305fe4e5c2a6fcf5ba6a3ff155720fbe4076569",
         "type": "github"
       },
       "original": {
-        "owner": "cdo256",
-        "repo": "just-agda",
+        "owner": "hercules-ci",
+        "repo": "flake-parts",
         "type": "github"
+      }
+    },
+    "just-agda": {
+      "inputs": {
+        "flake-parts": "flake-parts_2",
+        "nixpkgs": "nixpkgs"
+      },
+      "locked": {
+        "lastModified": 1750795335,
+        "narHash": "sha256-fXFZkn+ZzVwh37azEX/dTgyfqWhIbd2dL0uklXhILj8=",
+        "ref": "refs/heads/main",
+        "rev": "2bb31c3521d25a5928763c89d7b2fd9d18795146",
+        "revCount": 24,
+        "type": "git",
+        "url": "file:///home/cdo/src/just-agda"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/cdo/src/just-agda"
       }
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1750788513,
-        "narHash": "sha256-QqjFzilaS01KJ/A2R8ZRwmWl/eYdnaZSlDIP8dMLue4=",
+        "lastModified": 1742288794,
+        "narHash": "sha256-Txwa5uO+qpQXrNG4eumPSD+hHzzYi/CdaM80M9XRLCo=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "824c56f5280eeedf218e206c9350a8d64bbd0bf2",
+        "rev": "b6eaf97c6960d97350c584de1b6dcff03c9daf42",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
+        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -123,21 +106,6 @@
     },
     "nixpkgs-lib_2": {
       "locked": {
-        "lastModified": 1748740939,
-        "narHash": "sha256-rQaysilft1aVMwF14xIdGS3sj1yHlI6oKQNBRTF40cc=",
-        "owner": "nix-community",
-        "repo": "nixpkgs.lib",
-        "rev": "656a64127e9d791a334452c6b6606d17539476e2",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nix-community",
-        "repo": "nixpkgs.lib",
-        "type": "github"
-      }
-    },
-    "nixpkgs-lib_3": {
-      "locked": {
         "lastModified": 1743296961,
         "narHash": "sha256-b1EdN3cULCqtorQ4QeWgLMrd5ZGOjLSLemfa00heasc=",
         "owner": "nix-community",
@@ -151,18 +119,32 @@
         "type": "github"
       }
     },
+    "nixpkgs-lib_3": {
+      "locked": {
+        "lastModified": 1748740939,
+        "narHash": "sha256-rQaysilft1aVMwF14xIdGS3sj1yHlI6oKQNBRTF40cc=",
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "rev": "656a64127e9d791a334452c6b6606d17539476e2",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "nixpkgs.lib",
+        "type": "github"
+      }
+    },
     "nixpkgs_2": {
       "locked": {
-        "lastModified": 1742288794,
-        "narHash": "sha256-Txwa5uO+qpQXrNG4eumPSD+hHzzYi/CdaM80M9XRLCo=",
+        "lastModified": 1750788513,
+        "narHash": "sha256-QqjFzilaS01KJ/A2R8ZRwmWl/eYdnaZSlDIP8dMLue4=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "b6eaf97c6960d97350c584de1b6dcff03c9daf42",
+        "rev": "824c56f5280eeedf218e206c9350a8d64bbd0bf2",
         "type": "github"
       },
       "original": {
         "owner": "nixos",
-        "ref": "nixos-unstable",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -182,12 +164,31 @@
         "type": "github"
       }
     },
+    "onelab": {
+      "inputs": {
+        "flake-parts": "flake-parts_3",
+        "nixpkgs": "nixpkgs_3"
+      },
+      "locked": {
+        "lastModified": 1750797672,
+        "narHash": "sha256-gzH5c1uuk+oipCpArGdr9VcvgwvjKDQiWLYopvwQlAM=",
+        "ref": "refs/heads/flake",
+        "rev": "e4438b74cb232c1fa9b9e87172cc85a2571c17e0",
+        "revCount": 959,
+        "type": "git",
+        "url": "file:///home/cdo/src/1lab"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:///home/cdo/src/1lab"
+      }
+    },
     "root": {
       "inputs": {
-        "_1lab": "_1lab",
-        "flake-parts": "flake-parts_2",
+        "flake-parts": "flake-parts",
         "just-agda": "just-agda",
-        "nixpkgs": "nixpkgs_3"
+        "nixpkgs": "nixpkgs_2",
+        "onelab": "onelab"
       }
     }
   },

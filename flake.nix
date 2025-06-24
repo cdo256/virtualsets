@@ -5,9 +5,10 @@
     flake-parts.url = "github:hercules-ci/flake-parts";
     #nixpkgs.url = "/home/cdo/src/nixpkgs";
     nixpkgs.url = "github:nixos/nixpkgs";
-    just-agda.url = "github:cdo256/just-agda";
-    _1lab.url = "/home/cdo/src/1lab";
-    # _1lab.url = "github:cdo256/1lab";
+    just-agda.url = "/home/cdo/src/just-agda";
+    #just-agda.url = "github:cdo256/just-agda";
+    onelab.url = "/home/cdo/src/1lab";
+    #onelab.url = "github:cdo256/1lab";
   };
 
   outputs =

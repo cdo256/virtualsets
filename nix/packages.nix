@@ -13,12 +13,16 @@
       };
       config.packages = rec {
         agda = pkgs.agda.withPackages (ps: [
-          inputs._1lab.packages.${system}._1lab
+          inputs.onelab.packages.${system}._1lab
+          #pkgs.agdaPackages.standard-library
         ]);
-        inherit (inputs._1lab.packages.${system}) _1lab;
+        inherit (inputs.onelab.packages.${system}) _1lab;
         #inherit (pkgs.agdaPackages) _1lab;
         inherit (pkgs.labHaskellPackages) Agda;
-        just-agda = inputs.just-agda.packages.${pkgs.system}.default.override { inherit agda; };
+        inherit (pkgs.emacsPackages) agda2-mode;
+        just-agda = inputs.just-agda.packages.${pkgs.system}.default.override {
+          inherit agda agda2-mode;
+        };
       };
     };
 }
