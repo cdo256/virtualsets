@@ -13,12 +13,12 @@
       };
       config.packages = rec {
         agda = pkgs.agda.withPackages (ps: [
-          inputs._1lab.packages.${system}.default
+          inputs._1lab.packages.${system}._1lab
         ]);
-        inherit (pkgs.agdaPackages) _1lab;
+        inherit (inputs._1lab.packages.${system}) _1lab;
+        #inherit (pkgs.agdaPackages) _1lab;
         inherit (pkgs.labHaskellPackages) Agda;
-        just-agda-base = inputs.just-agda.packages.${pkgs.system}.default;
-        just-agda = just-agda-base.override { inherit agda; };
+        just-agda = inputs.just-agda.packages.${pkgs.system}.default.override { inherit agda; };
       };
     };
 }

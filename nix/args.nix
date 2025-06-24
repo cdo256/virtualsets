@@ -10,8 +10,8 @@
         pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [
-            (import "${self}/support/nix/haskell-packages.nix" { flake = self; })
-            (import "${self}/support/nix/agda-overlay.nix" { flake = self; })
+            (import ./haskell-packages.nix { flake = self; })
+            (import ./agda-overlay.nix { flake = self; })
           ];
         };
       };
