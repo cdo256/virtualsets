@@ -62,15 +62,16 @@
       "locked": {
         "lastModified": 1750795335,
         "narHash": "sha256-fXFZkn+ZzVwh37azEX/dTgyfqWhIbd2dL0uklXhILj8=",
-        "ref": "refs/heads/main",
+        "owner": "cdo256",
+        "repo": "just-agda",
         "rev": "2bb31c3521d25a5928763c89d7b2fd9d18795146",
-        "revCount": 24,
-        "type": "git",
-        "url": "file:///home/cdo/src/just-agda"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/cdo/src/just-agda"
+        "owner": "cdo256",
+        "ref": "main",
+        "repo": "just-agda",
+        "type": "github"
       }
     },
     "nixpkgs": {
@@ -137,7 +138,7 @@
     "nixpkgs_2": {
       "locked": {
         "lastModified": 1750788513,
-        "narHash": "sha256-QqjFzilaS01KJ/A2R8ZRwmWl/eYdnaZSlDIP8dMLue4=",
+        "lastModified": 1750799345,
         "owner": "nixos",
         "repo": "nixpkgs",
         "rev": "824c56f5280eeedf218e206c9350a8d64bbd0bf2",
@@ -145,6 +146,7 @@
       },
       "original": {
         "owner": "nixos",
+        "ref": "master",
         "repo": "nixpkgs",
         "type": "github"
       }
@@ -172,15 +174,16 @@
       "locked": {
         "lastModified": 1750797672,
         "narHash": "sha256-gzH5c1uuk+oipCpArGdr9VcvgwvjKDQiWLYopvwQlAM=",
-        "ref": "refs/heads/flake",
+        "owner": "cdo256",
+        "repo": "1lab",
         "rev": "e4438b74cb232c1fa9b9e87172cc85a2571c17e0",
-        "revCount": 959,
-        "type": "git",
-        "url": "file:///home/cdo/src/1lab"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:///home/cdo/src/1lab"
+        "owner": "cdo256",
+        "ref": "flake",
+        "repo": "1lab",
+        "type": "github"
       }
     },
     "root": {

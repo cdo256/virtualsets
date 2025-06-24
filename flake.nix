@@ -3,12 +3,24 @@
 
   inputs = {
     flake-parts.url = "github:hercules-ci/flake-parts";
-    #nixpkgs.url = "/home/cdo/src/nixpkgs";
-    nixpkgs.url = "github:nixos/nixpkgs";
-    just-agda.url = "/home/cdo/src/just-agda";
-    #just-agda.url = "github:cdo256/just-agda";
-    onelab.url = "/home/cdo/src/1lab";
-    #onelab.url = "github:cdo256/1lab";
+    nixpkgs = {
+      type = "github";
+      owner = "nixos";
+      repo = "nixpkgs";
+      ref = "master";
+    };
+    just-agda = {
+      type = "github";
+      owner = "cdo256";
+      repo = "just-agda";
+      ref = "main";
+    };
+    onelab = {
+      type = "github";
+      owner = "cdo256";
+      repo = "1lab";
+      ref = "flake";
+    };
   };
 
   outputs =
