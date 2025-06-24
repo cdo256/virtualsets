@@ -2,8 +2,8 @@
   description = "MSc Project on Virtual Sets";
 
   inputs = {
-    nixpkgs.url = "/home/cdo/src/nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
+    nixpkgs.url = "/home/cdo/src/nixpkgs";
     just-agda.url = "github:cdo256/just-agda";
     _1lab.url = "/home/cdo/src/1lab";
     # _1lab.url = "github:cdo256/1lab";
@@ -14,6 +14,11 @@
     inputs.flake-parts.lib.mkFlake { inherit inputs; } (top: {
       systems = [
         "x86_64-linux"
+      ];
+      imports = [
+        ./nix/args.nix
+        ./nix/packages.nix
+        ./nix/shells.nix
       ];
       perSystem =
         { system, pkgs, ... }:
