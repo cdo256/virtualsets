@@ -1,10 +1,8 @@
-name: tmc
+name: virtualset-1lab
 include:
   src
 depend:
-  standard-library
-  agda-categories
-  cubical
+  1lab
 flags:
   --cubical
   --no-load-primitives

@@ -2,11 +2,11 @@
   description = "MSc Project on Virtual Sets";
 
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixpkgs.url = "/home/cdo/src/nixpkgs";
     flake-parts.url = "github:hercules-ci/flake-parts";
     just-agda.url = "github:cdo256/just-agda";
-    _1lab.url = "github:the1lab/1lab";
-    _1lab.flake = false;
+    _1lab.url = "/home/cdo/src/1lab";
+    # _1lab.url = "github:cdo256/1lab";
   };
 
   outputs =
@@ -16,10 +16,10 @@
         "x86_64-linux"
       ];
       perSystem =
-        { pkgs, ... }:
+        { system, pkgs, ... }:
         let
           agda = pkgs.agda.withPackages (ps: [
-            ps._1lab
+            inputs._1lab.packages.${system}.default
             #ps.standard-library
             #ps.agda-categories
           ]);
