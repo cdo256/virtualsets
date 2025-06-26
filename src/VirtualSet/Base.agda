@@ -9,7 +9,8 @@ open import 1Lab.Path using (refl; sym; ap; subst; _≡_)
 
 -- Fin is defined as a bounded Nat in 1Lab so will require a fair amount of work to port.
 open import Data.Fin.Base
-  using (fin; Fin; fzero; fsuc; inject; fzero≠fsuc)
+  using (fin; Fin; fzero; fsuc; inject; fzero≠fsuc; fsuc≠fzero;
+         Fin-absurd)
 
 open import Data.Sum
   using (inl; inr; _⊎_)
@@ -94,7 +95,6 @@ is-injective {X} f = ∀ (x y : X) → f x ≡ f y → x ≡ y
 _↣_ : (X Y : Type) → Type
 X ↣ Y = Σ (X → Y) is-injective
 
-
 -- TEMP: Polyfill
 Injection : (X Y : Type) → Type
 Injection X Y = X ↣ Y
@@ -119,7 +119,7 @@ open import Data.Fin.Base using (fsuc-inj)
 add : {x : Nat} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖  a) 
 add {suc x} a b with fin-view a | fin-view b
 ... | vzero | _ = fsuc b , forget fzero≠fsuc
-... | vsuc a | vzero = fzero , (forget (λ fsuc≡fzero → fzero≠fsuc (sym fsuc≡fzero)))
+... | vsuc a | vzero = fzero , (forget fsuc≠fzero)
 ... | vsuc a | vsuc b with add a b
 ... | i , forget a≢i = fsuc i , forget (λ a'≡i' → a≢i (fsuc-inj a'≡i'))
 
@@ -136,69 +136,76 @@ del {suc x} a (b , forget b≢a) with fin-view a | fin-view b
 ... | vsuc a | vsuc b with del a (b , forget (λ a≡b → b≢a (ap fsuc a≡b)))
 ... | i = fsuc i
 
-del-zero-suc : ∀ {x} (b : ⟦ x ⟧) (a≢b : fzero ≢ fsuc b) → del fzero (fsuc b , forget a≢b) ≡ b
-del-zero-suc b a≢b with fin-view (del fzero (fsuc b , forget a≢b))
+del-zero-suc : ∀ {x} (b : ⟦ x ⟧)
+             → del fzero (fsuc b , forget fzero≠fsuc) ≡ b
+del-zero-suc b with fin-view (del fzero (fsuc b , forget fzero≠fsuc))
 ... | vzero = refl
 ... | vsuc _ = refl
 
+del-suc-zero : ∀ {x} (a : ⟦ suc x ⟧)
+             → del (fsuc a) (fzero , forget fsuc≠fzero) ≡ fzero
+del-suc-zero a with fin-view (del (fsuc a) (fzero , forget fsuc≠fzero))
+... | vzero = refl
+
+del-suc-suc : ∀ {x} (a b : ⟦ suc x ⟧) → .(a'≢b' : fsuc a ≢ fsuc b)
+             → del (fsuc a) (fsuc b , forget a'≢b')
+             ≡ fsuc (del a (b , forget λ a≡b → a'≢b' (ap fsuc a≡b)))
+del-suc-suc a b a'≢b' with fin-view (fsuc a) | fin-view (fsuc b)
+... | vsuc _ | vsuc _ = refl
 
 del-inj : {x : Nat} → (a : ⟦ suc x ⟧)
-        → (B₁ B₂ : (suc x ∖ a))
-        → del a B₁ ≡ del a B₂
-        → val B₁ ≡ val B₂
-del-inj fzero (fzero , a≢b₁) (fzero , a≢b₂) b₁'≡b₂' =
-  absurd (a≢b₁ ≡.refl)
-del-inj fzero (fzero , a≢b₁) (fsuc b₂ , a≢b₂) b₁'≡b₂' =
-  absurd (a≢b₁ ≡.refl)
-del-inj fzero (fsuc b₁ , a≢b₁) (fzero , a≢b₂) b₁'≡b₂' =
-  absurd (a≢b₂ ≡.refl)
-del-inj fzero (fsuc b₁ , a≢b₁) (fsuc b₂ , a≢b₂) b₁'≡b₂' =
-  let b₁' = del fzero (fsuc b₁ , a≢b₁)
-      b₂' = del fzero (fsuc b₂ , a≢b₂)
-      b₁'≡b₁ : b₁' ≡ b₁
-      b₁'≡b₁ = del-zero-suc b₁ a≢b₁
-      b₂'≡b₂ : b₂' ≡ b₂
-      b₂'≡b₂ = del-zero-suc b₂ a≢b₂
-  in begin
-      fsuc b₁
-    ≡⟨ ap fsuc (≡.sym b₁'≡b₁) ⟩
-      fsuc b₁'
-    ≡⟨ ap fsuc b₁'≡b₂' ⟩
-      fsuc b₂'
-    ≡⟨ ap fsuc b₂'≡b₂ ⟩
-      fsuc b₂ ∎
-del-inj (fsuc a) (fzero , a≢b₁) (fzero , a≢b₂) b₁'≡b₂' = ≡.refl
-del-inj (fsuc a) (fzero , a≢b₁) (fsuc b₂ , a≢b₂) b₁'≡b₂'
-  with del (fsuc a) (fzero , a≢b₁) | inspect (del (fsuc a)) (fzero , a≢b₁) | del (fsuc a) (fsuc b₂  , a≢b₂) | inspect (del (fsuc a)) (fsuc b₂ , a≢b₂)
-... | fzero | [ eq₁ ] | fzero | ()
-... | fzero | _ | fsuc _ | _ = absurd (0≢1+n b₁'≡b₂')
-... | fsuc X | () | _ | _
-del-inj (fsuc a) (fsuc b₁ , a≢b₁) (fzero , a≢b₂) b₁'≡b₂' =
-  ≡.sym (del-inj (fsuc a) (fzero , a≢b₂) (fsuc b₁ , a≢b₁) (≡.sym b₁'≡b₂'))
-del-inj (fsuc a) (fsuc b₁ , sa≢sb₁) (fsuc b₂ , sa≢sb₂) b₁'≡b₂'
-  with del (fsuc a) (fsuc b₁ , sa≢sb₁) | inspect (del (fsuc a)) (fsuc b₁ , sa≢sb₁) | del (fsuc a) (fsuc b₂  , sa≢sb₂) | inspect (del (fsuc a)) (fsuc b₂ , sa≢sb₂) | b₁'≡b₂'
-... | fsuc c₁ | [ eq₁ ] | fsuc c₂ | [ eq₂ ] | _ =
-  ap fsuc (del-inj a (b₁ , λ a≡b₁ → sa≢sb₁ (ap fsuc a≡b₁))
-                      (b₂ , λ a≡b₂ → sa≢sb₂ (ap fsuc a≡b₂))
-                      (suc-inj b₁'≡b₂'))
+        → (B C : (suc x ∖ a))
+        → del a B ≡ del a C
+        → fst B ≡ fst C
+del-inj {x = zero} a (b , forget a≢b) (c , forget a≢c) b'≡c'
+  with fin-view b | fin-view c
+... | vzero | vzero = refl 
+del-inj {x = suc x} a (b , forget a≢b) (c , forget a≢c) b'≡c'
+  with fin-view a | fin-view b | fin-view c
+... | vzero | vzero | _ = absurd (a≢b refl)
+... | vzero | vsuc i | vzero = absurd (a≢c refl)
+... | vzero | vsuc i | vsuc j =
+  let i≡j : i ≡ j
+      i≡j =
+        i
+          ≡˘⟨ del-zero-suc i ⟩
+        del fzero (fsuc i , forget a≢b)
+          ≡⟨ b'≡c' ⟩
+        del fzero (fsuc j , forget a≢c)
+          ≡⟨ del-zero-suc j ⟩
+        j ∎
+  in ap fsuc i≡j
+... | vsuc a | vzero | vzero = refl
+... | vsuc a | vzero | vsuc j = absurd (fzero≠fsuc b'≡c')
+... | vsuc a | vsuc i | vzero = absurd (fsuc≠fzero b'≡c')
+... | vsuc a | vsuc i | vsuc j =
+  let rec :  del a (i , forget _) ≡ del a (j , forget _) → i ≡ j
+      rec = del-inj a (i , (forget (λ a≡i → a≢b (ap fsuc a≡i))))
+                      (j , (forget (λ a≡j → a≢c (ap fsuc a≡j))))
+  in ap fsuc (rec (fsuc-inj (
+        fsuc (del a (i , forget _)) ≡⟨ refl ⟩
+        (del (fsuc a) ((fsuc i) , forget _)) ≡⟨ b'≡c' ⟩
+        (del (fsuc a) ((fsuc j) , forget _)) ≡⟨ refl ⟩
+        fsuc (del a (j , forget _ )) ∎)))
 
 add-inj : {x : Nat} → (a : ⟦ suc x ⟧)
-        → (b₁ b₂ : Fin x)
-        → val (add a b₁) ≡ val (add a b₂)
-        → b₁ ≡ b₂
-add-inj fzero fzero fzero c₁≡c₂ = ≡.refl
-add-inj fzero (fsuc b₁) (fsuc b₂) c₁≡c₂
-  with add fzero b₁ | inspect (add fzero) b₁ | add fzero b₂ | inspect (add fzero) b₂
-... | c₁ , z≢c₁ | [ eq₁ ] | c₂ , z≢c₂ | [ eq₂ ] = suc-inj c₁≡c₂
-add-inj (fsuc a) fzero fzero c₁≡c₂ = ≡.refl
-add-inj (fsuc a) (fsuc b₁) (fsuc b₂) c₁≡c₂
-  with add (fsuc a) (fsuc b₁) | inspect (add (fsuc a)) (fsuc b₁) | add (fsuc a) (fsuc b₂) | inspect (add (fsuc a)) (fsuc b₂)
-... | fsuc c₁ , sa≢sc₁ | [ eq₁ ] | fsuc c₂ , sa≢sc₂ | [ eq₂ ] =
-  ap fsuc (add-inj a b₁ b₂ (suc-inj c₁≡c₂))
+        → (b c : Fin x)
+        → fst (add a b) ≡ fst (add a c)
+        → b ≡ c
+add-inj {x = zero} a b c a+b≡a+c = absurd (Fin-absurd b)
+add-inj {x = suc x} a b c a+b≡a+c with fin-view a | fin-view b | fin-view c
+... | vzero | vzero | vzero = refl
+... | vzero | vzero | vsuc c' = absurd (fzero≠fsuc (fsuc-inj a+b≡a+c))
+... | vzero | vsuc b' | vzero = absurd (fsuc≠fzero (fsuc-inj a+b≡a+c))
+... | vzero | vsuc b' | vsuc c' = fsuc-inj a+b≡a+c
+... | vsuc a' | vzero | vzero = refl
+... | vsuc a' | vzero | vsuc c' = absurd (fzero≠fsuc a+b≡a+c)
+... | vsuc a' | vsuc b' | vzero = absurd (fsuc≠fzero a+b≡a+c)
+... | vsuc a' | vsuc b' | vsuc c' =
+  ap fsuc (add-inj a' b' c' (fsuc-inj a+b≡a+c))
 
+{-
 module _ {x y : Nat} (f : ⟦ suc x ⟧ ↣ ⟦ suc y ⟧) where
-  open Injection
-
   f' : Fin x → Fin y
   f' i =
     let (j , 0≢j) = add fzero i 
@@ -225,6 +232,8 @@ module _ {x y : Nat} (f : ⟦ suc x ⟧ ↣ ⟦ suc y ⟧) where
     ; cong = ap f'
     ; injective = comp (add-inj fzero) (del-inj (to f fzero))
     }
+
+{-
 
 infixl 6 _+_ _+ᶠ_ _-ᶠ_
 _+_ : SomeFin → SomeFin → SomeFin
@@ -567,6 +576,7 @@ module theorem1-2 where
   --  --     ((f ⊙ (g +ᶠ A)) -ᶠ A)
   --  --   ≡⟨ {!!} ⟩
   --  --     ((f -ᶠ A) ⊙ g ) ∎
+-- -}
 -- -}
 -- -}
 -- -}
