@@ -252,27 +252,31 @@ module Pred {x y : Nat} (f : ⟦ suc x ⟧ ↣ ⟦ suc y ⟧) where
 
 open Pred using () renaming (g to pred)
 
-{-
 
-infixl 6 _+_ _+ᶠ_ _-ᶠ_
+infixl 8 _+_ _+ᶠ_ _-ᶠ_
 _+_ : SomeFin → SomeFin → SomeFin
 X + Y = X +ℕ Y
+
+open import Data.Nat.Base using (zero≠suc; suc≠zero)
 
 sym-sub : {A' X Y : SomeFin} → (f : ⟦ A' + X ⟧ ↣ ⟦ A' + Y ⟧)
     → (A : SomeFin) → {A ≡ A'}
     → ⟦ X ⟧ ↣ ⟦ Y ⟧
-sym-sub {ℕ.zero} {X} {Y} f ℕ.zero = f
-sym-sub {suc A'} {X} {Y} f (suc A) = (sym-sub (sub f) A)
+sym-sub {zero} {X} {Y} f zero = f
+sym-sub {zero} {X} {Y} f (suc A) {eq} = absurd (suc≠zero eq)
+sym-sub {suc A'} {X} {Y} f (zero) {eq} = absurd (zero≠suc eq)
+sym-sub {suc A'} {X} {Y} f (suc A) = (sym-sub (pred f) A)
+
 
 +-commutative : ∀ (A B : SomeFin) → A + B ≡ B + A
 +-commutative = Data.Nat.Properties.+-commutative
 
-+-identityʳ : ∀ (x : SomeFin) → x + ℕ.zero ≡ x
-+-identityʳ ℕ.zero = ≡.refl
++-identityʳ : ∀ (x : SomeFin) → x + zero ≡ x
++-identityʳ zero = refl
 +-identityʳ (suc n) =
   ap suc (+-identityʳ n)
 
-
+{-
 module _ {A B C D : Typeω} where
   open Inverse
   open Injection
@@ -305,9 +309,9 @@ module _ {A B C D : Typeω} where
     ; injective = λ {x} {y} Rx≡Ry → 
       begin
           x
-        ≡⟨ ≡.sym ((snd (inverse R) {x} {fst R y}) (≡.sym Rx≡Ry)) ⟩
+        ≡⟨ sym ((snd (inverse R) {x} {fst R y}) (sym Rx≡Ry)) ⟩
           R .from (fst R y)
-        ≡⟨ (snd (inverse R)) ≡.refl ⟩
+        ≡⟨ (snd (inverse R)) refl ⟩
           y ∎
     }
 
@@ -320,28 +324,30 @@ module _ {A B C D : Typeω} where
 
   ↔-IsId : ∀ {A} → (R : A ↔ A) → Typeω
   ↔-IsId {A} R = ∀ (a : A) → fst R a ≡ a × a ≡ from R a
+
+{-
              
 module _ {A B C D : Typeω} where
   open Inverse
 
   ∘-assoc : (C→D : C → D) → (B→C : B → C) → (A→B : A → B)
           → (C→D ∘ B→C) ∘ A→B ≡ C→D ∘ (B→C ∘ A→B)
-  ∘-assoc C→D B→C A→B = ap (λ _ x → C→D (B→C (A→B x))) ≡.refl
+  ∘-assoc C→D B→C A→B = ap (λ _ x → C→D (B→C (A→B x))) refl
 
   ↔∘↔-assoc : (C↔D : C ↔ D) → (B↔C : B ↔ C) → (A↔B : A ↔ B)
             → (C↔D ↔∘↔ B↔C) ↔∘↔ A↔B ≡ C↔D ↔∘↔ (B↔C ↔∘↔ A↔B)
   ↔∘↔-assoc C↔D B↔C A↔B =
     begin
         (C↔D ↔∘↔ B↔C) ↔∘↔ A↔B
-      ≡⟨ ≡.refl ⟩
+      ≡⟨ refl ⟩
         B↔D ↔∘↔ A↔B
-      ≡⟨ ≡.refl ⟩
+      ≡⟨ refl ⟩
         A↔D₁
-      ≡⟨ ≡.refl ⟩
+      ≡⟨ refl ⟩
         A↔D₂
-      ≡⟨ ≡.refl ⟩
+      ≡⟨ refl ⟩
         C↔D ↔∘↔ A↔C 
-      ≡⟨ ≡.refl ⟩
+      ≡⟨ refl ⟩
         C↔D ↔∘↔ (B↔C ↔∘↔ A↔B) ∎
     where
       A↔C : A ↔ C
@@ -385,16 +391,16 @@ module _  where
   open Inverse
 
   double-flip : ∀ {A B} (R : A ↔ B) → (flip-↔ (flip-↔ R)) ≡ R
-  double-flip R = ≡.refl
+  double-flip R = refl
   
   flip-IsId : ∀ {A B} (R : A ↔ B) → ↔-IsId ((flip-↔ R) ↔∘↔ R)
-  fst (flip-IsId {A} {B} R a) = snd (inverse R) {a} {fst R a} ≡.refl
+  fst (flip-IsId {A} {B} R a) = snd (inverse R) {a} {fst R a} refl
   snd (flip-IsId {A} {B} R a) =
     begin
         a
-      ≡⟨ ≡.sym (fst (inverse (flip-↔ R)) ≡.refl) ⟩
+      ≡⟨ sym (fst (inverse (flip-↔ R)) refl) ⟩
         fst (flip-↔ R) (from (flip-↔ R) a)
-      ≡⟨ ≡.refl ⟩
+      ≡⟨ refl ⟩
         from R (fst R a) ∎
 
 module _ where
@@ -407,9 +413,9 @@ module _ where
   swap-involutive {A} {B} {x} = flip-IsId swap
 
   inl-injective : ∀ {A} {x y : A} → inl x ≡ inl y → x ≡ y
-  inl-injective ≡.refl = ≡.refl
+  inl-injective refl = refl
   inr-injective : ∀ {A} {x y : A} → inr x ≡ inr y → x ≡ y
-  inr-injective ≡.refl = ≡.refl
+  inr-injective refl = refl
 
   map↣⊎ : ∀ {A B C D} → (A ↣ B) → (C ↣ D) → ((A ⊎ C) ↣ (B ⊎ D))
   map↣⊎ {A} {B} {C} {D} f g = record
@@ -486,7 +492,7 @@ module _ where
   splice-inverseˡ : {X : SomeFin} → (a : ⟦ suc X ⟧) → Inverseˡ (del a) (ins a)
   splice-inverseˡ {zero} a {()} {y} y≡x+
   splice-inverseˡ {suc X} fzero {fzero} {fsuc y , y'≢0} y≡x+ = {!!}
-  splice-inverseˡ {suc X} (fsuc a) {fzero} {fzero , 0≢a'} y≡x+ = ≡.refl
+  splice-inverseˡ {suc X} (fsuc a) {fzero} {fzero , 0≢a'} y≡x+ = refl
   splice-inverseˡ {suc X} fzero {fsuc x} {fsuc (fsuc y) , y≢0} =
     λ L → 
       {!!} ( ap inl L)
@@ -527,7 +533,7 @@ module _ where
 {-
   _+ᶠ-sym_ : ∀ {X Y : SomeFin} (g : ⟦ X ⟧ ↣ ⟦ Y ⟧) → (A : SomeFin)
           → ⟦ A + X ⟧ ↣ ⟦ A + Y ⟧
-  _+ᶠ-sym_ {X} {Y} g ℕ.zero = g
+  _+ᶠ-sym_ {X} {Y} g zero = g
   _+ᶠ-sym_ {X} {Y} g (suc A) = ↔to↣ (flip-↔ +↔⊎) ↣∘↣ map↣⊎ (id↣ {⟦ 1 ⟧}) (g +ᶠ-sym A) ↣∘↣ ↔to↣ +↔⊎
 -}
 {-
@@ -542,7 +548,7 @@ module _ where
        g'' fzero = fzero
        g'' (fsuc a) = fsuc (fst g' a)
        inj : Injective g''
-       inj {fzero} {fzero} eq = ≡.refl
+       inj {fzero} {fzero} eq = refl
        inj {fsuc x} {fsuc y} eq =
          begin
               fsuc x
@@ -552,9 +558,9 @@ module _ where
 _+ᶠ_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (X + A) ↣ Fin (Y + A)
 _+ᶠ_ {X} {Y} g A =
   subst (λ h → Fin (X + A) ↣ Fin h)
-          (≡.sym (+-commutative Y A))
+          (sym (+-commutative Y A))
     (subst (λ h → Fin h ↣ Fin (A + Y))
-             (≡.sym (+-commutative X A))
+             (sym (+-commutative X A))
        (g +ᶠ-sym A))
 
 _⊙_ : ∀ {X Y fzero} → (Fin Y ↣ Fin fzero) → (Fin X ↣ Fin Y) → (Fin X ↣ Fin fzero)
@@ -569,9 +575,9 @@ module theorem1-2 where
     variable A B X Y fzero : SomeFin
 
   lemma1-3 : ∀ (f : Fin X ↣ Fin Y) → (f +ᶠ A) -ᶠ A ≡ f
-  lemma1-3 {A = ℕ.zero} f = 
+  lemma1-3 {A = zero} f = 
     begin
-        f +ᶠ ℕ.zero -ᶠ ℕ.zero
+        f +ᶠ zero -ᶠ zero
       ≡⟨ {!!} ⟩
         {!!}
       ≡⟨ {!!} ⟩
@@ -582,7 +588,7 @@ module theorem1-2 where
   --lemma1-3 : ∀ {X Y : SomeFin} → (f : Fin (X + 0) ↣ Fin (Y + 0)) → (f -ᶠ 0) ≡ f
 
   --lemma1 : ∀ {A X Y fzero} → (f : Fin (Y + A) ↣ Fin (fzero + A)) → (g : Fin X ↣ Fin Y) → (f ⊙ (g +ᶠ A)) -ᶠ A ≡ (f -ᶠ A) ⊙ g 
-  --lemma1 {ℕ.zero} {X} {Y} {fzero} f g = 
+  --lemma1 {zero} {X} {Y} {fzero} f g = 
   --  begin
   --      ((f ⊙ (g +ᶠ 0)) -ᶠ 0)
   --    ≡⟨ {!!} ⟩
