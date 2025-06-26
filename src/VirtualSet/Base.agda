@@ -4,12 +4,15 @@ open import Meta.Idiom
 
 open import 1Lab.Type
   using (Type; ⊥; absurd; _×_; _,_; ¬_)
+
+open import 1Lab.Path using (refl; sym; ap; subst; _≡_)
+
 -- Fin is defined as a bounded Nat in 1Lab so will require a fair amount of work to port.
 open import Data.Fin.Base
   using (fin; Fin; fzero; fsuc; inject)
 
 open import Data.Sum
-  using (inl; inr; _⊎_) renaming (swap to ⊎-swap)
+  using (inl; inr; _⊎_)
 
 open import Data.Nat
    using (Nat; suc-inj; zero; suc; _<_; _≤_; ≤-trans; s≤s; s≤s') renaming (_+_ to _+ℕ_)
@@ -21,8 +24,6 @@ open import Prim.Data.Sigma
 open import 1Lab.HIT.Truncation
   using (∃)
 open import 1Lab.Equiv using (Iso; is-iso)
-
-open import 1Lab.Path using (refl ; sym ; trans ; cong ; subst ; _≡_)
 
 _≢_ : ∀ {ℓ} {A : Type ℓ} → A → A → Type ℓ
 x ≢ y = ¬ x ≡ y
@@ -73,13 +74,14 @@ open import 1Lab.Path
 import Data.Nat.Properties
   using (+-commutative; +-sucr)
 
+⊎-swap : ∀ {X Y : Type} → (X ⊎ Y) → (Y ⊎ X)
+⊎-swap {X} {Y} (inl x) = inr x
+⊎-swap {X} {Y} (inr x) = inl x
+
 ⊎-swap-↔ : ∀ {X Y : Type} → Iso (X ⊎ Y) (Y ⊎ X)
-⊎-swap-↔ = swap , iso swap swap2 swap2
+⊎-swap-↔ = ⊎-swap , iso ⊎-swap swap2 swap2
   where
-    swap : ∀ {X Y : Type} → (X ⊎ Y) → (Y ⊎ X)
-    swap {X} {Y} (inl x) = inr x
-    swap {X} {Y} (inr x) = inl x
-    swap2 : ∀ {X Y : Type} → (z : X ⊎ Y) → swap (swap z) ≡ z
+    swap2 : ∀ {X Y : Type} → (z : X ⊎ Y) → ⊎-swap (⊎-swap z) ≡ z
     swap2 (inl x) = refl
     swap2 (inr x) = refl
 
@@ -138,7 +140,7 @@ del {suc x} fzero (fzero , 0≢0) = absurd (0≢0 ≡.refl)
 del {suc x} fzero (fsuc b , a≢b) = b
 del {suc x} (fsuc a) (fzero , a≢b) = fzero
 del {suc x} (fsuc a) (fsuc b , a'≢b') =
-  fsuc (del {x} a (b , λ a≡b → absurd (a'≢b' (≡.cong fsuc a≡b))))
+  fsuc (del {x} a (b , λ a≡b → absurd (a'≢b' (ap fsuc a≡b))))
 
 del-zero-suc : ∀ {x} (b : ⟦ x ⟧) (a≢b : fzero ≢ fsuc b) → del fzero (fsuc b , a≢b) ≡ b
 del-zero-suc b a≢b with del fzero (fsuc b , a≢b) | inspect (del fzero) (fsuc b , a≢b)
@@ -164,11 +166,11 @@ del-inj fzero (fsuc b₁ , a≢b₁) (fsuc b₂ , a≢b₂) b₁'≡b₂' =
       b₂'≡b₂ = del-zero-suc b₂ a≢b₂
   in begin
       fsuc b₁
-    ≡⟨ ≡.cong fsuc (≡.sym b₁'≡b₁) ⟩
+    ≡⟨ ap fsuc (≡.sym b₁'≡b₁) ⟩
       fsuc b₁'
-    ≡⟨ ≡.cong fsuc b₁'≡b₂' ⟩
+    ≡⟨ ap fsuc b₁'≡b₂' ⟩
       fsuc b₂'
-    ≡⟨ ≡.cong fsuc b₂'≡b₂ ⟩
+    ≡⟨ ap fsuc b₂'≡b₂ ⟩
       fsuc b₂ ∎
 del-inj (fsuc a) (fzero , a≢b₁) (fzero , a≢b₂) b₁'≡b₂' = ≡.refl
 del-inj (fsuc a) (fzero , a≢b₁) (fsuc b₂ , a≢b₂) b₁'≡b₂'
@@ -181,8 +183,8 @@ del-inj (fsuc a) (fsuc b₁ , a≢b₁) (fzero , a≢b₂) b₁'≡b₂' =
 del-inj (fsuc a) (fsuc b₁ , sa≢sb₁) (fsuc b₂ , sa≢sb₂) b₁'≡b₂'
   with del (fsuc a) (fsuc b₁ , sa≢sb₁) | inspect (del (fsuc a)) (fsuc b₁ , sa≢sb₁) | del (fsuc a) (fsuc b₂  , sa≢sb₂) | inspect (del (fsuc a)) (fsuc b₂ , sa≢sb₂) | b₁'≡b₂'
 ... | fsuc c₁ | [ eq₁ ] | fsuc c₂ | [ eq₂ ] | _ =
-  ≡.cong fsuc (del-inj a (b₁ , λ a≡b₁ → sa≢sb₁ (≡.cong fsuc a≡b₁))
-                      (b₂ , λ a≡b₂ → sa≢sb₂ (≡.cong fsuc a≡b₂))
+  ap fsuc (del-inj a (b₁ , λ a≡b₁ → sa≢sb₁ (ap fsuc a≡b₁))
+                      (b₂ , λ a≡b₂ → sa≢sb₂ (ap fsuc a≡b₂))
                       (suc-inj b₁'≡b₂'))
 
 add-inj : {x : Nat} → (a : ⟦ suc x ⟧)
@@ -197,7 +199,7 @@ add-inj (fsuc a) fzero fzero c₁≡c₂ = ≡.refl
 add-inj (fsuc a) (fsuc b₁) (fsuc b₂) c₁≡c₂
   with add (fsuc a) (fsuc b₁) | inspect (add (fsuc a)) (fsuc b₁) | add (fsuc a) (fsuc b₂) | inspect (add (fsuc a)) (fsuc b₂)
 ... | fsuc c₁ , sa≢sc₁ | [ eq₁ ] | fsuc c₂ , sa≢sc₂ | [ eq₂ ] =
-  ≡.cong fsuc (add-inj a b₁ b₂ (suc-inj c₁≡c₂))
+  ap fsuc (add-inj a b₁ b₂ (suc-inj c₁≡c₂))
 
 module _ {x y : Nat} (f : ⟦ suc x ⟧ ↣ ⟦ suc y ⟧) where
   open Injection
@@ -225,7 +227,7 @@ module _ {x y : Nat} (f : ⟦ suc x ⟧ ↣ ⟦ suc y ⟧) where
   sub : ⟦ x ⟧ ↣ ⟦ y ⟧
   sub = record
     { to = f'
-    ; cong = ≡.cong f'
+    ; cong = ap f'
     ; injective = comp (add-inj fzero) (del-inj (to f fzero))
     }
 
@@ -245,7 +247,7 @@ sym-sub {suc A'} {X} {Y} f (suc A) = (sym-sub (sub f) A)
 +-identityʳ : ∀ (x : SomeFin) → x + ℕ.zero ≡ x
 +-identityʳ ℕ.zero = ≡.refl
 +-identityʳ (suc n) =
-  ≡.cong suc (+-identityʳ n)
+  ap suc (+-identityʳ n)
 
 
 module _ {A B C D : Setω} where
@@ -301,7 +303,7 @@ module _ {A B C D : Setω} where
 
   ∘-assoc : (C→D : C → D) → (B→C : B → C) → (A→B : A → B)
           → (C→D ∘ B→C) ∘ A→B ≡ C→D ∘ (B→C ∘ A→B)
-  ∘-assoc C→D B→C A→B = ≡.cong (λ _ x → C→D (B→C (A→B x))) ≡.refl
+  ∘-assoc C→D B→C A→B = ap (λ _ x → C→D (B→C (A→B x))) ≡.refl
 
   ↔∘↔-assoc : (C↔D : C ↔ D) → (B↔C : B ↔ C) → (A↔B : A ↔ B)
             → (C↔D ↔∘↔ B↔C) ↔∘↔ A↔B ≡ C↔D ↔∘↔ (B↔C ↔∘↔ A↔B)
@@ -389,7 +391,7 @@ module _ where
   map↣⊎ : ∀ {A B C D} → (A ↣ B) → (C ↣ D) → ((A ⊎ C) ↣ (B ⊎ D))
   map↣⊎ {A} {B} {C} {D} f g = record
     { to = h
-    ; cong = ≡.cong h
+    ; cong = ap h
     ; injective = inj
     }
     where open Injection
@@ -398,9 +400,9 @@ module _ where
           h (inr c) = inr (to g c)
           inj : ∀ {x y} → h x ≡ h y → x ≡ y
           inj {inl x} {inl y} =
-            ≡.cong inl ∘ injective f ∘ inl-injective
+            ap inl ∘ injective f ∘ inl-injective
           inj {inr x} {inr y} =
-            ≡.cong inr ∘ injective g ∘ inr-injective
+            ap inr ∘ injective g ∘ inr-injective
 
   id↣ : ∀ {A} → A ↣ A
   id↣ {A} = record
@@ -414,7 +416,7 @@ module _ where
     { to = f
     ; from = inl
     ; to-cong = f-cong
-    ; from-cong = ≡.cong inl
+    ; from-cong = ap inl
     ; inverse = invˡ , invʳ
     }
     where
@@ -425,14 +427,14 @@ module _ where
       invˡ : ∀ {x} {y} → y ≡ inl x → f y ≡ x
       invˡ {x} {inl y} = inl-injective
       invʳ : ∀ {x} {y} → y ≡ f x → inl y ≡ x
-      invʳ {inl x} {y} = ≡.cong inl
+      invʳ {inl x} {y} = ap inl
       
   ⊎⊥ʳ : ∀ {A} → (⟦ zero ⟧ ⊎ A) ↔ A
   ⊎⊥ʳ {A} = record
     { to = f
     ; from = inr
     ; to-cong = f-cong
-    ; from-cong = ≡.cong inr
+    ; from-cong = ap inr
     ; inverse = invˡ , invʳ
     }
     where
@@ -443,7 +445,7 @@ module _ where
       invˡ : ∀ {x} {y} → y ≡ inr x → f y ≡ x
       invˡ {x} {inr y} = inr-injective
       invʳ : ∀ {x} {y} → y ≡ f x → inr y ≡ x
-      invʳ {inr x} {y} = ≡.cong inr
+      invʳ {inr x} {y} = ap inr
 
 
 module _ where
@@ -453,8 +455,8 @@ module _ where
   splice {X} a = record
     { to = add a
     ; from = del a 
-    ; to-cong = ≡.cong (add a)
-    ; from-cong = ≡.cong (del a)
+    ; to-cong = ap (add a)
+    ; from-cong = ap (del a)
     ; inverse = {!!} , {!!}
     }
 
@@ -464,9 +466,9 @@ module _ where
   splice-inverseˡ {suc X} (fsuc a) {fzero} {fzero , 0≢a'} y≡x+ = ≡.refl
   splice-inverseˡ {suc X} fzero {fsuc x} {fsuc (fsuc y) , y≢0} =
     λ L → 
-      {!!} ( ≡.cong inl L)
+      {!!} ( ap inl L)
          
-     -- ≡.cong fsuc {!suc-inj (suc-inj (inl-injective!} --  (≡.cong inl {!y≡x+!})
+     -- ap fsuc {!suc-inj (suc-inj (inl-injective!} --  (ap inl {!y≡x+!})
   splice-inverseˡ {suc X} (fsuc a) {fsuc x} {fsuc y , y'≢a'} y≡x+ = {!!}
     -- begin
     --     del a y
@@ -508,7 +510,7 @@ module _ where
 {-
     record
       { to = g''
-      ; cong = ≡.cong g''
+      ; cong = ap g''
       ; injective = inj
       }
      where
@@ -521,7 +523,7 @@ module _ where
        inj {fsuc x} {fsuc y} eq =
          begin
               fsuc x
-            ≡⟨ ≡.cong fsuc (injective g' (suc-inj eq)) ⟩
+            ≡⟨ ap fsuc (injective g' (suc-inj eq)) ⟩
               fsuc y ∎
 
 _+ᶠ_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (X + A) ↣ Fin (Y + A)
