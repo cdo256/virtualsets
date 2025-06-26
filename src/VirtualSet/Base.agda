@@ -116,11 +116,11 @@ A ∖ a = Σ[ b ∈ Fin A ] Irr (a ≢ b)
 
 open import Data.Fin.Base using (fsuc-inj)
 
-add : {x : Nat} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖  a) 
-add {suc x} a b with fin-view a | fin-view b
+ins : {x : Nat} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖  a) 
+ins {suc x} a b with fin-view a | fin-view b
 ... | vzero | _ = fsuc b , forget fzero≠fsuc
 ... | vsuc a | vzero = fzero , (forget fsuc≠fzero)
-... | vsuc a | vsuc b with add a b
+... | vsuc a | vsuc b with ins a b
 ... | i , forget a≢i = fsuc i , forget (λ a'≡i' → a≢i (fsuc-inj a'≡i'))
 
 |Fin1|≡1 : (a b : ⟦ 1 ⟧) → a ≡ b
@@ -188,12 +188,12 @@ del-inj {x = suc x} a (b , forget a≢b) (c , forget a≢c) b'≡c'
         (del (fsuc a) ((fsuc j) , forget _)) ≡⟨ refl ⟩
         fsuc (del a (j , forget _ )) ∎)))
 
-add-inj : {x : Nat} → (a : ⟦ suc x ⟧)
+ins-inj : {x : Nat} → (a : ⟦ suc x ⟧)
         → (b c : Fin x)
-        → fst (add a b) ≡ fst (add a c)
+        → fst (ins a b) ≡ fst (ins a c)
         → b ≡ c
-add-inj {x = zero} a b c a+b≡a+c = absurd (Fin-absurd b)
-add-inj {x = suc x} a b c a+b≡a+c with fin-view a | fin-view b | fin-view c
+ins-inj {x = zero} a b c a+b≡a+c = absurd (Fin-absurd b)
+ins-inj {x = suc x} a b c a+b≡a+c with fin-view a | fin-view b | fin-view c
 ... | vzero | vzero | vzero = refl
 ... | vzero | vzero | vsuc c' = absurd (fzero≠fsuc (fsuc-inj a+b≡a+c))
 ... | vzero | vsuc b' | vzero = absurd (fsuc≠fzero (fsuc-inj a+b≡a+c))
@@ -202,36 +202,55 @@ add-inj {x = suc x} a b c a+b≡a+c with fin-view a | fin-view b | fin-view c
 ... | vsuc a' | vzero | vsuc c' = absurd (fzero≠fsuc a+b≡a+c)
 ... | vsuc a' | vsuc b' | vzero = absurd (fsuc≠fzero a+b≡a+c)
 ... | vsuc a' | vsuc b' | vsuc c' =
-  ap fsuc (add-inj a' b' c' (fsuc-inj a+b≡a+c))
+  ap fsuc (ins-inj a' b' c' (fsuc-inj a+b≡a+c))
 
-{-
-module _ {x y : Nat} (f : ⟦ suc x ⟧ ↣ ⟦ suc y ⟧) where
-  f' : Fin x → Fin y
-  f' i =
-    let (j , 0≢j) = add fzero i 
-    in del (to f fzero) (to f j , λ f0≡fj → 0≢j (injective f f0≡fj))
+module Pred {x y : Nat} (f : ⟦ suc x ⟧ ↣ ⟦ suc y ⟧) where
+  f-inj : is-injective (fst f)
+  f-inj = snd f
 
-  comp : (ai : (b₁ b₂ : ⟦ x ⟧) → val (add fzero b₁) ≡ val (add fzero b₂) → b₁ ≡ b₂)
-       → (di : (B₁ B₂ : (suc y) ∖ to f fzero)
-             → del (to f fzero) B₁ ≡ del (to f fzero) B₂ → val B₁ ≡ val B₂)
-       → Injective _≡_ _≡_ f'
-  comp ai di {b₁} {b₂} f'b₁≡f'b₂ =
+  g^ : Fin x → Fin y
+  g^ i =
+    let (j , forget 0≢j) = ins fzero i 
+    in del (fst f fzero) (fst f j , forget λ f0≡fj → 0≢j (f-inj fzero j f0≡fj))
+
+
+  composition : (ai : (b₁ b₂ : ⟦ x ⟧) → fst (ins fzero b₁) ≡ fst (ins fzero b₂) → b₁ ≡ b₂)
+       → (di : (B₁ B₂ : (suc y) ∖ fst f fzero)
+             → del (fst f fzero) B₁ ≡ del (fst f fzero) B₂ → fst B₁ ≡ fst B₂)
+       → Injective g^
+  composition ai di b₁ b₂ f'b₁≡f'b₂ =
     let
-      (c₁ , z≢c₁) = add fzero b₁
-      (c₂ , z≢c₂) = add fzero b₂
+      (c₁ , forget z≢c₁) = ins fzero b₁
+      (c₂ , forget z≢c₂) = ins fzero b₂
     in
     ai b₁ b₂
-       (injective f {c₁} {c₂}
-            (di (to f c₁ , λ fz≡fc₁ → z≢c₁ (injective f {fzero} {c₁} fz≡fc₁))
-                (to f c₂ , λ fz≡fc₂ → z≢c₂ (injective f {fzero} {c₂} fz≡fc₂))
-                f'b₁≡f'b₂))
+       (f-inj c₁ c₂
+         (di (fst f c₁ , forget λ fz≡fc₁ → z≢c₁ (f-inj fzero c₁ fz≡fc₁))
+             (fst f c₂ , forget λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
+             f'b₁≡f'b₂))
 
-  sub : ⟦ x ⟧ ↣ ⟦ y ⟧
-  sub = record
-    { to = f'
-    ; cong = ap f'
-    ; injective = comp (add-inj fzero) (del-inj (to f fzero))
-    }
+  g-inj : is-injective g^
+  g-inj b₁ b₂ gb₁≡gb₂ = 
+    let
+      ai : (b₁ b₂ : ⟦ x ⟧) → fst (ins fzero b₁) ≡ fst (ins fzero b₂) → b₁ ≡ b₂
+      ai = ins-inj fzero
+      di : (B₁ B₂ : (suc y) ∖ fst f fzero)
+         → del (fst f fzero) B₁ ≡ del (fst f fzero) B₂
+         → fst B₁ ≡ fst B₂
+      di = del-inj (fst f fzero)
+      (c₁ , forget z≢c₁) = ins fzero b₁
+      (c₂ , forget z≢c₂) = ins fzero b₂
+    in
+    ai b₁ b₂
+       (f-inj c₁ c₂
+         (di (fst f c₁ , forget λ fz≡fc₁ → z≢c₁ (f-inj fzero c₁ fz≡fc₁))
+             (fst f c₂ , forget λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
+             gb₁≡gb₂))
+
+  g : ⟦ x ⟧ ↣ ⟦ y ⟧
+  g = g^ , g-inj
+
+open Pred using () renaming (g to pred)
 
 {-
 
@@ -260,8 +279,8 @@ module _ {A B C D : Typeω} where
   
   flip-↔ : (A ↔ B) → (B ↔ A)
   flip-↔ A↔B = record
-    { to = from A↔B
-    ; from = to A↔B
+    { fst = from A↔B
+    ; from = fst A↔B
     ; to-cong = from-cong A↔B
     ; from-cong = to-cong A↔B
     ; inverse = (snd (inverse A↔B)) , (fst (inverse A↔B))
@@ -271,9 +290,9 @@ module _ {A B C D : Typeω} where
 
   _↔∘↔_ : (B ↔ C) → (A ↔ B) → (A ↔ C)
   B↔C ↔∘↔ A↔B  = record
-    { to = to B↔C ∘ to A↔B 
+    { fst = fst B↔C ∘ fst A↔B 
     ; from = from A↔B ∘ from B↔C
-    ; to-cong = to-cong B↔C ∘ to-cong A↔B 
+    ; fst-cong = fst-cong B↔C ∘ to-cong A↔B 
     ; from-cong = from-cong A↔B ∘ from-cong B↔C 
     ; inverse = fst (inverse B↔C) ∘ fst (inverse A↔B)
               , snd (inverse A↔B) ∘ snd (inverse B↔C)
@@ -281,26 +300,26 @@ module _ {A B C D : Typeω} where
 
   ↔to↣ : (A ↔ B) → (A ↣ B)
   ↔to↣ R = record
-    { to = Inverse.to R 
+    { fst = Inverse.fst R 
     ; cong = to-cong R 
     ; injective = λ {x} {y} Rx≡Ry → 
       begin
           x
-        ≡⟨ ≡.sym ((snd (inverse R) {x} {to R y}) (≡.sym Rx≡Ry)) ⟩
-          R .from (to R y)
+        ≡⟨ ≡.sym ((snd (inverse R) {x} {fst R y}) (≡.sym Rx≡Ry)) ⟩
+          R .from (fst R y)
         ≡⟨ (snd (inverse R)) ≡.refl ⟩
           y ∎
     }
 
   _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
   B↔C ↣∘↣ A↔B  = record
-    { to = to B↔C ∘ to A↔B 
+    { fst = fst B↔C ∘ fst A↔B 
     ; cong = cong B↔C ∘ cong A↔B 
     ; injective = injective A↔B ∘ injective B↔C
     }
 
   ↔-IsId : ∀ {A} → (R : A ↔ A) → Typeω
-  ↔-IsId {A} R = ∀ (a : A) → to R a ≡ a × a ≡ from R a
+  ↔-IsId {A} R = ∀ (a : A) → fst R a ≡ a × a ≡ from R a
              
 module _ {A B C D : Typeω} where
   open Inverse
@@ -327,7 +346,7 @@ module _ {A B C D : Typeω} where
     where
       A↔C : A ↔ C
       A↔C = record
-        { to = to B↔C ∘ to A↔B
+        { fst = fst B↔C ∘ fst A↔B
         ; from = from A↔B ∘ from B↔C
         ; to-cong = to-cong B↔C ∘ to-cong A↔B 
         ; from-cong = from-cong A↔B ∘ from-cong B↔C
@@ -336,7 +355,7 @@ module _ {A B C D : Typeω} where
         }
       B↔D : B ↔ D
       B↔D = record
-        { to = to C↔D ∘ to B↔C
+        { fst = fst C↔D ∘ fst B↔C
         ; from = from B↔C ∘ from C↔D
         ; to-cong = to-cong C↔D ∘ to-cong B↔C 
         ; from-cong = from-cong B↔C ∘ from-cong C↔D
@@ -345,7 +364,7 @@ module _ {A B C D : Typeω} where
         }
       A↔D₁ : A ↔ D
       A↔D₁ = record
-        { to = (to C↔D ∘ to B↔C) ∘ to A↔B
+        { fst = (fst C↔D ∘ fst B↔C) ∘ fst A↔B
         ; from = from A↔B ∘ (from B↔C ∘ from C↔D)
         ; to-cong = (to-cong C↔D ∘ to-cong B↔C) ∘ to-cong A↔B
         ; from-cong = from-cong A↔B ∘ (from-cong B↔C ∘ from-cong C↔D)
@@ -354,7 +373,7 @@ module _ {A B C D : Typeω} where
         }
       A↔D₂ : A ↔ D
       A↔D₂ = record
-        { to = to C↔D ∘ (to B↔C ∘ to A↔B)
+        { fst = fst C↔D ∘ (fst B↔C ∘ fst A↔B)
         ; from = (from A↔B ∘ from B↔C) ∘ from C↔D
         ; to-cong = to-cong C↔D ∘ (to-cong B↔C ∘ to-cong A↔B)
         ; from-cong = (from-cong A↔B ∘ from-cong B↔C) ∘ from-cong C↔D
@@ -369,14 +388,14 @@ module _  where
   double-flip R = ≡.refl
   
   flip-IsId : ∀ {A B} (R : A ↔ B) → ↔-IsId ((flip-↔ R) ↔∘↔ R)
-  fst (flip-IsId {A} {B} R a) = snd (inverse R) {a} {to R a} ≡.refl
+  fst (flip-IsId {A} {B} R a) = snd (inverse R) {a} {fst R a} ≡.refl
   snd (flip-IsId {A} {B} R a) =
     begin
         a
       ≡⟨ ≡.sym (fst (inverse (flip-↔ R)) ≡.refl) ⟩
-        to (flip-↔ R) (from (flip-↔ R) a)
+        fst (flip-↔ R) (from (flip-↔ R) a)
       ≡⟨ ≡.refl ⟩
-        from R (to R a) ∎
+        from R (fst R a) ∎
 
 module _ where
   open Inverse
@@ -394,14 +413,14 @@ module _ where
 
   map↣⊎ : ∀ {A B C D} → (A ↣ B) → (C ↣ D) → ((A ⊎ C) ↣ (B ⊎ D))
   map↣⊎ {A} {B} {C} {D} f g = record
-    { to = h
+    { fst = h
     ; cong = ap h
     ; injective = inj
     }
     where open Injection
           h : (A ⊎ C) → (B ⊎ D)
-          h (inl a) = inl (to f a)
-          h (inr c) = inr (to g c)
+          h (inl a) = inl (fst f a)
+          h (inr c) = inr (fst g c)
           inj : ∀ {x y} → h x ≡ h y → x ≡ y
           inj {inl x} {inl y} =
             ap inl ∘ injective f ∘ inl-injective
@@ -410,14 +429,14 @@ module _ where
 
   id↣ : ∀ {A} → A ↣ A
   id↣ {A} = record
-    { to = id
+    { fst = id
     ; cong = id
     ; injective = id
     }
 
   ⊎⊥ˡ : ∀ {A} → (A ⊎ ⟦ zero ⟧) ↔ A
   ⊎⊥ˡ {A} = record
-    { to = f
+    { fst = f
     ; from = inl
     ; to-cong = f-cong
     ; from-cong = ap inl
@@ -457,14 +476,14 @@ module _ where
 
   splice : {X : SomeFin} → (a : ⟦ suc X ⟧) → ⟦ X ⟧ ↔ (suc X ∖ a)
   splice {X} a = record
-    { to = add a
+    { fst = ins a
     ; from = del a 
-    ; to-cong = ap (add a)
+    ; to-cong = ap (ins a)
     ; from-cong = ap (del a)
     ; inverse = {!!} , {!!}
     }
 
-  splice-inverseˡ : {X : SomeFin} → (a : ⟦ suc X ⟧) → Inverseˡ _≡_ _≡_ (del a) (add a)
+  splice-inverseˡ : {X : SomeFin} → (a : ⟦ suc X ⟧) → Inverseˡ (del a) (ins a)
   splice-inverseˡ {zero} a {()} {y} y≡x+
   splice-inverseˡ {suc X} fzero {fzero} {fsuc y , y'≢0} y≡x+ = {!!}
   splice-inverseˡ {suc X} (fsuc a) {fzero} {fzero , 0≢a'} y≡x+ = ≡.refl
@@ -494,7 +513,7 @@ module _ where
   _-ᶠ_ {A' = suc A'} {X} {Y} f (suc A) {eq} = _-ᶠ_ {A'} g A 
     where
       g : (⟦ X ⟧ ⊎ ⟦ A' ⟧) ↣ (⟦ Y ⟧ ⊎ ⟦ A' ⟧)
-      g = map↣⊎ id↣ {!add!}  ↣∘↣ f ↣∘↣ map↣⊎ id↣ {!!}
+      g = map↣⊎ id↣ {!ins!}  ↣∘↣ f ↣∘↣ map↣⊎ id↣ {!!}
 
   -- _-ᶠ_ {A'} {X} {Y} f A =
   --   let g = (↔to↣ (swap {Y} {A'})) ↣∘↣ f ↣∘↣ (↔to↣ (swap {A'} {X}))
@@ -513,7 +532,7 @@ module _ where
 -}
 {-
     record
-      { to = g''
+      { fst = g''
       ; cong = ap g''
       ; injective = inj
       }
@@ -521,8 +540,8 @@ module _ where
        g' = g +ᶠ-sym A
        g'' : Fin (suc A + X) → Fin (suc A + Y)
        g'' fzero = fzero
-       g'' (fsuc a) = fsuc (to g' a)
-       inj : Injective _≡_ _≡_ g''
+       g'' (fsuc a) = fsuc (fst g' a)
+       inj : Injective g''
        inj {fzero} {fzero} eq = ≡.refl
        inj {fsuc x} {fsuc y} eq =
          begin
@@ -540,7 +559,7 @@ _+ᶠ_ {X} {Y} g A =
 
 _⊙_ : ∀ {X Y fzero} → (Fin Y ↣ Fin fzero) → (Fin X ↣ Fin Y) → (Fin X ↣ Fin fzero)
 _⊙_ g f = record
-  { to = to g ∘ to f 
+  { fst = fst g ∘ fst f 
   ; cong = cong g ∘ cong f
   ; injective = injective f ∘ injective g
   }
