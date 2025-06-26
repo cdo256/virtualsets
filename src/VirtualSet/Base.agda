@@ -71,9 +71,19 @@ open import 1Lab.Path
     eqr {x = suc x} z = refl
 
 import Data.Nat.Properties
-  using (+-comm; +-suc)
-open import Data.Sum.Properties
-  using () renaming (swap-↔ to ⊎-swap-↔)
+  using (+-commutative; +-sucr)
+
+⊎-swap-↔ : ∀ {X Y : Type} → Iso (X ⊎ Y) (Y ⊎ X)
+⊎-swap-↔ = swap , iso swap swap2 swap2
+  where
+    swap : ∀ {X Y : Type} → (X ⊎ Y) → (Y ⊎ X)
+    swap {X} {Y} (inl x) = inr x
+    swap {X} {Y} (inr x) = inl x
+    swap2 : ∀ {X Y : Type} → (z : X ⊎ Y) → swap (swap z) ≡ z
+    swap2 (inl x) = refl
+    swap2 (inr x) = refl
+
+{-
 open import Level
   using (Setω; _⊔_; 0ℓ) renaming (suc to lsuc)
 open import Relation.Binary.PropositionalEquality
@@ -88,8 +98,6 @@ open import Function.Definitions
   using (Injective; Congruent;
          Inverseˡ; Inverseʳ; Inverseᵇ)
 
-{-
- 
 -- open import Cubical.HITs.SetQuotients.Base
 
 open ≡-Reasoning
@@ -231,8 +239,8 @@ sym-sub : {A' X Y : SomeFin} → (f : ⟦ A' + X ⟧ ↣ ⟦ A' + Y ⟧)
 sym-sub {ℕ.zero} {X} {Y} f ℕ.zero = f
 sym-sub {suc A'} {X} {Y} f (suc A) = (sym-sub (sub f) A)
 
-+-comm : ∀ (A B : SomeFin) → A + B ≡ B + A
-+-comm = Data.Nat.Properties.+-comm
++-commutative : ∀ (A B : SomeFin) → A + B ≡ B + A
++-commutative = Data.Nat.Properties.+-commutative
 
 +-identityʳ : ∀ (x : SomeFin) → x + ℕ.zero ≡ x
 +-identityʳ ℕ.zero = ≡.refl
@@ -519,9 +527,9 @@ module _ where
 _+ᶠ_ : ∀ {X Y : SomeFin} (g : Fin X ↣ Fin Y) → (A : SomeFin) → Fin (X + A) ↣ Fin (Y + A)
 _+ᶠ_ {X} {Y} g A =
   subst (λ h → Fin (X + A) ↣ Fin h)
-          (≡.sym (+-comm Y A))
+          (≡.sym (+-commutative Y A))
     (subst (λ h → Fin h ↣ Fin (A + Y))
-             (≡.sym (+-comm X A))
+             (≡.sym (+-commutative X A))
        (g +ᶠ-sym A))
 
 _⊙_ : ∀ {X Y fzero} → (Fin Y ↣ Fin fzero) → (Fin X ↣ Fin Y) → (Fin X ↣ Fin fzero)
