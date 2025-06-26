@@ -3,13 +3,13 @@ module VirtualSet.Base where
 open import Meta.Idiom
 
 open import 1Lab.Type
-  using (Type; ⊥; absurd; _×_; _,_; ¬_)
+  using (Type; Typeω; ⊥; absurd; _×_; _,_; ¬_; _∘_; id)
 
 open import 1Lab.Path using (refl; sym; ap; subst; _≡_)
 
 -- Fin is defined as a bounded Nat in 1Lab so will require a fair amount of work to port.
 open import Data.Fin.Base
-  using (fin; Fin; fzero; fsuc; inject)
+  using (fin; Fin; fzero; fsuc; inject; fzero≠fsuc)
 
 open import Data.Sum
   using (inl; inr; _⊎_)
@@ -85,67 +85,62 @@ import Data.Nat.Properties
     swap2 (inl x) = refl
     swap2 (inr x) = refl
 
-{-
-open import Level
-  using (Setω; _⊔_; 0ℓ) renaming (suc to lsuc)
-open import Relation.Binary.PropositionalEquality
-  using (inspect; [_])
-open import Function.Base
-  using (_∘_; id)
-open import Function.Bundles
-  using (_↣_; _↔_; Injection; Inverse)
-open import Algebra.Definitions
-  using (RightIdentity)
-open import Function.Definitions
-  using (Injective; Congruent;
-         Inverseˡ; Inverseʳ; Inverseᵇ)
+_↔_ : (X Y : Type) → Type
+X ↔ Y = Iso X Y
 
--- open import Cubical.HITs.SetQuotients.Base
+is-injective : {X Y : Type} → (f : X → Y) → Type
+is-injective {X} f = ∀ (x y : X) → f x ≡ f y → x ≡ y
 
-open ≡-Reasoning
-private
-  variable
-    c ℓ : Level.Level
+_↣_ : (X Y : Type) → Type
+X ↣ Y = Σ (X → Y) is-injective
 
 
+-- TEMP: Polyfill
+Injection : (X Y : Type) → Type
+Injection X Y = X ↣ Y
+Inverse : (X Y : Type) → Type
+Inverse X Y = X ↔ Y
+Injective : {X Y : Type} → (f : X → Y) → Type
+Injective f = is-injective f
 
-
-SomeFin : Setω
+SomeFin : Type
 SomeFin = Nat
 
-⟦_⟧ : (n : SomeFin) → Setω
+⟦_⟧ : (n : SomeFin) → Type
 ⟦ n ⟧ = Fin n
 
--- _∖_ : (A : SomeFin) → (a : Fin A) → Setω
--- A ∖ a = Σ[ b ∈ Fin A ] .(a ≢ b)
+open import Data.Irr using (Irr)
 
-record _∖_ (A : SomeFin) (a : Fin A) : Setω where
-  constructor _,_
-  field
-    val : Fin A
-    .≠ : a ≢ val
-open _∖_
+_∖_ : (A : SomeFin) → (a : Fin A) → Type
+A ∖ a = Σ[ b ∈ Fin A ] Irr (a ≢ b)
+
+open import Data.Fin.Base using (fsuc-inj)
 
 add : {x : Nat} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖  a) 
-add {suc x} fzero b = fsuc b , λ ()
-add {suc x} (fsuc a) fzero = fzero , λ ()
-add {suc x} (fsuc a) (fsuc b) =
-  let
-    (c , a≢c) = add a b
-  in fsuc (val (add a b)) , λ a'≡c' → a≢c (suc-inj a'≡c')
+add {suc x} a b with fin-view a | fin-view b
+... | vzero | _ = fsuc b , forget fzero≠fsuc
+... | vsuc a | vzero = fzero , (forget (λ fsuc≡fzero → fzero≠fsuc (sym fsuc≡fzero)))
+... | vsuc a | vsuc b with add a b
+... | i , forget a≢i = fsuc i , forget (λ a'≡i' → a≢i (fsuc-inj a'≡i'))
+
+|Fin1|≡1 : (a b : ⟦ 1 ⟧) → a ≡ b
+|Fin1|≡1 a b with fin-view a | fin-view b
+... | vzero | vzero = refl
 
 del : {x : Nat} → (a : ⟦ suc x ⟧) → (suc x ∖ a) → ⟦ x ⟧
-del {ℕ.zero} fzero (fzero , 0≢0) = absurt (0≢0 ≡.refl)
-del {suc x} fzero (fzero , 0≢0) = absurd (0≢0 ≡.refl)
-del {suc x} fzero (fsuc b , a≢b) = b
-del {suc x} (fsuc a) (fzero , a≢b) = fzero
-del {suc x} (fsuc a) (fsuc b , a'≢b') =
-  fsuc (del {x} a (b , λ a≡b → absurd (a'≢b' (ap fsuc a≡b))))
+del {zero} a (b , forget b≢a) = absurd (b≢a (|Fin1|≡1 a b))
+del {suc x} a (b , forget b≢a) with fin-view a | fin-view b
+... | vzero | vzero = absurd (b≢a refl)
+... | vzero | vsuc b = b
+... | vsuc a | vzero = fzero
+... | vsuc a | vsuc b with del a (b , forget (λ a≡b → b≢a (ap fsuc a≡b)))
+... | i = fsuc i
 
-del-zero-suc : ∀ {x} (b : ⟦ x ⟧) (a≢b : fzero ≢ fsuc b) → del fzero (fsuc b , a≢b) ≡ b
-del-zero-suc b a≢b with del fzero (fsuc b , a≢b) | inspect (del fzero) (fsuc b , a≢b)
-... | fzero | [ eq ] = ≡.sym eq
-... | fsuc X | [ eq ] = ≡.sym eq
+del-zero-suc : ∀ {x} (b : ⟦ x ⟧) (a≢b : fzero ≢ fsuc b) → del fzero (fsuc b , forget a≢b) ≡ b
+del-zero-suc b a≢b with fin-view (del fzero (fsuc b , forget a≢b))
+... | vzero = refl
+... | vsuc _ = refl
+
 
 del-inj : {x : Nat} → (a : ⟦ suc x ⟧)
         → (B₁ B₂ : (suc x ∖ a))
@@ -250,7 +245,7 @@ sym-sub {suc A'} {X} {Y} f (suc A) = (sym-sub (sub f) A)
   ap suc (+-identityʳ n)
 
 
-module _ {A B C D : Setω} where
+module _ {A B C D : Typeω} where
   open Inverse
   open Injection
   
@@ -295,10 +290,10 @@ module _ {A B C D : Setω} where
     ; injective = injective A↔B ∘ injective B↔C
     }
 
-  ↔-IsId : ∀ {A} → (R : A ↔ A) → Setω
+  ↔-IsId : ∀ {A} → (R : A ↔ A) → Typeω
   ↔-IsId {A} R = ∀ (a : A) → to R a ≡ a × a ≡ from R a
              
-module _ {A B C D : Setω} where
+module _ {A B C D : Typeω} where
   open Inverse
 
   ∘-assoc : (C→D : C → D) → (B→C : B → C) → (A→B : A → B)
