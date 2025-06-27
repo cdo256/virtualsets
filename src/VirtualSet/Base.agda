@@ -61,7 +61,6 @@ open import Data.Fin.Base using (fin-view)
 open import 1Lab.Equiv using (iso; Iso; is-right-inverse; is-left-inverse)
 
 open import 1Lab.Path
-
 +↔⊎ : ∀ {x y} → Iso (Fin x ⊎ Fin y) (Fin (x +ℕ y))
 +↔⊎ = +→⊎ , 1Lab.Equiv.iso ⊎→+ eqr eql
   where
@@ -265,7 +264,7 @@ sym-sub : {A' X Y : SomeFin} → (f : ⟦ A' + X ⟧ ↣ ⟦ A' + Y ⟧)
 sym-sub {zero} {X} {Y} f zero = f
 sym-sub {zero} {X} {Y} f (suc A) {eq} = absurd (suc≠zero eq)
 sym-sub {suc A'} {X} {Y} f (zero) {eq} = absurd (zero≠suc eq)
-sym-sub {suc A'} {X} {Y} f (suc A) = (sym-sub (pred f) A)
+sym-sub {suc A'} {X} {Y} f (suc A) = sym-sub (pred f) A
 
 
 +-commutative : ∀ (A B : SomeFin) → A + B ≡ B + A
@@ -276,8 +275,83 @@ sym-sub {suc A'} {X} {Y} f (suc A) = (sym-sub (pred f) A)
 +-identityʳ (suc n) =
   ap suc (+-identityʳ n)
 
+∘-assoc : ∀ {A B C D} (h : C → D) (g : B → C) (f : A → B)
+        → h ∘ (g ∘ f) ≡ (h ∘ g) ∘ f
+∘-assoc h g f = refl
+
+id-r : ∀ {A B} (f : A → B)
+     → f ∘ id ≡ f
+id-r f = refl
+
+id-l : ∀ {A B} (f : A → B)
+     → id ∘ f ≡ f
+id-l f = refl
+
+
+module _ {A B C D : Type} where
+  open is-iso
+
+  flip-↔ : (A ↔ B) → (B ↔ A)
+  flip-↔ (f , A↔B) = (from A↔B) , iso f (linv A↔B) (rinv A↔B)
+
+  infixl 9 _↔∘↔_ _↣∘↣_
+
+  _↔∘↔_ : (B ↔ C) → (A ↔ B) → (A ↔ C)
+  (g , g-iso) ↔∘↔ (f , f-iso) =
+    let f⁻¹ = from f-iso
+        g⁻¹ = from g-iso
+        fg-rinv : (g ∘ f) ∘ (f⁻¹ ∘ g⁻¹) ≡ id
+        fg-rinv =
+          (g ∘ f) ∘ (f⁻¹ ∘ g⁻¹) ≡⟨ sym (∘-assoc g f (f⁻¹ ∘ g⁻¹)) ⟩
+          g ∘ (f ∘ (f⁻¹ ∘ g⁻¹)) ≡⟨ ap (g ∘_) (∘-assoc f f⁻¹ g⁻¹) ⟩
+          g ∘ ((f ∘ f⁻¹) ∘ g⁻¹) ≡⟨ ap (λ ○ → g ∘ (○ ∘ g⁻¹)) (funext (rinv f-iso)) ⟩
+          g ∘ (id ∘ g⁻¹) ≡⟨ ap (g ∘_) (id-l g⁻¹) ⟩
+          g ∘ g⁻¹ ≡⟨ funext (rinv g-iso) ⟩
+          id ∎
+
+        fg-linv : (f⁻¹ ∘ g⁻¹) ∘ (g ∘ f) ≡ id
+        fg-linv =
+          (f⁻¹ ∘ g⁻¹) ∘ (g ∘ f) ≡⟨ sym (∘-assoc f⁻¹ g⁻¹ (g ∘ f)) ⟩
+          f⁻¹ ∘ (g⁻¹ ∘ (g ∘ f)) ≡⟨ ap (f⁻¹ ∘_) (∘-assoc g⁻¹ g f) ⟩
+          f⁻¹ ∘ ((g⁻¹ ∘ g) ∘ f) ≡⟨ ap (λ ○ → f⁻¹ ∘ (○ ∘ f)) (funext (linv g-iso)) ⟩
+          f⁻¹ ∘ (id ∘ f) ≡⟨ ap (f⁻¹ ∘_) (id-l f) ⟩
+          f⁻¹ ∘ f ≡⟨ funext (linv f-iso) ⟩
+          id ∎
+
+    in (g ∘ f) , iso (f⁻¹ ∘ g⁻¹)
+          (λ c → 
+            (g ∘ f) ((f⁻¹ ∘ g⁻¹) c) ≡⟨ refl ⟩
+            ((g ∘ f) ∘ (f⁻¹ ∘ g⁻¹)) c ≡⟨ ap (λ ○ → ○ c) fg-rinv ⟩
+            id c ≡⟨ refl ⟩
+            c ∎)
+          (λ a → 
+            (f⁻¹ ∘ g⁻¹) ((g ∘ f) a) ≡⟨ refl ⟩
+            ((f⁻¹ ∘ g⁻¹) ∘ (g ∘ f)) a ≡⟨ ap (λ ○ → ○ a) fg-linv ⟩
+            id a ≡⟨ refl ⟩
+            a ∎)
+
+  ↔to↣ : (A ↔ B) → (A ↣ B)
+  ↔to↣ (f , f-iso) =
+    let f⁻¹ = from f-iso
+    in
+    f , λ x y eq →
+      x ≡⟨ sym (linv f-iso x) ⟩
+      f⁻¹ (f x) ≡⟨ ap f⁻¹ eq ⟩
+      f⁻¹ (f y) ≡⟨ linv f-iso y ⟩
+      y ∎
+
+  {-
+
+
+  _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
+  (f , inj₁) ↣∘↣ (g , inj₂) = (f ∘ g) , λ x y eq → inj₂ _ _ (inj₁ _ _ eq)
+
+  ↔-IsId : ∀ {A} → (R : A ↔ A) → Typeω
+  ↔-IsId {A} (f , iso f⁻¹ _ _) = ∀ a → f a ≡ a × a ≡ f⁻¹ a
+  -- -}
+
 {-
-module _ {A B C D : Typeω} where
+module _ {A B C D : Type} where
   open Inverse
   open Injection
   
@@ -530,13 +604,11 @@ module _ where
           → ⟦ X + A ⟧ ↣ ⟦ Y + A ⟧
   _+ᶠ-sym_ {X} {Y} g A = ↔to↣ (flip-↔ +↔⊎) ↣∘↣ map↣⊎ g (id↣ {⟦ A ⟧}) ↣∘↣ ↔to↣ +↔⊎
 
-{-
   _+ᶠ-sym_ : ∀ {X Y : SomeFin} (g : ⟦ X ⟧ ↣ ⟦ Y ⟧) → (A : SomeFin)
           → ⟦ A + X ⟧ ↣ ⟦ A + Y ⟧
   _+ᶠ-sym_ {X} {Y} g zero = g
   _+ᶠ-sym_ {X} {Y} g (suc A) = ↔to↣ (flip-↔ +↔⊎) ↣∘↣ map↣⊎ (id↣ {⟦ 1 ⟧}) (g +ᶠ-sym A) ↣∘↣ ↔to↣ +↔⊎
 -}
-{-
     record
       { fst = g''
       ; cong = ap g''
