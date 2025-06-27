@@ -340,15 +340,13 @@ module _ {A B C D : Type} where
       f⁻¹ (f y) ≡⟨ linv f-iso y ⟩
       y ∎
 
-  {-
-
-
   _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
   (f , inj₁) ↣∘↣ (g , inj₂) = (f ∘ g) , λ x y eq → inj₂ _ _ (inj₁ _ _ eq)
 
-  ↔-IsId : ∀ {A} → (R : A ↔ A) → Typeω
-  ↔-IsId {A} (f , iso f⁻¹ _ _) = ∀ a → f a ≡ a × a ≡ f⁻¹ a
-  -- -}
+  ↔-IsId : ∀ {A} → (R : A ↔ A) → Type
+  ↔-IsId {A} (f , f-iso) =
+    let f⁻¹ = from f-iso
+    in f ≡ id × f⁻¹ ≡ id
 
 {-
 module _ {A B C D : Type} where
