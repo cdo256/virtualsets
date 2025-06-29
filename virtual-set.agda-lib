@@ -1,4 +1,4 @@
-name: virtualset-1lab
+name: virtual-set
 include:
   src
 depend:
