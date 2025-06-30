@@ -98,11 +98,58 @@ restrict-fin x a a<x = fin (lower a) ⦃ forget a<x ⦄
 +↔⊎ : ∀ {x y} → Iso (Fin x ⊎ Fin y) (Fin (x +ℕ y))
 +↔⊎ = ⊎→+ , 1Lab.Equiv.iso +→⊎ eqr eql
   where
-    l≤x : ∀ {x y : Nat} (a : Fin x) → Irr (Fin.lower (⊎→+ (inl a)) ≤ x)
-    l≤x {x = suc x} {y} a with fin-view a
-    ... | vzero = forget _≤_.0≤x
-    ... | vsuc (fin a' ⦃ le ⦄) = (map (λ a<x →
-                  x≤sucy {x = suc a'} {x} ⦃ a<x ⦄) le)
+    r⊎→+ : ∀ (x y : Nat) (a : Fin y) → (⊎→+ (inr a)) ≡ fshift x a
+    r⊎→+    zero y a = refl 
+    r⊎→+ (suc x) y a = refl
+
+    l<x : ∀ (x y : Nat) (a : Fin x) → Irr (lower (⊎→+ (inl a)) < x)
+    l<x (suc x) y a with fin-view a
+    ... | vzero = forget _
+    ... | vsuc (fin a' ⦃ le ⦄) = map (λ a<x → s≤s a<x) le
+    
+    fshift≡+ : ∀ (x y : Nat) (a : Fin y) → lower (fshift x a) ≡ x +ℕ lower a
+    fshift≡+ zero y a = refl
+    fshift≡+ (suc x) y a = eq
+      where
+        eq : lower (fshift (suc x) a) ≡ suc x +ℕ lower a
+        eq = lower (fshift (suc x) a) ≡⟨ refl ⟩
+             lower (fsuc (fshift x a)) ≡⟨ refl ⟩
+             suc (lower (fshift x a)) ≡⟨ ap suc (fshift≡+ x y a) ⟩
+             suc x +ℕ lower a ∎
+
+    fshift≡+ᵀ : ∀ (x y : Nat) (a : Fin y)
+              → Type
+    fshift≡+ᵀ x y a = fshift x a ≡ fin (x +ℕ lower a) ⦃ bounded ⦄ 
+      where
+        bounded : Irr (x +ℕ lower a < x +ℕ y)
+        bounded = +-preserves-<l (lower a) y x <$> Fin.bounded a
+
+    irr-is-prop : (X : Type) → (a b : Irr X) → a ≡ b
+    irr-is-prop X a b = refl
+    
+    fshift≡+ꟳ : ∀ (x y : Nat) (a : Fin y) → fshift≡+ᵀ x y a
+    fshift≡+ꟳ x y a =
+      fshift x a
+        ≡⟨ refl ⟩
+      fin (lower (fshift x a)) ⦃ Fin.bounded (fshift x a) ⦄
+        ≡⟨ ap (λ ○ → fin ○ ⦃ forget _ ⦄) eq ⟩
+      fin (x +ℕ lower a) ⦃ _ ⦄
+        ≡⟨ refl ⟩
+      fin (x +ℕ lower a) ⦃ bounded ⦄ ∎
+      where
+        bounded : Irr (x +ℕ lower a < x +ℕ y)
+        bounded = +-preserves-<l (lower a) y x <$> Fin.bounded a
+        eq : lower (fshift x a) ≡ x +ℕ lower a
+        eq = fshift≡+ x y a
+
+    r≥x : ∀ (x y : Nat) (a : Fin x) → Irr (y ≤ lower (⊎→+ (inr a)))
+    r≥x x zero a = forget 0≤x
+    r≥x x (suc y) a = subst (λ ○ → Irr (suc y ≤ ○)) (sym (fshift≡+ (suc y) x a)) ((le (suc y)))
+      where
+        le : (y : Nat) → Irr (y ≤ y +ℕ lower a)
+        le zero = forget 0≤x
+        le (suc y) = s≤s <$> le y
+
     eql : {x y : Nat} → is-left-inverse (+→⊎ {x} {y}) (⊎→+ {x} {y})
     eql {x = zero} (inr a) = refl
     eql {x = suc x} {y} (inl a) with fin-view a
@@ -437,8 +484,7 @@ module ↔∘↔-Assoc {A B C D : Type} (C↔D : C ↔ D) (B↔C : B ↔ C) (A�
         ; to-cong = to-cong C↔D ∘ to-cong B↔C 
         ; from-cong = from-cong B↔C ∘ from-cong C↔D
         ; inverse = fst (inverse C↔D) ∘ fst (inverse B↔C)
-                  , snd (inverse B↔C) ∘ snd (inverse C↔D)
-        }
+                  , snd (inverse B↔C) ∘ snd (inverse C↔D) }
       A↔D₁ : A ↔ D
       A↔D₁ = record
         { fst = (fst C↔D ∘ fst B↔C) ∘ fst A↔B
@@ -466,7 +512,7 @@ module _  where
   double-flip : ∀ {A B} (R : A ↔ B) → (flip-↔ (flip-↔ R)) ≡ R
   double-flip R = refl
   
-  flip-IsId : ∀ {A B} (R : A ↔ B) → ↔-IsId ((flip-↔ R) ↔∘↔ R)
+  flip-IsId : ∀ {A B} (R : A ↔ B) → ((flip-↔ R) ↔∘↔ R) ^ ≡ id
   fst (flip-IsId {A} {B} R a) = snd (inverse R) {a} {fst R a} refl
   snd (flip-IsId {A} {B} R a) =
     begin
@@ -482,7 +528,7 @@ module _ where
   swap : ∀ {A B} → ⟦ A + B ⟧ ↔ ⟦ B + A ⟧
   swap = (flip-↔ +↔⊎) ↔∘↔ ⊎-swap-↔ ↔∘↔ +↔⊎
 
-  swap-involutive : ∀ {A B : SomeFin} {x} → ↔-IsId (swap ↔∘↔ swap)
+  swap-involutive : ∀ {A B : SomeFin} {x} → (swap ↔∘↔ swap) ^ ≡ id
   swap-involutive {A} {B} {x} = flip-IsId swap
 
   inl-injective : ∀ {A} {x y : A} → inl x ≡ inl y → x ≡ y
@@ -568,7 +614,6 @@ module _ where
   splice-inverseˡ {suc X} (fsuc a) {fzero} {fzero , 0≢a'} y≡x+ = refl
   splice-inverseˡ {suc X} fzero {fsuc x} {fsuc (fsuc y) , y≢0} =
     λ L → 
-      {!!} ( ap inl L)
          
      -- ap fsuc {!suc-inj (suc-inj (inl-injective!} --  (ap inl {!y≡x+!})
   splice-inverseˡ {suc X} (fsuc a) {fsuc x} {fsuc y , y'≢a'} y≡x+ = {!!}
@@ -584,7 +629,6 @@ module _ where
 --       g : ⟦ X ⟧ → ⟦ Y ⟧
 --       g x = {!!}
 
-{-
   _-ᶠ_ : {A' X Y : SomeFin} → (f : (⟦ X ⟧ ⊎ ⟦ A' ⟧) ↣ (⟦ Y ⟧ ⊎ ⟦ A' ⟧))
       → (A : SomeFin) → {A ≡ A'}
       → ⟦ X ⟧ ↣ ⟦ Y ⟧
@@ -672,6 +716,12 @@ module theorem1-2 where
   --  --     ((f ⊙ (g +ᶠ A)) -ᶠ A)
   --  --   ≡⟨ {!!} ⟩
   --  --     ((f -ᶠ A) ⊙ g ) ∎
+-- -}
+-- -}
+-- -}
+-- -}
+-- -}
+-- -}
 -- -}
 -- -}
 -- -}
