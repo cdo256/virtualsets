@@ -1,6 +1,6 @@
 module VirtualSet.Fin where
 
-open import 1Lab.Equiv using (iso; Iso; is-right-inverse; is-left-inverse)
+open import 1Lab.Equiv
 open import 1Lab.HIT.Truncation using (∃)
 open import 1Lab.Path
 open import 1Lab.Type
@@ -22,50 +22,13 @@ open import VirtualSet.Iso
 
 open _≤_
 
-<→≤ : ∀ {x y : Nat} → x < suc y → x ≤ y 
-<→≤ {x} {y} x<sy with inspect x<sy
-... | sx≤sy , eq = ≤-peel sx≤sy
-
-_≢_ : ∀ {ℓ} {A : Type ℓ} → A → A → Type ℓ
-x ≢ y = ¬ x ≡ y
-
 ⊎→+ : ∀ {x y : Nat} → (Fin x ⊎ Fin y) → (Fin (x +ℕ y))
 ⊎→+ {x = zero} (inr i) = i
 ⊎→+ {x = suc x} {y} (inl i) = inject (+-≤l (suc x) y) i
 ⊎→+ {x = suc x} (inr i) = fsuc (⊎→+ {x = x} (inr i))
 
-between  : Nat → Nat → Nat → Type
-between l u x = l ≤ x × x < u
-
-record Interval (l u : Nat) : Type where
-  constructor interval
-  field
-    lower : Nat
-    ⦃ bounded ⦄ : Irr (between l u lower)
-
 +→⊎ : ∀ {x y : Nat} → (Fin (x +ℕ y)) → (Fin x ⊎ Fin y)
 +→⊎ i = split-+ i
-
-rshift-interval : {u l x : Nat} → Interval l u → Interval (x + l) (x + u)
-fin→interval : {x : Nat} → Fin x → Interval 0 x
-fin→interval (fin a ⦃ a<x ⦄) = interval a ⦃ (λ ○ → 0≤x , ○) <$> a<x ⦄
-interval→fin : {x y : Nat} → Interval x y → Fin y
-
-_≤?_ : (x y : Nat) → Dec (x ≤ y)
-zero ≤? y = yes 0≤x
-suc x ≤? zero = no (λ ())
-suc x ≤? suc y with x ≤? y
-... | yes x≤y = yes (s≤s x≤y)
-... | no x≰y = no (λ sx≤sy → x≰y (≤-peel sx≤sy))
-
-_<?_ : (x y : Nat) → Dec (x < y)
-x <? y = suc x ≤? y
-
-_≤ꟳ?_ : ∀ {x y : Nat} → (a b : Fin x) → Dec (a ≤ꟳ b)
-fin a ≤ꟳ? fin b = a ≤? b
-
-_<ꟳ?_ : ∀ {x y : Nat} → (a b : Fin x) → Dec (a <ꟳ b)
-fin a <ꟳ? fin b = a <? b
 
 decrease-fin : ∀ {y : Nat} (x : Nat) → (a : Fin (x +ℕ y))
              → (a≥x : x ≤ (lower a)) → Fin y
@@ -90,7 +53,7 @@ restrict-fin x a a<x = fin (lower a) ⦃ forget a<x ⦄
 
     l<x : ∀ (x y : Nat) (a : Fin x) → Irr (lower (⊎→+ (inl a)) < x)
     l<x (suc x) y a with fin-view a
-    ... | vzero = forget _
+    ... | vzero = forget (s≤s 0≤x)
     ... | vsuc (fin a' ⦃ le ⦄) = map (λ a<x → s≤s a<x) le
     
     fshift≡+ : ∀ (x y : Nat) (a : Fin y) → lower (fshift x a) ≡ x +ℕ lower a
@@ -112,14 +75,20 @@ restrict-fin x a a<x = fin (lower a) ⦃ forget a<x ⦄
 
     irr-is-prop : (X : Type) → (a b : Irr X) → a ≡ b
     irr-is-prop X a b = refl
+
+    Σ-Fin : (x : Nat) → Type
+    Σ-Fin x = Σ[ a ∈ Nat ] Irr (a < x)
+
+    ΣFin≃Fin : ∀ (x : Nat) → Σ-Fin x ≃ Fin x
+    ΣFin≃Fin x = {!mkIso!}
     
     fshift≡+ꟳ : ∀ (x y : Nat) (a : Fin y) → fshift≡+ᵀ x y a
     fshift≡+ꟳ x y a =
       fshift x a
         ≡⟨ refl ⟩
       fin (lower (fshift x a)) ⦃ Fin.bounded (fshift x a) ⦄
-        ≡⟨ ap (λ ○ → fin ○ ⦃ forget _ ⦄) eq ⟩
-      fin (x +ℕ lower a) ⦃ _ ⦄
+        ≡⟨ ap (λ ○ → fin ○ ⦃ forget {!!} ⦄) eq ⟩
+      fin (x +ℕ lower a) ⦃ {!!} ⦄
         ≡⟨ refl ⟩
       fin (x +ℕ lower a) ⦃ bounded ⦄ ∎
       where
