@@ -69,13 +69,31 @@ fin→interval : {x : Nat} → Fin x → Interval 0 x
 fin→interval (fin a ⦃ a<x ⦄) = interval a ⦃ (λ ○ → 0≤x , ○) <$> a<x ⦄
 interval→fin : {x y : Nat} → Interval x y → Fin y
 
+_≤?_ : (x y : Nat) → Dec (x ≤ y)
+zero ≤? y = yes 0≤x
+suc x ≤? zero = no (λ ())
+suc x ≤? suc y with x ≤? y
+... | yes x≤y = yes (s≤s x≤y)
+... | no x≰y = no (λ sx≤sy → x≰y (≤-peel sx≤sy))
 
-open import 1Lab.Equiv using (iso; Iso; is-right-inverse; is-left-inverse)
+_<?_ : (x y : Nat) → Dec (x < y)
+x <? y = suc x ≤? y
 
-open import 1Lab.Path
+_≤ꟳ?_ : ∀ {x y : Nat} → (a b : Fin x) → Dec (a ≤ꟳ b)
+fin a ≤ꟳ? fin b = a ≤? b
 
-open import Data.Irr using (Irr; Map-Irr)
-open import Data.Nat.Base using (x≤sucy)
+_<ꟳ?_ : ∀ {x y : Nat} → (a b : Fin x) → Dec (a <ꟳ b)
+fin a <ꟳ? fin b = a <? b
+
+decrease-fin : ∀ {y : Nat} (x : Nat) → (a : Fin (x +ℕ y))
+             → (a≥x : x ≤ (lower a)) → Fin y
+decrease-fin zero a a≥x = a
+decrease-fin (suc x) a a≥x with fin-view a
+... | vsuc i = decrease-fin x i (≤-peel a≥x)
+
+restrict-fin : ∀ {y : Nat} (x : Nat) → (a : Fin (x +ℕ y))
+             → (a<x : lower a < x) → Fin x
+restrict-fin x a a<x = fin (lower a) ⦃ forget a<x ⦄
 
 +↔⊎ : ∀ {x y} → Iso (Fin x ⊎ Fin y) (Fin (x +ℕ y))
 +↔⊎ = ⊎→+ , 1Lab.Equiv.iso +→⊎ eqr eql
