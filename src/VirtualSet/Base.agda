@@ -48,9 +48,14 @@ x ≢ y = ¬ x ≡ y
 ⊎→+ {x = zero} (inr i) = i
 ⊎→+ {x = suc x} {y} (inl i) = inject (+-≤l (suc x) y) i
 ⊎→+ {x = suc x} (inr i) = fsuc (⊎→+ {x = x} (inr i))
+between : Nat → Nat → Nat → Type
+between l u x = l ≤ x × x < u
 
-open import Data.Fin.Base using (fin-view)
-  renaming (zero to vzero; suc to vsuc)
+record Interval (l u : Nat) : Type where
+  constructor interval
+  field
+    lower : Nat
+    ⦃ bounded ⦄ : Irr (between l u lower)
 
 +→⊎ : ∀ {x y : Nat} → (Fin (x +ℕ y)) → (Fin x ⊎ Fin y)
 +→⊎ {x = zero} i = inr i
@@ -59,6 +64,10 @@ open import Data.Fin.Base using (fin-view)
 ... | vsuc i with +→⊎ {x} {y} i
 ... | inl j = inl (fsuc j)
 ... | inr j = inr j
+rshift-interval : {u l x : Nat} → Interval l u → Interval (x + l) (x + u)
+fin→interval : {x : Nat} → Fin x → Interval 0 x
+fin→interval (fin a ⦃ a<x ⦄) = interval a ⦃ (λ ○ → 0≤x , ○) <$> a<x ⦄
+interval→fin : {x y : Nat} → Interval x y → Fin y
 
 
 open import 1Lab.Equiv using (iso; Iso; is-right-inverse; is-left-inverse)
