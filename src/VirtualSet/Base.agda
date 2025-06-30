@@ -48,7 +48,8 @@ x ≢ y = ¬ x ≡ y
 ⊎→+ {x = zero} (inr i) = i
 ⊎→+ {x = suc x} {y} (inl i) = inject (+-≤l (suc x) y) i
 ⊎→+ {x = suc x} (inr i) = fsuc (⊎→+ {x = x} (inr i))
-between : Nat → Nat → Nat → Type
+
+between  : Nat → Nat → Nat → Type
 between l u x = l ≤ x × x < u
 
 record Interval (l u : Nat) : Type where
@@ -58,12 +59,8 @@ record Interval (l u : Nat) : Type where
     ⦃ bounded ⦄ : Irr (between l u lower)
 
 +→⊎ : ∀ {x y : Nat} → (Fin (x +ℕ y)) → (Fin x ⊎ Fin y)
-+→⊎ {x = zero} i = inr i
-+→⊎ {x = suc x} {y} i with fin-view i
-... | vzero = inl fzero
-... | vsuc i with +→⊎ {x} {y} i
-... | inl j = inl (fsuc j)
-... | inr j = inr j
++→⊎ i = split-+ i
+
 rshift-interval : {u l x : Nat} → Interval l u → Interval (x + l) (x + u)
 fin→interval : {x : Nat} → Fin x → Interval 0 x
 fin→interval (fin a ⦃ a<x ⦄) = interval a ⦃ (λ ○ → 0≤x , ○) <$> a<x ⦄
@@ -100,7 +97,11 @@ restrict-fin x a a<x = fin (lower a) ⦃ forget a<x ⦄
   where
     r⊎→+ : ∀ (x y : Nat) (a : Fin y) → (⊎→+ (inr a)) ≡ fshift x a
     r⊎→+    zero y a = refl 
-    r⊎→+ (suc x) y a = refl
+    r⊎→+ (suc x) y a =
+      ⊎→+ (inr a) ≡⟨ refl ⟩
+      fsuc (⊎→+ {x} (inr a)) ≡⟨ ap fsuc (r⊎→+ x y a) ⟩
+      fsuc (fshift x a) ≡⟨ refl ⟩
+      fshift (suc x) a ∎
 
     l<x : ∀ (x y : Nat) (a : Fin x) → Irr (lower (⊎→+ (inl a)) < x)
     l<x (suc x) y a with fin-view a
@@ -150,21 +151,35 @@ restrict-fin x a a<x = fin (lower a) ⦃ forget a<x ⦄
         le zero = forget 0≤x
         le (suc y) = s≤s <$> le y
 
-    eql : {x y : Nat} → is-left-inverse (+→⊎ {x} {y}) (⊎→+ {x} {y})
-    eql {x = zero} (inr a) = refl
-    eql {x = suc x} {y} (inl a) with fin-view a
+    eql-lemma1 : {x y : Nat} → (a : Fin x) → split-+ (inject (+-≤l x y) a) ≡ inl a
+    eql-lemma1 {suc x} {y} a with fin-view a
     ... | vzero = refl
-    ... | vsuc a' with (+→⊎ (⊎→+ (inl a')))
-    ...    | inl b =
-        let eq : +→⊎ (⊎→+ (inl a')) ≡ inl a'
-            eq = eql (inl a')
-        in (+→⊎ (⊎→+ (inl (fsuc a')))) ≡⟨ refl ⟩
-           (+→⊎ (inject (+-≤l (suc x) y) (fsuc a'))) ≡⟨ refl ⟩
-           (+→⊎ (fsuc (inject (+-≤l x y) a'))) ≡⟨ {!!} ⟩
-           (+→⊎ (fsuc (inject (+-≤l x y) a'))) ≡⟨ {!!} ⟩
-             {!!} ∎ 
-    ...    | inr b = {!!}
-    eql {x = suc x} (inr a) = {!!}
+    ... | vsuc a' =
+        (split-+ (inject (+-≤l (suc x) y) (fsuc a'))) ≡⟨ refl ⟩
+        (split-+ (fsuc (inject (+-≤l x y) a'))) ≡⟨ refl ⟩
+        (⊎-map fsuc id (split-+ (inject (+-≤l x y) a')))
+          ≡⟨ ap (⊎-map fsuc id) (eql-lemma1 a') ⟩
+        (⊎-map fsuc id (inl a'))
+          ≡⟨ refl ⟩
+        inl (fsuc a') ∎ 
+
+    eql-lemma2 : {x y : Nat} → (a : Fin y) → split-+ (⊎→+ (inr a)) ≡ inr a 
+    eql-lemma2 {x = zero} {y} a = refl
+    eql-lemma2 {x = suc x} {y} a = refl
+
+    eql : {x y : Nat} → is-left-inverse (+→⊎ {x} {y}) (⊎→+ {x} {y})
+    eql {x = zero} {y} (inr a) = refl
+    eql {x = suc x} {y} (inl a) = eql-lemma1 a
+    eql {x = suc x} {y} (inr a) =
+      +→⊎ (fsuc (⊎→+ (inr a)))
+        ≡⟨ refl ⟩
+      split-+ (fsuc (⊎→+ (inr a)))
+        ≡⟨ refl ⟩
+      ⊎-map fsuc id (split-+ (⊎→+ (inr a)))
+        ≡⟨ ap (⊎-map fsuc id) (eql (inr a)) ⟩
+      ⊎-map fsuc id (inr a)
+        ≡⟨ refl ⟩
+      inr a ∎
     eqr : {x y : Nat} → is-right-inverse +→⊎ ⊎→+
     eqr {x = zero} z = refl
     eqr {x = suc x} z = refl
