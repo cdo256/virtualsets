@@ -34,6 +34,9 @@ open import Data.Dec
 open import Data.Fin.Base
   renaming (zero to vzero; suc to vsuc; _≤_ to _≤ꟳ_; _<_ to _<ꟳ_)
 
+private
+  M = eff Irr
+
 <→≤ : ∀ {x y : Nat} → x < suc y → x ≤ y 
 <→≤ {x} {y} x<sy with inspect x<sy
 ... | sx≤sy , eq = ≤-peel sx≤sy
@@ -73,7 +76,6 @@ open import Data.Nat.Base using (x≤sucy)
     ... | vzero = forget _≤_.0≤x
     ... | vsuc (fin a' ⦃ le ⦄) = (map (λ a<x →
                   x≤sucy {x = suc a'} {x} ⦃ a<x ⦄) le)
-      where M = eff Irr
     eql : {x y : Nat} → is-left-inverse (+→⊎ {x} {y}) (⊎→+ {x} {y})
     eql {x = zero} (inr a) = refl
     eql {x = suc x} {y} (inl a) with fin-view a
