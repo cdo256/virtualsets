@@ -13,6 +13,9 @@
           agda
           just-agda
         ];
+        shellHook = ''
+          ln -sf ${self'.packages.agda-base}/bin/agda $out/bin/agda-base
+        '';
       };
     };
 }
