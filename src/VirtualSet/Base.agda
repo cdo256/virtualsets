@@ -1,10 +1,8 @@
 module VirtualSet.Base where
 
 open import Meta.Idiom
-
 open import 1Lab.Type
-  using (Type; Typeω; ⊥; absurd; _×_; _,_; ¬_; _∘_; id)
-
+open import 1Lab.Univalence
 open import 1Lab.Path using (refl; sym; ap; subst; _≡_; funext)
 
 -- Fin is defined as a bounded Nat in 1Lab so will require a fair amount of work to port.
@@ -13,32 +11,35 @@ open import Data.Fin.Base
          Fin-absurd)
 
 open import Data.Sum
-  using (inl; inr; _⊎_)
 
 open import Data.Nat
    using (Nat; suc-inj; zero; suc; _<_; _≤_; ≤-trans; s≤s; s≤s') renaming (_+_ to _+ℕ_)
+open _≤_
 open import Data.Nat.Properties
-   using (+-zeror; +-≤l)
+open import Data.Nat.Order
 
 open import Prim.Data.Sigma
   using (Σ; Σ-syntax; fst; snd)
 open import 1Lab.HIT.Truncation
   using (∃)
--- open import 1Lab.Equiv using (Iso; is-iso)
-
 open import VirtualSet.Iso
-     
-_≢_ : ∀ {ℓ} {A : Type ℓ} → A → A → Type ℓ
-x ≢ y = ¬ x ≡ y
-
 open import 1Lab.Path using (inspect)
-open import Data.Nat.Base using (≤-peel)
+open import Data.Nat.Base
+open import Data.Irr using (forget)
+open import Data.Nat.Properties
+open import 1Lab.Equiv using (iso; Iso; is-right-inverse; is-left-inverse)
+open import 1Lab.Path
+open import Data.Irr using (Irr; Map-Irr)
+open import Data.Dec
+open import Data.Fin.Base
+  renaming (zero to vzero; suc to vsuc; _≤_ to _≤ꟳ_; _<_ to _<ꟳ_)
 
 <→≤ : ∀ {x y : Nat} → x < suc y → x ≤ y 
 <→≤ {x} {y} x<sy with inspect x<sy
 ... | sx≤sy , eq = ≤-peel sx≤sy
 
-open import Data.Irr using (forget)
+_≢_ : ∀ {ℓ} {A : Type ℓ} → A → A → Type ℓ
+x ≢ y = ¬ x ≡ y
 
 ⊎→+ : ∀ {x y : Nat} → (Fin x ⊎ Fin y) → (Fin (x +ℕ y))
 ⊎→+ {x = zero} (inr i) = i
