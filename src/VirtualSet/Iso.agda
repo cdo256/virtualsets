@@ -26,15 +26,3 @@ module _ {A B : Type} where
   rinv A↔B = funext (is-iso.rinv (snd A↔B))
   linv : (A↔B : A ↔ B) → A↔B ⁻¹ ∘ A↔B ^ ≡ id
   linv A↔B = funext (is-iso.linv (snd A↔B))
-
--- ↔-IsId : ∀ {A} → (R : A ↔ A) → Type
--- ↔-IsId {A} f =
---   let ri : (x : A) → (f ^) ((f ⁻¹) x) ≡ x
---       ri = is-iso.rinv (snd f)
---   in
---       f ^  ≡ id
---     × f ⁻¹ ≡ id
---     × funext {!ri!} {!!} {!!}
---     -- × ((x : A) →  x ≡ refl)
--- --    × ((x : A) → ((linv R) x ≡ refl)
-
