@@ -80,7 +80,7 @@ restrict-fin x a a<x = fin (lower a) ⦃ forget a<x ⦄
     Σ-Fin x = Σ[ a ∈ Nat ] Irr (a < x)
 
     ΣFin≃Fin : ∀ (x : Nat) → Σ-Fin x ≃ Fin x
-    ΣFin≃Fin x = {!mkIso!}
+    ΣFin≃Fin x = {!!}
     
     fshift≡+ꟳ : ∀ (x y : Nat) (a : Fin y) → fshift≡+ᵀ x y a
     fshift≡+ꟳ x y a =

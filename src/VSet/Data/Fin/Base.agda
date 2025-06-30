@@ -18,7 +18,8 @@ open import Meta.Idiom
 open import Prim.Data.Sigma
   using (Σ; Σ-syntax; fst; snd)
 
-import VSet.Function.Iso
+-- open import VSet.Function.Iso 
+-- open import VSet.Function.Iso
 
 open _≤_
 

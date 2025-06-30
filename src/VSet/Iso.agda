@@ -1,10 +1,9 @@
-module VSet.Function.Iso where
+module VirtualSet.Iso where
 
 open import 1Lab.Type
 open import 1Lab.Path
 open import 1Lab.Equiv
 open import Prim.Data.Sigma
-
 
 infix 1 _↔_
 
@@ -91,24 +90,24 @@ module _ {A B C D : Type} where
           id ∎
     in mkIso (g ^ ∘ f ^) (f ⁻¹ ∘ g ⁻¹) fg-rinv fg-linv
     
-  -- ↔to↣ : (A ↔ B) → (A ↣ B)
-  -- ↔to↣ f =
-  --   let inj : is-injective (f ^)
-  --       inj x y eq = 
-  --         x ≡⟨ refl i1 ⟩
-  --         id x ≡˘⟨  ap (λ ○ → ○ x) (linv f) ⟩
-  --         (f ⁻¹ ∘ f ^) x ≡⟨ refl ⟩
-  --         (f ⁻¹) ((f ^) x) ≡⟨ ap (f ⁻¹) eq ⟩
-  --         (f ⁻¹) ((f ^) y) ≡⟨ refl ⟩
-  --         (f ⁻¹ ∘ f ^) y ≡⟨ ap (λ ○ → ○ y) (linv f) ⟩
-  --         y ∎ 
-  --   in f ^ , inj
+  ↔to↣ : (A ↔ B) → (A ↣ B)
+  ↔to↣ f =
+    let inj : is-injective (f ^)
+        inj x y eq = 
+          x ≡⟨ refl i1 ⟩
+          id x ≡˘⟨  ap (λ ○ → ○ x) (linv f) ⟩
+          (f ⁻¹ ∘ f ^) x ≡⟨ refl ⟩
+          (f ⁻¹) ((f ^) x) ≡⟨ ap (f ⁻¹) eq ⟩
+          (f ⁻¹) ((f ^) y) ≡⟨ refl ⟩
+          (f ⁻¹ ∘ f ^) y ≡⟨ ap (λ ○ → ○ y) (linv f) ⟩
+          y ∎ 
+    in f ^ , inj
 
-  -- ↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
-  -- f , inj₁) ↣∘↣ (g , inj₂) = (f ∘ g) , λ x y eq → inj₂ _ _ (inj₁ _ _ eq)
+  _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
+  (f , inj₁) ↣∘↣ (g , inj₂) = (f ∘ g) , λ x y eq → inj₂ _ _ (inj₁ _ _ eq)
 
 
-{-
+
 module ↔∘↔-Assoc {A B C D : Type} (C↔D : C ↔ D) (B↔C : B ↔ C) (A↔B : A ↔ B) where
   ↔∘↔-assoc : (C↔D ↔∘↔ B↔C) ↔∘↔ A↔B ≡ C↔D ↔∘↔ (B↔C ↔∘↔ A↔B)
   ↔∘↔-assoc = {!
@@ -125,32 +124,38 @@ module ↔∘↔-Assoc {A B C D : Type} (C↔D : C ↔ D) (B↔C : B ↔ C) (A�
         C↔D ↔∘↔ (B↔C ↔∘↔ A↔B) ∎!}
     where
       A↔C : A ↔ C
-      A↔C = mkIso
-        (B↔C ^ ∘ A↔B ^)
-        (A↔B ⁻¹ ∘ B↔C ⁻¹)
-        (rinv B↔C ∘ rinv A↔B)
-        (linv A↔B ∘ linv B↔C)
+      A↔C = mkIso (B↔C ^ ∘ A↔B ^)
+                  (A↔B ⁻¹ ∘ B↔C ⁻¹)
+                  (rinv B↔C ∘ rinv A↔B)
+                  (linv A↔B ∘ linv B↔C)
 
       B↔D : B ↔ D
-      B↔D = mkIso
-        (C↔D ^ ∘ B↔C ^)
-        (B↔C ⁻¹ ∘ C↔D ⁻¹)
-        ((rinv C↔D) ∘ (rinv B↔C))
-        ((linv B↔C) ∘ (linv C↔D))
+      B↔D = record
+        { fst = fst C↔D ∘ fst B↔C
+        ; from = from B↔C ∘ from C↔D
+        ; to-cong = to-cong C↔D ∘ to-cong B↔C 
+        ; from-cong = from-cong B↔C ∘ from-cong C↔D
+        ; inverse = fst (inverse C↔D) ∘ fst (inverse B↔C)
+                  , snd (inverse B↔C) ∘ snd (inverse C↔D) }
       A↔D₁ : A ↔ D
-      A↔D₁ = mkIso
-        ((C↔D ^ ∘ B↔C ^) ∘ A↔B ^)
-        (A↔B ⁻¹ ∘ (B↔C ⁻¹ ∘ C↔D ⁻¹))
-        ((rinv C↔D) ∘ (rinv B↔C)) ∘ (rinv A↔B)
-        (linv A↔B) ∘ ((linv B↔C) ∘ (linv C↔D))
+      A↔D₁ = record
+        { fst = (fst C↔D ∘ fst B↔C) ∘ fst A↔B
+        ; from = from A↔B ∘ (from B↔C ∘ from C↔D)
+        ; to-cong = (to-cong C↔D ∘ to-cong B↔C) ∘ to-cong A↔B
+        ; from-cong = from-cong A↔B ∘ (from-cong B↔C ∘ from-cong C↔D)
+        ; inverse = (fst (inverse C↔D) ∘ fst (inverse B↔C)) ∘ fst (inverse A↔B)
+                  , snd (inverse A↔B) ∘ (snd (inverse B↔C) ∘ snd (inverse C↔D))
+        }
       A↔D₂ : A ↔ D
-      A↔D₂ = mkIso
-        (C↔D ^ ∘ (B↔C ^ ∘ A↔B ^))
-        ((A↔B ⁻¹ ∘ B↔C ⁻¹) ∘ C↔D ⁻¹)
-        ((rinv C↔D) ∘ ((rinv B↔C) ∘ (rinv A↔B)))
-        (((linv A↔B) ∘ (linv B↔C)) ∘ (linv C↔D))
+      A↔D₂ = record
+        { fst = fst C↔D ∘ (fst B↔C ∘ fst A↔B)
+        ; from = (from A↔B ∘ from B↔C) ∘ from C↔D
+        ; to-cong = to-cong C↔D ∘ (to-cong B↔C ∘ to-cong A↔B)
+        ; from-cong = (from-cong A↔B ∘ from-cong B↔C) ∘ from-cong C↔D
+        ; inverse = fst (inverse C↔D) ∘ (fst (inverse B↔C) ∘ fst (inverse A↔B))
+                  , (snd (inverse A↔B) ∘ snd (inverse B↔C)) ∘ snd (inverse C↔D)
+        }
 
-{-
 
 module _  where
   open Inverse
@@ -167,10 +172,3 @@ module _  where
         fst (flip-↔ R) (from (flip-↔ R) a)
       ≡⟨ refl ⟩
         from R (fst R a) ∎
--- -}
--- -}
--- -}
--- -}
--- -}
--- -}
--- -}
