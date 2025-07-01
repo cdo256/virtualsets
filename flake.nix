@@ -15,17 +15,17 @@
       repo = "just-agda";
       ref = "main";
     };
-    onelab = {
+    agda-cubical = {
       type = "github";
-      owner = "cdo256";
-      repo = "1lab";
-      ref = "flake";
+      owner = "agda";
+      repo = "cubical";
+      ref = "master";
     };
   };
 
   outputs =
     inputs:
-    inputs.flake-parts.lib.mkFlake { inherit inputs; } (top: {
+    inputs.flake-parts.lib.mkFlake { inherit inputs; } {
       systems = [
         "x86_64-linux"
       ];
@@ -34,5 +34,5 @@
         ./nix/packages.nix
         ./nix/shells.nix
       ];
-    });
+    };
 }

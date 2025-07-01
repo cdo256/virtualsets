@@ -2,7 +2,7 @@ name: virtual-set
 include:
   src
 depend:
-  1lab
+  cubical
 flags:
   --cubical
   --no-load-primitives

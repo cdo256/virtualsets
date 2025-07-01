@@ -3,7 +3,7 @@
 	url = https://github.com/agda/agda-categories.git
 [submodule "stdlib"]
 	path = stdlib
-	url = https://github.com/agda/agda-stdlib.git
-[submodule "1lab"]
-	path = 1lab
-	url = https://github.com/the1lab/1lab.git
+	url = https://github.com/agda/agda-stdlib
+[submodule "cubical"]
+	path = cubical
+	url = https://github.com/agda/cubical
