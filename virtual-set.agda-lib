@@ -2,6 +2,7 @@ name: virtual-set
 include:
   src
 depend:
+  standard-library
   cubical
 flags:
   --cubical
