@@ -11,14 +11,72 @@ open import Cubical.Data.Unit renaming (Unit to ⊤)
 open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.Foundations.Isomorphism
+open import Cubical.Induction.WellFounded
 
-open import Induction.WellFounded
-
+open import VSet.Path
 open import VSet.Data.NatPlus.Base
 
 data Tree : Type where
   ◎ : Tree
   _⊻_ : Tree → Tree → Tree
+
+module SmallStep where
+  α-base-type : Tree → Tree → Type
+  α-base-type ((A ⊻ B) ⊻ C) (A' ⊻ (B' ⊻ C')) = (A ≡ A') × (B ≡ B') × (C ≡ C')
+  α-base-type _ _ = ⊥
+
+  infixl 10 _<_ _≪_
+
+  _<_ : Tree → Tree → Type
+  cong-type :  Tree → Tree → Type
+  cong-type (A ⊻ B) (A' ⊻ B') =
+      ((A < A') × (B ≡ B')) 
+    ⊎ ((A ≡ A') × (B < B'))
+  cong-type _ _ = ⊥ 
+
+  A < B = (α-base-type A B) ⊎ (cong-type A B)
+
+--  _<⁺_ : Tree → Tree → Type 
+--  A <⁺ B = (A ≡ B) ⊎ (Σ[ C ∈ Tree ] (A <⁺ C × C < B))
+
+module BigStep where
+  _≪_ : Tree → Tree → Type
+
+  α : Tree → Tree → Type
+  α ((A ⊻ B) ⊻ C) (A' ⊻ (B' ⊻ C')) = (A ≪ A') × (B ≪ B') × (C ≪ C')
+  α _ _ = ⊥
+
+  c : Tree → Tree → Type
+  c (A ⊻ B) (A' ⊻ B') = A ≪ A' × B ≪ B'
+  c _ _ = ⊥
+
+  A ≪ B = (A ≡ B) ⊎ ((α A B) ⊎ (c A B))
+
+  _≪'_ : Tree → Tree → Type
+  A ≪' B = (A ≪ B) × (A ≢ B)
+
+  -- WTS ≪' is well-founded
+
+  ≪'-acc : {X Y : Tree} → Y ≪' X → Acc _≪'_ Y
+  ≪'-acc {◎} {◎} β = ?
+  ≪'-acc {◎} {_ ⊻ _} β = ?
+  ≪'-acc {A ⊻ B} {C ⊻ D} (less , ne) =
+    acc {!λ Y β → ≪'-acc β!}
+    where
+      wfrec : {A : Tree} → WFRec _≪'_ (Acc _≪'_) A
+      wfrec {◎ ⊻ B} (◎ ⊻ F) ((ne , α , c) , ne') = acc {!!}
+      wfrec {◎ ⊻ B} ((E ⊻ E₁) ⊻ F) ((ne , α , c) , ne') = acc {!!}
+      wfrec {(A ⊻ A₁) ⊻ B} (E ⊻ F) ((ne , α , c) , ne')
+        = acc {!!}
+
+  ≪'-WellFounded : WellFounded _≪'_
+  ≪'-WellFounded A = {!!}
+
+{-
+
+-- data TreeSwap : Type where
+--   α : (A B C : Tree) → TreeSwap -- ((A ⊻ B) ⊻ C) ~ (A ⊻ (B ⊻ C))
+--   cong-left : (A B : Tree) (S : TreeSwap A B)
 
 bubbleOne : Tree → Tree → Tree
 bubbleOne ◎ R = R
@@ -85,4 +143,7 @@ reassoc {◎} {◎} p = {!?!}
 reassoc {◎} {B₁ ⊻ B₂} p = {!!}
 reassoc {A₁ ⊻ A₂} {◎} p = {!!}
 reassoc {A₁ ⊻ A₂} {B₁ ⊻ B₂} p = {!!}
--}
+
+-- -}
+-- -}
+-- -}
