@@ -12,13 +12,30 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Sigma
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Induction.WellFounded
+open import Cubical.Relation.Nullary
 
 open import VSet.Path
 open import VSet.Data.NatPlus.Base
 
+infix 30 _⊻_
+
 data Tree : Type where
   ◎ : Tree
   _⊻_ : Tree → Tree → Tree
+
+caseTree : ∀ {ℓ} → {A : Type ℓ} → (al af : A) → Tree → A
+caseTree al af ◎ = al
+caseTree al af (t1 ⊻ t2) = af
+
+⊻≢◎ : {t1 t2 : Tree} → t1 ⊻ t2 ≢ ◎
+⊻≢◎ {t1} {t2} f≡l = subst (caseTree ⊥ Tree) f≡l ◎
+
+◎≢⊻ : {t1 t2 : Tree} → ◎ ≢ t1 ⊻ t2 
+◎≢⊻ {t1} {t2} f≡l = subst (caseTree Tree ⊥) f≡l ◎ 
+
+∥_∥ : Tree → ℕ+
+∥ ◎ ∥ = one
+∥ t1 ⊻ t2 ∥ = ∥ t1 ∥ + ∥ t2 ∥
 
 module SmallStep where
   α-base-type : Tree → Tree → Type
@@ -39,6 +56,24 @@ module SmallStep where
 --  _<⁺_ : Tree → Tree → Type 
 --  A <⁺ B = (A ≡ B) ⊎ (Σ[ C ∈ Tree ] (A <⁺ C × C < B))
 
+module SmallStepInductive where
+  data _▻_ : Tree → Tree → Type where
+    α : (A B C : Tree) → ((A ⊻ B) ⊻ C) ▻ (A ⊻ (B ⊻ C))
+    cong-left : (A A' B : Tree) → A ▻ A' → (A ⊻ B) ▻ (A' ⊻ B)
+    cong-right : (A B B' : Tree) → B ▻ B' → (A ⊻ B) ▻ (A ⊻ B')
+
+  data _▻*_ : Tree → Tree → Type where
+    [] : {A : Tree} → A ▻* A
+    _∷_ : {A B C : Tree} → A ▻ B → B ▻* C → A ▻* C
+
+  _▻⁺_ : Tree → Tree → Type
+  A ▻⁺ B = Σ[ δ ∈ A ▻* B ] ((p : A ≡ B) → (subst (_▻* B) p δ) ≢ [])
+  
+  ▻-preserves-size : ∀ {X Y} → X ▻ Y → ∥ X ∥ ≡ ∥ Y ∥
+  ▻-preserves-size {X} {Y} (α A B C) = {!+-assoc!}
+  ▻-preserves-size {X} {Y} (cong-left A A' B step) = {!!}
+  ▻-preserves-size {X} {Y} (cong-right A B B' step) = {!!}
+
 module BigStep where
   _≪_ : Tree → Tree → Type
 
@@ -54,7 +89,7 @@ module BigStep where
 
   _≪'_ : Tree → Tree → Type
   A ≪' B = (A ≪ B) × (A ≢ B)
-
+  
   -- WTS ≪' is well-founded
 
   -- Trivial lemmas
@@ -121,10 +156,6 @@ infix 30 ⟦_⟧ ∥_∥
 ⟦_⟧ : Tree → Type
 ⟦ ◎ ⟧ = ⊤
 ⟦ t1 ⊻ t2 ⟧ = ⟦ t1 ⟧ ⊎ ⟦ t2 ⟧
-
-∥_∥ : Tree → ℕ+
-∥ ◎ ∥ = one
-∥ t1 ⊻ t2 ∥ = ∥ t1 ∥ + ∥ t2 ∥
 
 Tree# : ℕ+ → Type
 Tree# n = Σ[ t ∈ Tree ] (∥ t ∥ ≡ n)
