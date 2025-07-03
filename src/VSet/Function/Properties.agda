@@ -20,8 +20,6 @@ open import VSet.Function.Injection
 
 open Iso
 
-infix 1 _↔_
-
 private
   variable
     A B C : Type
@@ -31,8 +29,6 @@ private
   let inj : is-injective (f ^)
       inj x y eq = 
         x
-          ≡⟨ refl i1 ⟩
-        id x
           ≡⟨ sym (cong (λ ○ → ○ x) (linv f)) ⟩
         (f ⁻¹ ∘ f ^) x
           ≡⟨ refl ⟩
@@ -43,7 +39,7 @@ private
         (f ⁻¹ ∘ f ^) y
           ≡⟨ cong (λ ○ → ○ y) (linv f) ⟩
         y ∎ 
-  in {!f ^ , inj!}
+  in f ^ , inj
 
 _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
 (f , inj₁) ↣∘↣ (g , inj₂) = (f ∘ g) , λ x y eq → inj₂ _ _ (inj₁ _ _ eq)
