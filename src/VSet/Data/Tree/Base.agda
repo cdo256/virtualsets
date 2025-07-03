@@ -57,17 +57,45 @@ module BigStep where
 
   -- WTS ≪' is well-founded
 
+  -- Trivial lemmas
+  ◎¬α-left : {A : Tree} → ¬ α ◎ A
+  ◎¬α-left {A} ()
+  ◎¬α-right : {A : Tree} → ¬ α A ◎
+  ◎¬α-right {◎ ⊻ _} ()
+  ◎¬α-right {(_ ⊻ _) ⊻ _} ()
+
+  ◎⊻¬α-left : {A B : Tree} → ¬ α (◎ ⊻ A) B
+  ◎⊻¬α-left {◎} {_} α' = α'
+  ◎⊻¬α-left {_ ⊻ _} {_} α' = α'
+  ◎⊻¬α-right : {A B : Tree} → ¬ α A (B ⊻ ◎)
+  ◎⊻¬α-right {◎ ⊻ _} {◎} α' = α'
+  ◎⊻¬α-right {(_ ⊻ _) ⊻ _} {◎} α' = α'
+  ◎⊻¬α-right {◎ ⊻ _} {_ ⊻ _} α' = α'
+  ◎⊻¬α-right {(_ ⊻ _) ⊻ _} {_ ⊻ _} α' = α'
+
+  ¬◎≪ : {A B : Tree} → ¬ ◎ ≪ (A ⊻ B)
+  ¬◎≪ {A} (inl eq) = ◎≢⊻ eq
+  ¬◎≪ {A} (inr (inl ()))
+  ¬◎≪ {A} (inr (inr ()))
+  ¬≪◎ : {A B : Tree} → ¬ (A ⊻ B) ≪ ◎
+  ¬≪◎ {A} (inl eq) = ⊻≢◎ eq
+  ¬≪◎ {A} (inr (inl α')) = ◎¬α-right α'
+
   ≪'-acc : {X Y : Tree} → Y ≪' X → Acc _≪'_ Y
-  ≪'-acc {◎} {◎} β = ?
-  ≪'-acc {◎} {_ ⊻ _} β = ?
-  ≪'-acc {A ⊻ B} {C ⊻ D} (less , ne) =
-    acc {!λ Y β → ≪'-acc β!}
+  ≪'-acc {_} {_} (inl eq , ne) = absurd (ne eq)
+  ≪'-acc {A ⊻ (B ⊻ C)} {(D ⊻ E) ⊻ F} (inr (inl α') , ne)
+    = acc λ X less → ≪'-acc less
+  ≪'-acc {A ⊻ (B ⊻ C)} {(D ⊻ E) ⊻ F} (inr (inr x) , ne) = {!!}
+  ≪'-acc {◎} {◎} (inr _ , ne) = absurd (ne refl)
+  ≪'-acc {◎} {_ ⊻ _} (inr (inl α') , _) = absurd (◎¬α-right α')
+  ≪'-acc {_ ⊻ _} {◎} (inr (inl ()) , ne)
+  ≪'-acc {_ ⊻ _} {◎} (inr (inr ()) , ne)
+  ≪'-acc {◎ ⊻ C} {◎ ⊻ F} (inr (inr x) , ne) = {!!}
+  ≪'-acc {◎ ⊻ C} {(D ⊻ D₁) ⊻ F} x = {!!}
+  ≪'-acc {(A ⊻ A₁) ⊻ C} {D ⊻ F} x = {!!}
     where
       wfrec : {A : Tree} → WFRec _≪'_ (Acc _≪'_) A
-      wfrec {◎ ⊻ B} (◎ ⊻ F) ((ne , α , c) , ne') = acc {!!}
-      wfrec {◎ ⊻ B} ((E ⊻ E₁) ⊻ F) ((ne , α , c) , ne') = acc {!!}
-      wfrec {(A ⊻ A₁) ⊻ B} (E ⊻ F) ((ne , α , c) , ne')
-        = acc {!!}
+      wfrec = {!!}
 
   ≪'-WellFounded : WellFounded _≪'_
   ≪'-WellFounded A = {!!}
