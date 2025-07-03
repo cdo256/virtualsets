@@ -17,6 +17,10 @@ open import VSet.Function.Base
 
 open Iso
 
+private
+  variable
+    A B C D : Type
+
 infix 1 _↔_
 
 _↔_ : (A B : Type) → Type
@@ -47,18 +51,16 @@ mkIso {A} {B} f g ri li =
     r : (b : B) → f (g b) ≡ b
     r b = cong (λ ○ → ○ b) ri
 
+flip-↔ : (A ↔ B) → (B ↔ A)
+flip-↔ A↔B = invIso A↔B
 
-module _ {A B C D : Type} where
-  flip-↔ : (A ↔ B) → (B ↔ A)
-  flip-↔ A↔B = invIso A↔B
+infixl 9 _↔∘↔_
 
-  infixl 9 _↔∘↔_
-
-  _↔∘↔_ : (B ↔ C) → (A ↔ B) → (A ↔ C)
-  g ↔∘↔ f = compIso f g
+_↔∘↔_ : (B ↔ C) → (A ↔ B) → (A ↔ C)
+g ↔∘↔ f = compIso f g
 
 module _ where
-  double-flip : ∀ {A B} (R : A ↔ B) → (flip-↔ (flip-↔ R)) ≡ R
+  double-flip : ∀ {A B} (R : A ↔ B) → (flip-↔ {B} {A} (flip-↔ {A} {B} R)) ≡ R
   double-flip R i .fun = fun R
   double-flip R i .inv = inv R
   double-flip R i .rightInv = rightInv R
