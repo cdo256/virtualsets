@@ -14,8 +14,9 @@ open import Cubical.Foundations.Isomorphism
 open import Cubical.Induction.WellFounded
 open import Cubical.Relation.Nullary
 
+open import Cubical.Data.Nat
+
 open import VSet.Path
-open import VSet.Data.NatPlus.Base
 
 infix 30 _⊻_
 
@@ -33,9 +34,9 @@ caseTree al af (t1 ⊻ t2) = af
 ◎≢⊻ : {t1 t2 : Tree} → ◎ ≢ t1 ⊻ t2 
 ◎≢⊻ {t1} {t2} f≡l = subst (caseTree Tree ⊥) f≡l ◎ 
 
-∥_∥ : Tree → ℕ+
-∥ ◎ ∥ = one
-∥ t1 ⊻ t2 ∥ = ∥ t1 ∥ + ∥ t2 ∥
+∥_∥ : Tree → ℕ
+∥ ◎ ∥ = 1
+∥ t1 ⊻ t2 ∥ = (∥ t1 ∥) + (∥ t2 ∥)
 
 module SmallStep where
   α-base-type : Tree → Tree → Type
@@ -70,7 +71,7 @@ module SmallStepInductive where
   A ▻⁺ B = Σ[ δ ∈ A ▻* B ] ((p : A ≡ B) → (subst (_▻* B) p δ) ≢ [])
   
   ▻-preserves-size : ∀ {X Y} → X ▻ Y → ∥ X ∥ ≡ ∥ Y ∥
-  ▻-preserves-size {X} {Y} (α A B C) = {!+-assoc!}
+  ▻-preserves-size {X} {Y} (α A B C) = {!+n-assoc!}
   ▻-preserves-size {X} {Y} (cong-left A A' B step) = {!!}
   ▻-preserves-size {X} {Y} (cong-right A B B' step) = {!!}
 
@@ -119,6 +120,8 @@ module BigStep where
   ≪'-acc : {X Y : Tree} → Y ≪' X → Acc _≪'_ Y
   ≪'-acc {_} {_} (inl eq , ne) = absurd (ne eq)
   ≪'-acc {A ⊻ (B ⊻ C)} {(D ⊻ E) ⊻ F} (inr (inl α') , ne)
+    -- This should be a single atomic swap, but I'm not sure how to
+    -- split this up so it terminates.
     = acc λ X less → ≪'-acc less
   ≪'-acc {A ⊻ (B ⊻ C)} {(D ⊻ E) ⊻ F} (inr (inr x) , ne) = {!!}
   ≪'-acc {◎} {◎} (inr _ , ne) = absurd (ne refl)
