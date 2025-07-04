@@ -24,6 +24,7 @@ private
   variable
     A B C : Type
 
+
 ↔to↣ : (A ↔ B) → (A ↣ B)
 ↔to↣ f =
   let inj : is-injective (f ^)

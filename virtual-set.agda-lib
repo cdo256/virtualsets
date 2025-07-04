@@ -11,3 +11,4 @@ flags:
   --guardedness
   --two-level
   -W noUnsupportedIndexedMatch
+  --allow-unsolved-metas
