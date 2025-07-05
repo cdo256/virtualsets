@@ -5,11 +5,9 @@ open import Cubical.Core.Primitives
 open import Cubical.Data.Empty
 open import Cubical.Data.Sum
 open import Cubical.Data.Unit renaming (Unit to ⊤)
-open import Cubical.Data.SumFin.Base
-open import Cubical.Data.SumFin.Properties
 
 open import VSet.Path
--- open import VSet.Data.Fin.Default
+open import VSet.Data.Fin.Base
 open import VSet.Function.Base
 open import VSet.Function.Injection
 open import VSet.Function.Iso
@@ -19,21 +17,15 @@ open import VSet.Data.SomeFin.Base
 
 open _∖_
 
-fzero≢fsuc : {x : SomeFin} → (a : Fin x) → fzero ≢ fsuc a
-fzero≢fsuc a = {!elim!} 
-
-fsuc≢fzero : {x : SomeFin} → (a : Fin x) → fsuc a ≢ fzero 
-fsuc≢fzero a = ≢sym {!fzero≢fsuc!} 
-
 del-zero-suc : ∀ {x} (b : ⟦ x ⟧)
-             → del fzero (fsuc b , fzero≢fsuc b) ≡ b
+             → del fzero (fsuc b , {!fzero≢fsuc b!}) ≡ b
 del-zero-suc = {!!}
 -- del-zero-suc b with fin-view (del fzero (fsuc b , fzero≠fsuc))
 -- ... | vzero = refl
 -- ... | vsuc _ = refl
 
 del-suc-zero : ∀ {x} (a : ⟦ suc x ⟧)
-             → del (fsuc a) (fzero , fsuc≢fzero a) ≡ fzero
+             → del (fsuc a) (fzero , {!fsuc≢fzero a!}) ≡ fzero
 del-suc-zero = {!!}
 -- del-suc-zero a with fin-view (del (fsuc a) (fzero , fsuc≠fzero))
 -- ... | vzero = refl

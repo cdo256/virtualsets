@@ -10,8 +10,6 @@ open import Cubical.Data.Nat.Order
 open import Cubical.Data.Empty renaming (elim to absurd)
 open import Cubical.Data.Sum
 open import Cubical.Data.Unit renaming (Unit to ⊤)
-open import Cubical.Data.SumFin.Base
-open import Cubical.Data.SumFin.Properties
 
 open import VSet.Path
 open import VSet.Data.Fin.Default

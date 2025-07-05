@@ -23,6 +23,11 @@ data Fin : ℕ → Type where
 fzero≢fsuc : ∀ i → fzero ≢ fsuc i
 fzero≢fsuc ()
 
+fsuc≢fzero : ∀ i → fsuc i ≢ fzero 
+fsuc≢fzero a = ≢sym (fzero≢fsuc a) 
+
+
+
 elim : ∀ {ℓ} {A : {n : ℕ} → Fin (suc n) → Type ℓ}
      → ({n : ℕ} → A {n} fzero)
      → ({n : ℕ} → (a : Fin (suc n)) → A a → A (fsuc a))
