@@ -21,13 +21,13 @@ open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
 open import VSet.Transform.Pred
 
-infixl 8 _+ᶠ_ _-ᶠ_
+infixl 8 _-ᶠ_
 
-sym-sub : {A' X Y : SomeFin} → (f : [ A' + X ↣ A' + Y ])
+_-ᶠ_ : {A' X Y : SomeFin} → (f : [ A' + X ↣ A' + Y ])
     → (A : SomeFin) → {A ≡ A'}
     → [ X ↣ Y ]
-sym-sub {zero} {X} {Y} f zero = f
-sym-sub {zero} {X} {Y} f (suc A) {eq} = absurd (snotz eq)
-sym-sub {suc A'} {X} {Y} f (zero) {eq} = absurd (znots eq)
-sym-sub {suc A'} {X} {Y} f (suc A) = sym-sub (pred f) A
+_-ᶠ_ {zero} {X} {Y} f zero = f
+_-ᶠ_ {zero} {X} {Y} f (suc A) {eq} = absurd (snotz eq)
+_-ᶠ_ {suc A'} {X} {Y} f (zero) {eq} = absurd (znots eq)
+_-ᶠ_ {suc A'} {X} {Y} f (suc A) = _-ᶠ_ (pred f) A
 

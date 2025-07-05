@@ -18,8 +18,6 @@ open import VSet.Function.Iso
 open import VSet.Function.Properties
 open import VSet.Data.SomeFin.Base
 
-infixl 8 _+ᶠ_ _-ᶠ_
-
 [_↣_] : SomeFin → SomeFin → Type
 [ X ↣ Y ] = ⟦ X ⟧ ↣ ⟦ Y ⟧
 
