@@ -23,16 +23,6 @@ elim : ∀ {A : {n : ℕ} → Fin (suc n) → Type }
 elim {A = A} z s m fzero = z
 elim {A = A} z s (suc m) (fsuc a) = s a (elim {A = A} z s m a)
 
-fzero≢fsuc : ∀ {x : ℕ} (i : Fin x) → fzero ≢ fsuc i
-fzero≢fsuc {x} i p = transport (cong P p) tt
-  where
-    P : {x : ℕ} → Fin (suc x) → Type
-    P {x} fzero = ⊤ 
-    P {x} (fsuc a) = ⊥
-
-fsuc≢fzero : ∀ {x : ℕ} (i : Fin x) → fsuc i ≢ fzero 
-fsuc≢fzero a = ≢sym (fzero≢fsuc a) 
-
 toℕ : ∀ {n} → Fin n → ℕ 
 toℕ fzero = zero
 toℕ (fsuc x) = suc (toℕ x)
@@ -42,37 +32,9 @@ fromℕ {zero} a a<0 = absurd (¬-<-zero {a} a<0)
 fromℕ {suc n} zero _ = fzero
 fromℕ {suc n} (suc a) sa<sn = fsuc (fromℕ {n} a (pred-<-pred {a} {n} sa<sn))
 
-toℕ∘fromℕ≡id : {m : ℕ} → (n : ℕ) → (n<m : n < m) → toℕ {m} (fromℕ n n<m) ≡ n
-toℕ∘fromℕ≡id {zero} n n<0 = absurd (¬-<-zero n<0)
-toℕ∘fromℕ≡id {suc m} zero 0<sm = refl
-toℕ∘fromℕ≡id {suc m} (suc n) sn<sm = cong suc (toℕ∘fromℕ≡id n (pred-<-pred sn<sm))
-
-toℕ<m : ∀ {m : ℕ} → (a : Fin m) → toℕ a < m 
-toℕ<m {suc m} fzero = suc-<-suc tt
-toℕ<m {suc m} (fsuc a) = suc-<-suc (toℕ<m a)
-
-fromℕ∘toℕ≡id : {m : ℕ} → (a : Fin m) → fromℕ (toℕ {m} a) (toℕ<m a) ≡ a
-fromℕ∘toℕ≡id {suc m} fzero = refl
-fromℕ∘toℕ≡id {suc m} (fsuc a) =
-  fromℕ (toℕ (fsuc a)) (toℕ<m (fsuc a))
-    ≡⟨ refl ⟩
-  fromℕ (suc (toℕ a)) (suc-<-suc a<m)
-    ≡⟨ refl ⟩
-  fsuc (fromℕ (toℕ a) (pred-<-pred (suc-<-suc a<m)))
-    ≡⟨ cong (λ ○ → fsuc (fromℕ (toℕ a) ○)) refl ⟩
-  fsuc (fromℕ (toℕ a) a<m)
-    ≡⟨ cong fsuc (fromℕ∘toℕ≡id a) ⟩
-  fsuc a ∎
-  where
-    a<m = toℕ<m a
-
 pred : {n : ℕ} → Fin (suc (suc n)) → Fin (suc n)
 pred fzero = fzero
 pred (fsuc n) = n
-
-fsuc-injective : ∀ {n} {i j : Fin n} → fsuc {n} i ≡ fsuc {n} j → i ≡ j
-fsuc-injective {zero} {()} {()} 
-fsuc-injective {suc n} {i} {j} p = cong pred p
 
 fshift : (x : ℕ) → {y : ℕ} → Fin y → Fin (x +ℕ y)
 fshift zero a = a

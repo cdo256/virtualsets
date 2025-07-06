@@ -5,3 +5,4 @@ open import Cubical.Data.Nat public
 open import VSet.Data.Nat.Order public
 
 open import VSet.Data.Fin.Base public
+open import VSet.Data.Fin.Properties public
