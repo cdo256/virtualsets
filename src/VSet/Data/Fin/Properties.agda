@@ -7,6 +7,7 @@ open import Cubical.Data.Nat using (ℕ) renaming (_+_ to _+ℕ_)
 open import VSet.Data.Nat.Order
 
 open import VSet.Data.Fin.Base
+open import VSet.Function.Injection
 
 open ℕ.ℕ
 
@@ -51,4 +52,28 @@ fromℕ∘toℕ≡id {suc m} (fsuc a) =
 fsuc-injective : ∀ {n} {i j : Fin n} → fsuc {n} i ≡ fsuc {n} j → i ≡ j
 fsuc-injective {zero} {()} {()} 
 fsuc-injective {suc n} {i} {j} p = cong pred p
+
+finject-injective : {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
+finject-injective {x} zero a b fa≡fb =
+  a
+    ≡⟨ sym (subst-inv Fin p a) ⟩
+  subst Fin p (subst Fin (sym p) a)
+    ≡⟨ cong (subst Fin p) fa≡fb ⟩
+  subst Fin p (subst Fin (sym p) b)
+    ≡⟨ subst-inv Fin p b ⟩
+  b ∎
+  where
+    p : x +ℕ 0 ≡ x
+    p = ℕ.+-zero x 
+finject-injective {x} (suc y) fzero fzero fa≡fb = refl
+finject-injective {x} (suc y) fzero (fsuc b) fa≡fb =
+  absurd (fzero≢fsuc (finject (suc y) b) fa≡fb)
+finject-injective {x} (suc y) (fsuc a) fzero fa≡fb =
+  absurd (fsuc≢fzero (finject (suc y) a) fa≡fb)
+finject-injective {x} (suc y) (fsuc a) (fsuc b) fa≡fb =
+  cong fsuc (finject-injective (suc y) a b (fsuc-injective fa≡fb))
+
+fshift-injective : {x : ℕ} → (y : ℕ) → is-injective (fshift x {y})
+fshift-injective {zero} y a b fa≡fb = fa≡fb
+fshift-injective {suc x} y a b fa≡fb = fshift-injective y a b fa≡fb
 
