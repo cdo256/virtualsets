@@ -38,8 +38,6 @@ normal A = f A
     f 𝟙 = ⊤ 
     f (A ⊕ B) = normal A × normal B
 
-normalize
-
 ∥_∥ : BitTree → ℕ
 ∥ 𝟘 ∥ = 0 
 ∥ 𝟙 ∥ = 1
