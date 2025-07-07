@@ -14,7 +14,7 @@ lemma1-3 : ∀ (X Y A : SomeFin) → (f : [ X ↣ Y ])
 lemma1-3 X Y zero f = refl
 lemma1-3 X Y (suc A) f =
   sub (suc A) (add (suc A) f) ≡⟨ {!!} ⟩
-  sub (suc A) (add (suc A) f) ≡⟨ {!!} ⟩
+  sub A (add (suc A) f) ≡⟨ {!!} ⟩
   f ∎
 
 lemma1-4 : ∀ (X Y A B : SomeFin) → (f : [ A + X ↣ A + Y ])

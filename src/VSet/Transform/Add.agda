@@ -41,14 +41,22 @@ add {X} {Y} (suc A) g = inc (add A g)
 +0r {X} {Y} f = subst (λ ○ → [ ○ ↣ Y + 0 ]) (sym (+-zero X))
               $ subst (λ ○ → [ X ↣ ○ ]) (sym (+-zero Y)) f
 
+dec-dom-func : ∀ {X Y : SomeFin} → (⟦ suc X ⟧ → ⟦ Y ⟧) → (⟦ X ⟧ → ⟦ Y ⟧)
+dec-dom-func {X} {Y} f a = f (fsuc a)
+
+dec-dom-inj : ∀ {X Y : SomeFin} → (f : [ suc X ↣ Y ])
+            → is-injective (dec-dom-func (fst f))
+dec-dom-inj {X} {Y} f a b ga≡gb = fsuc-injective (snd f (fsuc a) (fsuc b) ga≡gb)
+
+dec-dom : ∀ {X Y : SomeFin} → [ suc X ↣ Y ] → [ X ↣ Y ]
+dec-dom {X} {Y} f = dec-dom-func (fst f) , dec-dom-inj f
+
 join-dom-func : ∀ {X Y Z : SomeFin}
               → (⟦ X ⟧ → ⟦ Z ⟧) → (⟦ Y ⟧ → ⟦ Z ⟧) → (⟦ X + Y ⟧ → ⟦ Z ⟧)
 join-dom-func {zero} {Y} {Z} f g a = g a
 join-dom-func {suc X} {Y} {Z} f g fzero = f fzero
 join-dom-func {suc X} {Y} {Z} f g (fsuc a) =
-  join-dom-func f' g a
-  where f' : ⟦ X ⟧ → ⟦ Z ⟧
-        f' a = f (fsuc a)
+  join-dom-func (f ∘ fsuc) g a
 
 absurd-func : ∀ {A : Type} {X : SomeFin} → (⟦ suc X ⟧ → ⟦ zero ⟧) → A
 absurd-func {X} f with f fzero
@@ -65,15 +73,24 @@ tensor-inj : ∀ {W X Y Z : SomeFin}
            → (f : [ W ↣ X ]) → (g : [ Y ↣ Z ])
            → is-injective (tensor-func (fst f) (fst g))
 tensor-inj {zero} {X} {Y} {Z} f g x y hx≡hy =
-  snd g x y (subst {!!} {!!} hx≡hy)
+  snd g x y (fshift-injective Z (fst g x) (fst g y) hx≡hy)
   where
     h : ⟦ 0 + Y ⟧ → ⟦ X + Z ⟧
     h = tensor-func (fst f) (fst g)
-tensor-inj {suc W} {X} {Y} {Z} f g x y hx≡hy = {!!}
+tensor-inj {suc W} {X} {Y} {Z} f g fzero fzero hx≡hy = refl
+tensor-inj {suc W} {X} {Y} {Z} f g fzero (fsuc y) hx≡hy =
+  {!snd f ? ? ?!}
+tensor-inj {suc W} {X} {Y} {Z} f g (fsuc x) fzero hx≡hy = {!!}
+tensor-inj {suc W} {X} {Y} {Z} f g (fsuc x) (fsuc y) hx≡hy =
+  let r = tensor-inj {W} {X} {Y} (dec-dom f) g {!!} {!!} {!!} in {!!}
   where
     h : ⟦ suc W + Y ⟧ → ⟦ X + Z ⟧
     h = tensor-func (fst f) (fst g)
-
+    f' : ⟦ W ⟧ → ⟦ X ⟧
+    f' x = fst f (fsuc x)
+    f'-inj : is-injective f'
+    f'-inj x y f'x≡f'y = fsuc-injective (snd f (fsuc x) (fsuc y) f'x≡f'y)
+    w = tensor-inj {W} {X} {Y} {Z} (f' , f'-inj) g {!x!} {!!} {!!}
 tensor : ∀ {W X Y Z : SomeFin} → [ W ↣ X ] → [ Y ↣ Z ] → [ W + Y ↣ X + Z ]
 tensor {zero} {zero} f g = g
 tensor {zero} {suc X} f g = {!fsuc ∘ fst g , ?!}
