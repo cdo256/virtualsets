@@ -62,6 +62,8 @@ absurd-func : ∀ {A : Type} {X : SomeFin} → (⟦ suc X ⟧ → ⟦ zero ⟧) 
 absurd-func {X} f with f fzero
 ... | ()
 
+
+
 tensor-func : ∀ {W X Y Z : SomeFin}
               → (⟦ W ⟧ → ⟦ X ⟧) → (⟦ Y ⟧ → ⟦ Z ⟧) → (⟦ W + Y ⟧ → ⟦ X + Z ⟧)
 tensor-func {zero} {X} {Y} {Z} f g a = fshift X (g a)
@@ -79,7 +81,7 @@ tensor-inj {zero} {X} {Y} {Z} f g x y hx≡hy =
     h = tensor-func (fst f) (fst g)
 tensor-inj {suc W} {X} {Y} {Z} f g fzero fzero hx≡hy = refl
 tensor-inj {suc W} {X} {Y} {Z} f g fzero (fsuc y) hx≡hy =
-  {!snd f ? ? ?!}
+  snd {!!}
 tensor-inj {suc W} {X} {Y} {Z} f g (fsuc x) fzero hx≡hy = {!!}
 tensor-inj {suc W} {X} {Y} {Z} f g (fsuc x) (fsuc y) hx≡hy =
   let r = tensor-inj {W} {X} {Y} (dec-dom f) g {!!} {!!} {!!} in {!!}
@@ -91,10 +93,9 @@ tensor-inj {suc W} {X} {Y} {Z} f g (fsuc x) (fsuc y) hx≡hy =
     f'-inj : is-injective f'
     f'-inj x y f'x≡f'y = fsuc-injective (snd f (fsuc x) (fsuc y) f'x≡f'y)
     w = tensor-inj {W} {X} {Y} {Z} (f' , f'-inj) g {!x!} {!!} {!!}
+
 tensor : ∀ {W X Y Z : SomeFin} → [ W ↣ X ] → [ Y ↣ Z ] → [ W + Y ↣ X + Z ]
-tensor {zero} {zero} f g = g
-tensor {zero} {suc X} f g = {!fsuc ∘ fst g , ?!}
-tensor {suc W} {X} f g = {!!}
+tensor {W} {X} {Y} {Z} f g = ↔to↣ {!!} ↣∘↣ {!!} ↣∘↣ ↔to↣ {!!}
 
 join-dom : ∀ {X Y Z : SomeFin} → [ X ↣ Z ] → [ Y ↣ Z ] → [ X + Y ↣ Z ]
 join-dom {zero} f g = g
