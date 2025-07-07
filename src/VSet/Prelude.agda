@@ -2,7 +2,9 @@ module VSet.Prelude where
 
 open import Cubical.Foundations.Prelude public
 open import Cubical.Foundations.Function public
-open import Cubical.Foundations.Transport public
+open import Cubical.Foundations.Transport public hiding (transpEquiv)
+open import Cubical.Foundations.Equiv public
+open import Cubical.Foundations.Isomorphism public
 open import Cubical.Core.Primitives public
 
 open import Cubical.Data.Empty public renaming (elim to absurd)

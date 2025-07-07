@@ -2,7 +2,7 @@ module VSet.Path where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Path public
-open import Cubical.Foundations.Transport public
+open import Cubical.Foundations.Transport public hiding (transpEquiv)
 open import Cubical.Core.Primitives
 open import Cubical.Data.Empty renaming (elim to absurd)
 
@@ -10,7 +10,6 @@ open import Cubical.Data.Empty renaming (elim to absurd)
 private
   variable
     ℓ : Level
-
 
 _≢_ : ∀ {ℓ} {A : Type ℓ} → (x y : A) → Type ℓ
 x ≢ y = x ≡ y → ⊥
