@@ -58,22 +58,29 @@ finject-injective {x} zero a b fa≡fb =
   a
     ≡⟨ sym (subst-inv Fin p a) ⟩
   subst Fin p (subst Fin (sym p) a)
-    ≡⟨ cong (subst Fin p) fa≡fb ⟩
+    ≡⟨ cong {!subst Fin p!} fa≡fb ⟩
   subst Fin p (subst Fin (sym p) b)
     ≡⟨ subst-inv Fin p b ⟩
   b ∎
   where
     p : x +ℕ 0 ≡ x
     p = ℕ.+-zero x 
-finject-injective {x} (suc y) fzero fzero fa≡fb = refl
-finject-injective {x} (suc y) fzero (fsuc b) fa≡fb =
-  absurd (fzero≢fsuc (finject (suc y) b) fa≡fb)
-finject-injective {x} (suc y) (fsuc a) fzero fa≡fb =
-  absurd (fsuc≢fzero (finject (suc y) a) fa≡fb)
-finject-injective {x} (suc y) (fsuc a) (fsuc b) fa≡fb =
-  cong fsuc (finject-injective (suc y) a b (fsuc-injective fa≡fb))
+finject-injective {x} (suc y) fzero fzero _ = refl
+finject-injective {x} (suc y) fzero (fsuc b) f0≡fsb =
+  absurd (fzero≢fsuc (finject (suc y) b) f0≡fsb)
+finject-injective {x} (suc y) (fsuc a) fzero fsa≡f0 =
+  absurd (fsuc≢fzero (finject (suc y) a) fsa≡f0)
+finject-injective {x} (suc y) (fsuc a) (fsuc b) fsa≡fsb =
+  cong fsuc (finject-injective (suc y) a b (fsuc-injective fsa≡fsb))
+
+finject∘fsuc-commutes : ∀ {x y : ℕ} → (a : Fin x)
+                      → finject y (fsuc a) ≡ fsuc (finject y a)
+finject∘fsuc-commutes {suc x} {zero} a = refl
+finject∘fsuc-commutes {suc x} {suc y} a = refl
+finject∘fsuc-commutes {zero} {suc y} a = refl
 
 fshift-injective : {x : ℕ} → (y : ℕ) → is-injective (fshift x {y})
 fshift-injective {zero} y a b fa≡fb = fa≡fb
-fshift-injective {suc x} y a b fa≡fb = fshift-injective y a b fa≡fb
+fshift-injective {suc x} y a b fa≡fb =
+  fshift-injective {x} y a b (fsuc-injective fa≡fb)
 
