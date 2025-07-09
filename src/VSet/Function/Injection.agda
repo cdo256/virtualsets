@@ -18,6 +18,9 @@ is-injective {X} f = ∀ (x y : X) → f x ≡ f y → x ≡ y
 _↣_ : (X Y : Type) → Type
 X ↣ Y = Σ (X → Y) is-injective
 
+↣-id : (X : Type) → X ↣ X
+↣-id X = (λ x → x) , (λ x y p → p)
+
 Injection : (X Y : Type) → Type
 Injection X Y = X ↣ Y
 Injective : {X Y : Type} → (f : X → Y) → Type
