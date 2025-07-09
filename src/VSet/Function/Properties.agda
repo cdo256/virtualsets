@@ -1,7 +1,5 @@
 module VSet.Function.Properties where
 
--- open import Cubical.Level
-
 open import VSet.Path
 open import VSet.Prelude
 open import VSet.Data.Sum.Properties
@@ -42,27 +40,20 @@ _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
 ↣-map-⊎ {A} {B} {C} {D} f g = h , inj
   where
     h : (A ⊎ C) → (B ⊎ D)
-    h (inl a) = inl (fst f a)
-    h (inr c) = inr (fst g c)
+    h = ⊎-map (fst f) (fst g)
 
     inj : (x y : A ⊎ C) → h x ≡ h y → x ≡ y
     inj (inl a₁) (inl a₂) hx≡hy =
         cong inl
       $ snd f a₁ a₂
       $ inl-injective (fst f a₁) (fst f a₂)
-      $ {!A₁ ≡⟨ {!!} ⟩
-        foo ≡⟨ {!!} ⟩
-        A₂ ∎!}
-      where
-        A₁ : B ⊎ D
-        A₁ = inl {A = B} {B = D} (fst f a₁)
-        foo : B ⊎ D
-        foo = h (inl {A = A} {B = C} a₁)
-        A₂ : B ⊎ D
-        A₂ = inl {A = B} {B = D} (fst f a₂)
+      $ hx≡hy
     inj (inl a₁) (inr c₂) hx≡hy =
       absurd (inl≢inr (fst f a₁) (fst g c₂) hx≡hy)
     inj (inr c₁) (inl a₂) hx≡hy =
       absurd (inl≢inr (fst f a₂) (fst g c₁) (sym hx≡hy))
     inj (inr c₁) (inr c₂) hx≡hy =
-      cong inr $ snd g c₁ c₂ (inr-injective (fst g c₁) (fst g c₂) {!hx≡hy!})
+        cong inr
+      $ snd g c₁ c₂
+      $ inr-injective (fst g c₁) (fst g c₂)
+      $ hx≡hy
