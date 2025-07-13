@@ -3,17 +3,22 @@ module Compat.1Lab where
 open import Cubical.Foundations.Prelude as Cubical
   renaming ( hcomp to cubical-hcomp
            ; hfill to cubical-hfill
-           ; Square to cubical-Square
            )
 
 ∂ : I → I
 ∂ i  = i ∨ ~ i
 
-Square
-  : ∀ {ℓ} {A : Type ℓ} {a00 a01 a10 a11 : A}
-  → (p : a00 ≡ a01) (q : a00 ≡ a10) (s : a01 ≡ a11) (r : a10 ≡ a11)
-  → Type ℓ
-Square p q s r = PathP (λ i → p i ≡ r i) q s  -- cubical-Square p s r q?
+-- compat-Square
+--   : ∀ {ℓ} {A : Type ℓ} {a00 a01 a10 a11 : A}
+--   → (p : a00 ≡ a01) (q : a00 ≡ a10) (s : a01 ≡ a11) (r : a10 ≡ a11)
+--   → Type ℓ
+-- compat-Square p q s r = Square q s p r
+
+-- 1lab-Square
+--   : ∀ {ℓ} {A : Type ℓ} {a00 a01 a10 a11 : A}
+--   → (p : a00 ≡ a01) (q : a00 ≡ a10) (s : a01 ≡ a11) (r : a10 ≡ a11)
+--   → Type ℓ
+-- 1lab-Square p q s r = PathP (λ i → p i ≡ r i) q s
 
 hcomp
   : ∀ {ℓ} {A : Type ℓ} (φ : I)
@@ -53,7 +58,7 @@ hfill φ i u = hcomp (φ ∨ ~ i) λ where
 
 ∙∙-filler : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
           → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
-          → Square (sym p) q (p ∙∙ q ∙∙ r) r
+          → Square q (p ∙∙ q ∙∙ r) (sym p) r
 ∙∙-filler p q r i j = hfill (∂ j) i λ where
   k (j = i0) → p (~ k)
   k (j = i1) → r k
@@ -61,7 +66,7 @@ hfill φ i u = hcomp (φ ∨ ~ i) λ where
 
 module DoubleCompUnique {ℓ : Level} {A : Type ℓ}
     {w x y z : A} (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
-    (α' β' : Σ[ s ∈ w ≡ z ] Square (sym p) q s r) where
+    (α' β' : Σ[ s ∈ w ≡ z ] Square q s (sym p) r) where
 
   α = fst α'
   α-fill = snd α'
@@ -87,14 +92,14 @@ open DoubleCompUnique using (∙∙-unique)
 
 ∙∙-contract : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
             → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
-            → (β : Σ[ s ∈ (w ≡ z) ] Square (sym p) q s r)
+            → (β : Σ[ s ∈ (w ≡ z) ] Square q s (sym p) r)
             → (p ∙∙ q ∙∙ r , ∙∙-filler p q r) ≡ β
 ∙∙-contract p q r β = ∙∙-unique p q r _ β
 
 ∙∙-unique'
   : {ℓ : Level} {A : Type ℓ}
   → {w x y z : A} {p : w ≡ x} {q : x ≡ y} {r : y ≡ z} {s : w ≡ z}
-  → (β : Square (sym p) q s r)
+  → (β : Square q s (sym p) r)
   → s ≡ p ∙∙ q ∙∙ r
 ∙∙-unique' β i = ∙∙-contract _ _ _ (_ , β) (~ i) .fst
 
