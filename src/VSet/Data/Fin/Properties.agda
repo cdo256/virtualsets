@@ -25,6 +25,9 @@ fzero≢fsuc {x} i p = transport (cong P p) tt
 fsuc≢fzero : ∀ {x : ℕ} (i : Fin x) → fsuc i ≢ fzero 
 fsuc≢fzero a = ≢sym (fzero≢fsuc a) 
 
+Fin0≃⊥ : Fin 0 ≃ ⊥
+Fin0≃⊥ = (λ ()) , record { equiv-proof = absurd }
+
 toℕ∘fromℕ≡id : {m : ℕ} → (n : ℕ) → (n<m : n < m) → toℕ {m} (fromℕ n n<m) ≡ n
 toℕ∘fromℕ≡id {zero} n n<0 = absurd (¬-<-zero n<0)
 toℕ∘fromℕ≡id {suc m} zero 0<sm = refl
