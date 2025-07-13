@@ -20,21 +20,49 @@ open import Cubical.Foundations.Prelude as Cubical
 --   → Type ℓ
 -- 1lab-Square p q s r = PathP (λ i → p i ≡ r i) q s
 
-hcomp
+-- primHComp  : ∀ {ℓ} {A : Set ℓ} {φ : I} (u : ∀ i → Partial φ A) (a : A) → A
+
+
+compat-hcomp
   : ∀ {ℓ} {A : Type ℓ} (φ : I)
   → (u : (i : I) → Partial (φ ∨ ~ i) A)
   → A
-hcomp {A = A} φ u = cubical-hcomp sys (u i0 1=1) module hcomp-sys where
+compat-hcomp {A = A} φ u =
+  cubical-hcomp sys (u i0 1=1) where
+    sys : ∀ j → Partial φ A
+    sys j (φ = i1) = u j 1=1
+
+1lab-hcomp
+  : ∀ {ℓ} {A : Type ℓ} (φ : I)
+  → (u : (i : I) → Partial (φ ∨ ~ i) A)
+  → A
+1lab-hcomp {A = A} φ u = cubical-hcomp sys (u i0 1=1) where
   sys : ∀ j → Partial φ A
   sys j (φ = i1) = u j 1=1
 
-hfill : ∀ {ℓ} {A : Type ℓ} (φ : I) → I
+1lab-hfill : ∀ {ℓ} {A : Type ℓ} (φ : I) → I
       → ((i : I) → Partial (φ ∨ ~ i) A)
       → A
-hfill φ i u = hcomp (φ ∨ ~ i) λ where
+1lab-hfill φ i u = 1lab-hcomp (φ ∨ ~ i) λ where
   j (φ = i1) → u (i ∧ j) 1=1
   j (i = i0) → u i0 1=1
   j (j = i0) → u i0 1=1
+
+compat-hfill : ∀ {ℓ} {A : Type ℓ} (φ : I) → I
+      → ((i : I) → Partial (φ ∨ ~ i) A)
+      → A
+compat-hfill {A = A} φ i u = hcomp where
+  f : (j : I) → Partial (φ ∨ ~ i ∨ ~ j) A
+  f j (φ = i1) = u (i ∧ j) 1=1
+  f j (i = i0) = u i0 1=1
+  f j (j = i0) = u i0 1=1
+
+  sys : ∀ j → Partial (φ ∨ ~ i) A
+  sys j (φ = i1) = f j 1=1
+  sys j (i = i0) = f j 1=1
+
+  hcomp : A
+  hcomp  = cubical-hcomp sys (u i0 1=1)
 
 -- cong-∙∙ : ∀ {B : Type ℓ} (f : A → B) (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
 --           → cong f (p ∙∙ q ∙∙ r) ≡ (cong f p) ∙∙ (cong f q) ∙∙ (cong f r)
@@ -56,6 +84,7 @@ hfill φ i u = hcomp (φ ∨ ~ i) λ where
 --                  ; (i = i0) → outS u0 })
 --         (outS u0)
 
+{-
 ∙∙-filler : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
           → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
           → Square q (p ∙∙ q ∙∙ r) (sym p) r
@@ -121,3 +150,8 @@ cong₂-∙
   → {w x y : B} (ξ : w ≡ x) (ψ : x ≡ y)
   → cong₂ f (α ∙ β) (ξ ∙ ψ) ≡ cong₂ f α ξ ∙ cong₂ f β ψ
 cong₂-∙ f α β ξ ψ = cong₂-∙∙ f refl α β refl ξ ψ
+
+-- -}
+-- -}
+-- -}
+-- -}
