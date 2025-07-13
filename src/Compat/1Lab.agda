@@ -1,6 +1,7 @@
 module Compat.1Lab where
 
-open import Cubical.Foundations.Prelude renaming (hcomp to cubical-hcomp)
+open import Cubical.Foundations.Prelude
+  renaming (hcomp to cubical-hcomp; hfill to cubical-hfill)
 -- open import Cubical.Foundations.Function 
 -- open import Cubical.Foundations.Transport hiding (transpEquiv)
 -- open import Cubical.Foundations.Equiv
@@ -17,7 +18,7 @@ hcomp
   : ∀ {ℓ} {A : Type ℓ} (φ : I)
   → (u : (i : I) → Partial (φ ∨ ~ i) A)
   → A
-hcomp {A = A} φ u = X.primHComp sys (u i0 1=1) module hcomp-sys where
+hcomp {A = A} φ u = cubical-hcomp sys (u i0 1=1) module hcomp-sys where
   sys : ∀ j → Partial φ A
   sys j (φ = i1) = u j 1=1
 
@@ -29,7 +30,10 @@ hfill φ i u = hcomp (φ ∨ ~ i) λ where
   j (i = i0) → u i0 1=1
   j (j = i0) → u i0 1=1
 
+{-
 doubleHComp : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
             → w ≡ x → x ≡ y → y ≡ z
             → w ≡ z
 doubleHComp p q r i = hcomp (λ j _ → {!!}) {!!} {!!}
+
+-- -}
