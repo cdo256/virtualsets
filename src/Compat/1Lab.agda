@@ -91,25 +91,23 @@ open DoubleCompUnique using (∙∙-unique)
             → (p ∙∙ q ∙∙ r , ∙∙-filler p q r) ≡ β
 ∙∙-contract p q r β = ∙∙-unique p q r _ β
 
-module DoubleCompUnique' {ℓ : Level} {A : Type ℓ}
-    {w x y z : A} {p : w ≡ x} {q : x ≡ y} {r : y ≡ z} {s : w ≡ z}
-    (β : Square (sym p) q s r) where
+∙∙-unique'
+  : {ℓ : Level} {A : Type ℓ}
+  → {w x y z : A} {p : w ≡ x} {q : x ≡ y} {r : y ≡ z} {s : w ≡ z}
+  → (β : Square (sym p) q s r)
+  → s ≡ p ∙∙ q ∙∙ r
+∙∙-unique' β i = ∙∙-contract _ _ _ (_ , β) (~ i) .fst
 
-  ∙∙-unique' : s ≡ p ∙∙ q ∙∙ r
-  ∙∙-unique' i = ∙∙-contract _ _ _ (_ , β) (~ i) .fst
-
-open DoubleCompUnique' using (∙∙-unique')
-
-module _ {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''}
-    (f : A → B → C)
-    {a b c d : A} (α : a ≡ b) (β : b ≡ c) (γ : c ≡ d)
-    {w x y z : B} (ξ : w ≡ x) (ψ : x ≡ y) (ω : y ≡ z) where
-
-  cong₂-∙∙ : cong₂ f (α ∙∙ β ∙∙ γ) (ξ ∙∙ ψ ∙∙ ω)
-           ≡ cong₂ f α ξ ∙∙ cong₂ f β ψ ∙∙ cong₂ f γ ω
-  cong₂-∙∙ =
-    ∙∙-unique' λ i j → f (∙∙-filler α β γ i j)
-                         (∙∙-filler ξ ψ ω i j)
+cong₂-∙∙
+  : {ℓ ℓ' ℓ'' : Level} {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''}
+  → (f : A → B → C)
+  → {a b c d : A} (α : a ≡ b) (β : b ≡ c) (γ : c ≡ d)
+  → {w x y z : B} (ξ : w ≡ x) (ψ : x ≡ y) (ω : y ≡ z)
+  →   cong₂ f (α ∙∙ β ∙∙ γ) (ξ ∙∙ ψ ∙∙ ω)
+    ≡ cong₂ f α ξ ∙∙ cong₂ f β ψ ∙∙ cong₂ f γ ω
+cong₂-∙∙ f α β γ ξ ψ ω =
+  ∙∙-unique' λ i j → f (∙∙-filler α β γ i j)
+                       (∙∙-filler ξ ψ ω i j)
 
 cong₂-∙
   : ∀ {ℓ ℓ' ℓ''} {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''}
