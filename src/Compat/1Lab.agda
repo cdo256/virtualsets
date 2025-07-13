@@ -96,15 +96,25 @@ compat-∙∙-filler : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
           → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
           → Square q (p ∙∙ q ∙∙ r) (sym p) r
 compat-∙∙-filler {A = A} p q r i j = out where
-  f : (k : I) → Partial (~ j ∨ j ∨ ~ k) A
-  f k (j = i0) = p (~ k)
-  f k (j = i1) = r k
-  f k (k = i0) = q j
+  u : (k : I) → Partial (~ j ∨ j ∨ ~ k) A
+  u k (j = i0) = p (~ k)
+  u k (j = i1) = r k
+  u k (k = i0) = q j
+
+  f : (l : I) → Partial (j ∨ ~ j ∨ ~ i ∨ ~ l) A
+  f l (j = i1) = u (i ∧ l) 1=1
+  f l (j = i0) = u (i ∧ l) 1=1
+  f l (i = i0) = u i0 1=1
+  f l (l = i0) = u i0 1=1
+
+  sys : ∀ l → Partial (j ∨ ~ j ∨ ~ i) A
+  sys l (j = i1) = f l 1=1
+  sys l (j = i0) = f l 1=1
+  sys l (i = i0) = f l 1=1
 
   out : A
-  out = compat-hfill (∂ j) i f
+  out = cubical-hcomp sys (u i0 1=1)
 
-{-
 module DoubleCompUnique {ℓ : Level} {A : Type ℓ}
     {w x y z : A} (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
     (α' β' : Σ[ s ∈ w ≡ z ] Square q s (sym p) r) where
@@ -116,7 +126,7 @@ module DoubleCompUnique {ℓ : Level} {A : Type ℓ}
   β-fill = snd β'
 
   cube : (i j : I) → p (~ j) ≡ r j
-  cube i j k = hfill (∂ i ∨ ∂ k) j λ where
+  cube i j k = compat-hfill (∂ i ∨ ∂ k) j λ where
     l (i = i0) → α-fill l k
     l (i = i1) → β-fill l k
     l (k = i0) → p (~ l)
@@ -130,6 +140,8 @@ module DoubleCompUnique {ℓ : Level} {A : Type ℓ}
   ∙∙-unique = λ i → (λ j → square i j) , (λ j k → cube i j k)
 
 open DoubleCompUnique using (∙∙-unique)
+
+{-
 
 ∙∙-contract : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
             → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
