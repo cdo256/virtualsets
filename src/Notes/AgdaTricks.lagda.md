@@ -30,3 +30,16 @@ Well-founded : {A : Type} → (A → A → Type) → Type
 Well-founded {A} _<_ = (x : A) → Acc _<_ x
 ```
 
+You can use modules as 'where' clauses. See this example from 1Lab.
+
+```agda
+1lab-hcomp
+  : ∀ {ℓ} {A : Type ℓ} (φ : I)
+  → (u : (i : I) → Partial (φ ∨ ~ i) A)
+  → A
+1lab-hcomp {A = A} φ u = hcomp sys (u i0 1=1) module hcomp-sys where
+  sys : ∀ j → Partial φ A
+  sys j (φ = i1) = u j 1=1
+```
+
+This allows you to access the variables in the where clause as if it were a module-- because it is!!
