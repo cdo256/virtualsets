@@ -84,15 +84,27 @@ compat-hfill {A = A} φ i u = hcomp where
 --                  ; (i = i0) → outS u0 })
 --         (outS u0)
 
-{-
-∙∙-filler : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
+1lab-∙∙-filler : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
           → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
           → Square q (p ∙∙ q ∙∙ r) (sym p) r
-∙∙-filler p q r i j = hfill (∂ j) i λ where
+1lab-∙∙-filler p q r i j = compat-hfill (∂ j) i λ where
   k (j = i0) → p (~ k)
   k (j = i1) → r k
   k (k = i0) → q j
 
+compat-∙∙-filler : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
+          → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
+          → Square q (p ∙∙ q ∙∙ r) (sym p) r
+compat-∙∙-filler {A = A} p q r i j = out where
+  f : (k : I) → Partial (~ j ∨ j ∨ ~ k) A
+  f k (j = i0) = p (~ k)
+  f k (j = i1) = r k
+  f k (k = i0) = q j
+
+  out : A
+  out = compat-hfill (∂ j) i f
+
+{-
 module DoubleCompUnique {ℓ : Level} {A : Type ℓ}
     {w x y z : A} (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
     (α' β' : Σ[ s ∈ w ≡ z ] Square q s (sym p) r) where
