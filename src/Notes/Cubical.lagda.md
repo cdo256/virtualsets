@@ -41,11 +41,28 @@ Path abstraction defines the following notions:
 
 Abstraction: For $i : 𝕀; t, u : A$,
 
-$$
+```agda-sketch
 ⟨ i ⟩ t : Path A t u
-$$
+```
 
-Substitutions: $(i/r)$. $i0$ and $i1$ are special endpoint values
+Substitutions: $(i/r)$. $i0$ and $i1$ are special endpoint values.
+
+There is an additional algebra called the 'face lattice'. This is a restirction of the cubical space to just (hyper) faces/edges/points. By substituting an endpoint to an axis variable.
+
+These can be combined into sets of faces/edges. Every path in cubical Agda originates from some face algebra.
+
+## Comp operator
+
+The comp operator operates in a fixed h-level and is written:
+
+```agda-sketch
+compⁱ A \left[ φ ↦ u \right] a₀
+```
+
+Here $u$ is a system of extents given by a face algebra.
+
+"The composition operation expresses that being extensible is preserved along paths: if
+a partial path is extensible at 0, then it is extensible at 1." [@cchm2016]
 
 
 
