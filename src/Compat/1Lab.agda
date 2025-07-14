@@ -22,7 +22,6 @@ open import Cubical.Foundations.Prelude as Cubical
 
 -- primHComp  : ∀ {ℓ} {A : Set ℓ} {φ : I} (u : ∀ i → Partial φ A) (a : A) → A
 
-
 compat-hcomp
   : ∀ {ℓ} {A : Type ℓ} (φ : I)
   → (u : (i : I) → Partial (φ ∨ ~ i) A)
@@ -125,13 +124,34 @@ module DoubleCompUnique {ℓ : Level} {A : Type ℓ}
   β = fst β'
   β-fill = snd β'
 
+  φ : (i j k : I) → I
+  φ i j k = (∂ i ∨ ∂ k)
+
+  g : (i k j : I) → Partial (~ i ∨ i ∨ ~ k ∨ k ∨ ~ j) A
+  g i k j (i = i0) = α-fill j k
+  g i k j (i = i1) = β-fill j k
+  g i k j (k = i0) = p (~ j)
+  g i k j (k = i1) = r j
+  g i k j (j = i0) = q k
+
+  hfill : ∀ {ℓ} (φ j : I)
+        → ((i : I) → Partial (φ ∨ ~ i) A)
+        → A
+  hfill φ j u = hcomp where
+    f : (l : I) → Partial (φ ∨ ~ j ∨ ~ l) A
+    f l (φ = i1) = u (j ∧ l) 1=1
+    f l (j = i0) = u i0 1=1
+    f l (l = i0) = u i0 1=1
+
+    sys : ∀ l → Partial (φ ∨ ~ j) A
+    sys l (φ = i1) = f l 1=1
+    sys l (j = i0) = f l 1=1
+
+    hcomp : A
+    hcomp  = cubical-hcomp sys (u i0 1=1)
+
   cube : (i j : I) → p (~ j) ≡ r j
-  cube i j k = compat-hfill (∂ i ∨ ∂ k) j λ where
-    l (i = i0) → α-fill l k
-    l (i = i1) → β-fill l k
-    l (k = i0) → p (~ l)
-    l (k = i1) → r l
-    l (l = i0) → q k
+  cube i j k = hfill (∂ i ∨ ∂ k) j (g i k)
 
   square : α ≡ β
   square i j = cube i i1 j
@@ -141,12 +161,11 @@ module DoubleCompUnique {ℓ : Level} {A : Type ℓ}
 
 open DoubleCompUnique using (∙∙-unique)
 
-{-
 
 ∙∙-contract : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
             → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
             → (β : Σ[ s ∈ (w ≡ z) ] Square q s (sym p) r)
-            → (p ∙∙ q ∙∙ r , ∙∙-filler p q r) ≡ β
+            → (p ∙∙ q ∙∙ r , compat-∙∙-filler p q r) ≡ β
 ∙∙-contract p q r β = ∙∙-unique p q r _ β
 
 ∙∙-unique'
@@ -164,8 +183,8 @@ cong₂-∙∙
   →   cong₂ f (α ∙∙ β ∙∙ γ) (ξ ∙∙ ψ ∙∙ ω)
     ≡ cong₂ f α ξ ∙∙ cong₂ f β ψ ∙∙ cong₂ f γ ω
 cong₂-∙∙ f α β γ ξ ψ ω =
-  ∙∙-unique' λ i j → f (∙∙-filler α β γ i j)
-                       (∙∙-filler ξ ψ ω i j)
+  ∙∙-unique' λ i j → f (compat-∙∙-filler α β γ i j)
+                       (compat-∙∙-filler ξ ψ ω i j)
 
 cong₂-∙
   : ∀ {ℓ ℓ' ℓ''} {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''}
