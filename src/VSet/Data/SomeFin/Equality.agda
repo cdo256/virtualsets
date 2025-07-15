@@ -16,20 +16,20 @@ open import Cubical.Foundations.Equiv.Base
 
 infix 8 _≈_
 
-record _≈_ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) : Type where
+record _≈_ {A B X Y : ℕ} (f : [ A ↣ X ]) (g : [ B ↣ Y ]) : Type where
   field
     p : A ≡ B
     q : X ≡ Y
-    path : (λ i → cong₂ FinFun p q i) [ f ≡ g ]
+    path : (λ i → cong₂ FinFun p q i) [ fst f ≡ fst g ]
 
-≈refl : {A X : ℕ} (f : Fin A → Fin X) → f ≈ f
+≈refl : {A X : ℕ} (f : [ A ↣ X ]) → f ≈ f
 ≈refl {A} {X} f = record
   { p = refl
   ; q = refl
-  ; path = λ i x → f x
+  ; path = λ i x → fst f x
   }
 
-≈sym : ∀ {A B X Y : ℕ} {f : Fin A → Fin X} {g : Fin B → Fin Y} → f ≈ g → g ≈ f
+≈sym : ∀ {A B X Y : ℕ} {f : [ A ↣ X ]} {g : [ B ↣ Y ]} → f ≈ g → g ≈ f
 ≈sym {A} {B} {X} {Y} {f} {g} f≈g = record
   { p = sym p 
   ; q = sym q
@@ -38,13 +38,11 @@ record _≈_ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) : Type 
   where
     open _≈_ f≈g
 
--- ≈transp : ∀ {A B X Y : ℕ} {f : Fin A → Fin X} {g : Fin B → Fin Y}
---         → (f≈g : f ≈ g) → (i : I) → (h : () )
 
 module Trans {A B C X Y Z : ℕ}
-           {f : Fin A → Fin X}
-           {g : Fin B → Fin Y}
-           {h : Fin C → Fin Z}
+           {f : [ A ↣ X ]}
+           {g : [ B ↣ Y ]}
+           {h : [ C ↣ Z ]}
            (f≈g : f ≈ g) (g≈h : g ≈ h) where
 
   open _≈_ f≈g renaming (p to p1; q to q1; path to path1)
@@ -66,16 +64,17 @@ module Trans {A B C X Y Z : ℕ}
       c2 : cong₂ FinFun (p1 ∙ p2) (q1 ∙ q2) ≡
            cong₂ FinFun p1 q1 ∙ cong₂ FinFun p2 q2
       c2 = cong₂-∙ FinFun p1 p2 q1 q2
-      path : (λ j → (cong₂ FinFun p1 q1 ∙ cong₂ FinFun p2 q2) j) [ f ≡ h ]
+      path : (λ j → (cong₂ FinFun p1 q1 ∙ cong₂ FinFun p2 q2) j) [ fst f ≡ fst h ]
       path = compPathP path1 path2
-      path' : (λ j → (cong₂ FinFun (p1 ∙ p2) (q1 ∙ q2)) j) [ f ≡ h ]
-      path' = subst⁻ (λ ○ → PathP (λ j → ○ j) f h) c2 path
+      path' : (λ j → (cong₂ FinFun (p1 ∙ p2) (q1 ∙ q2)) j) [ fst f ≡ fst h ]
+      path' = subst⁻ (λ ○ → (λ j → ○ j) [ fst f ≡ fst h ]) c2 path
+
   _∘≈_ : f ≈ h
   _∘≈_ = ≈trans
 
 open Trans using (≈trans; _∘≈_)
 
-≈⁻∘≈ : ∀ {A B X Y : ℕ} {f : Fin A → Fin X} {g : Fin B → Fin Y}
+≈⁻∘≈ : ∀ {A B X Y : ℕ} {f : [ A ↣ X ]} {g : [ B ↣ Y ]}
      → (f≈g : f ≈ g) → f≈g ∘≈ ≈sym f≈g ≡ ≈refl f
 ≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.p = refl i
 ≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.q = refl i
