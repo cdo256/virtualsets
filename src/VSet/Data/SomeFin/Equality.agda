@@ -3,7 +3,7 @@ module VSet.Data.SomeFin.Equality where
 open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Properties
 
-open import VSet.Prelude
+open import VSet.Prelude hiding (_∎)
 open import VSet.Data.Fin
 open import VSet.Function.Base
 open import VSet.Function.Injection
@@ -43,7 +43,7 @@ module Trans {A B C X Y Z : ℕ}
            {f : [ A ↣ X ]}
            {g : [ B ↣ Y ]}
            {h : [ C ↣ Z ]}
-           (f≈g : f ≈ g) (g≈h : g ≈ h) where
+           (g≈h : g ≈ h) (f≈g : f ≈ g) where
 
   open _≈_ f≈g renaming (p to p1; q to q1; path to path1)
   open _≈_ g≈h renaming (p to p2; q to q2; path to path2)
@@ -69,13 +69,35 @@ module Trans {A B C X Y Z : ℕ}
       path' : (λ j → (cong₂ FinFun (p1 ∙ p2) (q1 ∙ q2)) j) [ fst f ≡ fst h ]
       path' = subst⁻ (λ ○ → (λ j → ○ j) [ fst f ≡ fst h ]) c2 path
 
+  infixl 4 _∘≈_ 
   _∘≈_ : f ≈ h
   _∘≈_ = ≈trans
 
 open Trans using (≈trans; _∘≈_)
 
-≈⁻∘≈ : ∀ {A B X Y : ℕ} {f : [ A ↣ X ]} {g : [ B ↣ Y ]}
-     → (f≈g : f ≈ g) → f≈g ∘≈ ≈sym f≈g ≡ ≈refl f
-≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.p = refl i
-≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.q = refl i
-≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.path = refl 
+-- ≈⁻∘≈ : ∀ {A B X Y : ℕ} {f : [ A ↣ X ]} {g : [ B ↣ Y ]}
+--      → (f≈g : f ≈ g) → f≈g ∘≈ ≈sym f≈g ≡ ≈refl f
+-- ≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.p = refl i
+-- ≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.q = refl i
+-- ≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.path = refl 
+
+
+-- step-≈ : {A B C X Y Z : SomeFin}
+--        → (f : [ A ↣ X ]) → {g : [ B ↣ Y ]} → {h : [ C ↣ Z ]}
+--        → f ≈ g → g ≈ h → f ≈ h
+-- step-≈ _ f≈g g≈h =  g≈h ∘≈ f≈g
+
+-- syntax step-≈ f g f≈g = f ≈⟨ f≈g ⟩ g
+
+-- infixr 2 ≈⟨⟩-syntax
+-- syntax ≈⟨⟩-syntax f g (λ i → B) = f ≈[ i ]⟨ B ⟩ g
+
+infixr 2 _≈⟨_⟩_
+_≈⟨_⟩_ : {A B C X Y Z : SomeFin}
+       → (f : [ A ↣ X ]) → {g : [ B ↣ Y ]} → {h : [ C ↣ Z ]}
+       → f ≈ g → g ≈ h → f ≈ h
+_ ≈⟨ f≈g ⟩ g≈h = g≈h ∘≈ f≈g
+
+infix 3 _∎
+_∎ : {A X : SomeFin} → (f : [ A ↣ X ]) → f ≈ f
+f ∎ = ≈refl f
