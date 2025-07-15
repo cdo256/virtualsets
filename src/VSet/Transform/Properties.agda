@@ -1,6 +1,6 @@
 module VSet.Transform.Properties where
 
-open import VSet.Prelude
+open import VSet.Prelude hiding (_∎)
 open import VSet.Data.Fin hiding (pred)
 
 open import VSet.Function.Base
@@ -9,6 +9,7 @@ open import VSet.Function.Iso
 open import VSet.Function.Properties
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
+open import VSet.Data.SomeFin.Equality
 open import VSet.Transform.Sub
 open import VSet.Transform.Tensor
 open import VSet.Transform.Split using (⊎↔+; ⊎→+; +→⊎)
@@ -17,14 +18,46 @@ open import VSet.Transform.Pred
 open import Cubical.Data.Nat.Properties
 
 𝟘⊕≡id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → 𝟘 ⊕ f ≈ f
-𝟘⊕≡id {X} {Y} f x = 
-  fst (𝟘 ⊕ f) x ≡⟨ refl ⟩
-  fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x ≡⟨ refl ⟩
-  (fst (↔to↣ ⊎↔+) ∘ fst (↣-map-⊎ 𝟘 f) ∘ fst (↔to↣ (flip-↔ ⊎↔+))) x ≡⟨ refl ⟩
-  ⊎→+ (⊎-map (λ ()) (fst f) (+→⊎ x)) ≡⟨ refl ⟩
-  ⊎→+ (inr (fst f x)) ≡⟨ refl ⟩
-  fst f x ∎
+𝟘⊕≡id {X} {Y} f = record
+  { p = refl
+  ; q = refl
+  -- Goal: (λ i → cong₂ FinFun (λ _ → 0 + X) (λ _ → 0 + Y) i) [
+  --   fst (𝟘 ⊕ f) ≡ fst f ]
+  ; path = cong (λ ○ x → fst f x) (refl {x = f})
+  }
 
+⊕𝟘≡id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → f ⊕ 𝟘 ≈ f
+⊕𝟘≡id {X} {Y} f = record
+  { p = +-zero X
+  ; q = +-zero Y
+  -- Goal: (λ i → cong₂ FinFun (+-zero X) (+-zero Y) i) [ fst (f ⊕ 𝟘) ≡
+  --  fst f ]
+  ; path = λ i x → c2 {!!} {!!}
+  }
+  where
+    f' : [ X + 0 ↣ Y + 0 ]
+    f' = f ⊕ 𝟘
+    -- c2 : ? [ FinFun X Y ≡ FinFun (X + 0) (Y + 0) ]
+    c2 : (i : I) → cong₂ FinFun (+-zero X) (+-zero Y) i
+    c2 i x = y
+      where
+        x' : Fin X
+        x' = transport (λ j → Fin (+-zero X (i ∨ j))) x
+        y' : Fin Y
+        y' = fst f x'
+        y : Fin (+-zero Y i)
+        y = transport⁻ (λ j → Fin (+-zero Y (i ∨ j))) y'
+      
+    
+-- 𝟘⊕≡id {X} {Y} f x = 
+--   fst (𝟘 ⊕ f) x ≡⟨ refl ⟩
+--   fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x ≡⟨ refl ⟩
+--   (fst (↔to↣ ⊎↔+) ∘ fst (↣-map-⊎ 𝟘 f) ∘ fst (↔to↣ (flip-↔ ⊎↔+))) x ≡⟨ refl ⟩
+--   ⊎→+ (⊎-map (λ ()) (fst f) (+→⊎ x)) ≡⟨ refl ⟩
+--   ⊎→+ (inr (fst f x)) ≡⟨ refl ⟩
+--   fst f x ∎
+
+{-
 finPath : (n : ℕ) → Fin n ≡ Fin (n + 0)
 finPath n = cong Fin (sym (+-zero n))
 
@@ -67,3 +100,9 @@ lemma1-3 X Y (suc A) f =
 
 lemma1-4 : ∀ (X Y A B : SomeFin) → (f : [ A + X ↣ A + Y ])
          → radd B (sub A f) ≡ sub A {!add B f!} 
+
+-- -}
+-- -}
+-- -}
+-- -}
+-- -}
