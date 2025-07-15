@@ -11,7 +11,6 @@ open import VSet.Function.Iso
 open import VSet.Function.Properties
 open import VSet.Data.SomeFin.Base
 
-open import Cubical.Foundations.Equiv.Base 
 
 [_↣_] : SomeFin → SomeFin → Type
 [ X ↣ Y ] = ⟦ X ⟧ ↣ ⟦ Y ⟧
@@ -19,16 +18,5 @@ open import Cubical.Foundations.Equiv.Base
 id↣ : ∀ {A} → A ↣ A
 id↣ {A} = id , λ x y z → z
 
-
-MapPath : ∀ {A B X Y : ℕ} (p : A ≡ B) (p : X ≡ Y)
-     → PathP (λ i → Type) (Fin A → Fin X) (Fin B → Fin Y)
-MapPath p q i = (Fin (p i) → Fin (q i))
-
 FinFun : ∀ (A B : ℕ) → Type
 FinFun A B = Fin A → Fin B
-
-
--- -}
--- -}
--- -}
--- -}
