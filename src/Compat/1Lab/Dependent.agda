@@ -37,19 +37,6 @@ doubleComp-faces-dep : ∀ {ℓ} {A : (i j : I) → Type ℓ}
 doubleComp-faces-dep p r i j (i = i0) = p (~ j)
 doubleComp-faces-dep p r i j (i = i1) = r j
 
--- _∙∙-dep_∙∙-dep_
---   : ∀ {ℓ ℓ'} {A : Type ℓ} {B : A → Type ℓ'}
---   → {a b c d : A}
---   → {α : a ≡ b} {β : b ≡ c} {γ : c ≡ d}
---   → {w : B a} {x : B b} {y : B c} {z : B d}
---   → (ξ : PathP (λ i → B (α i)) w x)
---   → (ψ : PathP (λ i → B (β i)) x y)
---   → (ϕ : PathP (λ i → B (γ i)) y z)
---   → PathP (λ i → B ((α ∙ β) i)) w y
--- (ξ ∙∙-dep ψ ∙∙-dep ϕ) i =
---   1lab-comp (λ j → {!!}) (~ i ∨ i) {!!} {!!}
---   where A : I → I → B 
-
 -- doubleCompPath-filler : ∀ {ℓ} {A : Type ℓ} {x y z w : A} (p : x ≡ y) (q : y ≡ z) (r : z ≡ w)
 --                       → PathP (λ j → p (~ j) ≡ r j) q (p ∙∙ q ∙∙ r)
 -- doubleCompPath-filler p q r j i =
@@ -66,25 +53,39 @@ _∙∙-dep_∙∙-dep_
   → PathP (λ i → B ((α ∙ β) i)) w y
 (_∙∙-dep_∙∙-dep_) {A = A} {B = B} {a = a} {b = b} {c = c} {d = d}
                   {α = α} {β = β} {γ = γ} {w = w} {x = x} {y = y} {z = z}
-                  ξ ψ ϕ i = {!1lab-hcomp (∂ i) base-sys!}
+                  ξ ψ ϕ i = {!1lab-comp (∂ i) base-sys!}
   where
     sq : PathP (λ j → α (~ j) ≡ γ j) β (α ∙∙ β ∙∙ γ)
     sq = doubleCompPath-filler α β γ
-
-    fib : ∀ j k → PartialP (~ i ∨ i ∨ ~ j ∨ j ∨ ~ k) {!!}
-    fib j k 1=1 (i = i0) = α (~ j)
-    fib j k 1=1 (i = i1) = γ j
-    fib j k 1=1 (j = i0) = β i
-    fib j k 1=1 (j = i1) = (α ∙∙ β ∙∙ γ) i
-    fib j k 1=1 (k = i0) = sq
-
-    B' : ∀ j k → B (sq j k)
-    B' j k = {!!}
 
     α' = λ j → B (α j)
     β' = λ i → B (β i)
     γ' = λ j → B (γ j)
     δ' = λ i → B ((α ∙∙ β ∙∙ γ) i)
+
+    ParitalSq2 : ∀ j → IsOne (~ i ∨ i ∨ ~ j) → Type
+    -- PartialSq2 j 1=1 (i = i0) = {!!}
+    -- PartialSq2 j 1=1 (i = i1) = {!!}
+    -- PartialSq2 j 1=1 (j = i0) = {!!}
+
+    B' : ∀ j → PartialP (~ i ∨ i ∨ ~ j) {!sq!}
+    B' j k 1=1 (i = i0) = α' (~ j)
+    B' j k 1=1 (i = i1) = γ' j
+    B' j k 1=1 (j = i0) = β' i
+
+    sq2 : ∀ j → Partial (~ i ∨ i ∨ ~ j ∨ j) A
+    sq2 j (i = i0) = α (~ j)
+    sq2 j (i = i1) = γ j
+    sq2 j (j = i0) = β i
+    sq2 j (j = i1) = (α ∙∙ β ∙∙ γ) i
+
+    sq3 : ∀ j → PartialP (~ i ∨ i ∨ ~ j ∨ j) {!(i j : I) → sq!}
+    sq3 j 1=1 (i = i0) = α (~ j)
+    sq3 j 1=1 (i = i1) = γ j
+    sq3 j 1=1 (j = i0) = β i
+    sq3 j 1=1 (j = i1) = (α ∙∙ β ∙∙ γ) i
+
+    cube' : ∀ j k → PartialP (~ i ∨ i ∨ ~ j ∨ j ∨ ~ k) {!!}
 
     -- base-sys : ∀ j → Partial (∂ i ∨ ~ j) A
     -- base-sys j (i = i0) = α (~ j)
@@ -102,7 +103,7 @@ _∙-dep_
   → (ξ : PathP (λ i → B (α i)) w x)
   → (ψ : PathP (λ i → B (β i)) x y)
   → PathP (λ i → B ((α ∙ β) i)) w y
-_∙-dep_ {α = α} {β = β} ξ ψ = {!refl ∙∙-dep ξ ∙∙-dep ψ!}
+ξ ∙-dep ψ = refl ∙∙-dep ξ ∙∙-dep ψ
 
 {-
 1lab-∙∙-filler : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
@@ -226,8 +227,10 @@ cong₂-∙ f α β ξ ψ = cong₂-∙∙ f refl α β refl ξ ψ
 -- cong₂ f p q i = f (p i) (q i)
 -- {-# INLINE cong₂ #-}
 
--- _∙-dep_ : {x ≡ y → y ≡ z → x ≡ z
--- p ∙-dep q = refl ∙∙-dep p ∙∙-dep q
+_∙-dep_ : {x ≡ y → y ≡ z → x ≡ z
+p ∙-dep q = refl ∙∙-dep p ∙∙-dep q
+-}
+-}
 
 -- \Mi - math italic
 cong₂-∙-dep
@@ -242,7 +245,5 @@ cong₂-∙-dep
 cong₂-∙-dep f α β ξ ψ = {!cong₂-∙∙-dep f refl α β refl ξ ψ!}
 
 
--- -}
--- -}
 -- -}
 -- -}
