@@ -8,7 +8,6 @@ open import Cubical.Data.Nat.Properties
 open import Cubical.Data.Unit renaming (Unit to ⊤)
 
 open import VSet.Path
-open import VSet.Function.Base
 open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties

@@ -4,7 +4,6 @@ open import VSet.Prelude
 open import VSet.Data.Nat
 open import VSet.Path
 open import VSet.Data.Fin
-open import VSet.Function.Base
 open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties

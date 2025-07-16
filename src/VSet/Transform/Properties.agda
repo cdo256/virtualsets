@@ -3,7 +3,6 @@ module VSet.Transform.Properties where
 open import VSet.Prelude hiding (_∎)
 open import VSet.Data.Fin hiding (pred)
 
-open import VSet.Function.Base
 open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties

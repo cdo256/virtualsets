@@ -11,9 +11,9 @@ open import Cubical.Data.Sum
 open import Cubical.Data.Unit renaming (Unit to ⊤)
 open import Cubical.Data.Fin.Base
 open import Cubical.Data.Fin.Properties
+open import Cubical.Data.Equality.Base using (id)
 
 open import VSet.Path
-open import VSet.Function.Base
 
 open Iso
 

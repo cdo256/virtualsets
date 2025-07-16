@@ -1,7 +1,6 @@
 module VSet.Transform.Tensor where
 
 open import VSet.Prelude
-open import VSet.Function.Base
 open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties

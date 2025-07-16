@@ -2,7 +2,6 @@ module VSet.Data.Sum.Properties where
 
 open import VSet.Path
 open import VSet.Prelude
-open import VSet.Function.Base
 open import VSet.Function.Iso
 open import VSet.Function.Injection
 

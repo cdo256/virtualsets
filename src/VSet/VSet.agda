@@ -12,7 +12,6 @@ open import Cubical.Core.Primitives
 
 open import VSet.Path
 open import VSet.Data.Fin.Default
-open import VSet.Function.Base
 open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties
