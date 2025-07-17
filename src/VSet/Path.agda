@@ -1,6 +1,6 @@
 module VSet.Path where
 
-open import Cubical.Foundations.Prelude
+open import Cubical.Foundations.Prelude renaming (_∎ to _▯)
 open import Cubical.Foundations.Path public
 open import Cubical.Foundations.Transport public hiding (transpEquiv)
 open import Cubical.Core.Primitives
