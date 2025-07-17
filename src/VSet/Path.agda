@@ -10,8 +10,7 @@ open import Cubical.Data.Empty renaming (elim to absurd)
 private
   variable
     ℓ ℓ' ℓ'' : Level
-
-
+    A : Type ℓ
 
 _≢_ : ∀ {ℓ} {A : Type ℓ} → (x y : A) → Type ℓ
 x ≢ y = x ≡ y → ⊥
@@ -30,36 +29,44 @@ subst-inv {A} {x} {y} B p a =
     ≡⟨ transportTransport⁻ (λ i → B (p i)) a ⟩
   a ∎
 
--- step-≡P : {A : I → Type ℓ} {x : A i0} {y : A i1} {B_i1 : Type ℓ} {B : (A i1) ≡ B_i1} {z : B i1}
---         → PathP A x y → PathP (λ i → B i) y z → PathP (λ j → ((λ i → A i) ∙ B) j) x z
--- step-≡P = compPathP     
-
-
--- module DependentPathSyntax where
-private
-  variable
-    A : Type ℓ
-    B : A → Type ℓ
-    x y z w : A
-    p : x ≡ y
-    q : y ≡ z
-
 step-≡P : ∀ (B : A → Type ℓ')
-          → (x' : B x) {y' : B y} {z' : B z} 
+          → (x : A) {y z : A}
+          → (p : x ≡ y)
+          → (q : y ≡ z)
+          → (x' : B x) {y' : B y} {z' : B z}
           → (P : PathP (λ i → B (p i)) x' y')
           → (Q : PathP (λ i → B (q i)) y' z')
           → PathP (λ i → B ((p ∙ q) i)) x' z'
-step-≡P B x' P Q = compPathP' {B = B} {x' = x'} P Q
+step-≡P B x p q x' P Q = compPathP' {x = x} {B = B} {x' = x'} {p = p} {q = q}  P Q
 
-syntax step-≡P B x' P Q = x' ≡P[ B ]⟨ P ⟩ Q
+syntax step-≡P B x p q x' P Q = x' ≡P[ x ][ p ∙P q ]⟨ B ➢ P ⟩ Q
 
 infixr 2 ≡P⟨⟩-syntax
-≡P⟨⟩-syntax : (x : A) → y ≡ z → x ≡ y → x ≡ z
-≡P⟨⟩-syntax = step-≡
+≡P⟨⟩-syntax : ∀ (B : A → Type ℓ')
+            → (x : A) {y z : A}
+            → (p : x ≡ y)
+            → (q : y ≡ z)
+            → (x' : B x) {y' : B y} {z' : B z}
+            → (P : PathP (λ i → B (p i)) x' y')
+            → (Q : PathP (λ i → B (q i)) y' z')
+            → PathP (λ i → B ((p ∙ q) i)) x' z'
+≡P⟨⟩-syntax B x p q x' P Q = step-≡P B x p q x' P Q 
 
 infix 3 _∎P
 _∎P : {A : Type ℓ} (x : A) → x ≡ x
 _ ∎P = refl
 
+-- ? ≡P[ ? ][ ? ∙P ? ]⟨ ? ➢ ? ⟩
 
--- open DependentPathSyntax public
+module Tests where
+  open import Cubical.Data.Nat
+  open import Cubical.Data.Unit
+
+  foo : (λ i → ℕ) [ 1 + 1 ≡ 2 + 0 ]
+  foo = (1 + 1) ≡P[ tt ][ refl ∙P refl ]⟨ (λ _ → ℕ) ➢ refl ⟩ (
+        2 ≡P[ tt ][ refl ∙P refl ]⟨ (λ _ → ℕ) ➢ (+-zero 2) ⟩ 
+        (2 + 0 ∎P))
+
+  foo' : (λ i → ℕ) [ 1 + 1 ≡ 2 + 0 ]
+  foo' = compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} refl
+        (compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} ((+-zero 2)) refl)
