@@ -27,12 +27,17 @@ private
           ≡⟨ refl ⟩
         (f ⁻¹ ∘ f ^) y
           ≡⟨ cong (λ ○ → ○ y) (linv f) ⟩
-        y ∎ 
+        y ▯ 
   in f ^ , inj
 
 ≡to↣ : ∀ {A B} → A ≡ B → A ↣ B
 ≡to↣ p = ↔to↣ (pathToIso p)
 
+refl-to-↣-is-id : ∀ {A} → fst (≡to↣ (refl {x = A})) ≡ id
+refl-to-↣-is-id =
+  funExt (λ x →
+    fst (≡to↣ refl) x ≡⟨ {!!} ⟩
+    x ▯)
 
 infixl 5 _↣∘↣_
 
@@ -60,7 +65,6 @@ _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
       $ snd g c₁ c₂
       $ inr-injective (fst g c₁) (fst g c₂)
       $ hx≡hy
-
 
 id≡transport : ∀ {ℓ} {A B : Type ℓ} (p : A ≡ B)
              → (λ i → A → p i) [ id ≡ transport p ]

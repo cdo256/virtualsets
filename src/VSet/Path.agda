@@ -27,7 +27,7 @@ subst-inv {A} {x} {y} B p a =
   subst B p (subst B (sym p) a) ≡⟨ refl ⟩
   subst B p (transport (λ i → B (p (~ i))) a)
     ≡⟨ transportTransport⁻ (λ i → B (p i)) a ⟩
-  a ∎
+  a ▯
 
 step-≡P : ∀ (B : A → Type ℓ')
           → (x : A) {y z : A}

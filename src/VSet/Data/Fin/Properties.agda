@@ -19,7 +19,7 @@ fzero≢fsuc : ∀ {x : ℕ} (i : Fin x) → fzero ≢ fsuc i
 fzero≢fsuc {x} i p = transport (cong P p) tt
   where
     P : {x : ℕ} → Fin (suc x) → Type
-    P {x} fzero = ⊤ 
+    P {x} fzero = ⊤
     P {x} (fsuc a) = ⊥
 
 fsuc≢fzero : ∀ {x : ℕ} (i : Fin x) → fsuc i ≢ fzero 
@@ -48,7 +48,7 @@ fromℕ∘toℕ≡id {suc m} (fsuc a) =
     ≡⟨ cong (λ ○ → fsuc (fromℕ (toℕ a) ○)) refl ⟩
   fsuc (fromℕ (toℕ a) a<m)
     ≡⟨ cong fsuc (fromℕ∘toℕ≡id a) ⟩
-  fsuc a ∎
+  fsuc a ▯
   where
     a<m = toℕ<m a
 
@@ -61,10 +61,12 @@ finject-injective {x} zero a b fa≡fb =
   a
     ≡⟨ sym (subst-inv Fin p a) ⟩
   subst Fin p (subst Fin (sym p) a)
-    ≡⟨ cong {!subst Fin p!} fa≡fb ⟩
+    ≡⟨ {!!} ⟩
+  {!!}
+    ≡⟨ {!!} ⟩
   subst Fin p (subst Fin (sym p) b)
     ≡⟨ subst-inv Fin p b ⟩
-  b ∎
+  b ▯
   where
     p : x +ℕ 0 ≡ x
     p = ℕ.+-zero x 

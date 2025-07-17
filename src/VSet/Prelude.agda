@@ -1,6 +1,6 @@
 module VSet.Prelude where
 
-open import Cubical.Foundations.Prelude public
+open import Cubical.Foundations.Prelude public renaming (_∎ to _▯)
 open import Cubical.Foundations.Function public
 open import Cubical.Foundations.Transport public hiding (transpEquiv)
 open import Cubical.Foundations.Equiv public

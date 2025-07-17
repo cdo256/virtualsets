@@ -70,7 +70,7 @@ fromℕ∘toℕ≡id {suc m} (fsuc a) =
   fromℕ (toℕ (fsuc a)) (toℕ<m (fsuc a)) ≡⟨ refl ⟩
   fromℕ (suc (toℕ a)) (suc-≤-suc (toℕ<m a)) ≡⟨ {!refl!} ⟩
   fsuc (fromℕ (toℕ a) (toℕ<m a)) ≡⟨ cong fsuc (fromℕ∘toℕ≡id a) ⟩
-  fsuc a ∎
+  fsuc a ▯
 
 fsuc-injective : ∀ {n} {i j : Fin n} → fsuc i ≡ fsuc j → i ≡ j
 fsuc-injective {suc n} {fzero} {fzero} p = refl

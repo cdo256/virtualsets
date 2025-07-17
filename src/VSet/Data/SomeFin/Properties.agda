@@ -65,7 +65,7 @@ del-inj {x = suc x} (fsuc a) (fsuc b — a≢b) (fsuc c — a≢c) b'≡c'
 --           ≡⟨ b'≡c' ⟩
 --         del fzero (fsuc j — a≢c)
 --           ≡⟨ del-zero-suc j ⟩
---         j ∎
+--         j ▯
 --   in cong fsuc i≡j
 -- ... | fsuc a | fzero | fzero = refl
 -- ... | fsuc a | fzero | fsuc j = absurd (fzero≢fsuc {!!} b'≡c')
@@ -78,7 +78,7 @@ del-inj {x = suc x} (fsuc a) (fsuc b — a≢b) (fsuc c — a≢c) b'≡c'
 --         fsuc (del a (i — _)) ≡⟨ refl ⟩
 --         (del (fsuc a) ((fsuc i) — _)) ≡⟨ b'≡c' ⟩
 --         (del (fsuc a) ((fsuc j) — _)) ≡⟨ refl ⟩
---         fsuc (del a (j — _ )) ∎)))
+--         fsuc (del a (j — _ )) ▯)))
 
 
 ins-inj : {x : SomeFin} → (a : ⟦ suc x ⟧)

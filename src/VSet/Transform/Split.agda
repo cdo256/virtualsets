@@ -30,32 +30,32 @@ sect {suc X} {zero} fzero = refl
 sect {suc X} {suc Y} fzero = refl
 sect {suc X} {zero} (fsuc a) =
   ⊎→+ (+→⊎ (fsuc a)) ≡⟨ refl ⟩
-  fsuc a ∎
+  fsuc a ▯
 sect {suc X} {suc Y} (fsuc a) with +→⊎ a
 ... | inl b = 
   ⊎→+ (+→⊎ (fsuc a)) ≡⟨ refl ⟩
   ⊎→+ (inc (+→⊎ a)) ≡⟨ refl ⟩
   ⊎→+ (inc (inl b)) ≡⟨ refl ⟩
   ⊎→+ (inl (fsuc b)) ≡⟨ refl ⟩
-  fsuc a ∎
+  fsuc a ▯
 ... | inr b =
   ⊎→+ (+→⊎ (fsuc a)) ≡⟨ refl ⟩
   ⊎→+ (inc (+→⊎ a)) ≡⟨ refl ⟩
-  fsuc a ∎
+  fsuc a ▯
 
 retr : ∀ {X Y : SomeFin} → retract {A = ⟦ X ⟧ ⊎ ⟦ Y ⟧} ⊎→+ +→⊎
 retr {zero} {Y} (inr a) = refl
 retr {suc X} {Y} (inl fzero) =
   +→⊎ (⊎→+ (inl fzero)) ≡⟨ refl ⟩
   +→⊎ fzero ≡⟨ refl ⟩
-  inl fzero ∎
+  inl fzero ▯
 retr {suc X} {zero} (inl (fsuc a)) =
   +→⊎ (⊎→+ (inl (fsuc a))) ≡⟨ refl ⟩
   +→⊎ (finject 0 (fsuc a)) ≡⟨ refl ⟩
   +→⊎ {suc X} {zero} (fsuc (finject 0 a)) ≡⟨ refl ⟩
   inc (+→⊎ {X} {zero} (finject 0 a)) ≡⟨ refl ⟩
   inc (+→⊎ {X} {zero} (⊎→+ {X} {zero} (inl a))) ≡⟨ cong inc (retr (inl a)) ⟩
-  inl (fsuc a) ∎
+  inl (fsuc a) ▯
 retr {suc X} {suc Y} (inl (fsuc a)) =
   +→⊎ (⊎→+ (inl (fsuc a))) ≡⟨ refl ⟩
   +→⊎ (finject {suc X} (suc Y) (fsuc a)) ≡⟨ refl ⟩
@@ -64,7 +64,7 @@ retr {suc X} {suc Y} (inl (fsuc a)) =
   inc (+→⊎ (finject {X} (suc Y) a)) ≡⟨ refl ⟩
   inc (+→⊎ (⊎→+ (inl a))) ≡⟨ cong inc (retr (inl a)) ⟩
   inc (inl a) ≡⟨ refl ⟩
-  inl (fsuc a) ∎
+  inl (fsuc a) ▯
 retr {suc X} {Y} (inr a) =
   +→⊎ (⊎→+ (inr a)) ≡⟨ refl ⟩
   +→⊎ (fshift (suc X) a) ≡⟨ refl ⟩
@@ -72,7 +72,7 @@ retr {suc X} {Y} (inr a) =
   inc (+→⊎ (fshift X a)) ≡⟨ refl ⟩
   inc (+→⊎ (⊎→+ (inr a))) ≡⟨ cong inc (retr (inr a)) ⟩
   inc (inr a) ≡⟨ refl ⟩
-  inr a ∎
+  inr a ▯
 
 ⊎↔+ : ∀ {X Y : SomeFin} → Iso (⟦ X ⟧ ⊎ ⟦ Y ⟧) ⟦ X +ℕ Y ⟧
 ⊎↔+ {X} {Y} = iso ⊎→+ +→⊎ sect retr

@@ -1,6 +1,6 @@
 module VSet.Transform.Properties where
 
-open import VSet.Prelude renaming (_∎ to _▯)
+open import VSet.Prelude
 open import VSet.Data.Fin hiding (pred)
 
 open import VSet.Function.Injection
@@ -93,13 +93,13 @@ step3 {suc X} f (fsuc x) = {!!}
 --         y = transport⁻ (λ j → Fin (+-zero Y (i ∨ j))) y'
       
     
--- 𝟘⊕≡id {X} {Y} f x = 
+-- 𝟘⊕≈id {X} {Y} f x = 
 --   fst (𝟘 ⊕ f) x ≡⟨ refl ⟩
 --   fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x ≡⟨ refl ⟩
 --   (fst (↔to↣ ⊎↔+) ∘ fst (↣-map-⊎ 𝟘 f) ∘ fst (↔to↣ (flip-↔ ⊎↔+))) x ≡⟨ refl ⟩
 --   ⊎→+ (⊎-map (λ ()) (fst f) (+→⊎ x)) ≡⟨ refl ⟩
 --   ⊎→+ (inr (fst f x)) ≡⟨ refl ⟩
---   fst f x ∎
+--   fst f x ▯
 
 {-
 finPath : (n : ℕ) → Fin n ≡ Fin (n + 0)
@@ -127,23 +127,23 @@ foo n m f g = PathP (λ i → (x : Fin n) → (Fin (m + 0)))
 
 
 
--- ⊕𝟘≡id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → f ⊕ 𝟘 ≈ f
--- ⊕𝟘≡id {X} {Y} f x =  ?
+-- ⊕𝟘≈id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → f ⊕ 𝟘 ≈ f
+-- ⊕𝟘≈id {X} {Y} f x =  ?
 --   -- fst (f ⊕ 𝟘) x ≡⟨ refl ⟩
   -- fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x ≡⟨ refl ⟩
   -- (fst (↔to↣ ⊎↔+) ∘ fst (↣-map-⊎ f 𝟘) ∘ fst (↔to↣ (flip-↔ ⊎↔+))) x ≡⟨ refl ⟩
   -- ⊎→+ (⊎-map (λ ()) (fst f) {!+→⊎ x!}) ≡⟨ refl ⟩
   -- ⊎→+ (inl (fst f x)) ≡⟨ refl ⟩
-  -- fst f x ∎
+  -- fst f x ▯
 
 lemma1-3 : ∀ (X Y A : SomeFin) → (f : [ X ↣ Y ])
-         → sub A (ladd A f) ≡ f
+         → sub A (ladd A f) ≈ f
 lemma1-3 X Y zero f = {!!}
 lemma1-3 X Y (suc A) f =
   {!!}
 
 lemma1-4 : ∀ (X Y A B : SomeFin) → (f : [ A + X ↣ A + Y ])
-         → radd B (sub A f) ≡ sub A {!add B f!} 
+         → radd B (sub A f) ≈ sub A {!add B f!} 
 
 -- -}
 -- -}
