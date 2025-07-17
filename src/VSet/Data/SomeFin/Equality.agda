@@ -72,7 +72,17 @@ module Trans {A B C X Y Z : ℕ}
   _∘≈_ : f ≈ h
   _∘≈_ = ≈trans
 
-open Trans using (≈trans; _∘≈_)
+open Trans using (≈trans; _∘≈_) public
+
+-- reverse composition
+infixl 4 _≈∘_
+_≈∘_ : {A B C X Y Z : ℕ}
+       {f : [ A ↣ X ]}
+       {g : [ B ↣ Y ]}
+       {h : [ C ↣ Z ]}
+       (f≈g : f ≈ g) (g≈h : g ≈ h) → f ≈ h
+f≈g ≈∘ g≈h = ≈trans g≈h f≈g
+
 
 -- ≈⁻∘≈ : ∀ {A B X Y : ℕ} {f : [ A ↣ X ]} {g : [ B ↣ Y ]}
 --      → (f≈g : f ≈ g) → f≈g ∘≈ ≈sym f≈g ≡ ≈refl f
@@ -101,32 +111,52 @@ infix 3 _∎
 _∎ : {A X : SomeFin} → (f : [ A ↣ X ]) → f ≈ f
 f ∎ = ≈refl f
 
+
 ≈transport : ∀ {A B X Y : SomeFin} → A ≡ B → X ≡ Y → [ A ↣ X ] → [ B ↣ Y ]
 ≈transport {A = A} {B = B} p q f = X↣Y ↣∘↣ f ↣∘↣ B↣A
   where
     B↣A = ≡to↣ (cong Fin (sym p))
     X↣Y = ≡to↣ (cong Fin q)
 
-≈cong : ∀ {A B X Y : SomeFin} → (p : A ≡ B) → (q : X ≡ Y) → (f : [ A ↣ X ])
-      → f ≈ ≈transport p q f
-≈cong {A = A} {B} {X} {Y} p q f = record { p = p ; q = q ; path = {!!} }
+≈transport-fun : ∀ {A B X Y : SomeFin} → A ≡ B → X ≡ Y
+               → [ A ↣ X ] → Type
+≈transport-fun p q f = {!!}
+
+≈transport-filler : ∀ {A B X Y : SomeFin} → (p : A ≡ B) → (q : X ≡ Y)
+                  → (f : [ A ↣ X ]) → f ≈ ≈transport p q f
+≈transport-filler {A = A} {B} {X} {Y} p q f =
+  record { p = p ; q = q ; path = path }
   where
     B↣A = ≡to↣ (cong Fin (sym p))
     X↣Y = ≡to↣ (cong Fin q)
     P = cong₂ FinFun p q
-    step1 : fst (≈transport p q f) ≡ subst Fin q ∘ fst f ∘ subst Fin (sym p)
-    step1 =
-      fst (≈transport p q f)
-        ≡⟨ refl ⟩
-      fst (X↣Y ↣∘↣ f ↣∘↣ B↣A)
-        ≡⟨ refl ⟩
-      fst X↣Y ∘ fst f ∘ fst B↣A 
-        ≡⟨ refl ⟩
-      (subst Fin q ∘ fst f ∘ subst Fin (sym p)) ▯ 
+    path : (λ i → cong₂ FinFun p q i)
+      [ fst f
+      ≡ subst Fin q ∘ fst f ∘ subst Fin (sym p)
+      ]
+    path = subst2-filler FinFun p q (fst f)
 
-    step2 : (λ i → cong₂ FinFun p q i) [ fst f ≡ subst Fin q ∘ fst f ∘ subst Fin (sym p) ]
-    step2 = subst2-filler FinFun p q (fst f)
+from≡ : ∀ {A X : SomeFin} → {f g : [ A ↣ X ]}
+      → fst f ≡ fst g → f ≈ g
+from≡ path = record
+  { p = refl
+  ; q = refl
+  ; path = path
+  }
 
-    path : (λ i →  FinFun' (((cong₂ _,_ p q) ∙ refl) i)) [ fst f ≡ fst (≈transport p q f) ]
-    path = compPathP' {A = ℕ × ℕ} {B = FinFun'} {p = (cong₂ _,_ p q)} {q = refl} 
-           step2 (sym step1)
+--- redundant?
+-- ≈transport-filler : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ])
+--                   → f ≈ ≈transport refl refl f
+-- ≈transport-filler f = record
+--   { p = refl
+--   ; q = refl
+--   ; path = funExt (λ x →
+--     fst f x ≡⟨ {!!} ⟩
+--     (fst X↣Y ∘ fst f ∘ fst B↣A) x ≡⟨ refl ⟩
+--     (fst X↣Y ∘ fst f ∘ fst B↣A) x ≡⟨ refl ⟩
+--     fst (X↣Y ↣∘↣ f ↣∘↣ B↣A) x ≡⟨ refl ⟩
+--     fst (≈transport refl refl f) x ▯)
+--   }
+--   where
+--     B↣A = ≡to↣ refl
+--     X↣Y = ≡to↣ refl 
