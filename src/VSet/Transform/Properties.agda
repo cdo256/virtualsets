@@ -16,14 +16,65 @@ open import VSet.Transform.Pred
 
 open import Cubical.Data.Nat.Properties
 
-𝟘⊕≡id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → 𝟘 ⊕ f ≈ f
-𝟘⊕≡id {X} {Y} f = record
-  { p = refl
-  ; q = refl
-  -- Goal: (λ i → cong₂ FinFun (λ _ → 0 + X) (λ _ → 0 + Y) i) [
-  --   fst (𝟘 ⊕ f) ≡ fst f ]
-  ; path = cong (λ ○ x → fst f x) (refl {x = f})
-  }
+is-transport : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → Type
+is-transport {X} {Y} f = Σ[ p ∈ X ≡ Y ] fst f ≡ ≈transport refl p (↣-id ⟦ X ⟧)
+
+-- 𝟘⊕-is-transport : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → fst (𝟘 ⊕ f) x ≡ fst (≈transport refl refl f) x
+
+
+{-
+
+𝟘⊕≡transport : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → (x : ⟦ 0 + X ⟧) → fst (𝟘 ⊕ f) x ≡ fst (≈transport refl refl f) x
+𝟘⊕≡transport {X = X} {Y = Y} f x with +→⊎ {X = 0} {Y = X} x | inspect (+→⊎ {X = 0} {Y = X}) x
+𝟘⊕≡transport {X = X} {Y = Y} f fzero | inr fzero | [ path ]ᵢ =
+  sym (fst (≈transport refl refl f) fzero ≡⟨ {!!} ⟩
+       {!!})
+𝟘⊕≡transport {X = X} {Y = Y} f fzero | inr (fsuc x') | [ path ]ᵢ = {!!}
+𝟘⊕≡transport {X = X} {Y = Y} f (fsuc x) | inr x' | [ path ]ᵢ = {!!}
+-- ... | inl ()
+-- ... | inr x' = {!!}
+--   -- fst (𝟘 ⊕ f) x ≡⟨ {!refl!} ⟩
+  -- fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x ≡⟨ refl ⟩
+  -- ⊎→+ (⊎-map (λ ()) (fst f) (+→⊎ x)) ≡⟨ {!!} ⟩
+  -- ⊎→+ (⊎-map (λ ()) (fst f) (inr x')) ≡⟨ {!!} ⟩
+  -- fst (≈transport (λ _ → X) (λ _ → Y) f) x ▯ 
+
+-- 𝟘⊕≡transport : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → (x : ⟦ 0 + X ⟧) → fst (𝟘 ⊕ f) x ≡ fst (≈transport refl refl f) x
+-- 𝟘⊕≡transport {X = X} {Y = Y} f x =
+--   fst (𝟘 ⊕ f) x ≡⟨ {!!} ⟩
+--   fst (≈transport refl refl f) x ▯
+
+𝟘⊕≈id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → 𝟘 ⊕ f ≈ f
+𝟘⊕≈id {X} {Y} f = {!!}
+  where
+    b : fst (𝟘 ⊕ f) ≡ fst (≈transport refl refl f)
+    b = fst (𝟘 ⊕ f) ≡⟨ refl ⟩
+        fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) ≡⟨ refl ⟩
+        ⊎→+ ∘ ⊎-map (λ ()) (fst f) ∘ +→⊎ ≡⟨ {!!} ⟩
+        ⊎→+ ∘ ⊎-map (λ ()) (fst f) ∘ +→⊎ ≡⟨ {!!} ⟩
+        fst (≈transport (λ _ → X) (λ _ → Y) f) ▯ 
+    c : f ≈ ≈transport (λ _ → X) (λ _ → Y) f
+    c = ≈transport-filler refl refl f
+
+
+-- 𝟘⊕≈id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → 𝟘 ⊕ f ≈ f
+-- 𝟘⊕≈id {X} {Y} f = ≈sym {!!}
+--   where
+--     b : fst (𝟘 ⊕ f) ≡ fst (≈transport (λ _ → X) (λ _ → Y) f)
+--     b = fst (𝟘 ⊕ f) ≡⟨ refl ⟩
+--         fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) ≡⟨ refl ⟩
+--         ⊎→+ ∘ ⊎-map (λ ()) (fst f) ∘ +→⊎ ≡⟨ {!!} ⟩
+--         ⊎→+ ∘ ⊎-map (λ ()) (fst f) ∘ +→⊎ ≡⟨ {!!} ⟩
+--         fst (≈transport (λ _ → X) (λ _ → Y) f) ▯ 
+--     c : f ≈ ≈transport (λ _ → X) (λ _ → Y) f
+--     c = ≈cong refl refl f
+  -- record
+  -- { p = refl
+  -- ; q = refl
+  -- -- Goal: (λ i → cong₂ FinFun (λ _ → 0 + X) (λ _ → 0 + Y) i) [
+  -- --   fst (𝟘 ⊕ f) ≡ fst f ]
+  -- ; path = cong (λ ○ x → fst f x) (refl {x = f})
+  -- }
 
 step3 : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) 
       → (x : Fin (X + 0)) → subst Fin (sym (+-zero Y)) (fst f (subst Fin (+-zero X) x)) 
@@ -43,15 +94,51 @@ step3 {suc X} {Y} f fzero =
     step4 = subst-filler Fin (+-zero (suc X)) fzero
 step3 {suc X} f (fsuc x) = {!!}
 
+inject0≡subst : ∀ {X Y : SomeFin} → (x : ⟦ X + Y ⟧) →  {!!}
 
-⊕𝟘≡id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → f ⊕ 𝟘 ≈ f
-⊕𝟘≡id {X} {Y} f =
-  ≈sym {!!}
+{-
+lemma1 : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → (x : ⟦ X + 0 ⟧)
+       → ((subst Fin (sym (+-zero Y))) ∘ fst f ∘ (subst Fin (+-zero X))) x
+       ≡ ⊎→+ {X = Y} {Y = 0} (⊎-map (fst f) (λ (z : Fin 0) → z) (+→⊎ x)) 
+lemma1 {X} {Y} f x with +→⊎ {X = X} x | fst f (subst Fin (+-zero X) x) 
+lemma1 {suc X} {Y} f fzero | inl fzero | W =
+  ((subst Fin (sym (+-zero Y))) ∘ fst f ∘ (subst Fin (+-zero (suc X)))) fzero
+    ≡⟨ {!!} ⟩
+  finject 0 (fst f fzero)
+    ≡⟨ {!!} ⟩
+  finject 0 (fst f fzero)
+    ≡⟨ refl ⟩
+  ⊎→+ (inl (fst f fzero))
+    ≡⟨ refl ⟩
+  ⊎→+ (⊎-map (fst f) (λ z → z) (inl fzero)) ▯
+lemma1 {suc X} {Y} f fzero | inl (fsuc x') | W = {!!}
+lemma1 {suc X} {Y} f (fsuc x) | inl x' | W = {!!}
+  -- (subst Fin (sym (+-zero Y)) ∘ fst f ∘ subst Fin (+-zero X)) x
+  --   ≡⟨ {!!} ⟩
+  -- ⊎→+ (⊎-map (fst f) (λ z → z) (+→⊎ x)) ▯
+
+⊕𝟘≈id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → f ⊕ 𝟘 ≈ f
+⊕𝟘≈id {X} {Y} f =
+  ≈sym $ ≈transport-filler (sym (+-zero X)) (sym (+-zero Y)) f
+      ≈∘ (from≡ $ funExt $ λ x →
+        fst (≈transport (sym (+-zero X)) (sym (+-zero Y)) f) x
+          ≡⟨ refl ⟩
+        fst (≡to↣ (cong Fin (sym (+-zero Y))) ↣∘↣ f ↣∘↣ ≡to↣ (cong Fin (+-zero X))) x
+          ≡⟨ refl ⟩
+        ((subst Fin (sym (+-zero Y))) ∘ fst f ∘ (subst Fin (+-zero X))) x
+          ≡⟨ {!!} ⟩
+        ⊎→+ (⊎-map (fst f) (λ (z : Fin 0) → z) (+→⊎ x))
+          ≡⟨ refl ⟩
+        (⊎→+ ∘ ⊎-map (fst f) (λ (z : Fin 0) → z) ∘ +→⊎) x
+          ≡⟨ refl ⟩
+        fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x
+          ≡⟨ refl ⟩
+        fst (f ⊕ 𝟘) x ▯)
   where
     t : [ (X + 0) ↣ (Y + 0) ]
     t = ≈transport (λ i → +-zero X (~ i)) (λ i → +-zero Y (~ i)) f 
     step1 : f ≈ t
-    step1 = ≈cong (sym (+-zero X)) (sym (+-zero Y)) f
+    step1 = ≈transport-filler (sym (+-zero X)) (sym (+-zero Y)) f
     open _≈_ step1
     step2 : t ≈ f ⊕ 𝟘
     step2 = record
