@@ -109,7 +109,7 @@ f ∎ = ≈refl f
 
 ≈cong : ∀ {A B X Y : SomeFin} → (p : A ≡ B) → (q : X ≡ Y) → (f : [ A ↣ X ])
       → f ≈ ≈transport p q f
-≈cong {A = A} {B} {X} {Y} p q f = record { p = p ; q = q ; path = path }
+≈cong {A = A} {B} {X} {Y} p q f = record { p = p ; q = q ; path = {!!} }
   where
     B↣A = ≡to↣ (cong Fin (sym p))
     X↣Y = ≡to↣ (cong Fin q)
@@ -127,18 +127,6 @@ f ∎ = ≈refl f
     step2 : (λ i → cong₂ FinFun p q i) [ fst f ≡ subst Fin q ∘ fst f ∘ subst Fin (sym p) ]
     step2 = subst2-filler FinFun p q (fst f)
 
-    path : (λ i → P i) [ fst f ≡ fst (≈transport p q f) ]
-    path = compPathP' step1 (symP step2)
-    path = fst f ≡P[ {!!} ]⟨ step2 ⟩
-           ({!subst Fin q ∘ fst f ∘ subst Fin (sym p)!} ≡P[ {!!} ]⟨ sym step1 ⟩ {!!})
-           -- subst Fin q ∘ fst f ∘ subst Fin (sym p) ≡P⟨ sym step1 ⟩
-           -- {!fst (≈transport p q f) ∎P!}
-
-
--- {!
---       (fst f ≡P⟨ step2 ⟩
---       {!subst Fin q ∘ fst f ∘ subst Fin (sym p) ≡P⟨ sym step1 ⟩
---       fst (≈transport p q f) {!∎P!} !}!}
-
-
-foo = ℕ ≡P[ id ]⟨ refl ⟩ ℕ ≡P[ id ]⟨ refl ⟩ (ℕ ∎P)
+    path : (λ i →  FinFun' (((cong₂ _,_ p q) ∙ refl) i)) [ fst f ≡ fst (≈transport p q f) ]
+    path = compPathP' {A = ℕ × ℕ} {B = FinFun'} {p = (cong₂ _,_ p q)} {q = refl} 
+           step2 (sym step1)
