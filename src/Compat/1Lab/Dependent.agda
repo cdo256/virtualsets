@@ -28,9 +28,9 @@ a10 -------------> a11
  |                  V     |
  x        s         y     |
 a00 -------------> a01    +-----> i
--}(λ i → 
+-}
 
-
+{-
 1lab-∙∙-filler : ∀ {ℓ} {A : Type ℓ} {w x y z : A}
           → (p : w ≡ x) (q : x ≡ y) (r : y ≡ z)
           → Square q (p ∙∙ q ∙∙ r) (sym p) r
@@ -167,3 +167,22 @@ cong₂-∙-dep f α β ξ ψ = {!cong₂-∙∙-dep f refl α β refl ξ ψ!}
 
 -- -}
 -- -}
+
+
+-- _∙P'_
+--   : ∀ {ℓ ℓ'} {A : Type ℓ} {B : A → Type ℓ'}
+--   → {a b c : A} {α : a ≡ b} {β : b ≡ c}
+--   → {w : B a} {x : B b} {y : B c}
+--   → (ξ : PathP (λ i → B (α i)) w x)
+--   → (ψ : PathP (λ i → B (β i)) x y)
+--   → PathP (λ i → B ((α ∙ β) i)) w y
+-- _∙P'_ {B = B} ξ ψ = compPathP' {B = B} ξ ψ
+
+-- _∙P_
+--   : ∀ {ℓ ℓ'} {A A' : Type ℓ} {B : A → Type ℓ'} {C : A' → Type ℓ'}
+--   → {a b c : A} {α : a ≡ b} {β : b ≡ c}
+--   → {w : B a} {x : B b} {y : B c}
+--   → (ξ : PathP (λ i → B (α i)) w x)
+--   → (ψ : PathP (λ i → B (β i)) x y)
+--   → PathP (λ i → B ((α ∙ β) i)) w y
+-- _∙P_ {B = B} ξ ψ = compPathP' {B = B} ξ ψ
