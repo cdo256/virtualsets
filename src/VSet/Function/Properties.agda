@@ -30,6 +30,10 @@ private
         y ∎ 
   in f ^ , inj
 
+≡to↣ : ∀ {A B} → A ≡ B → A ↣ B
+≡to↣ p = ↔to↣ (pathToIso p)
+
+
 infixl 5 _↣∘↣_
 
 _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
@@ -56,3 +60,18 @@ _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
       $ snd g c₁ c₂
       $ inr-injective (fst g c₁) (fst g c₂)
       $ hx≡hy
+
+
+id≡transport : ∀ {ℓ} {A B : Type ℓ} (p : A ≡ B)
+             → (λ i → A → p i) [ id ≡ transport p ]
+id≡transport p = funExt (transport-filler p)
+
+id≡subst : ∀ {ℓ ℓ'} {A : Type ℓ} {x y : A} 
+        → (B : A → Type ℓ') (p : x ≡ y)
+        → (λ i → B x → B (p i)) [ id ≡ subst B p ]
+id≡subst B p = funExt (subst-filler B p) 
+
+id≡subst' : ∀ {ℓ ℓ'} {A : Type ℓ} {x y : A} 
+        → (B : A → Type ℓ') (p : x ≡ y)
+        → (λ i → B (p i) → B x) [ id ≡ subst B (sym p) ]
+id≡subst' B p = {!subst-filler B ?!} 
