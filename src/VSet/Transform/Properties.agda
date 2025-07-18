@@ -1,6 +1,6 @@
 module VSet.Transform.Properties where
 
-open import VSet.Prelude hiding (_∎)
+open import VSet.Prelude renaming (_∎ to _▯)
 open import VSet.Data.Fin hiding (pred)
 
 open import VSet.Function.Injection
@@ -25,27 +25,72 @@ open import Cubical.Data.Nat.Properties
   ; path = cong (λ ○ x → fst f x) (refl {x = f})
   }
 
-⊕𝟘≡id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → f ⊕ 𝟘 ≈ f
-⊕𝟘≡id {X} {Y} f = record
-  { p = +-zero X
-  ; q = +-zero Y
-  -- Goal: (λ i → cong₂ FinFun (+-zero X) (+-zero Y) i) [ fst (f ⊕ 𝟘) ≡
-  --  fst f ]
-  ; path = λ i x → c2 {!!} {!!}
-  }
+step3 : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) 
+      → (x : Fin (X + 0)) → subst Fin (sym (+-zero Y)) (fst f (subst Fin (+-zero X) x)) 
+      ≡ ⊎→+ (⊎-map (fst f) (fst 𝟘) (+→⊎ x))  
+step3 {suc X} {Y} f fzero =
+  subst Fin (sym (+-zero Y)) (fst f (subst Fin (+-zero (suc X)) fzero)) 
+    ≡⟨ congP (λ i ○ → subst Fin (sym (+-zero Y)) (fst f ○))
+    -- Goal: subst Fin (λ i → suc (+-zero X i)) fzero ≡ fzero
+              {!!} ⟩
+  subst Fin (sym (+-zero Y)) (fst f fzero) 
+    ≡⟨ {!cong !} ⟩
+  {!!}
+    ≡⟨ {!!} ⟩
+  ⊎→+ (⊎-map (fst f) (fst 𝟘) (+→⊎ fzero)) ▯
   where
-    f' : [ X + 0 ↣ Y + 0 ]
-    f' = f ⊕ 𝟘
-    -- c2 : ? [ FinFun X Y ≡ FinFun (X + 0) (Y + 0) ]
-    c2 : (i : I) → cong₂ FinFun (+-zero X) (+-zero Y) i
-    c2 i x = y
-      where
-        x' : Fin X
-        x' = transport (λ j → Fin (+-zero X (i ∨ j))) x
-        y' : Fin Y
-        y' = fst f x'
-        y : Fin (+-zero Y i)
-        y = transport⁻ (λ j → Fin (+-zero Y (i ∨ j))) y'
+    step4 : (λ i → Fin (+-zero (suc X) i)) [ fzero ≡ subst Fin (+-zero (suc X)) fzero ]
+    step4 = subst-filler Fin (+-zero (suc X)) fzero
+step3 {suc X} f (fsuc x) = {!!}
+
+
+⊕𝟘≡id : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → f ⊕ 𝟘 ≈ f
+⊕𝟘≡id {X} {Y} f =
+  ≈sym {!!}
+  where
+    t : [ (X + 0) ↣ (Y + 0) ]
+    t = ≈transport (λ i → +-zero X (~ i)) (λ i → +-zero Y (~ i)) f 
+    step1 : f ≈ t
+    step1 = ≈cong (sym (+-zero X)) (sym (+-zero Y)) f
+    open _≈_ step1
+    step2 : t ≈ f ⊕ 𝟘
+    step2 = record
+      { p = refl
+      ; q = refl
+      ; path = funExt (λ x → 
+          fst t x ≡⟨ refl ⟩
+          subst Fin q (fst f (subst Fin (sym p) x))
+            ≡⟨ subst2-filler {!FinFun!} {!!} {!!} {!!} ⟩
+          ⊎→+ (⊎-map (fst f) (fst 𝟘) (inl (subst Fin ((+-zero X)) x)))
+            ≡⟨ {!!} ⟩
+          ⊎→+ (⊎-map (fst f) (fst 𝟘) (+→⊎ x))
+            ≡⟨ refl ⟩
+          fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x
+            ≡⟨ refl ⟩
+          fst (f ⊕ 𝟘) x ▯)
+      }
+    
+    -- -f⊕𝟘
+-- record
+--   { p = +-zero X
+--   ; q = +-zero Y
+--   -- Goal: (λ i → cong₂ FinFun (+-zero X) (+-zero Y) i) [ fst (f ⊕ 𝟘) ≡
+--   --  fst f ]
+--   ; path = λ i x → c2 {!!} {!!}
+--   }
+--   where
+--     f' : [ X + 0 ↣ Y + 0 ]
+--     f' = f ⊕ 𝟘
+--     -- c2 : ? [ FinFun X Y ≡ FinFun (X + 0) (Y + 0) ]
+--     c2 : (i : I) → cong₂ FinFun (+-zero X) (+-zero Y) i
+--     c2 i x = y
+--       where
+--         x' : Fin X
+--         x' = transport (λ j → Fin (+-zero X (i ∨ j))) x
+--         y' : Fin Y
+--         y' = fst f x'
+--         y : Fin (+-zero Y i)
+--         y = transport⁻ (λ j → Fin (+-zero Y (i ∨ j))) y'
       
     
 -- 𝟘⊕≡id {X} {Y} f x = 
