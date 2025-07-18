@@ -17,6 +17,7 @@ open import VSet.Data.Fin
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Properties
 open import VSet.Data.SomeFin.Injection
+open import VSet.Data.SomeFin.Minus
 
 
 module Pred {x y : SomeFin} (f : [ suc x ↣ suc y ]) where

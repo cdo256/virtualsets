@@ -9,6 +9,7 @@ open import VSet.Function.Iso
 open import VSet.Function.Properties
 
 open import VSet.Data.SomeFin.Base
+open import VSet.Data.SomeFin.Minus
 
 open _∖_
 

@@ -11,6 +11,7 @@ open import VSet.Data.Nat using (ℕ; zero; suc)
 open import VSet.Data.Fin renaming (pred to fpred)
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
+open import VSet.Data.SomeFin.Equality
 open import VSet.Data.SomeFin.Properties
 open import VSet.Transform.Split using (⊎↔+)
 open import VSet.Transform.Pred
