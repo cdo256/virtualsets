@@ -3,7 +3,7 @@ module VSet.Data.Fin.Properties where
 open import VSet.Prelude
 
 import Cubical.Data.Nat as ℕ
-open import Cubical.Data.Nat using (ℕ) renaming (_+_ to _+ℕ_)
+open import Cubical.Data.Nat using (ℕ; +-zero) renaming (_+_ to _+ℕ_)
 open import VSet.Data.Nat.Order
 
 open import VSet.Data.Fin.Base
@@ -59,11 +59,36 @@ fsuc-injective : ∀ {n} {i j : Fin n} → fsuc {n} i ≡ fsuc {n} j → i ≡ j
 fsuc-injective {zero} {()} {()} 
 fsuc-injective {suc n} {i} {j} p = cong pred p
 
+-- finject : {x : ℕ} → (y : ℕ) → Fin x → Fin (x +ℕ y)
+-- finject {suc x} zero fzero = fzero
+-- finject {suc x} zero (fsuc a) = fsuc (finject zero a)
+-- finject {suc x} (suc y) fzero = fzero
+-- finject {suc x} (suc y) (fsuc a) = fsuc (finject {x} (suc y) a)
+
+-- fzero-subst : {x y : ℕ} (p : suc x ≡ suc y) (a : Fin x)
+--             → (λ i → {!!} i) [ fzero {n = y} ≡ subst Fin p (fzero {n = x}) ]
+-- fzero-subst {x} {y} p a =
+--   fzero {n = y} ≡P[ {!!} ][ p ∙P refl ]⟨ Fin ➢ {!!} ⟩ (subst Fin p (fzero {n = x}) ∎P)
+
+finject0≡subst : {x : ℕ} (a : Fin x)
+               → (λ i → Fin (+-zero x ( i))) [ finject {x} zero a ≡ a ]
+finject0≡subst {suc x} fzero =
+  finject zero fzero ≡P[ suc (x +ℕ 0) ][ cong suc {!(+-zero x)!} ∙P {!!} ]⟨ Fin ➢ {!!} ⟩
+  (fzero {n = x} ∎P)
+
+  -- finject zero fzero ≡⟨ refl ⟩
+  -- fzero {n = x +ℕ 0} ≡⟨ cong (λ ○ → fzero {n = ○}) {!(+-zero x)!} ⟩
+  -- {!fzero {n = x}!} ≡⟨ {!!} ⟩
+  -- subst Fin (sym (+-zero (suc x))) fzero ▯
+finject0≡subst {suc x} (fsuc a) = {!!}
+
 finject-injective : {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
 finject-injective {x} zero a b fa≡fb =
   a
     ≡⟨ sym (subst-inv Fin p a) ⟩
   subst Fin p (subst Fin (sym p) a)
+    ≡⟨ {!!} ⟩
+  {!!}
     ≡⟨ {!!} ⟩
   {!!}
     ≡⟨ {!!} ⟩
@@ -75,9 +100,9 @@ finject-injective {x} zero a b fa≡fb =
     p = ℕ.+-zero x 
 finject-injective {x} (suc y) fzero fzero _ = refl
 finject-injective {x} (suc y) fzero (fsuc b) f0≡fsb =
-  absurd (fzero≢fsuc (finject (suc y) b) f0≡fsb)
+  absurd {A = λ _ → fzero ≡ fsuc b} (fzero≢fsuc (finject (suc y) b) f0≡fsb)
 finject-injective {x} (suc y) (fsuc a) fzero fsa≡f0 =
-  absurd (fsuc≢fzero (finject (suc y) a) fsa≡f0)
+  absurd {A = λ _ → fsuc a ≡ fzero} (fsuc≢fzero (finject (suc y) a) fsa≡f0)
 finject-injective {x} (suc y) (fsuc a) (fsuc b) fsa≡fsb =
   cong fsuc (finject-injective (suc y) a b (fsuc-injective fsa≡fsb))
 
