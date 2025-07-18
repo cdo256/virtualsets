@@ -11,6 +11,8 @@ open import VSet.Function.Iso
 open import VSet.Function.Properties
 open import VSet.Data.SomeFin.Base
 
+open import Cubical.Foundations.Equiv.Base 
+
 [_↣_] : SomeFin → SomeFin → Type
 [ X ↣ Y ] = ⟦ X ⟧ ↣ ⟦ Y ⟧
 
@@ -19,64 +21,20 @@ id↣ {A} = id , λ x y z → z
 
 infix 8 _≈_ _≈'_
 
--- _≈_ : {X Y : SomeFin} → (f g : [ X ↣ Y ]) → Type
--- (f , _) ≈ (g , _) = ∀ x → f x ≡ g x
-
-open import Cubical.Foundations.Equiv.Base 
-
--- record _≈'_ {W X Y Z : SomeFin} (f : [ W ↣ X ]) (g : [ Y ↣ Z ]) : Type where
---   field
---     eq₁ : W ≃ Y
---     eq₂ : X ≃ Z
-
--- _≈'_ : {W X Y Z : SomeFin} → (f : [ W ↣ X ]) → (g : [ Y ↣ Z ]) → Type
--- (f , _) ≈' (g , _) = {!Σ (p : W ≡ Y) {!Σ (q : X ≡ Z) ∀ x → f x ≡ g x!}!}
-
-
-⟦x+0⟧≃⟦x⟧ : ∀ (X : SomeFin) → ⟦ X + 0 ⟧ ≃ ⟦ X ⟧ 
-⟦x+0⟧≃⟦x⟧ X = transpEquiv (λ i → Fin ((+-zero X) i)) i0
-
-
--- fzero≃fzero : (m : ℕ) → (fzero {n = m + 0}) ≡ (fzero {n = m})
--- fzero≃fzero = ?
-
-
-swap : ⟦ 2 ⟧ → ⟦ 2 ⟧
-swap fzero = fsuc fzero
-swap (fsuc fzero) = fzero
-
-swap' : ⟦ 2 + 0 ⟧ → ⟦ 2 + 0 ⟧
-swap' fzero = fsuc fzero
-swap' (fsuc fzero) = fzero
-
-pred' : {n : ℕ} → Fin (suc (suc n) + 0) → Fin (suc n + 0)
-pred' fzero = fzero
-pred' (fsuc n) = n
-
--- _≈_ : ∀ {A B X Y : ℕ} → (f : Fin A → Fin X) → (g : Fin B → Fin Y) → Type
--- _≈_ {A} {B} {X} {Y} f g = Σ[ A≡B ∈ A ≡ B ] Σ[ X≡Y ∈ X ≡ Y ]
---   ((a : Fin A) → f a ≡ subst Fin (sym X≡Y) (g (subst Fin A≡B a)))
-
--- transp-fun : ∀ {A B X Y : ℕ} (A ≡ B) (X ≡ Y) → (Fin A → Fin X) ≡ (Fin B → Fin Y) 
--- transp-fun {A} {B} {X} {Y} p q g = 
---   subst Fin (sym p) (g (subst Fin q a))
-
-_≈'_ : ∀ {A B X Y : ℕ} → (f : Fin A → Fin X) → (g : Fin B → Fin Y) → Type
-_≈'_ {A} {B} {X} {Y} f g = Σ[ p ∈ A ≡ B ] Σ[ q ∈ X ≡ Y ]
-  ((a : Fin A) → f a ≡ subst Fin (sym q) (g (subst Fin p a)))
-
-_≈''_ : ∀ {A B X Y : ℕ} → (f : Fin A → Fin X) → (g : Fin B → Fin Y) → Type
-_≈''_ {A} {B} {X} {Y} f g = Σ[ p ∈ A ≡ B ] Σ[ q ∈ X ≡ Y ]
-  let r : PathP (λ i → Type) (Fin A → Fin X) (Fin B → Fin Y)
-      r i = (Fin (p i) → Fin (q i))
-  in PathP (λ i → r i) f g 
-
 MapPath : ∀ {A B X Y : ℕ} (p : A ≡ B) (p : X ≡ Y)
      → PathP (λ i → Type) (Fin A → Fin X) (Fin B → Fin Y)
 MapPath p q i = (Fin (p i) → Fin (q i))
 
 FinFun : ∀ (A B : ℕ) → Type
 FinFun A B = Fin A → Fin B
+
+-- I think this is automatic.
+-- record ≈Point {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) : Type where
+--   field
+--     p : A ≡ B
+--     q : X ≡ Y
+--     path : (λ i → MapPath p q i) [ f ≡ g ]
+--     coincide : ∀ j → transp (λ i → MapPath p q (i ∨ j)) j {!path j!} ≡ {!!}
 
 record _≈_ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) : Type where
   field
@@ -101,10 +59,15 @@ record _≈_ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) : Type 
   where
     open _≈_ f≈g
 
+-- ≈transp : ∀ {A B X Y : ℕ} {f : Fin A → Fin X} {g : Fin B → Fin Y}
+--         → (f≈g : f ≈ g) → (i : I) → (h : () )
+
 
 ≈sym-pi : ∀ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) → f ≈ g → g ≈ f
 ≈⁻∘≈ : ∀ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y)
   → (f≈g : f ≈ g) → {!≈sym f≈g ∘≈ f≈g ≡ id!}
+
+
 
 module Trans {A B C X Y Z : ℕ}
            (f : Fin A → Fin X)
@@ -119,6 +82,33 @@ module Trans {A B C X Y Z : ℕ}
   r2 : FinFun B Y ≡ FinFun C Z
   r2 i = FinFun (p2 i) (q2 i)
 
+  open import Compat.1Lab using (cong₂-∙)
+
+  path3 : r1 ∙ r2 ≡ (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i)
+  path3 =
+    r1 ∙ r2
+      ≡⟨ refl ⟩
+    (λ i → MapPath p1 q1 i) ∙ (λ i → MapPath p2 q2 i)
+      ≡⟨ refl ⟩
+    (λ i → Fin (p1 i) → Fin (q1 i)) ∙ (λ i → Fin (p2 i) → Fin (q2 i))
+      ≡⟨ {!!} ⟩
+    (λ i → Fin ((p1 ∙ p2) i) → Fin ((q1 ∙ q2) i))
+      ≡⟨ refl ⟩
+    (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i) ∎
+
+  ≈trans : f ≈ g → g ≈ h → f ≈ h
+  ≈trans f≈g g≈h = record
+    { p = p1 ∙ p2
+    ; q = q1 ∙ q2
+    -- ; path = cong₂-∙ (λ X Y i → path' i) p1 p2 q1 q2 i1 i1
+    ; path = cong₂-∙ {A = ℕ} {B = ℕ} {C = {!!}} {!!} {!!} {!!} {!!} {!!} {!!}
+    }
+    where
+      path' : (i : I) → MapPath (p1 ∙ p2) (q1 ∙ q2) i
+      -- path' : (i : I) → Fin ((p1 ∙ p2) i) → Fin ((q1 ∙ q2) i)
+      path' i = {!!}
+
+{-
   shape : (i j : I) → Partial (~ j ∨ i ∨ ~ i) Type
   shape i j (i = i0) = refl (~ j)
   shape i j (i = i1) = r2 j
@@ -173,44 +163,37 @@ module Trans {A B C X Y Z : ℕ}
       ≡⟨ {!!} ⟩
     h (subst Fin (p1 ∙ p2) a) ∎
 
-  path3 : r1 ∙ r2 ≡ (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i)
-  path3 =
-    r1 ∙ r2
-      ≡⟨ refl ⟩
-    (λ i → MapPath p1 q1 i) ∙ (λ i → MapPath p2 q2 i)
-      ≡⟨ refl ⟩
-    (λ i → Fin (p1 i) → Fin (q1 i)) ∙ (λ i → Fin (p2 i) → Fin (q2 i))
-      ≡⟨ {!!} ⟩
-    (λ i → Fin ((p1 ∙ p2) i) → Fin ((q1 ∙ q2) i))
-      ≡⟨ refl ⟩
-    (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i) ∎
+  -- path3 : r1 ∙ r2 ≡ (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i)
+  -- path3 =
+  --   r1 ∙ r2
+  --     ≡⟨ refl ⟩
+  --   (λ i → MapPath p1 q1 i) ∙ (λ i → MapPath p2 q2 i)
+  --     ≡⟨ refl ⟩
+  --   (λ i → Fin (p1 i) → Fin (q1 i)) ∙ (λ i → Fin (p2 i) → Fin (q2 i))
+  --     ≡⟨ {!!} ⟩
+  --   (λ i → Fin ((p1 ∙ p2) i) → Fin ((q1 ∙ q2) i))
+  --     ≡⟨ refl ⟩
+  --   (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i) ∎
 
-  module _ {A B C X Y Z : Type} (F : Type → Type → Type)
-           (f : F A X) (g : F B Y) (h : F C Z)
-           {a : A} {c : C} {x : X} {z : Z}
-           (p1 : A ≡ B) (p2 : B ≡ C) (q1 : X ≡ Y) (q2 : Y ≡ Z) where
-    path4 : (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
-          ≡ (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i))
-    path4 =
-      J {!!} {!!} {!!} 
-      (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
-        ≡⟨ (congP₂ {A = λ i → (p1 ∙ p2) i} {B = λ i _ → (q1 ∙ q2) i}
-                   {C = λ i a b → {!F a b!}} (λ i a b → {!!})
-                   {x = a} {y = c} {u = x} {v = z}
-                   {!λ i → transport (λ j → (p1 ∙ p2) {!j!}) {!!}!} {!!} ∙₂ {!!}) i0 ⟩
-      (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i)) ∎
+  -- module _ {A B C X Y Z : Type} (F : Type → Type → Type)
+  --          (f : F A X) (g : F B Y) (h : F C Z)
+  --          {a : A} {c : C} {x : X} {z : Z}
+  --          (p1 : A ≡ B) (p2 : B ≡ C) (q1 : X ≡ Y) (q2 : Y ≡ Z) where
+  --   path4 : (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
+  --         ≡ (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i))
+  --   path4 =
+  --     J {!!} {!!} {!!} 
+  --     (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
+  --       ≡⟨ (congP₂ {A = λ i → (p1 ∙ p2) i} {B = λ i _ → (q1 ∙ q2) i}
+  --                  {C = λ i a b → {!F a b!}} (λ i a b → {!!})
+  --                  {x = a} {y = c} {u = x} {v = z}
+  --                  {!λ i → transport (λ j → (p1 ∙ p2) {!j!}) {!!}!} {!!} ∙₂ {!!}) i0 ⟩
+  --     (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i)) ∎
 
-    path5 : (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
-          ≡ (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i))
-    path5 =
-      J-∙ {x = g} (λ f' g≡f → {!g ≈ f!}) {!!} {!!} {!!} 
-
-  ≈trans : f ≈ g → g ≈ h → f ≈ h
-  ≈trans f≈g g≈h = record
-    { p = p1 ∙ p2
-    ; q = q1 ∙ q2
-    ; path = {!r1 ∙ r2!}
-    }
+  --   path5 : (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
+  --         ≡ (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i))
+  --   path5 =
+  --     J-∙ {x = g} (λ f' g≡f → {!g ≈ f!}) {!!} {!!} {!!} 
 
 
 {-
@@ -378,3 +361,19 @@ module Transport (f : {A' X' : ℕ} → Fin A' → Fin X')
 --   -- , sym (+-zero (suc m))
 --   -- , λ a → {!!}
 -}
+
+⟦x+0⟧≃⟦x⟧ : ∀ (X : SomeFin) → ⟦ X + 0 ⟧ ≃ ⟦ X ⟧ 
+⟦x+0⟧≃⟦x⟧ X = transpEquiv (λ i → Fin ((+-zero X) i)) i0
+
+swap : ⟦ 2 ⟧ → ⟦ 2 ⟧
+swap fzero = fsuc fzero
+swap (fsuc fzero) = fzero
+
+swap' : ⟦ 2 + 0 ⟧ → ⟦ 2 + 0 ⟧
+swap' fzero = fsuc fzero
+swap' (fsuc fzero) = fzero
+
+-- -}
+-- -}
+-- -}
+-- -}
