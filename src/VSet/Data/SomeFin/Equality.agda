@@ -3,7 +3,7 @@ module VSet.Data.SomeFin.Equality where
 open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Properties
 
-open import VSet.Prelude renaming (_∎ to _▯)
+open import VSet.Prelude
 open import VSet.Data.Fin
 open import VSet.Function.Injection
 open import VSet.Function.Iso
@@ -119,8 +119,9 @@ f ∎ = ≈refl f
     X↣Y = ≡to↣ (cong Fin q)
 
 ≈transport-fun : ∀ {A B X Y : SomeFin} → A ≡ B → X ≡ Y
-               → [ A ↣ X ] → Type
-≈transport-fun p q f = {!!}
+               → (⟦ A ⟧ → ⟦ X ⟧) → ⟦ B ⟧ → ⟦ Y ⟧
+≈transport-fun p q f =
+  subst Fin q ∘ f ∘ subst Fin (sym p)
 
 ≈transport-filler : ∀ {A B X Y : SomeFin} → (p : A ≡ B) → (q : X ≡ Y)
                   → (f : [ A ↣ X ]) → f ≈ ≈transport p q f
@@ -143,20 +144,3 @@ from≡ path = record
   ; q = refl
   ; path = path
   }
-
---- redundant?
--- ≈transport-filler : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ])
---                   → f ≈ ≈transport refl refl f
--- ≈transport-filler f = record
---   { p = refl
---   ; q = refl
---   ; path = funExt (λ x →
---     fst f x ≡⟨ {!!} ⟩
---     (fst X↣Y ∘ fst f ∘ fst B↣A) x ≡⟨ refl ⟩
---     (fst X↣Y ∘ fst f ∘ fst B↣A) x ≡⟨ refl ⟩
---     fst (X↣Y ↣∘↣ f ↣∘↣ B↣A) x ≡⟨ refl ⟩
---     fst (≈transport refl refl f) x ▯)
---   }
---   where
---     B↣A = ≡to↣ refl
---     X↣Y = ≡to↣ refl 

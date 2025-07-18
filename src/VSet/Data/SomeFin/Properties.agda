@@ -31,7 +31,9 @@ del-suc-zero a = refl
 del-suc-suc : ∀ {x} (a b : ⟦ suc x ⟧) → (a'≢b' : fsuc a ≢ fsuc b)
              → del (fsuc a) (fsuc b — a'≢b')
              ≡ fsuc (del a (b — ≢cong fsuc a'≢b'))
-del-suc-suc {zero} fzero fzero a'≢b' = absurd (a'≢b' refl)
+del-suc-suc {zero} fzero fzero a'≢b' =
+  absurd {A = λ _ → del (fsuc fzero) (fsuc fzero — a'≢b')
+                  ≡ fsuc (del fzero (fzero — ≢cong fsuc a'≢b'))} (a'≢b' refl)
 del-suc-suc {suc x} a b a'≢b' = refl
 
 del-inj : {x : SomeFin} → (a : ⟦ suc x ⟧)
