@@ -20,7 +20,7 @@ open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Properties
 open import VSet.Data.SomeFin.Injection
 open import VSet.Transform.Pred
-open import VSet.Transform.Add
+open import VSet.Transform.Tensor
 open import VSet.Transform.Compose
 open import VSet.Transform.Sub
 open import VSet.Transform.Split
@@ -28,11 +28,6 @@ open import VSet.Transform.Split
 private
   variable
     A B X Y Z : SomeFin
-
-lemma1-3 : ∀ A X Y → (f : [ X ↣ Y ]) → (f +ᶠ-sym A) -ᶠ A ≡ f
-lemma1-3 zero X Y f = refl
-lemma1-3 (suc A) X Y f =
-  {!!}
 
 
 -- -}

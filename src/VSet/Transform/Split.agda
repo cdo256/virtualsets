@@ -75,5 +75,5 @@ retr {suc X} {Y} (inr a) =
   inc (inr a) ≡⟨ refl ⟩
   inr a ∎
 
-+↔⊎ : ∀ {X Y : SomeFin} → Iso (⟦ X ⟧ ⊎ ⟦ Y ⟧) ⟦ X +ℕ Y ⟧
-+↔⊎ {X} {Y} = iso ⊎→+ +→⊎ sect retr
+⊎↔+ : ∀ {X Y : SomeFin} → Iso (⟦ X ⟧ ⊎ ⟦ Y ⟧) ⟦ X +ℕ Y ⟧
+⊎↔+ {X} {Y} = iso ⊎→+ +→⊎ sect retr

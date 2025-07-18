@@ -1,4 +1,5 @@
-module VSet.Transform.Add where
+-- Functions proven but not currently needed
+module VSet.Transform.Unused where
 
 open import VSet.Prelude
 open import VSet.Function.Base
@@ -13,6 +14,7 @@ open import VSet.Data.Fin renaming (pred to fpred)
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
 open import VSet.Data.SomeFin.Properties
+open import VSet.Transform.Split using (⊎↔+)
 open import VSet.Transform.Pred
 
 inc-func : ∀ {X Y : SomeFin} → (⟦ X ⟧ → ⟦ Y ⟧) → (⟦ suc X ⟧ → ⟦ suc Y ⟧)
@@ -62,49 +64,3 @@ absurd-func : ∀ {A : Type} {X : SomeFin} → (⟦ suc X ⟧ → ⟦ zero ⟧) 
 absurd-func {X} f with f fzero
 ... | ()
 
-
-
-tensor-func : ∀ {W X Y Z : SomeFin}
-              → (⟦ W ⟧ → ⟦ X ⟧) → (⟦ Y ⟧ → ⟦ Z ⟧) → (⟦ W + Y ⟧ → ⟦ X + Z ⟧)
-tensor-func {zero} {X} {Y} {Z} f g a = fshift X (g a)
-tensor-func {suc W} {X} {Y} {Z} f g fzero = finject Z (f fzero)
-tensor-func {suc W} {X} {Y} {Z} f g (fsuc a) =
-  tensor-func {W} {X} {Y} {Z} (f ∘ fsuc) g a
-
-tensor-inj : ∀ {W X Y Z : SomeFin}
-           → (f : [ W ↣ X ]) → (g : [ Y ↣ Z ])
-           → is-injective (tensor-func (fst f) (fst g))
-tensor-inj {zero} {X} {Y} {Z} f g x y hx≡hy =
-  snd g x y (fshift-injective Z (fst g x) (fst g y) hx≡hy)
-  where
-    h : ⟦ 0 + Y ⟧ → ⟦ X + Z ⟧
-    h = tensor-func (fst f) (fst g)
-tensor-inj {suc W} {X} {Y} {Z} f g fzero fzero hx≡hy = refl
-tensor-inj {suc W} {X} {Y} {Z} f g fzero (fsuc y) hx≡hy =
-  snd {!!}
-tensor-inj {suc W} {X} {Y} {Z} f g (fsuc x) fzero hx≡hy = {!!}
-tensor-inj {suc W} {X} {Y} {Z} f g (fsuc x) (fsuc y) hx≡hy =
-  let r = tensor-inj {W} {X} {Y} (dec-dom f) g {!!} {!!} {!!} in {!!}
-  where
-    h : ⟦ suc W + Y ⟧ → ⟦ X + Z ⟧
-    h = tensor-func (fst f) (fst g)
-    f' : ⟦ W ⟧ → ⟦ X ⟧
-    f' x = fst f (fsuc x)
-    f'-inj : is-injective f'
-    f'-inj x y f'x≡f'y = fsuc-injective (snd f (fsuc x) (fsuc y) f'x≡f'y)
-    w = tensor-inj {W} {X} {Y} {Z} (f' , f'-inj) g {!x!} {!!} {!!}
-
-tensor : ∀ {W X Y Z : SomeFin} → [ W ↣ X ] → [ Y ↣ Z ] → [ W + Y ↣ X + Z ]
-tensor {W} {X} {Y} {Z} f g = ↔to↣ {!!} ↣∘↣ {!!} ↣∘↣ ↔to↣ {!!}
-
-join-dom : ∀ {X Y Z : SomeFin} → [ X ↣ Z ] → [ Y ↣ Z ] → [ X + Y ↣ Z ]
-join-dom {zero} f g = g
-join-dom {suc X} {Y} {Z} f g = join-dom-func (fst f) (fst g) , {!!}
-  
-rinc : ∀ {X Y : SomeFin} → (A : SomeFin) → [ X ↣ Y ] → [ X + 1 ↣ Y + 1 ]
-rinc {zero} {Y} A f = {!!} , {!!}
-rinc {suc X} {Y} A f = {!!}
-
-radd : ∀ {X Y : SomeFin} → (A : SomeFin) → [ X ↣ Y ] → [ X + A ↣ Y + A ]
-radd {X} {Y} zero g = +0r g
-radd {X} {Y} (suc A) g = {!!}
