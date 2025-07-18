@@ -9,7 +9,9 @@ open import Cubical.Data.Empty renaming (elim to absurd)
 
 private
   variable
-    ℓ : Level
+    ℓ ℓ' ℓ'' : Level
+
+
 
 _≢_ : ∀ {ℓ} {A : Type ℓ} → (x y : A) → Type ℓ
 x ≢ y = x ≡ y → ⊥
@@ -28,3 +30,36 @@ subst-inv {A} {x} {y} B p a =
     ≡⟨ transportTransport⁻ (λ i → B (p i)) a ⟩
   a ∎
 
+-- step-≡P : {A : I → Type ℓ} {x : A i0} {y : A i1} {B_i1 : Type ℓ} {B : (A i1) ≡ B_i1} {z : B i1}
+--         → PathP A x y → PathP (λ i → B i) y z → PathP (λ j → ((λ i → A i) ∙ B) j) x z
+-- step-≡P = compPathP     
+
+
+-- module DependentPathSyntax where
+private
+  variable
+    A : Type ℓ
+    B : A → Type ℓ
+    x y z w : A
+    p : x ≡ y
+    q : y ≡ z
+
+step-≡P : ∀ (B : A → Type ℓ')
+          → (x' : B x) {y' : B y} {z' : B z} 
+          → (P : PathP (λ i → B (p i)) x' y')
+          → (Q : PathP (λ i → B (q i)) y' z')
+          → PathP (λ i → B ((p ∙ q) i)) x' z'
+step-≡P B x' P Q = compPathP' {B = B} {x' = x'} P Q
+
+syntax step-≡P B x' P Q = x' ≡P[ B ]⟨ P ⟩ Q
+
+infixr 2 ≡P⟨⟩-syntax
+≡P⟨⟩-syntax : (x : A) → y ≡ z → x ≡ y → x ≡ z
+≡P⟨⟩-syntax = step-≡
+
+infix 3 _∎P
+_∎P : {A : Type ℓ} (x : A) → x ≡ x
+_ ∎P = refl
+
+
+-- open DependentPathSyntax public
