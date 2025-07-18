@@ -37,6 +37,24 @@ doubleComp-faces-dep : ∀ {ℓ} {A : (i j : I) → Type ℓ}
 doubleComp-faces-dep p r i j (i = i0) = p (~ j)
 doubleComp-faces-dep p r i j (i = i1) = r j
 
+-- _∙∙-dep_∙∙-dep_
+--   : ∀ {ℓ ℓ'} {A : Type ℓ} {B : A → Type ℓ'}
+--   → {a b c d : A}
+--   → {α : a ≡ b} {β : b ≡ c} {γ : c ≡ d}
+--   → {w : B a} {x : B b} {y : B c} {z : B d}
+--   → (ξ : PathP (λ i → B (α i)) w x)
+--   → (ψ : PathP (λ i → B (β i)) x y)
+--   → (ϕ : PathP (λ i → B (γ i)) y z)
+--   → PathP (λ i → B ((α ∙ β) i)) w y
+-- (ξ ∙∙-dep ψ ∙∙-dep ϕ) i =
+--   1lab-comp (λ j → {!!}) (~ i ∨ i) {!!} {!!}
+--   where A : I → I → B 
+
+-- doubleCompPath-filler : ∀ {ℓ} {A : Type ℓ} {x y z w : A} (p : x ≡ y) (q : y ≡ z) (r : z ≡ w)
+--                       → PathP (λ j → p (~ j) ≡ r j) q (p ∙∙ q ∙∙ r)
+-- doubleCompPath-filler p q r j i =
+--   hfill (doubleComp-faces p r i) (inS (q i)) j
+
 _∙∙-dep_∙∙-dep_
   : ∀ {ℓ ℓ'} {A : Type ℓ} {B : A → Type ℓ'}
   → {a b c d : A}
@@ -46,9 +64,36 @@ _∙∙-dep_∙∙-dep_
   → (ψ : PathP (λ i → B (β i)) x y)
   → (ϕ : PathP (λ i → B (γ i)) y z)
   → PathP (λ i → B ((α ∙ β) i)) w y
-(ξ ∙∙-dep ψ ∙∙-dep ϕ) i =
-  1lab-comp (λ i → {!!}) {!!} {!!} {!!}
-    
+(_∙∙-dep_∙∙-dep_) {A = A} {B = B} {a = a} {b = b} {c = c} {d = d}
+                  {α = α} {β = β} {γ = γ} {w = w} {x = x} {y = y} {z = z}
+                  ξ ψ ϕ i = {!1lab-hcomp (∂ i) base-sys!}
+  where
+    sq : PathP (λ j → α (~ j) ≡ γ j) β (α ∙∙ β ∙∙ γ)
+    sq = doubleCompPath-filler α β γ
+
+    fib : ∀ j k → PartialP (~ i ∨ i ∨ ~ j ∨ j ∨ ~ k) {!!}
+    fib j k 1=1 (i = i0) = α (~ j)
+    fib j k 1=1 (i = i1) = γ j
+    fib j k 1=1 (j = i0) = β i
+    fib j k 1=1 (j = i1) = (α ∙∙ β ∙∙ γ) i
+    fib j k 1=1 (k = i0) = sq
+
+    B' : ∀ j k → B (sq j k)
+    B' j k = {!!}
+
+    α' = λ j → B (α j)
+    β' = λ i → B (β i)
+    γ' = λ j → B (γ j)
+    δ' = λ i → B ((α ∙∙ β ∙∙ γ) i)
+
+    -- base-sys : ∀ j → Partial (∂ i ∨ ~ j) A
+    -- base-sys j (i = i0) = α (~ j)
+    -- base-sys j (i = i1) = γ j
+    -- base-sys j (j = i0) = β i
+
+    -- base-comp : A
+    -- base-comp = 1lab-hcomp (∂ i) base-sys
+
 
 _∙-dep_
   : ∀ {ℓ ℓ'} {A : Type ℓ} {B : A → Type ℓ'}
