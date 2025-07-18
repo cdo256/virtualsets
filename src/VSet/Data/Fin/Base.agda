@@ -45,3 +45,15 @@ finject {suc x} zero fzero = fzero
 finject {suc x} zero (fsuc a) = fsuc (finject zero a)
 finject {suc x} (suc y) fzero = fzero
 finject {suc x} (suc y) (fsuc a) = fsuc (finject {x} (suc y) a)
+
+finject-subst-commute
+  : ∀ {x y z : ℕ} → (p : x ≡ z) → (a : Fin x)
+  → finject {z} y (subst Fin p a) ≡ subst (λ ○ → Fin (○ +ℕ y)) p (finject {x} y a)
+finject-subst-commute {x} {y} {z} p a =
+  substRefl {B = (λ ○ → Fin (○ +ℕ y))} ? ?
+
+-- finject-subst-commute {suc x} {zero} {zero} p fzero =
+--   {!refl!}
+-- finject-subst-commute {suc x} {zero} {zero} p (fsuc a) = {!!}
+-- finject-subst-commute {suc x} {zero} {suc z} p a = {!!}
+-- finject-subst-commute {suc x} {suc y} {z} p a = {!!}
