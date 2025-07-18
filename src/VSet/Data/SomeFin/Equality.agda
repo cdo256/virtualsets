@@ -3,7 +3,7 @@ module VSet.Data.SomeFin.Equality where
 open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Properties
 
-open import VSet.Prelude hiding (_∎)
+open import VSet.Prelude renaming (_∎ to _▯)
 open import VSet.Data.Fin
 open import VSet.Function.Injection
 open import VSet.Function.Iso
@@ -100,3 +100,45 @@ _ ≈⟨ f≈g ⟩ g≈h = g≈h ∘≈ f≈g
 infix 3 _∎
 _∎ : {A X : SomeFin} → (f : [ A ↣ X ]) → f ≈ f
 f ∎ = ≈refl f
+
+≈transport : ∀ {A B X Y : SomeFin} → A ≡ B → X ≡ Y → [ A ↣ X ] → [ B ↣ Y ]
+≈transport {A = A} {B = B} p q f = X↣Y ↣∘↣ f ↣∘↣ B↣A
+  where
+    B↣A = ≡to↣ (cong Fin (sym p))
+    X↣Y = ≡to↣ (cong Fin q)
+
+≈cong : ∀ {A B X Y : SomeFin} → (p : A ≡ B) → (q : X ≡ Y) → (f : [ A ↣ X ])
+      → f ≈ ≈transport p q f
+≈cong {A = A} {B} {X} {Y} p q f = record { p = p ; q = q ; path = path }
+  where
+    B↣A = ≡to↣ (cong Fin (sym p))
+    X↣Y = ≡to↣ (cong Fin q)
+    P = cong₂ FinFun p q
+    step1 : fst (≈transport p q f) ≡ subst Fin q ∘ fst f ∘ subst Fin (sym p)
+    step1 =
+      fst (≈transport p q f)
+        ≡⟨ refl ⟩
+      fst (X↣Y ↣∘↣ f ↣∘↣ B↣A)
+        ≡⟨ refl ⟩
+      fst X↣Y ∘ fst f ∘ fst B↣A 
+        ≡⟨ refl ⟩
+      (subst Fin q ∘ fst f ∘ subst Fin (sym p)) ▯ 
+
+    step2 : (λ i → cong₂ FinFun p q i) [ fst f ≡ subst Fin q ∘ fst f ∘ subst Fin (sym p) ]
+    step2 = subst2-filler FinFun p q (fst f)
+
+    path : (λ i → P i) [ fst f ≡ fst (≈transport p q f) ]
+    path = compPathP' step1 (symP step2)
+    path = fst f ≡P[ {!!} ]⟨ step2 ⟩
+           ({!subst Fin q ∘ fst f ∘ subst Fin (sym p)!} ≡P[ {!!} ]⟨ sym step1 ⟩ {!!})
+           -- subst Fin q ∘ fst f ∘ subst Fin (sym p) ≡P⟨ sym step1 ⟩
+           -- {!fst (≈transport p q f) ∎P!}
+
+
+-- {!
+--       (fst f ≡P⟨ step2 ⟩
+--       {!subst Fin q ∘ fst f ∘ subst Fin (sym p) ≡P⟨ sym step1 ⟩
+--       fst (≈transport p q f) {!∎P!} !}!}
+
+
+foo = ℕ ≡P[ id ]⟨ refl ⟩ ℕ ≡P[ id ]⟨ refl ⟩ (ℕ ∎P)

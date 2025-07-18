@@ -19,3 +19,6 @@ id↣ {A} = id , λ x y z → z
 
 FinFun : ∀ (A B : ℕ) → Type
 FinFun A B = Fin A → Fin B
+
+FinFun' : ℕ × ℕ → Type
+FinFun' (A , B) = FinFun A B
