@@ -82,27 +82,138 @@ record _≈_ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) : Type 
   field
     p : A ≡ B
     q : X ≡ Y
-    -- path : PathP (λ i → MapPath p q i) f g 
-    path : subst2 FinFun p q f ≡ g
+    path : (λ i → MapPath p q i) [ f ≡ g ]
+    -- path : subst2 FinFun p q f ≡ g
 
--- subst2-filler : {B : Type ℓ'} {z w : B} (C : A → B → Type ℓ'')
---                 (p : x ≡ y) (q : z ≡ w) (c : C x z)
---               → PathP (λ i → C (p i) (q i)) c (subst2 C p q c)
--- subst2-filler C p q = transport-filler (cong₂ C p q)
--- B = ℕ; z = X; w = Y; C = FinFun; p = p; q = q; c = f
--- PathP (λ i → Fin (p i) → Fin (q i)) f (subst2 (Fin p → Fin q) f)
+≈refl : {A X : ℕ} (f : Fin A → Fin X) → f ≈ f
+≈refl {A} {X} f = record
+  { p = refl
+  ; q = refl
+  ; path = λ i x → f x
+  }
+
+≈sym : ∀ {A B X Y : ℕ} {f : Fin A → Fin X} {g : Fin B → Fin Y} → f ≈ g → g ≈ f
+≈sym {A} {B} {X} {Y} {f} {g} f≈g = record
+  { p = sym p 
+  ; q = sym q
+  ; path = λ i → path (~ i)
+  }
+  where
+    open _≈_ f≈g
 
 
--- subst2 : ∀ {ℓ' ℓ''} { : Type ℓ'} {z w : B} (FinFun : A → B → Type ℓ'')
---         (p : x ≡ y) (q : z ≡ w) → FinFun x z → FinFun y w
--- subst2 FinFun p q f = transport (λ _ → FinFun A X) f
+≈sym-pi : ∀ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) → f ≈ g → g ≈ f
+≈⁻∘≈ : ∀ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y)
+  → (f≈g : f ≈ g) → {!≈sym f≈g ∘≈ f≈g ≡ id!}
 
--- module _ {A : I → Type ℓ} {x : A i0} {y : A i1} where
---   toPathP : transport (λ i → A i) x ≡ y → PathP A x y
---   toPathP p i = hcomp (λ j → λ { (i = i0) → x
---                                ; (i = i1) → p j })
---                       (transp (λ j → A (i ∧ j)) (~ i) x)
+module Trans {A B C X Y Z : ℕ}
+           (f : Fin A → Fin X)
+           (g : Fin B → Fin Y)
+           (h : Fin C → Fin Z)
+           (f≈g : f ≈ g) (g≈h : g ≈ h) where
 
+  open _≈_ f≈g renaming (p to p1; q to q1; path to path1)
+  open _≈_ g≈h renaming (p to p2; q to q2; path to path2)
+  r1 : FinFun A X ≡ FinFun B Y
+  r1 i = FinFun (p1 i) (q1 i)
+  r2 : FinFun B Y ≡ FinFun C Z
+  r2 i = FinFun (p2 i) (q2 i)
+
+  shape : (i j : I) → Partial (~ j ∨ i ∨ ~ i) Type
+  shape i j (i = i0) = refl (~ j)
+  shape i j (i = i1) = r2 j
+  shape i j (j = i0) = r1 i
+
+  -- ∘≈ : (f≈g : f ≈ g) (g≈h : g ≈ h)
+  --    → f ≈ h
+  -- ∘≈ f≈g g≈h = let
+  --   J' = J {x = g}  (λ g' g≡g' → f ≈ g')  f≈g {y = h} {!!}
+  --   in {!!}
+
+  -- record
+  --   { p = p1 ∙ p2
+  --   ; q = q1 ∙ q2
+  --   ; path = 
+  --   }
+
+
+  -- path' : MapPath (p1 ∙ p2) (q1 ∙ q2)
+  -- path' i = {!!}
+
+  -- shape' : (i j : I) →  Partial {!!} (Fin ((p1 ∙ p2) {!i!}))
+  -- shape' i j (j = i0) = {!f x!}
+  -- shape' i j (j = i1) = {!!}
+  -- shape' i j (i = i0) = {!!}
+  -- shape' i j (i = i1) = {!!}
+
+  -- path : PathP (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i) f h
+  -- path i x = fill (λ j → Fin ((p1 ∙ p2) j)) {!!} {!!} {!!}
+  -- -- (Fin ((p1 ∙ p2) i) → Fin ((q1 ∙ q2) i))
+  -- -- path i = hfill (λ j p → {!shape i j!}) {!!} (i ∨ ~ i)
+
+  transpTrans : ∀ {ℓ} {A B C : Type ℓ} → (p : A ≡ B) → (q : B ≡ C) → (a : A)
+              → transport (p ∙ q) a ≡ transport q (transport p a)
+  transpTrans {ℓ} {A} {B} {C} p q a i = hfill (λ j is1 → {!!}) {!!} {!!}
+
+  rect : ∀ (a : Fin A) → subst Fin (q1 ∙ q2) (f a) ≡ h (subst Fin (p1 ∙ p2) a)
+  rect a =
+    subst Fin (q1 ∙ q2) (f a)
+      ≡⟨ refl ⟩
+    transport (λ i → Fin ((q1 ∙ q2) i)) (f a)
+      ≡⟨ cong (λ ○ → transport ○ (f a)) refl ⟩
+    transport (λ i → Fin (((λ i → q1 i) ∙ (λ i → q2 i)) i)) (f a)
+      ≡⟨ cong (λ ○ → transport ○ (f a)) refl ⟩
+    transport (λ i → (((λ i → Fin (q1 i)) ∙ (λ i → Fin (q2 i))) i)) (f a)
+      ≡⟨ cong (λ ○ → transport ○ (f a)) refl ⟩
+    transport ((λ i → Fin (q1 i)) ∙ (λ i → Fin (q2 i))) (f a)
+      ≡⟨ {!!} ⟩
+    transport (λ i → Fin (q2 i)) (transport (λ i → Fin (q1 i)) (f a))
+      ≡⟨ {!!} ⟩
+    subst Fin q2 (subst Fin q1 (f a))
+      ≡⟨ {!!} ⟩
+    h (subst Fin (p1 ∙ p2) a) ∎
+
+  path3 : r1 ∙ r2 ≡ (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i)
+  path3 =
+    r1 ∙ r2
+      ≡⟨ refl ⟩
+    (λ i → MapPath p1 q1 i) ∙ (λ i → MapPath p2 q2 i)
+      ≡⟨ refl ⟩
+    (λ i → Fin (p1 i) → Fin (q1 i)) ∙ (λ i → Fin (p2 i) → Fin (q2 i))
+      ≡⟨ {!!} ⟩
+    (λ i → Fin ((p1 ∙ p2) i) → Fin ((q1 ∙ q2) i))
+      ≡⟨ refl ⟩
+    (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i) ∎
+
+  module _ {A B C X Y Z : Type} (F : Type → Type → Type)
+           (f : F A X) (g : F B Y) (h : F C Z)
+           {a : A} {c : C} {x : X} {z : Z}
+           (p1 : A ≡ B) (p2 : B ≡ C) (q1 : X ≡ Y) (q2 : Y ≡ Z) where
+    path4 : (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
+          ≡ (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i))
+    path4 =
+      J {!!} {!!} {!!} 
+      (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
+        ≡⟨ (congP₂ {A = λ i → (p1 ∙ p2) i} {B = λ i _ → (q1 ∙ q2) i}
+                   {C = λ i a b → {!F a b!}} (λ i a b → {!!})
+                   {x = a} {y = c} {u = x} {v = z}
+                   {!λ i → transport (λ j → (p1 ∙ p2) {!j!}) {!!}!} {!!} ∙₂ {!!}) i0 ⟩
+      (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i)) ∎
+
+    path5 : (λ i → F (p1 i) (q1 i)) ∙ (λ i → F (p2 i) (q2 i))
+          ≡ (λ i → F ((p1 ∙ p2) i) ((q1 ∙ q2) i))
+    path5 =
+      J-∙ {x = g} (λ f' g≡f → {!g ≈ f!}) {!!} {!!} {!!} 
+
+  ≈trans : f ≈ g → g ≈ h → f ≈ h
+  ≈trans f≈g g≈h = record
+    { p = p1 ∙ p2
+    ; q = q1 ∙ q2
+    ; path = {!r1 ∙ r2!}
+    }
+
+
+{-
 constPath≡refl : {B : Type} → toPathP (λ _ → B) ≡ refl {x = B}
 constPath≡refl {B} =
   toPathP {A = λ _ → Type} {x = B} {y = B} (λ _ → B) ≡⟨ refl ⟩
@@ -113,16 +224,6 @@ constPath≡refl {B} =
               (transp (λ _ → Type) (~ i) B)) ≡⟨ refl ⟩
   refl ∎
 
--- constPath≡refl' : ∀ {ℓ} {A : Type ℓ} {x : A} → toPathP (λ _ → x) ≡ refl
--- constPath≡refl' {x} =
---   toPathP {A = λ _ → Type} {x = x} {y = x} (λ _ → x) ≡⟨ refl ⟩
---   (λ i → hcomp (λ j → λ { (i = i0) → x
---                         ; (i = i1) → (λ _ → x) j })
---               (transp (λ j → (λ _ → Type) (i ∧ j)) (~ i) x)) ≡⟨ refl ⟩
---   (λ i → hcomp (λ _ _ → x)
---               (transp (λ _ → Type) (~ i) x)) ≡⟨ refl ⟩
---   refl ∎
-
 
 -- transport-filler : ∀ {ℓ} {A B : Type ℓ} (p : A ≡ B) (x : A)
 --                    → PathP (λ i → p i) x (transport p x)
@@ -131,27 +232,88 @@ constPath≡refl {B} =
 transpRefl : {A : Type} → (x : A) → transport (λ _ → A) x ≡ x
 -- transpRefl x = transport-filler refl {!!} {!!}
 transpRefl {A} x =
-  transport (λ _ → A) x ≡⟨ cong (λ ○ → transport ○ x) {!constPath≡refl {B = }!} {!!} ⟩
+  transport (λ _ → A) x ≡⟨ cong (λ ○ → transport ○ x) refl i1 ⟩
+  transport refl x ≡⟨ transportRefl x ⟩
   x ∎
-  -- where
-  --   const≡refl : toPathP (λ _ → A) ≡ refl {x = A}
-  --   const≡refl = constPath≡refl 
-  --   TF : PathP (λ i → {!!}) {!!} {!!}
-  --   TF = transport-filler {!!} {!!} {!!}
 
 ≈refl : {A X : ℕ} (f : Fin A → Fin X) → f ≈ f
 ≈refl {A} {X} f = record
   { p = refl
   ; q = refl
-  ; path = funExt extPath -- λ w → {!subst2-filler (λ x y → FinFun x {!y!})refl refl f !}
+  ; path = transpRefl f
+  }
+
+≈sym : ∀ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) → f ≈ g → g ≈ f
+≈sym {A} {B} {X} {Y} f g f≈g = record
+  { p = sym p 
+  ; q = sym q
+  ; path = path'
   }
   where
-    extPath : (w : Fin A) → subst2 FinFun (λ _ → A) (λ _ → X) f w ≡ f w
-    extPath w =
-      subst2 FinFun (λ _ → A) (λ _ → X) f w ≡⟨ refl ⟩
-      transport (λ _ → Fin A → Fin X) f w ≡⟨ transportRefl {!!} {!!} ⟩
-      f w ≡⟨ {!!} ⟩
-      f w ∎
+    open _≈_ f≈g
+    r : FinFun A X ≡ FinFun B Y
+    r i = FinFun (p i) (q i)
+    path' : subst2 FinFun (sym p) (sym q) g ≡ f
+    path' =
+      subst2 FinFun (sym p) (sym q) g ≡⟨ refl ⟩
+      transport⁻ r g ≡⟨ cong (transport (sym r)) (sym path) ⟩
+      transport⁻ r (transport r f) ≡⟨ transport⁻Transport r f ⟩
+      f ∎
+
+
+module Trans {A B C X Y Z : ℕ}
+           (f : Fin A → Fin X)
+           (g : Fin B → Fin Y)
+           (h : Fin C → Fin Z)
+           (f≈g : f ≈ g) (g≈h : g ≈ h) where
+
+  open _≈_ f≈g renaming (p to p1; q to q1; path to path1)
+  open _≈_ g≈h renaming (p to p2; q to q2; path to path2)
+  r1 : FinFun A X ≡ FinFun B Y
+  r1 i = FinFun (p1 i) (q1 i)
+  r2 : FinFun B Y ≡ FinFun C Z
+  r2 i = FinFun (p2 i) (q2 i)
+
+  term1 : (i : I) (j : I) → Partial (i ∨ ~ i) Type
+  term1 i j (i = i0) = refl (~ j)
+  term1 i j (i = i1) = FinFun (p2 j) (q2 j)
+
+  lemma1 : (λ i → FinFun ((p1 ∙ p2) i) ((q1 ∙ q2) i))
+         ≡ (λ i → FinFun (p1 i) (q1 i)) ∙ (λ i → FinFun (p2 i) (q2 i)) 
+  lemma1 =
+    (λ i → FinFun ((p1 ∙ p2) i) ((q1 ∙ q2) i)) ≡⟨ {!!} ⟩
+    (λ i → hcomp (term1 i)
+                 (FinFun (p1 i) (q1 i))) ≡⟨ refl ⟩
+    (λ i → hcomp (doubleComp-faces refl (λ i → FinFun (p2 i) (q2 i)) i)
+                 (FinFun (p1 i) (q1 i))) ≡⟨ refl ⟩
+    refl ∙∙ (λ i → FinFun (p1 i) (q1 i)) ∙∙ (λ i → FinFun (p2 i) (q2 i)) ≡⟨ refl ⟩
+    (λ i → FinFun (p1 i) (q1 i)) ∙ (λ i → FinFun (p2 i) (q2 i)) ∎
+
+  ≈trans : f ≈ g → g ≈ h → f ≈ h
+  ≈trans f≈g g≈h = record
+    { p = p1 ∙ p2
+    ; q = q1 ∙ q2
+    ; path = path'
+    }
+    where
+      path' : subst2 FinFun (p1 ∙ p2) (q1 ∙ q2) f ≡ h
+      path' =
+        subst2 FinFun (p1 ∙ p2) (q1 ∙ q2) f ≡⟨ refl ⟩
+        transport (λ i → FinFun ((p1 ∙ p2) i) ((q1 ∙ q2) i)) f
+          ≡⟨ {!refl!} ⟩
+        transport ((λ i → FinFun (p1 i) (q1 i)) ∙ (λ i → FinFun (p2 i) (q2 i))) f
+          ≡⟨ {!!} ⟩
+        transport ((λ i → FinFun (p1 i) (q1 i)) ∙ (λ i → FinFun (p2 i) (q2 i))) f
+          ≡⟨ {!!} ⟩
+        transport (r1 ∙ r2) f
+          ≡⟨ {!!} ⟩
+        h ∎
+
+      -- transport (λ i → FinFun ((refl ∙∙ p1 ∙∙ p2) i) ((refl ∙∙ q1 ∙∙ q2) i)) f ≡⟨ {!!} ⟩
+      -- transport (λ i → FinFun (hcomp (doubleComp-faces refl p2 i) (p1 i))
+      --                         (hcomp (doubleComp-faces refl q2 i) (q1 i))) f ≡⟨ {!refl!} ⟩
+      -- transport (λ i → FinFun (hcomp (doubleComp-faces refl p2 i) (p1 i))
+      --                         (hcomp (doubleComp-faces refl q2 i) (q1 i))) f ≡⟨ {!refl!} ⟩
 
 module Transport (f : {A' X' : ℕ} → Fin A' → Fin X')
                  (g : {B' Y' : ℕ} → Fin B' → Fin Y')
@@ -174,12 +336,12 @@ module Transport (f : {A' X' : ℕ} → Fin A' → Fin X')
     eql : f' ≡ g
     eql = funExt ext
 
-  pointwise : {A B X Y : ℕ} (p : A ≡ B) (q : X ≡ Y) (a : Fin A) (b : Fin B)
-            → (PathP (λ i → Fin (p i)) a b)
-            → PathP (λ i → Fin (q i)) (f a) (g b)
-  pointwise p q a b r =
-    let H = transport-filler (λ i → Fin (p i)) a
-    in {!!}
+  -- pointwise : {A B X Y : ℕ} (p : A ≡ B) (q : X ≡ Y) (a : Fin A) (b : Fin B)
+  --           → (PathP (λ i → Fin (p i)) a b)
+  --           → PathP (λ i → Fin (q i)) (f a) (g b)
+  -- pointwise p q a b r =
+  --   let H = transport-filler (λ i → Fin (p i)) a
+  --   in {!!}
   -- pointwise p q a b r = subst (λ ○ → PathP (λ i → Fin (q i)) (f a) (g ○))
   --                             {!r!} {!!}
 
@@ -215,3 +377,4 @@ module Transport (f : {A' X' : ℕ} → Fin A' → Fin X')
 --   --   sym (+-zero (suc (suc m)))
 --   -- , sym (+-zero (suc m))
 --   -- , λ a → {!!}
+-}
