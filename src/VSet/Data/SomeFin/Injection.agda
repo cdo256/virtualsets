@@ -67,8 +67,6 @@ record _≈_ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y) : Type 
 ≈⁻∘≈ : ∀ {A B X Y : ℕ} (f : Fin A → Fin X) (g : Fin B → Fin Y)
   → (f≈g : f ≈ g) → {!≈sym f≈g ∘≈ f≈g ≡ id!}
 
-
-
 module Trans {A B C X Y Z : ℕ}
            (f : Fin A → Fin X)
            (g : Fin B → Fin Y)
@@ -82,7 +80,7 @@ module Trans {A B C X Y Z : ℕ}
   r2 : FinFun B Y ≡ FinFun C Z
   r2 i = FinFun (p2 i) (q2 i)
 
-  open import Compat.1Lab using (cong₂-∙)
+  open import Compat.1Lab.Path using (cong₂-∙)
 
   path3 : r1 ∙ r2 ≡ (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i)
   path3 =
@@ -96,12 +94,20 @@ module Trans {A B C X Y Z : ℕ}
       ≡⟨ refl ⟩
     (λ i → MapPath (p1 ∙ p2) (q1 ∙ q2) i) ∎
 
+  -- my-cong₂-∙
+  --   : ∀ {ℓ ℓ' ℓ''} {A : Type ℓ} {B : Type ℓ'} {C : Type ℓ''}
+  --   → (f : A → B → C)
+  --   → {a b c : A} (α : a ≡ b) (β : b ≡ c)
+  --   → {w x y : B} (ξ : w ≡ x) (ψ : x ≡ y)
+  --   → cong₂ f (α ∙ β) (ξ ∙ ψ) ≡ cong₂ f α ξ ∙ cong₂ f β ψ
+  -- my-cong₂-∙ f α β ξ ψ = cong₂-∙∙ f refl α β refl ξ ψ
+
   ≈trans : f ≈ g → g ≈ h → f ≈ h
   ≈trans f≈g g≈h = record
     { p = p1 ∙ p2
     ; q = q1 ∙ q2
     -- ; path = cong₂-∙ (λ X Y i → path' i) p1 p2 q1 q2 i1 i1
-    ; path = cong₂-∙ {A = ℕ} {B = ℕ} {C = {!!}} {!!} {!!} {!!} {!!} {!!} {!!}
+    ; path = cong₂-∙ {A = ℕ} {B = ℕ} {C = {!!}} {!!} {!!} {!!} {!!} {!!} {!!} {!!}
     }
     where
       path' : (i : I) → MapPath (p1 ∙ p2) (q1 ∙ q2) i
