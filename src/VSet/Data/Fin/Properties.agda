@@ -127,18 +127,14 @@ fsuc-subst-reorder p a = transport-reorder Fin suc fsuc p a
 
 finject-subst-reorder
   : ∀ {x y : ℕ} (z : ℕ) (p : x ≡ y) (a : Fin x)
-  → _
-    [ subst (λ ○ → Fin (○ +ℕ z)) p (finject {x} z a)
-    ≡ finject {y} z (subst Fin p a)
-    ]
+  → subst (λ ○ → Fin (○ +ℕ z)) p (finject {x} z a)
+  ≡ finject {y} z (subst Fin p a)
 finject-subst-reorder z p a =
   transport-reorder Fin (_+ℕ z) (λ {w} b → finject {w} z b) p a
  
 fshift-subst-reorder
   : ∀ {x y z : ℕ} → (p : x ≡ y) → (a : Fin x)
-  → (λ i → _)
-    [ subst (λ ○ → Fin (z +ℕ ○)) p (fshift z {x} a)
-    ≡ fshift z {y} (subst Fin p a)
-    ]
+  → subst (λ ○ → Fin (z +ℕ ○)) p (fshift z {x} a)
+  ≡ fshift z {y} (subst Fin p a)
 fshift-subst-reorder {x} {y} {z} p a =
   transport-reorder Fin (z +ℕ_) (λ {w} b → fshift z b) p a
