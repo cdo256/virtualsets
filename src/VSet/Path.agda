@@ -75,7 +75,6 @@ step-≡P B x p q x' P Q = compPathP' {x = x} {B = B} {x' = x'} {p = p} {q = q} 
 
 syntax step-≡P B x p q x' P Q = x' ≡P[ x ][ p ∙P q ]⟨ B ➢ P ⟩ Q
 
-infixr 2 ≡P⟨⟩-syntax
 ≡P⟨⟩-syntax : ∀ (B : A → Type ℓ')
             → (x : A) {y z : A}
             → (p : x ≡ y)
@@ -99,9 +98,9 @@ module Tests where
   open import Cubical.Data.Unit
 
   foo : (λ i → ℕ) [ 1 + 1 ≡ 2 + 0 ]
-  foo = (1 + 1) ≡P[ tt ][ refl ∙P refl ]⟨ (λ _ → ℕ) ➢ refl ⟩ (
+  foo = (1 + 1) ≡P[ tt ][ refl ∙P refl ]⟨ (λ _ → ℕ) ➢ refl ⟩ 
         2 ≡P[ tt ][ refl ∙P refl ]⟨ (λ _ → ℕ) ➢ (+-zero 2) ⟩ 
-        (2 + 0 ∎P))
+        2 + 0 ∎P
 
   foo' : (λ i → ℕ) [ 1 + 1 ≡ 2 + 0 ]
   foo' = compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} refl
