@@ -37,9 +37,6 @@ ladd {X} {Y} A f = (↣-id ⟦ A ⟧) ⊕ f
 radd : ∀ {X Y : SomeFin} → (A : SomeFin) → [ X ↣ Y ] → [ X + A ↣ Y + A ]
 radd {X} {Y} A f = f ⊕ (↣-id ⟦ A ⟧)
 
-is-transport : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → Type
-is-transport {X} {Y} f = Σ[ p ∈ X ≡ Y ] fst f ≡ fst (≈transport refl p (↣-id ⟦ X ⟧))
-
 transport-tensor : ∀ {W X Y Z : SomeFin}
                    → (f : [ W ↣ X ]) → (g : [ Y ↣ Z ])
                    → is-transport f → is-transport g

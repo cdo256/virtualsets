@@ -144,3 +144,6 @@ from≡ path = record
   ; q = refl
   ; path = path
   }
+
+is-transport : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → Type
+is-transport {X} {Y} f = Σ[ p ∈ X ≡ Y ] fst f ≡ subst Fin p

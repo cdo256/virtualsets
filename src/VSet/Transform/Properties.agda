@@ -16,8 +16,6 @@ open import VSet.Transform.Pred
 
 open import Cubical.Data.Nat.Properties
 
-is-transport : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → Type
-is-transport {X} {Y} f = Σ[ p ∈ X ≡ Y ] fst f ≡ fst (≈transport refl p (↣-id ⟦ X ⟧))
 
 -- 𝟘⊕-is-transport : ∀ {X Y : SomeFin} → (f : [ X ↣ Y ]) → fst (𝟘 ⊕ f) x ≡ fst (≈transport refl refl f) x
 
