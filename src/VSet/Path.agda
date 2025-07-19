@@ -29,6 +29,29 @@ subst-inv {A} {x} {y} B p a =
     ≡⟨ transportTransport⁻ (λ i → B (p i)) a ⟩
   a ▯
 
+transport-reorder
+  : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
+  → (f : A → A) (g : {z : A} → B z → B (f z)) (p : x ≡ y) (a : B x)
+  → (λ i → _)
+    [ transport (λ i → B (f (p i))) (g a)
+    ≡ g (transport (λ i → B (p i)) a)
+    ]
+transport-reorder B f g p a =
+  let 
+    step1 : (λ z → B (f (p (~ z))))
+      [ transport (λ i → B (f (p i))) (g a)
+      ≡ g a
+      ]
+    step1 = symP (transport-filler (λ i → B (f (p i))) (g a))
+    step2 : (λ i → B (f (p i)))
+      [ g a
+      ≡ g (transport (λ i → B (p i)) a)
+      ]
+    step2 = congP (λ i ○ → g ○) (transport-filler (λ i → B (p i)) a)
+  in
+  compPathP' {B = B} step1 step2
+
+
 step-≡P : ∀ (B : A → Type ℓ')
           → (x : A) {y z : A}
           → (p : x ≡ y)
@@ -58,6 +81,8 @@ _ ∎P = refl
 
 -- ? ≡P[ ? ][ ? ∙P ? ]⟨ ? ➢ ? ⟩
 
+
+
 module Tests where
   open import Cubical.Data.Nat
   open import Cubical.Data.Unit
@@ -70,3 +95,4 @@ module Tests where
   foo' : (λ i → ℕ) [ 1 + 1 ≡ 2 + 0 ]
   foo' = compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} refl
         (compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} ((+-zero 2)) refl)
+
