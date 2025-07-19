@@ -5,6 +5,7 @@ open import Cubical.Foundations.Path public
 open import Cubical.Foundations.Transport public hiding (transpEquiv)
 open import Cubical.Core.Primitives
 open import Cubical.Data.Empty renaming (elim to absurd)
+open import Cubical.Foundations.GroupoidLaws
 
 
 private
@@ -32,26 +33,36 @@ subst-inv {A} {x} {y} B p a =
 transport-reorder
   : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
   → (f : A → A) (g : {z : A} → B z → B (f z)) (p : x ≡ y) (a : B x)
-  → (λ i → _)
-    [ transport (λ i → B (f (p i))) (g a)
-    ≡ g (transport (λ i → B (p i)) a)
-    ]
+  → transport (λ i → B (f (p i))) (g a)
+  ≡ g (transport (λ i → B (p i)) a)
 transport-reorder B f g p a =
   let 
-    step1 : (λ z → B (f (p (~ z))))
+    step1 : (λ j → B (f (p (~ j))))
       [ transport (λ i → B (f (p i))) (g a)
       ≡ g a
       ]
     step1 = symP (transport-filler (λ i → B (f (p i))) (g a))
-    step2 : (λ i → B (f (p i)))
+    step2 : (λ j → B (f (p j)))
       [ g a
       ≡ g (transport (λ i → B (p i)) a)
       ]
     step2 = congP (λ i ○ → g ○) (transport-filler (λ i → B (p i)) a)
+    composite : (λ i → B ((sym (cong f p) ∙ (cong f p)) i))
+      [ transport (λ i → B (f (p i))) (g a)
+      ≡ g (transport (λ i → B (p i)) a)
+      ]
+    composite = compPathP' {B = B} step1 step2
   in
-  compPathP' {B = B} step1 step2
+    -- Our path index goes out and back along the same path,
+    -- so contract that to a point, so we have a non-dependent path.
+    subst (λ ○ → PathP (λ i → B (○ i))
+                 (transport (λ i → B (f (p i))) (g a))
+                 (g (transport (λ i → B (p i)) a)))
+          (lCancel (cong f p)) composite
 
 
+infixr 2 ≡P⟨⟩-syntax
+infixr 2 step-≡P 
 step-≡P : ∀ (B : A → Type ℓ')
           → (x : A) {y z : A}
           → (p : x ≡ y)
