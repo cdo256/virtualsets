@@ -117,3 +117,28 @@ fshift-injective {zero} y a b fa≡fb = fa≡fb
 fshift-injective {suc x} y a b fa≡fb =
   fshift-injective {x} y a b (fsuc-injective fa≡fb)
 
+fsuc-subst-reorder
+  : ∀ {x y : ℕ} → (p : x ≡ y) → (a : Fin x)
+  → (λ i → _)
+    [ transport (λ i → Fin (suc (p i))) (fsuc a)
+    ≡ fsuc (transport (λ i → Fin (p i)) a)
+    ]
+fsuc-subst-reorder p a = transport-reorder Fin suc fsuc p a
+
+finject-subst-reorder
+  : ∀ {x y : ℕ} (z : ℕ) (p : x ≡ y) (a : Fin x)
+  → _
+    [ subst (λ ○ → Fin (○ +ℕ z)) p (finject {x} z a)
+    ≡ finject {y} z (subst Fin p a)
+    ]
+finject-subst-reorder z p a =
+  transport-reorder Fin (_+ℕ z) (λ {w} b → finject {w} z b) p a
+ 
+fshift-subst-reorder
+  : ∀ {x y z : ℕ} → (p : x ≡ y) → (a : Fin x)
+  → (λ i → _)
+    [ subst (λ ○ → Fin (z +ℕ ○)) p (fshift z {x} a)
+    ≡ fshift z {y} (subst Fin p a)
+    ]
+fshift-subst-reorder {x} {y} {z} p a =
+  transport-reorder Fin (z +ℕ_) (λ {w} b → fshift z b) p a
