@@ -5,7 +5,7 @@ open import Cubical.Foundations.Path public
 open import Cubical.Foundations.Transport public hiding (transpEquiv)
 open import Cubical.Core.Primitives
 open import Cubical.Data.Empty renaming (elim to absurd)
-open import Cubical.Foundations.GroupoidLaws public
+open import Cubical.Foundations.GroupoidLaws
 
 open import Cubical.Data.Prod.Base
 
