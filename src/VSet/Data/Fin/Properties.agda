@@ -70,17 +70,6 @@ fsuc-injective {suc n} {i} {j} p = cong pred p
 -- fzero-subst {x} {y} p a =
 --   fzero {n = y} ≡P[ {!!} ][ p ∙P refl ]⟨ Fin ➢ {!!} ⟩ (subst Fin p (fzero {n = x}) ∎P)
 
-finject0≡subst : {x : ℕ} (a : Fin x)
-               → (λ i → Fin (+-zero x ( i))) [ finject {x} zero a ≡ a ]
-finject0≡subst {suc x} fzero =
-  finject zero fzero ≡P[ suc (x +ℕ 0) ][ cong suc {!(+-zero x)!} ∙P {!!} ]⟨ Fin ➢ {!!} ⟩
-  (fzero {n = x} ∎P)
-
-  -- finject zero fzero ≡⟨ refl ⟩
-  -- fzero {n = x +ℕ 0} ≡⟨ cong (λ ○ → fzero {n = ○}) {!(+-zero x)!} ⟩
-  -- {!fzero {n = x}!} ≡⟨ {!!} ⟩
-  -- subst Fin (sym (+-zero (suc x))) fzero ▯
-finject0≡subst {suc x} (fsuc a) = {!!}
 
 finject-injective : {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
 finject-injective {x} zero a b fa≡fb =
@@ -106,35 +95,74 @@ finject-injective {x} (suc y) (fsuc a) fzero fsa≡f0 =
 finject-injective {x} (suc y) (fsuc a) (fsuc b) fsa≡fsb =
   cong fsuc (finject-injective (suc y) a b (fsuc-injective fsa≡fsb))
 
-finject∘fsuc-commutes : ∀ {x y : ℕ} → (a : Fin x)
+finject-fsuc-reorder : ∀ {x y : ℕ} → (a : Fin x)
                       → finject y (fsuc a) ≡ fsuc (finject y a)
-finject∘fsuc-commutes {suc x} {zero} a = refl
-finject∘fsuc-commutes {suc x} {suc y} a = refl
-finject∘fsuc-commutes {zero} {suc y} a = refl
+finject-fsuc-reorder {suc x} {zero} a = refl
+finject-fsuc-reorder {suc x} {suc y} a = refl
+finject-fsuc-reorder {zero} {suc y} a = refl
+
+finject0≡subst : {x : ℕ} (a : Fin x)
+               → finject {x} zero a ≡ subst Fin (sym (+-zero x)) a
+finject0≡subst {suc x} fzero =
+  resubst (Fin ∘ suc) (λ z → fzero {z}) (sym (+-zero x))
+finject0≡subst {suc x} (fsuc a) =
+  finject zero (fsuc a) ≡⟨ finject-fsuc-reorder a ⟩
+  fsuc (finject zero a) ≡⟨ cong fsuc (finject0≡subst a) ⟩
+  fsuc (subst Fin (sym (+-zero x)) a)
+    ≡⟨ sym (transport-reorder Fin suc fsuc (sym (+-zero x)) a) ⟩
+  subst Fin (sym (+-zero (suc x))) (fsuc a) ▯
+
+subst-fsuc-reorder
+  : ∀ {x y : ℕ} → (p : x ≡ y) → (a : Fin x)
+  → transport (λ i → Fin (suc (p i))) (fsuc a)
+  ≡ fsuc (transport (λ i → Fin (p i)) a)
+subst-fsuc-reorder p a = transport-reorder Fin suc fsuc p a
+
+fshift-fsuc-reorder : ∀ {x y : ℕ} → (a : Fin y)
+                    → fshift x {suc y} (fsuc {y} a)
+                    ≡ subst Fin (sym (ℕ.+-suc x y)) (fsuc (fshift x {y} a))
+fshift-fsuc-reorder {zero} {suc y} a =
+  fshift zero (fsuc a)
+    ≡⟨ refl ⟩
+  fsuc a
+    ≡⟨ cong fsuc (sym (substRefl {B = Fin} a)) ⟩
+  fsuc (subst Fin (sym (ℕ.+-suc 0 y)) a)
+    ≡⟨ refl ⟩
+  fsuc (subst Fin (sym (ℕ.+-suc 0 y)) (fshift 0 {suc y} a))
+    ≡⟨ sym (subst-fsuc-reorder (λ i → ℕ.+-suc 0 y (~ i)) a) ⟩
+  subst Fin (sym (ℕ.+-suc 0 (suc y))) (fsuc (fshift 0 {suc y} a)) ▯
+fshift-fsuc-reorder {suc x} {suc y} a =
+  fshift (suc x) (fsuc a)
+    ≡⟨ refl ⟩
+  fsuc (fshift x (fsuc a))
+    ≡⟨ {!!} ⟩
+  subst Fin (sym (ℕ.+-suc (suc x) (suc y))) (fshift (suc (suc x)) a)
+    ≡⟨ refl ⟩
+  subst Fin (sym (ℕ.+-suc (suc x) (suc y))) (fsuc (fshift (suc x) a)) ▯
 
 fshift-injective : {x : ℕ} → (y : ℕ) → is-injective (fshift x {y})
 fshift-injective {zero} y a b fa≡fb = fa≡fb
 fshift-injective {suc x} y a b fa≡fb =
   fshift-injective {x} y a b (fsuc-injective fa≡fb)
 
-fsuc-subst-reorder
-  : ∀ {x y : ℕ} → (p : x ≡ y) → (a : Fin x)
-  → (λ i → _)
-    [ transport (λ i → Fin (suc (p i))) (fsuc a)
-    ≡ fsuc (transport (λ i → Fin (p i)) a)
-    ]
-fsuc-subst-reorder p a = transport-reorder Fin suc fsuc p a
-
-finject-subst-reorder
+subst-finject-reorder
   : ∀ {x y : ℕ} (z : ℕ) (p : x ≡ y) (a : Fin x)
   → subst (λ ○ → Fin (○ +ℕ z)) p (finject {x} z a)
   ≡ finject {y} z (subst Fin p a)
-finject-subst-reorder z p a =
+subst-finject-reorder z p a =
   transport-reorder Fin (_+ℕ z) (λ {w} b → finject {w} z b) p a
  
-fshift-subst-reorder
+subst-fshift-reorder
   : ∀ {x y z : ℕ} → (p : x ≡ y) → (a : Fin x)
   → subst (λ ○ → Fin (z +ℕ ○)) p (fshift z {x} a)
   ≡ fshift z {y} (subst Fin p a)
-fshift-subst-reorder {x} {y} {z} p a =
+subst-fshift-reorder {x} {y} {z} p a =
   transport-reorder Fin (z +ℕ_) (λ {w} b → fshift z b) p a
+
+fzero-cong : {x y : ℕ} (p : x ≡ y)
+           → (λ i → Fin (suc (p i))) [ fzero {x} ≡ fzero {y} ]
+fzero-cong {x} {y} p i = fzero {p i}
+
+fzero≡subst-fzero : {x y : ℕ} (p : x ≡ y)
+                  → fzero {y} ≡ subst (Fin ∘ suc) p (fzero {x})
+fzero≡subst-fzero {x} {y} p = resubst (Fin ∘ suc) (λ z → fzero {z}) p
