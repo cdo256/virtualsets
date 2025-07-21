@@ -42,7 +42,7 @@ map : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} → (f : A → B) → Tree A
 map f = fold (λ x → ⟨ f x ⟩ₜ) _＋_
 
 ∥_∥ₜ : Tree ℕ → ℕ
-∥ ⟨ x ⟩ₜ ∥ₜ = 1
+∥ ⟨ X ⟩ₜ ∥ₜ = X
 ∥ t1 ＋ t2 ∥ₜ = (∥ t1 ∥ₜ) + (∥ t2 ∥ₜ)
 
 [_]ₛ : Tree (Type ℓ) → Type ℓ
@@ -59,7 +59,7 @@ ftree : ℕ → Tree ⊤
 ftree zero = ⟨ tt ⟩ₜ
 ftree (suc x) = ⟨ tt ⟩ₜ ＋ ftree x
 
-module _ {D : Type ℓ} {A B C : Tree (Type ℓ) } where
+module _ {A B C : Tree (Type ℓ) } where
   α : [ A ＋ (B ＋ C) ]ₛ → [ (A ＋ B) ＋ C ]ₛ
   α (inl x) = inl (inl x)
   α (inr (inl x)) = inl (inr x)
@@ -81,25 +81,3 @@ module _ {D : Type ℓ} {A B C : Tree (Type ℓ) } where
       retr (inl x) = refl
       retr (inr (inl x)) = refl
       retr (inr (inr x)) = refl
-
-
-{-
-
-αEquiv : {A B C : Tree} → ⟦ A ⊻ (B ⊻ C) ⟧ ≃ ⟦ (A ⊻ B) ⊻ C ⟧ 
-αEquiv = isoToEquiv αIso
-
-
-α∥_∥ : (B : Tree) → (x : ⟦ B ⟧) → ⟦ T∥ B ∥ ⟧
-α∥ (leaf x) ∥ tt with inspect (λ B → ⟦ T∥ B ∥ ⟧)
-... | X = {!subst {!!} {!!} {!!}!}
-α∥ A ⊻ B ∥ x = {!!}
-
-reassoc : {A B : Tree} → ∥ A ∥ ≡ ∥ B ∥ → Iso ⟦ A ⟧ ⟦ B ⟧
-reassoc {(leaf x)} {(leaf x)} p = {!?!}
-reassoc {(leaf x)} {B₁ ⊻ B₂} p = {!!}
-reassoc {A₁ ⊻ A₂} {(leaf x)} p = {!!}
-reassoc {A₁ ⊻ A₂} {B₁ ⊻ B₂} p = {!!}
-
--- -}
--- -}
--- -}
