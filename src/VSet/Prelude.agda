@@ -11,9 +11,14 @@ open import Cubical.Data.Equality.Base public using (id)
 open import Cubical.Data.Empty public renaming (elim to absurd)
 open import Cubical.Data.Unit.Base public renaming (Unit to ⊤)
 open import Cubical.Relation.Nullary public
-open import Cubical.Data.Prod public
+open import Cubical.Data.Prod hiding (map) public
 open import Cubical.Data.Sum public
   renaming (rec to ⊎-rec; elim to ⊎-elim; map to ⊎-map)
 
 
 open import VSet.Path public
+
+
+infix 12 _≅_
+_≅_ : ∀ {ℓ ℓ'} (A : Type ℓ) (B : Type ℓ') → Type (ℓ-max ℓ ℓ')
+_≅_ = Iso

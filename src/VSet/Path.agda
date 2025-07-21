@@ -133,4 +133,3 @@ module Tests where
   foo' : (λ i → ℕ) [ 1 + 1 ≡ 2 + 0 ]
   foo' = compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} refl
         (compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} ((+-zero 2)) refl)
-
