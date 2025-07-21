@@ -25,7 +25,7 @@ module Pred {x y : SomeFin} (f : [ suc x ↣ suc y ]) where
   f-inj : is-injective (fst f)
   f-inj = snd f
 
-  g^ : Fin x → Fin y
+  g^ : ⟦ x ⟧ → ⟦ y ⟧
   g^ i =
     let (j — 0≢j) = ins fzero i 
     in del (fst f fzero) (fst f j — λ f0≡fj → 0≢j (f-inj fzero j f0≡fj))
@@ -64,7 +64,7 @@ module Pred {x y : SomeFin} (f : [ suc x ↣ suc y ]) where
              (fst f c₂ — λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
              gb₁≡gb₂))
 
-  g : ⟦ x ⟧ ↣ ⟦ y ⟧
+  g : [ x ↣ y ]
   g = g^ , g-inj
 
 open Pred using () renaming (g to pred) public
