@@ -25,3 +25,5 @@ infixl 8 _⊙_
 
 _⊙_ : ∀ {X Y Z} → [ Y ↣ Z ] → [ X ↣ Y ] → [ X ↣ Z ]
 _⊙_ g f = (fst g ∘ fst f) , λ x y z → f .snd x y (g .snd (f .fst x) (f .fst y) z)
+
+⊙IdR : {X Y : SomeFin} (f : [ X ↣ Y ]) → (f ⊙ id↣) ≡ f
