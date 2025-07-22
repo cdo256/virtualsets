@@ -3,6 +3,7 @@ include:
   src
 depend:
   cubical
+  standard-library
 flags:
   --cubical
   --no-load-primitives
