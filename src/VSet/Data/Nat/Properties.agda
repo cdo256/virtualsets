@@ -2,6 +2,7 @@ module VSet.Data.Nat.Properties where
 
 open import VSet.Prelude
 open import Cubical.Data.Nat
+open import Cubical.Data.Nat.Order
 
 pred∘suc≡id : (n : ℕ) → predℕ (suc n) ≡ n
 pred∘suc≡id zero = refl
@@ -15,37 +16,12 @@ cong-inj-suc : {X Y : ℕ} (p : suc X ≡ suc Y)
 cong-inj-suc {X} {Y} p =
   compPath→Square {p = cong (suc ∘ predℕ) p} {q = p} {r = λ i → suc X} {s = λ i → suc Y}
                   {!!}
-  -- hfill (λ { j (i = i0) → refl
-  --          ; j (i = i1) → refl })
-  --       {!!} {!!}
   where
     
     R : ℕ → Type
     R zero = ⊥
     R (suc W) = {!!}
-  -- case p i of λ
-  --   { zero → {!!}
-  --   ; (suc b) → absurd {!!}
-  --   }
 
-{-
+x≮0 : (x : ℕ) → ¬ x < 0
+x≮0 x (y , y+x'≡0) = snotz (+-comm (suc x) y ∙ y+x'≡0)
 
--- ∨ - max
--- ∧ - min
-... | zero = absurd (snotz λ j → {!p (j ∧ i)!})
-... | suc W = {!!}
-  -- cong suc (injSuc p) i
-  --   ≡⟨ refl ⟩
-  -- suc (injSuc p i)
-  --   ≡⟨ {!refl!} ⟩
-  -- p i ▯
-
-
-  -- cong suc (injSuc p)
-  --   ≡⟨ refl ⟩
-  -- cong suc (cong predℕ p)
-  --   ≡⟨ refl ⟩
-  -- (λ i → suc (predℕ (p i)))
-  --   ≡⟨ {!!} ⟩
-  -- p ▯
--- -}
