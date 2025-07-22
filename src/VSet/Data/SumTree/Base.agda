@@ -1,20 +1,15 @@
 module VSet.Data.SumTree.Base where
 
 open import VSet.Prelude
-open import VSet.Data.Nat hiding (_+_)
+open import VSet.Data.Nat hiding (_+_; _<_)
 open import VSet.Data.SomeFin.Base
-
-open import Cubical.Data.Bool
-open import Cubical.Foundations.Isomorphism
-open import Cubical.Induction.WellFounded
-open import Cubical.Relation.Nullary
+open import Cubical.Data.Nat.Order
 
 infix 30 _＋_
 
 private
   variable
     ℓ ℓ' : Level
-    A : Type
 
 data Tree {ℓ} (A : Type ℓ) : Type ℓ where
   ⟨_⟩ₜ : A → Tree A
@@ -37,23 +32,17 @@ leaf≢fork : ∀ {ℓ} {A : Type ℓ} (t1 t2 : Tree A) (x : A) → ⟨ x ⟩ₜ
 leaf≢fork {ℓ = ℓ} {A = A} t1 t2 x l≡f =
   lower (subst (case {B = Type ℓ} (Tree A) ⊥*) l≡f ⟨ x ⟩ₜ)
 
-
 map : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} → (f : A → B) → Tree A → Tree B
 map f = fold (λ x → ⟨ f x ⟩ₜ) _＋_
 
-∥_∥ₜ : Tree ℕ → ℕ
-∥ ⟨ X ⟩ₜ ∥ₜ = X
-∥ t1 ＋ t2 ∥ₜ = (∥ t1 ∥ₜ) + (∥ t2 ∥ₜ)
-
+-- Make sum type from Tree
 [_]ₛ : Tree (Type ℓ) → Type ℓ
 [ ⟨ X ⟩ₜ ]ₛ = X
 [ l ＋ r ]ₛ = [ l ]ₛ ⊎ [ r ]ₛ
 
+-- Fin tree
 ⟦_⟧ₛ : Tree ℕ → Type
 ⟦_⟧ₛ = [_]ₛ ∘ map ⟦_⟧
-
-Tree# : ℕ → Type
-Tree# n = Σ[ t ∈ Tree ℕ ] (∥ t ∥ₜ ≡ suc n)
 
 ftree : ℕ → Tree ⊤
 ftree zero = ⟨ tt ⟩ₜ
