@@ -4,7 +4,14 @@ open import VSet.Prelude
 open import VSet.Data.Nat hiding (_+_; _<_)
 open import VSet.Data.SomeFin.Base
 open import Cubical.Data.Nat.Order
+open import VSet.Data.Nat.WellFounded
 open import VSet.Data.SumTree.Base
+open import Cubical.Relation.Binary.Base 
+open import Cubical.Induction.WellFounded
+open import VSet.Function.Base
+open import VSet.Relation.Definitions
+open import VSet.Relation.WellFounded.Base
+open import Cubical.Relation.Nullary.DecidablePropositions 
 
 private
   variable
@@ -14,6 +21,20 @@ private
 Σ∥_∥ : Tree ℕ → ℕ
 Σ∥ ⟨ X ⟩ₜ ∥ = X
 Σ∥ A ＋ B ∥ = Σ∥ A ∥ + Σ∥ B ∥
+
+forkℕ : {A : Type ℓ} → A → A → ℕ → A
+forkℕ az as zero = az
+forkℕ az as (suc _) = as
+
+≡0? : (x : ℕ) → Dec (x ≡ 0) 
+≡0? zero = yes refl
+≡0? (suc x) = no snotz
+
+-- Number of steps to deflate on the left
+0L∥_∥ : Tree ℕ → ℕ
+0L∥ ⟨ zero ⟩ₜ ∥ = 0
+0L∥ ⟨ suc _ ⟩ₜ ∥ = 0
+0L∥ A ＋ B ∥ = forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
 
 -- Number of zero leaves
 0∥_∥ : Tree ℕ → ℕ
@@ -37,18 +58,20 @@ Tree0+ : Type
 Tree0+ = Σ[ A ∈ Tree ℕ ] (0∥ A ∥ ≥ 1)
 Tree∖0 : Type
 Tree∖0 = Tree0[ 0 ]
+DeflatedTree : Type
+DeflatedTree = Σ[ A ∈ Tree ℕ ] (0L∥ A ∥ ≡ 0)
 
-record TreeMetrics : Type where
-  constructor _,_
-  field
-    ΣM : ℕ
-    #M : ℕ
-
-open TreeMetrics
-
-metrics : Tree ℕ → TreeMetrics
+metrics : Tree ℕ → ℕ × ℕ
 metrics A = Σ∥ A ∥ , #∥ A ∥
 
-data _≺M_ : (AM BM : TreeMetrics) → Type where
-  Σ<Σ : ∀ {AM BM} → ΣM AM < ΣM BM → AM ≺M BM 
-  #<# : ∀ {AM BM} → ΣM AM ≡ ΣM BM → #M AM < #M BM → AM ≺M BM
+_≺ₘ_ : Rel (Tree ℕ) (Tree ℕ) lzero
+_≺ₘ_  = mapRel metrics _≺²_
+
+≺ₘ-wellFounded : WellFounded _≺ₘ_
+≺ₘ-wellFounded = mapRel-wellFounded metrics _≺²_ ℕ²-wellFounded
+
+_≺₀ₗ_ : Rel (Tree ℕ) (Tree ℕ) lzero
+_≺₀ₗ_ = mapRel 0L∥_∥ _<_
+
+≺₀ₗ-wellFounded : WellFounded _≺₀ₗ_
+≺₀ₗ-wellFounded = mapRel-wellFounded 0L∥_∥ _<_ ℕ-wellFounded
