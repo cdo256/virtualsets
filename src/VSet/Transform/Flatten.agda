@@ -7,56 +7,30 @@ open import Cubical.Data.Nat.Order
 open import VSet.Data.Nat hiding (_+_; ¬-<-zero)
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SumTree.Base
+open import VSet.Data.SumTree.Metrics
 
 open import VSet.Transform.Split hiding (sect; retr)
 
-flatten : (A : Tree ℕ) → ⟦ A ⟧ₛ → ⟦ ∥ A ∥ₜ ⟧
+flatten : (A : Tree ℕ) → ⟦ A ⟧ₛ → ⟦ Σ∥ A ∥ ⟧
 flatten ⟨ X ⟩ₜ a = a
-flatten (A ＋ B) (inl x) = ⊎→+ ∥ A ∥ₜ ∥ B ∥ₜ (inl (flatten A x))
-flatten (A ＋ B) (inr y) = ⊎→+ ∥ A ∥ₜ ∥ B ∥ₜ (inr (flatten B y))
+flatten (A ＋ B) (inl x) = ⊎→+ Σ∥ A ∥ Σ∥ B ∥ (inl (flatten A x))
+flatten (A ＋ B) (inr y) = ⊎→+ Σ∥ A ∥ Σ∥ B ∥ (inr (flatten B y))
 
-unflatten : (A : Tree ℕ) → ⟦ ∥ A ∥ₜ ⟧ → ⟦ A ⟧ₛ
+unflatten : (A : Tree ℕ) → ⟦ Σ∥ A ∥ ⟧ → ⟦ A ⟧ₛ
 unflatten ⟨ X ⟩ₜ a = a
-unflatten (A ＋ B) a with +→⊎ ∥ A ∥ₜ ∥ B ∥ₜ a
+unflatten (A ＋ B) a with +→⊎ Σ∥ A ∥ Σ∥ B ∥ a
 ... | inl x = inl (unflatten A x)
 ... | inr y = inr (unflatten B y)
 
-no-0 : (A : Tree ℕ) → Type
-no-0 ⟨ X ⟩ₜ = X ≥ 1
-no-0 (A ＋ B) = no-0 A × no-0 B
-
-Tree+ : Type
-Tree+ = Σ[ A ∈ Tree ℕ ] ∥ A ∥ₜ ≥ 1
-
-Tree∖0 : Type
-Tree∖0 = Σ[ A ∈ Tree ℕ ] no-0 A
-
-Tree+∖0 : Type
-Tree+∖0 = Σ[ A ∈ Tree ℕ ] (no-0 A × (∥ A ∥ₜ ≥ 1))
-
-suc≥1 : (x : ℕ) → suc x ≥ 1
-suc≥1 x = x , +-comm x 1
-
-0≱y+1 : (x : ℕ) → ¬ 0 ≥ x + 1
-0≱y+1 x (y , y+x+1≡0) = snotz s≡0
-  where
-    s≡0 : suc (y + x) ≡ 0
-    s≡0 = suc (y + x) ≡⟨ +-comm 1 (y + x) ⟩
-          (y + x) + 1 ≡⟨ sym (+-assoc y x 1) ⟩
-          y + (x + 1) ≡⟨ y+x+1≡0 ⟩
-          0 ▯
-
-0≱1 : ¬ 0 ≥ 1
-0≱1 (x , x+1≡0) = snotz (+-comm 1 x ∙ x+1≡0)
-
 drop-0-base : (A : Tree ℕ) → Tree ℕ
 drop-0-base ⟨ X ⟩ₜ = ⟨ X ⟩ₜ
-drop-0-base (A ＋ B) with ∥ A ∥ₜ | ∥ B ∥ₜ
+drop-0-base (A ＋ B) with Σ∥ A ∥ | Σ∥ B ∥
 ... | zero | bn = drop-0-base B
 ... | suc an | zero = drop-0-base A
 ... | suc an | suc bn = drop-0-base A ＋ drop-0-base B
 
-drop-0-no-0 : (A : Tree ℕ) → (an : ℕ) → ∥ A ∥ₜ ≡ suc an → no-0 (drop-0-base A)
+{-
+drop-0-no-0 : (A : Tree ℕ) → (an : ℕ) → Σ∥ A ∥ ≡ suc an → no-0 (drop-0-base A)
 drop-0-drops-0 : (A : Tree ℕ) → ∥ A ∥ₜ ≥ 1 → no-0 (drop-0-base A)
 
 drop-0-no-0 A an a≡ = drop-0-drops-0 A (subst (_≥ 1) (sym a≡) (suc≥1 an))
@@ -108,8 +82,8 @@ Tree+∖0→Tree+ ((A ＋ B) , ge) a =
   helper ∥ A ∥ₜ (inspect ∥_∥ₜ A) (∥ B ∥ₜ) (inspect ∥_∥ₜ B)
   where
     helper : (an : ℕ) → Reveal ∥_∥ₜ · A is an → (bn : ℕ) → Reveal ∥_∥ₜ · B is bn →  ⟦ A ＋ B ⟧ₛ  
-    helper zero [ A≡an ]ᵢ bn [ B≡bn ]ᵢ = ?
-    helper (suc an) [ A≡an ]ᵢ bn [ B≡bn ]ᵢ = ?
+    helper zero [ A≡an ]ᵢ bn [ B≡bn ]ᵢ = {!!}
+    helper (suc an) [ A≡an ]ᵢ bn [ B≡bn ]ᵢ = {!!}
 
 --   with w -- | ∥ A ∥ₜ | inspect ∥_∥ₜ A | ∥ B ∥ₜ | inspect ∥_∥ₜ B
 -- ... | w' = {!!} --| _ | _ | _ = ?
