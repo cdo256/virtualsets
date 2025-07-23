@@ -38,23 +38,8 @@ toℕ∘fromℕ≡id {suc m} (suc n) sn<sm =
   cong suc (toℕ∘fromℕ≡id n (pred-<-pred sn<sm))
 
 toℕ<m : ∀ {m : ℕ} → (a : Fin m) → toℕ a < m 
-toℕ<m {suc m} fzero = suc-<-suc tt
+toℕ<m {suc m} fzero = 0<suc m
 toℕ<m {suc m} (fsuc a) = suc-<-suc (toℕ<m a)
-
-fromℕ∘toℕ≡id : {m : ℕ} → (a : Fin m) → fromℕ (toℕ {m} a) (toℕ<m a) ≡ a
-fromℕ∘toℕ≡id {suc m} fzero = refl
-fromℕ∘toℕ≡id {suc m} (fsuc a) =
-  fromℕ (toℕ (fsuc a)) (toℕ<m (fsuc a))
-    ≡⟨ refl ⟩
-  fromℕ (suc (toℕ a)) (suc-<-suc a<m)
-    ≡⟨ refl ⟩
-  fsuc (fromℕ (toℕ a) (pred-<-pred (suc-<-suc a<m)))
-    ≡⟨ cong (λ ○ → fsuc (fromℕ (toℕ a) ○)) refl ⟩
-  fsuc (fromℕ (toℕ a) a<m)
-    ≡⟨ cong fsuc (fromℕ∘toℕ≡id a) ⟩
-  fsuc a ▯
-  where
-    a<m = toℕ<m a
 
 fsuc-injective : ∀ {n} {i j : Fin n} → fsuc {n} i ≡ fsuc {n} j → i ≡ j
 fsuc-injective {zero} {()} {()} 

@@ -28,7 +28,7 @@ toℕ fzero = zero
 toℕ (fsuc x) = suc (toℕ x)
 
 fromℕ : ∀ {n} → (a : ℕ) → (a < n) → Fin n
-fromℕ {zero} a a<0 = absurd (¬-<-zero {a} a<0)
+fromℕ {zero} a a<0 = absurd {A = λ _ → Fin 0} (¬-<-zero {a} a<0)
 fromℕ {suc n} zero _ = fzero
 fromℕ {suc n} (suc a) sa<sn = fsuc (fromℕ {n} a (pred-<-pred {a} {n} sa<sn))
 
