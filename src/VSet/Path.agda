@@ -31,9 +31,15 @@ subst-inv {A} {x} {y} B p a =
     ≡⟨ transportTransport⁻ (λ i → B (p i)) a ⟩
   a ▯
 
+Singleton : ∀ {ℓ} {A : Type ℓ} → A → Type _
+Singleton x = Σ[ y ∈ _ ] x ≡ y
+
+inspect' : ∀ {a} {A : Type a} (x : A) → Singleton x
+inspect' x = x , refl
+
 module _ {A : Type ℓ} {B : A -> Type ℓ'} where
-  inspect' : (f : (x : A) → B x) (x : A) → B x × (Reveal f · x is f x)
-  inspect' f x = f x , inspect f x
+  inspect'' : (f : (x : A) → B x) (x : A) → B x × (Reveal f · x is f x)
+  inspect'' f x = f x , inspect f x
 
 transport-reorder
   : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
