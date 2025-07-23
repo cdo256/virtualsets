@@ -19,74 +19,44 @@ open import VSet.Transform.Split hiding (sect; retr)
 
 open WFI
 
-deflate' : (A : Tree ℕ) → Acc _≺₀ₗ_ A → DeflatedTree
-deflate' ⟨ zero ⟩ₜ _ = ⟨ zero ⟩ₜ , refl
-deflate' ⟨ suc X ⟩ₜ _ = ⟨ suc X ⟩ₜ , refl
-deflate' (A ＋ B) (acc rs) with inspect' Σ∥ A ∥
-... | zero , ΣA≡0 = deflate' B (rs B 0B<0LA+B)
-  where
-    rw : 0L∥ A ＋ B ∥ ≡ suc 0L∥ B ∥
-    rw =
-      0L∥ A ＋ B ∥
-        ≡⟨ refl ⟩
-      forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
-        ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥ )) ΣA≡0 ⟩
-      forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) 0
-        ≡⟨ refl ⟩
-      suc 0L∥ B ∥ ▯
-    0B<0LA+B : 0L∥ B ∥ < 0L∥ A ＋ B ∥
-    0B<0LA+B = subst (0L∥ B ∥ <_) (sym rw) ≤-refl
-... | suc n , ΣA≡s = deflate' A (rs A 0A<0A+B)
-  where
-    0A+B≡0A' : 0L∥ A ＋ B ∥ ≡ suc 0L∥ A ∥
-    0A+B≡0A' =
-      0L∥ A ＋ B ∥
-        ≡⟨ refl ⟩
-      forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
-        ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥)) ΣA≡s ⟩
-      forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) (suc n)
-        ≡⟨ refl ⟩
-      suc 0L∥ A ∥ ▯
-    0A<0A+B : 0L∥ A ∥ < 0L∥ A ＋ B ∥
-    0A<0A+B = subst (0L∥ A ∥ <_) (sym 0A+B≡0A') ≤-refl 
+deflate' : (A B : Tree ℕ) → Dec (Σ∥ A ∥ ≡ 0) → Acc _≺₀ₗ_ (A ＋ B) → DeflatedTree
+deflate : (A : Tree ℕ) → Acc _≺₀ₗ_ A → DeflatedTree
 
-deflate : (A : TreeΣ+) → Acc _≺₀ₗ_ (fst A) → DeflatedTree
-deflate (⟨ zero ⟩ₜ , Σ+) _ = absurd {A = λ _ → DeflatedTree} (0≱suc 0 Σ+)
-deflate (⟨ suc X ⟩ₜ , Σ+) _ = ⟨ suc X ⟩ₜ , refl
-deflate (A ＋ B , Σ+) (acc rs) with inspect' Σ∥ A ∥
-... | zero , ΣA≡0 = deflate (B , subst (λ ○ → ○ + Σ∥ B ∥ ≥ 1) ΣA≡0 Σ+)
-                             (rs B 0B<0LA+B)
-  where
-    rw : 0L∥ A ＋ B ∥ ≡ suc 0L∥ B ∥
-    rw =
-      0L∥ A ＋ B ∥
-        ≡⟨ refl ⟩
-      forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
-        ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥ )) ΣA≡0 ⟩
-      forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) 0
-        ≡⟨ refl ⟩
-      suc 0L∥ B ∥ ▯
-    0B<0LA+B : 0L∥ B ∥ < 0L∥ A ＋ B ∥
-    0B<0LA+B = subst (0L∥ B ∥ <_) (sym rw) ≤-refl
-... | suc n , ΣA≡s = deflate (A , subst (_≥ 1) (sym ΣA≡s) (suc≥1 n))
-                              (rs A 0A<0A+B)
-  where
-    0A+B≡0A' : 0L∥ A ＋ B ∥ ≡ suc 0L∥ A ∥
-    0A+B≡0A' =
-      0L∥ A ＋ B ∥
-        ≡⟨ refl ⟩
-      forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
-        ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥)) ΣA≡s ⟩
-      forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) (suc n)
-        ≡⟨ refl ⟩
-      suc 0L∥ A ∥ ▯
-    0A<0A+B : 0L∥ A ∥ < 0L∥ A ＋ B ∥
-    0A<0A+B = subst (0L∥ A ∥ <_) (sym 0A+B≡0A') ≤-refl 
+deflate' A B (yes ΣA≡0) (acc rs) =
+  deflate B (rs B 0B<0LA+B)
+    where
+      rw : 0L∥ A ＋ B ∥ ≡ suc 0L∥ B ∥
+      rw =
+        0L∥ A ＋ B ∥
+          ≡⟨ refl ⟩
+        forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
+          ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥ )) ΣA≡0 ⟩
+        forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) 0
+          ≡⟨ refl ⟩
+        suc 0L∥ B ∥ ▯
+      0B<0LA+B : 0L∥ B ∥ < 0L∥ A ＋ B ∥
+      0B<0LA+B = subst (0L∥ B ∥ <_) (sym rw) ≤-refl
+deflate' A B (no ΣA≢0) (acc rs) =
+  deflate A (rs A 0A<0A+B)
+    where
+      k = fst (≢0→≥1 Σ∥ A ∥ ΣA≢0)
+      k+1≡ΣA = snd (≢0→≥1 Σ∥ A ∥ ΣA≢0)
+      0A+B≡0A' : 0L∥ A ＋ B ∥ ≡ suc 0L∥ A ∥
+      0A+B≡0A' =
+        0L∥ A ＋ B ∥
+          ≡⟨ refl ⟩
+        forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
+          ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥)) (
+             sym k+1≡ΣA ∙ +-comm k 1) ⟩
+        forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) (suc k)
+          ≡⟨ refl ⟩
+        suc 0L∥ A ∥ ▯
+      0A<0A+B : 0L∥ A ∥ < 0L∥ A ＋ B ∥
+      0A<0A+B = subst (0L∥ A ∥ <_) (sym 0A+B≡0A') ≤-refl 
 
--- deflate : (A : Tree ℕ) → DeflatedTree
--- deflate A with ≡0? Σ∥ A ∥
--- ... | yes z = ⟨ 0 ⟩ₜ , refl
--- ... | no ¬z = deflate' (A , ≢0→≥1 Σ∥ A ∥ ¬z) (≺₀ₗ-wellFounded A)
+deflate ⟨ zero ⟩ₜ _ = ⟨ zero ⟩ₜ , refl
+deflate ⟨ suc X ⟩ₜ _ = ⟨ suc X ⟩ₜ , refl
+deflate (A ＋ B) (acc r) = deflate' A B (≡0? Σ∥ A ∥) (acc r)
 
 Σ≡0→Empty : (A : Tree ℕ) → (Σ∥ A ∥ ≡ 0) → ¬ ⟦ A ⟧ₛ
 Σ≡0→Empty ⟨ X ⟩ₜ Σ≡0 a = equivFun Fin0≃⊥ (transport {A = ⟦ ⟨ X ⟩ₜ ⟧ₛ} eq' a)
@@ -248,6 +218,10 @@ sect (A ＋ B) b = {!!}
   -- flatten A (unflatten A b) ≡⟨ {!!} ⟩
   -- b ▯
 
+-- -}
+-- -}
+-- -}
+-- -}
 -- -}
 -- -}
 -- -}
