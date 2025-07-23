@@ -33,7 +33,8 @@ leaf≢fork {ℓ = ℓ} {A = A} t1 t2 x l≡f =
   lower (subst (case {B = Type ℓ} (Tree A) ⊥*) l≡f ⟨ x ⟩ₜ)
 
 map : ∀ {ℓ ℓ'} {A : Type ℓ} {B : Type ℓ'} → (f : A → B) → Tree A → Tree B
-map f = fold (λ x → ⟨ f x ⟩ₜ) _＋_
+map f ⟨ X ⟩ₜ = ⟨ f X ⟩ₜ
+map f (x ＋ y) = map f x ＋ map f y
 
 -- Make sum type from Tree
 [_]ₛ : Tree (Type ℓ) → Type ℓ
