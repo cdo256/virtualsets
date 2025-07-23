@@ -42,6 +42,7 @@ module _ {_<₁_ : Rel A A ℓ₂} {_<₂_ : Rel B B ℓ₃}
     _<ₗₑₓ_ = ×-Lex _<₁_ _<₂_
 
   -- FIXME: Convince agda of this fact
+  {-# TERMINATING #-}
   ×-wellFounded : WellFounded _<₁_ →
                   WellFounded _<₂_ →
                   WellFounded _<ₗₑₓ_
