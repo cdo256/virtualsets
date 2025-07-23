@@ -19,41 +19,42 @@ open import VSet.Transform.Split hiding (sect; retr)
 
 open WFI
 
+0L-R : (A B : Tree ℕ) → Σ∥ A ∥ ≡ 0 →  0L∥ A ＋ B ∥ ≡ suc 0L∥ B ∥
+0L-R A B ΣA≡0 =
+  0L∥ A ＋ B ∥
+    ≡⟨ refl ⟩
+  forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
+    ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥ )) ΣA≡0 ⟩
+  forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) 0
+    ≡⟨ refl ⟩
+  suc 0L∥ B ∥ ▯
+
 deflate'' : (A B : Tree ℕ) → Dec (Σ∥ A ∥ ≡ 0) → Acc _≺₀ₗ_ (A ＋ B) → DeflatedTree
 deflate' : (A : Tree ℕ) → Acc _≺₀ₗ_ A → DeflatedTree
 
+0B<0LA+B : (A B : Tree ℕ) → Σ∥ A ∥ ≡ 0 → 0L∥ B ∥ < 0L∥ A ＋ B ∥
+0B<0LA+B A B ΣA≡0 = subst (0L∥ B ∥ <_) (sym (0L-R A B ΣA≡0)) ≤-refl
+
+Σ≢0→Σ≥1 : (A : Tree ℕ) (ΣA≢0 : Σ∥ A ∥ ≢ 0) → Σ ℕ (λ k → k +ℕ 1 ≡ Σ∥ A ∥)
+Σ≢0→Σ≥1 A ΣA≢0 = ≢0→≥1 Σ∥ A ∥ ΣA≢0
+
+0A+B≡0A' : (A B : Tree ℕ) → Σ∥ A ∥ ≢ 0 → 0L∥ A ＋ B ∥ ≡ suc 0L∥ A ∥
+0A+B≡0A' A B ΣA≢0 =
+  0L∥ A ＋ B ∥
+    ≡⟨ refl ⟩
+  forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
+    ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥)) (
+        sym (snd (Σ≢0→Σ≥1 A ΣA≢0)) ∙ +-comm (fst (Σ≢0→Σ≥1 A ΣA≢0)) 1) ⟩
+  forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) (suc (fst (Σ≢0→Σ≥1 A ΣA≢0)))
+    ≡⟨ refl ⟩
+  suc 0L∥ A ∥ ▯
+0A<0A+B : (A B : Tree ℕ) → Σ∥ A ∥ ≢ 0 → 0L∥ A ∥ < 0L∥ A ＋ B ∥
+0A<0A+B A B ΣA≢0 = subst (0L∥ A ∥ <_) (sym (0A+B≡0A' A B ΣA≢0)) ≤-refl 
+
 deflate'' A B (yes ΣA≡0) (acc rs) =
-  deflate' B (rs B 0B<0LA+B)
-    where
-      rw : 0L∥ A ＋ B ∥ ≡ suc 0L∥ B ∥
-      rw =
-        0L∥ A ＋ B ∥
-          ≡⟨ refl ⟩
-        forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
-          ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥ )) ΣA≡0 ⟩
-        forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) 0
-          ≡⟨ refl ⟩
-        suc 0L∥ B ∥ ▯
-      0B<0LA+B : 0L∥ B ∥ < 0L∥ A ＋ B ∥
-      0B<0LA+B = subst (0L∥ B ∥ <_) (sym rw) ≤-refl
+  deflate' B (rs B (0B<0LA+B A B ΣA≡0))
 deflate'' A B (no ΣA≢0) (acc rs) =
-  let (k , k+1≡ΣA) = ≢0→≥1 Σ∥ A ∥ ΣA≢0
-  in deflate' A (rs A 0A<0A+B)
-    where
-      k = fst (≢0→≥1 Σ∥ A ∥ ΣA≢0)
-      k+1≡ΣA = snd (≢0→≥1 Σ∥ A ∥ ΣA≢0)
-      0A+B≡0A' : 0L∥ A ＋ B ∥ ≡ suc 0L∥ A ∥
-      0A+B≡0A' =
-        0L∥ A ＋ B ∥
-          ≡⟨ refl ⟩
-        forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
-          ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥)) (
-             sym k+1≡ΣA ∙ +-comm k 1) ⟩
-        forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) (suc k)
-          ≡⟨ refl ⟩
-        suc 0L∥ A ∥ ▯
-      0A<0A+B : 0L∥ A ∥ < 0L∥ A ＋ B ∥
-      0A<0A+B = subst (0L∥ A ∥ <_) (sym 0A+B≡0A') ≤-refl 
+  deflate' A (rs A {!0A<0A+B!})
 
 deflate' ⟨ zero ⟩ₜ _ = ⟨ zero ⟩ₜ , refl
 deflate' ⟨ suc X ⟩ₜ _ = ⟨ suc X ⟩ₜ , refl
@@ -87,30 +88,54 @@ deflate A = deflate' A (≺₀ₗ-wellFounded A)
   where ΣB≤0 : Σ∥ B ∥ ≤ 0
         ΣB≤0 = Σ∥ A ∥ , Σ≡0
 
-{-
+deflateIndependentOfWf : (A : Tree ℕ) → (acc1 acc2 : Acc _≺₀ₗ_ A) → fst (deflate' A acc1) ≡ fst (deflate' A acc2)
+deflateIndependentOfWf ⟨ zero ⟩ₜ acc1 acc2 = refl
+deflateIndependentOfWf ⟨ suc X ⟩ₜ acc1 acc2 = refl
+deflateIndependentOfWf (A ＋ B) (acc r1) (acc r2) with inspect' (≡0? Σ∥ A ∥)
+... | yes ΣA≡0 , ΣA≡0-path =
+  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r1))
+    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r1))) ΣA≡0-path ⟩
+  fst (deflate'' A B (yes ΣA≡0) (acc r1))
+    ≡⟨ refl ⟩
+  fst (deflate' B (r1 B {!VSet.Transform.Inflate.0B<0LA+B A B ΣA≡0 r1!}))
+    ≡⟨ {!!} ⟩
+  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r2)) ▯
+... | no ΣA≢0 , ΣA≢0-path = {!!}
+
+  -- {!!}
+  -- where
+  --   accEqA = deflateIndependentOfWf A {!!} {!!}
+
 deflateMap : (A : Tree ℕ) → ⟦ A ⟧ₛ → ⟦ fst (deflate A) ⟧ₛ
 deflateMap A a with ≡0? Σ∥ A ∥
 deflateMap A a | yes z = absurd (Σ≡0→Empty A z a)
 deflateMap ⟨ suc X ⟩ₜ a | no ¬z = a
-deflateMap (A ＋ B) a | no ¬z with ≡0? Σ∥ A ∥
-deflateMap (A ＋ B) (inl a) | no ¬z | yes z' = absurd (Σ≡0→Empty A z' a)
-deflateMap (A ＋ B) (inr a) | no ¬z | yes z' =
+deflateMap (A ＋ B) a | no ¬z with inspect' (≡0? Σ∥ A ∥)
+deflateMap (A ＋ B) (inl a) | no ¬z | yes ΣA≡0 , ΣA≡0-path = absurd (Σ≡0→Empty A ΣA≡0 a)
+deflateMap (A ＋ B) (inr a) | no ¬z | yes ΣA≡0 , ΣA≡0-path =
   deflateMap {!B!} a
   where
     ΣAB≡B : Σ∥ A ＋ B ∥ ≡ Σ∥ B ∥
     ΣAB≡B =
       Σ∥ A ＋ B ∥ ≡⟨ refl ⟩
-      Σ∥ A ∥ + Σ∥ B ∥ ≡⟨ cong (_+ Σ∥ B ∥) z' ⟩
+      Σ∥ A ∥ + Σ∥ B ∥ ≡⟨ cong (_+ Σ∥ B ∥) ΣA≡0 ⟩
       0 + Σ∥ B ∥ ≡⟨ refl ⟩
       Σ∥ B ∥ ▯
-    deflateAB≡deflateB : deflate (A ＋ B) ≡ deflate B
+    deflateAB≡deflateB : fst (deflate (A ＋ B)) ≡ fst (deflate B)
     deflateAB≡deflateB =
-      deflate (A ＋ B)
-        ≡⟨ {!refl!} ⟩
-      deflate' ((A ＋ B) , ≢0→≥1 Σ∥ A ＋ B ∥ ¬z) (≺₀ₗ-wellFounded (A ＋ B))
+      fst (deflate (A ＋ B))
+        ≡⟨ refl ⟩
+      fst (deflate' (A ＋ B) (≺₀ₗ-wellFounded (A ＋ B)))
+        ≡⟨ refl ⟩
+      fst (deflate'' A B (≡0? Σ∥ A ∥) (≺₀ₗ-wellFounded (A ＋ B)))
+        ≡⟨ cong {x = ≡0? Σ∥ A ∥} {y = yes ΣA≡0} (λ ○ → fst (deflate'' A B ○ (≺₀ₗ-wellFounded (A ＋ B))))
+                ΣA≡0-path ⟩
+      fst (deflate'' A B (yes ΣA≡0) (≺₀ₗ-wellFounded (A ＋ B)))
+        ≡⟨ refl ⟩
+      fst (deflate' B _)
         ≡⟨ {!!} ⟩
-      {!!} ▯
-... | no ¬z = {!!}
+      fst (deflate B) ▯
+... | no ¬z , _ = {!!}
 
 {-
 step : (A : TreeΣ+) → Tree ℕ
