@@ -19,11 +19,11 @@ open import VSet.Transform.Split hiding (sect; retr)
 
 open WFI
 
-deflate' : (A B : Tree ℕ) → Dec (Σ∥ A ∥ ≡ 0) → Acc _≺₀ₗ_ (A ＋ B) → DeflatedTree
-deflate : (A : Tree ℕ) → Acc _≺₀ₗ_ A → DeflatedTree
+deflate'' : (A B : Tree ℕ) → Dec (Σ∥ A ∥ ≡ 0) → Acc _≺₀ₗ_ (A ＋ B) → DeflatedTree
+deflate' : (A : Tree ℕ) → Acc _≺₀ₗ_ A → DeflatedTree
 
-deflate' A B (yes ΣA≡0) (acc rs) =
-  deflate B (rs B 0B<0LA+B)
+deflate'' A B (yes ΣA≡0) (acc rs) =
+  deflate' B (rs B 0B<0LA+B)
     where
       rw : 0L∥ A ＋ B ∥ ≡ suc 0L∥ B ∥
       rw =
@@ -36,8 +36,9 @@ deflate' A B (yes ΣA≡0) (acc rs) =
         suc 0L∥ B ∥ ▯
       0B<0LA+B : 0L∥ B ∥ < 0L∥ A ＋ B ∥
       0B<0LA+B = subst (0L∥ B ∥ <_) (sym rw) ≤-refl
-deflate' A B (no ΣA≢0) (acc rs) =
-  deflate A (rs A 0A<0A+B)
+deflate'' A B (no ΣA≢0) (acc rs) =
+  let (k , k+1≡ΣA) = ≢0→≥1 Σ∥ A ∥ ΣA≢0
+  in deflate' A (rs A 0A<0A+B)
     where
       k = fst (≢0→≥1 Σ∥ A ∥ ΣA≢0)
       k+1≡ΣA = snd (≢0→≥1 Σ∥ A ∥ ΣA≢0)
@@ -54,9 +55,12 @@ deflate' A B (no ΣA≢0) (acc rs) =
       0A<0A+B : 0L∥ A ∥ < 0L∥ A ＋ B ∥
       0A<0A+B = subst (0L∥ A ∥ <_) (sym 0A+B≡0A') ≤-refl 
 
-deflate ⟨ zero ⟩ₜ _ = ⟨ zero ⟩ₜ , refl
-deflate ⟨ suc X ⟩ₜ _ = ⟨ suc X ⟩ₜ , refl
-deflate (A ＋ B) (acc r) = deflate' A B (≡0? Σ∥ A ∥) (acc r)
+deflate' ⟨ zero ⟩ₜ _ = ⟨ zero ⟩ₜ , refl
+deflate' ⟨ suc X ⟩ₜ _ = ⟨ suc X ⟩ₜ , refl
+deflate' (A ＋ B) (acc r) = deflate'' A B (≡0? Σ∥ A ∥) (acc r)
+
+deflate : Tree ℕ → DeflatedTree
+deflate A = deflate' A (≺₀ₗ-wellFounded A)
 
 Σ≡0→Empty : (A : Tree ℕ) → (Σ∥ A ∥ ≡ 0) → ¬ ⟦ A ⟧ₛ
 Σ≡0→Empty ⟨ X ⟩ₜ Σ≡0 a = equivFun Fin0≃⊥ (transport {A = ⟦ ⟨ X ⟩ₜ ⟧ₛ} eq' a)
