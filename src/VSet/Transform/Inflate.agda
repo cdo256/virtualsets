@@ -14,6 +14,7 @@ open import Cubical.Induction.WellFounded
 open import VSet.Relation.WellFounded.Base 
 open import VSet.Relation.WellFounded.Lex 
 open import Cubical.Relation.Binary.Base 
+open import VSet.Data.Nat.WellFounded 
 
 open import VSet.Transform.Split hiding (sect; retr)
 
@@ -54,7 +55,7 @@ deflate' : (A : Tree ℕ) → Acc _≺₀ₗ_ A → DeflatedTree
 deflate'' A B (yes ΣA≡0) (acc rs) =
   deflate' B (rs B (0B<0LA+B A B ΣA≡0))
 deflate'' A B (no ΣA≢0) (acc rs) =
-  deflate' A (rs A {!0A<0A+B!})
+  deflate' A (rs A (0A<0A+B A B ΣA≢0))
 
 deflate' ⟨ zero ⟩ₜ _ = ⟨ zero ⟩ₜ , refl
 deflate' ⟨ suc X ⟩ₜ _ = ⟨ suc X ⟩ₜ , refl
@@ -97,14 +98,66 @@ deflateIndependentOfWf (A ＋ B) (acc r1) (acc r2) with inspect' (≡0? Σ∥ A 
     ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r1))) ΣA≡0-path ⟩
   fst (deflate'' A B (yes ΣA≡0) (acc r1))
     ≡⟨ refl ⟩
-  fst (deflate' B (r1 B {!VSet.Transform.Inflate.0B<0LA+B A B ΣA≡0 r1!}))
-    ≡⟨ {!!} ⟩
+  fst (deflate' B (r1 B (0B<0LA+B A B ΣA≡0)))
+    ≡⟨ deflateIndependentOfWf B (r1 B (0B<0LA+B A B ΣA≡0))
+                                (r2 B (0B<0LA+B A B ΣA≡0)) ⟩
+  fst (deflate' B (r2 B (0B<0LA+B A B ΣA≡0)))
+    ≡⟨ refl ⟩
+  fst (deflate'' A B (yes ΣA≡0) (acc r2))
+    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r2))) (sym ΣA≡0-path) ⟩
   fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r2)) ▯
-... | no ΣA≢0 , ΣA≢0-path = {!!}
+... | no ΣA≢0 , ΣA≢0-path =
+  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r1))
+    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r1))) ΣA≢0-path ⟩
+  fst (deflate'' A B (no ΣA≢0) (acc r1))
+    ≡⟨ refl ⟩
+  fst (deflate' A (r1 A (0A<0A+B A B ΣA≢0)))
+    ≡⟨ deflateIndependentOfWf A (r1 A (0A<0A+B A B ΣA≢0))
+                                (r2 A (0A<0A+B A B ΣA≢0)) ⟩
+  fst (deflate' A (r2 A (0A<0A+B A B ΣA≢0)))
+    ≡⟨ refl ⟩
+  fst (deflate'' A B (no ΣA≢0) (acc r2))
+    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r2))) (sym ΣA≢0-path) ⟩
+  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r2)) ▯
 
-  -- {!!}
-  -- where
-  --   accEqA = deflateIndependentOfWf A {!!} {!!}
+deflateAB≡deflateB : (A B : Tree ℕ) → Σ∥ A ∥ ≡ 0 → fst (deflate (A ＋ B)) ≡ fst (deflate B)
+deflateAB≡deflateB A B ΣA≡0 with inspect' (≡0? Σ∥ A ∥)
+... | yes ΣA≡0' , ΣA≡0-path =
+  fst (deflate (A ＋ B))
+    ≡⟨ refl ⟩
+  fst (deflate' (A ＋ B) (≺₀ₗ-wellFounded (A ＋ B)))
+    ≡⟨ refl ⟩
+  fst (deflate'' A B (≡0? Σ∥ A ∥) (≺₀ₗ-wellFounded (A ＋ B)))
+    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (≺₀ₗ-wellFounded (A ＋ B))))
+            ΣA≡0-path ⟩
+  fst (deflate'' A B (yes ΣA≡0') (≺₀ₗ-wellFounded (A ＋ B)))
+    ≡⟨ refl ⟩
+  fst (deflate' B (accB→accA 0L∥_∥ _<_ B
+    (accℕ (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥) 0L∥ B ∥
+      (0B<0LA+B A B ΣA≡0'))))
+    ≡⟨ deflateIndependentOfWf B ((accB→accA 0L∥_∥ _<_ B
+    (accℕ (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥) 0L∥ B ∥
+      (0B<0LA+B A B ΣA≡0')))) (≺₀ₗ-wellFounded B) ⟩
+  fst (deflate' B (≺₀ₗ-wellFounded B))
+    ≡⟨ refl ⟩
+  fst (deflate B) ▯
+... | no ΣA≢0 , _ = absurd (ΣA≢0 ΣA≡0)
+
+
+deflateMap'' : (A : Tree ℕ) → Dec (Σ∥ A ∥ ≡ 0)
+            → ⟦ A ⟧ₛ → ⟦ fst (deflate A) ⟧ₛ
+deflateMap' : (A B : Tree ℕ) → (Σ∥ A ＋ B ∥ ≢ 0) → Dec (Σ∥ A ∥ ≡ 0) 
+            → ⟦ A ＋ B ⟧ₛ → ⟦ fst (deflate (A ＋ B)) ⟧ₛ
+
+deflateMap'' C (yes ΣC≡0) a = absurd (Σ≡0→Empty C ΣC≡0 a)
+deflateMap'' ⟨ suc X ⟩ₜ (no ΣC≢0) a = a
+deflateMap'' (A ＋ B) (no ΣC≢0) a =
+  deflateMap' A B (ΣC≢0) (≡0? Σ∥ A ∥) a
+
+deflateMap' A B ΣAB≢0 (yes ΣA≡0) (inl a) = absurd (Σ≡0→Empty A ΣA≡0 a)
+deflateMap' A B ΣAB≢0 (yes ΣA≡0) (inr a) = subst ⟦_⟧ₛ  {!!} (deflateMap'' B (≡0? Σ∥ B ∥) a)
+deflateMap' A B ΣAB≢0 (no ΣA≢0) a = {!!}
+
 
 deflateMap : (A : Tree ℕ) → ⟦ A ⟧ₛ → ⟦ fst (deflate A) ⟧ₛ
 deflateMap A a with ≡0? Σ∥ A ∥
@@ -121,20 +174,6 @@ deflateMap (A ＋ B) (inr a) | no ¬z | yes ΣA≡0 , ΣA≡0-path =
       Σ∥ A ∥ + Σ∥ B ∥ ≡⟨ cong (_+ Σ∥ B ∥) ΣA≡0 ⟩
       0 + Σ∥ B ∥ ≡⟨ refl ⟩
       Σ∥ B ∥ ▯
-    deflateAB≡deflateB : fst (deflate (A ＋ B)) ≡ fst (deflate B)
-    deflateAB≡deflateB =
-      fst (deflate (A ＋ B))
-        ≡⟨ refl ⟩
-      fst (deflate' (A ＋ B) (≺₀ₗ-wellFounded (A ＋ B)))
-        ≡⟨ refl ⟩
-      fst (deflate'' A B (≡0? Σ∥ A ∥) (≺₀ₗ-wellFounded (A ＋ B)))
-        ≡⟨ cong {x = ≡0? Σ∥ A ∥} {y = yes ΣA≡0} (λ ○ → fst (deflate'' A B ○ (≺₀ₗ-wellFounded (A ＋ B))))
-                ΣA≡0-path ⟩
-      fst (deflate'' A B (yes ΣA≡0) (≺₀ₗ-wellFounded (A ＋ B)))
-        ≡⟨ refl ⟩
-      fst (deflate' B _)
-        ≡⟨ {!!} ⟩
-      fst (deflate B) ▯
 ... | no ¬z , _ = {!!}
 
 {-
