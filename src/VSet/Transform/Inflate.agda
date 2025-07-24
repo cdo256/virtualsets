@@ -143,6 +143,24 @@ deflateAB≡deflateB A B ΣA≡0 with inspect' (≡0? Σ∥ A ∥)
   fst (deflate B) ▯
 ... | no ΣA≢0 , _ = absurd (ΣA≢0 ΣA≡0)
 
+deflateAB≡deflateA : (A B : Tree ℕ) → Σ∥ A ∥ ≢ 0 → fst (deflate (A ＋ B)) ≡ fst (deflate A)
+deflateAB≡deflateA A B ΣA≢0' with inspect' (≡0? Σ∥ A ∥)
+... | yes ΣA≡0 , _ = absurd (ΣA≢0' ΣA≡0)
+... | no ΣA≢0 , ΣA≢0-path =
+  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r1))
+   ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r1))) ΣA≢0-path ⟩
+  fst (deflate'' A B (no ΣA≢0) (acc r1))
+   ≡⟨ refl ⟩
+  fst (deflate' A (r1 A (0A<0A+B A B ΣA≢0)))
+   ≡⟨ deflateIndependentOfWf A (r1 A (0A<0A+B A B ΣA≢0)) (acc r2) ⟩
+  fst (deflate' A (acc r2)) ▯
+  where
+    r1 = (λ y y≺'x →
+             accB→accA 0L∥_∥ (λ m n → Σ ℕ (λ k → k +ℕ suc m ≡ n)) y
+             (accℕ (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥) 0L∥ y ∥ y≺'x))
+    r2 = (λ y y≺'x →
+        accB→accA 0L∥_∥ (λ m n → Σ ℕ (λ k → k +ℕ suc m ≡ n)) y
+        (accℕ 0L∥ A ∥ 0L∥ y ∥ y≺'x))
 
 deflateMap'' : (A : Tree ℕ) → Dec (Σ∥ A ∥ ≡ 0)
             → ⟦ A ⟧ₛ → ⟦ fst (deflate A) ⟧ₛ
@@ -155,9 +173,14 @@ deflateMap'' (A ＋ B) (no ΣC≢0) a =
   deflateMap' A B (ΣC≢0) (≡0? Σ∥ A ∥) a
 
 deflateMap' A B ΣAB≢0 (yes ΣA≡0) (inl a) = absurd (Σ≡0→Empty A ΣA≡0 a)
-deflateMap' A B ΣAB≢0 (yes ΣA≡0) (inr a) = subst ⟦_⟧ₛ  {!!} (deflateMap'' B (≡0? Σ∥ B ∥) a)
-deflateMap' A B ΣAB≢0 (no ΣA≢0) a = {!!}
-
+deflateMap' A B ΣAB≢0 (yes ΣA≡0) (inr a) =
+  subst ⟦_⟧ₛ (sym $ deflateAB≡deflateB A B ΣA≡0) (deflateMap'' B (≡0? Σ∥ B ∥) a)
+deflateMap' A B ΣAB≢0 (no ΣA≢0) (inl a) =
+  subst (⟦_⟧ₛ) {!eq'!} (inl (deflateMap'' A (no ΣA≢0) a))
+  -- (subst ⟦ deflateMap' A B ΣAB≢0 (no ΣA≢0) ⟧ₛ {!!} (inl (deflateMap'' A (no ΣA≢0) a)))
+  where
+    eq' : fst (deflate (A + B)) ≡ fst (deflate  B )
+deflateMap' A B ΣAB≢0 (no ΣA≢0) (inr a) = {!!}
 
 deflateMap : (A : Tree ℕ) → ⟦ A ⟧ₛ → ⟦ fst (deflate A) ⟧ₛ
 deflateMap A a with ≡0? Σ∥ A ∥
@@ -166,15 +189,10 @@ deflateMap ⟨ suc X ⟩ₜ a | no ¬z = a
 deflateMap (A ＋ B) a | no ¬z with inspect' (≡0? Σ∥ A ∥)
 deflateMap (A ＋ B) (inl a) | no ¬z | yes ΣA≡0 , ΣA≡0-path = absurd (Σ≡0→Empty A ΣA≡0 a)
 deflateMap (A ＋ B) (inr a) | no ¬z | yes ΣA≡0 , ΣA≡0-path =
-  deflateMap {!B!} a
-  where
-    ΣAB≡B : Σ∥ A ＋ B ∥ ≡ Σ∥ B ∥
-    ΣAB≡B =
-      Σ∥ A ＋ B ∥ ≡⟨ refl ⟩
-      Σ∥ A ∥ + Σ∥ B ∥ ≡⟨ cong (_+ Σ∥ B ∥) ΣA≡0 ⟩
-      0 + Σ∥ B ∥ ≡⟨ refl ⟩
-      Σ∥ B ∥ ▯
-... | no ¬z , _ = {!!}
+  subst ⟦_⟧ₛ (sym (deflateAB≡deflateB A B ΣA≡0)) (deflateMap B a)
+deflateMap (A ＋ B) a | no ¬z₁ | no ¬z , _ = {!!}
+
+
 
 {-
 step : (A : TreeΣ+) → Tree ℕ
