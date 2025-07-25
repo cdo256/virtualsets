@@ -34,7 +34,7 @@ subst-inv {A} {x} {y} B p a =
 Singleton : ∀ {ℓ} {A : Type ℓ} → A → Type _
 Singleton x = Σ[ y ∈ _ ] x ≡ y
 
-inspect' : ∀ {a} {A : Type a} (x : A) → Singleton x
+inspect' : ∀ {ℓ} {A : Type ℓ} (x : A) → Singleton x
 inspect' x = x , refl
 
 module _ {A : Type ℓ} {B : A -> Type ℓ'} where
