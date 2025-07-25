@@ -26,10 +26,6 @@ forkℕ : {A : Type ℓ} → A → A → ℕ → A
 forkℕ az as zero = az
 forkℕ az as (suc _) = as
 
-≡0? : (x : ℕ) → Dec (x ≡ 0) 
-≡0? zero = yes refl
-≡0? (suc x) = no snotz
-
 -- Number of steps to deflate on the left
 0L∥_∥ : Tree ℕ → ℕ
 0L∥ ⟨ zero ⟩ₜ ∥ = 0

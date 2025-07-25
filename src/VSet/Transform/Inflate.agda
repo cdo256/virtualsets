@@ -30,39 +30,28 @@ open WFI
     ≡⟨ refl ⟩
   suc 0L∥ B ∥ ▯
 
-deflate'' : (A B : Tree ℕ) → Dec (Σ∥ A ∥ ≡ 0) → Acc _≺₀ₗ_ (A ＋ B) → DeflatedTree
-deflate' : (A : Tree ℕ) → Acc _≺₀ₗ_ A → DeflatedTree
-
 0B<0LA+B : (A B : Tree ℕ) → Σ∥ A ∥ ≡ 0 → 0L∥ B ∥ < 0L∥ A ＋ B ∥
 0B<0LA+B A B ΣA≡0 = subst (0L∥ B ∥ <_) (sym (0L-R A B ΣA≡0)) ≤-refl
 
 Σ≢0→Σ≥1 : (A : Tree ℕ) (ΣA≢0 : Σ∥ A ∥ ≢ 0) → Σ ℕ (λ k → k +ℕ 1 ≡ Σ∥ A ∥)
 Σ≢0→Σ≥1 A ΣA≢0 = ≢0→≥1 Σ∥ A ∥ ΣA≢0
 
-0A+B≡0A' : (A B : Tree ℕ) → Σ∥ A ∥ ≢ 0 → 0L∥ A ＋ B ∥ ≡ suc 0L∥ A ∥
-0A+B≡0A' A B ΣA≢0 =
+0A+B≡0A' : (A B : Tree ℕ) → Σ∥ A ∥ ≥ 1 → 0L∥ A ＋ B ∥ ≡ suc 0L∥ A ∥
+0A+B≡0A' A B ΣA≥1 =
   0L∥ A ＋ B ∥
     ≡⟨ refl ⟩
   forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
     ≡⟨ cong (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥)) (
-        sym (snd (Σ≢0→Σ≥1 A ΣA≢0)) ∙ +-comm (fst (Σ≢0→Σ≥1 A ΣA≢0)) 1) ⟩
-  forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) (suc (fst (Σ≢0→Σ≥1 A ΣA≢0)))
+        sym (snd (ΣA≥1)) ∙ +-comm (fst (ΣA≥1)) 1) ⟩
+  forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) (suc (fst ΣA≥1))
     ≡⟨ refl ⟩
   suc 0L∥ A ∥ ▯
-0A<0A+B : (A B : Tree ℕ) → Σ∥ A ∥ ≢ 0 → 0L∥ A ∥ < 0L∥ A ＋ B ∥
-0A<0A+B A B ΣA≢0 = subst (0L∥ A ∥ <_) (sym (0A+B≡0A' A B ΣA≢0)) ≤-refl 
 
-deflate'' A B (yes ΣA≡0) (acc rs) =
-  deflate' B (rs B (0B<0LA+B A B ΣA≡0))
-deflate'' A B (no ΣA≢0) (acc rs) =
-  deflate' A (rs A (0A<0A+B A B ΣA≢0))
+0A<0A+B : (A B : Tree ℕ) → Σ∥ A ∥ ≥ 1 → 0L∥ A ∥ < 0L∥ A ＋ B ∥
+0A<0A+B A B ΣA≥1 = subst (0L∥ A ∥ <_) (sym (0A+B≡0A' A B ΣA≥1)) ≤-refl 
 
-deflate' ⟨ zero ⟩ₜ _ = ⟨ zero ⟩ₜ , refl
-deflate' ⟨ suc X ⟩ₜ _ = ⟨ suc X ⟩ₜ , refl
-deflate' (A ＋ B) (acc r) = deflate'' A B (≡0? Σ∥ A ∥) (acc r)
-
-deflate : Tree ℕ → DeflatedTree
-deflate A = deflate' A (≺₀ₗ-wellFounded A)
+≡suc→≥1 : {x y : ℕ} → x ≡ suc y → x ≥ 1
+≡suc→≥1 {x} {y} x≡sy = y , +-comm y 1 ∙ sym x≡sy 
 
 Σ≡0→Empty : (A : Tree ℕ) → (Σ∥ A ∥ ≡ 0) → ¬ ⟦ A ⟧ₛ
 Σ≡0→Empty ⟨ X ⟩ₜ Σ≡0 a = equivFun Fin0≃⊥ (transport {A = ⟦ ⟨ X ⟩ₜ ⟧ₛ} eq' a)
@@ -89,71 +78,105 @@ deflate A = deflate' A (≺₀ₗ-wellFounded A)
   where ΣB≤0 : Σ∥ B ∥ ≤ 0
         ΣB≤0 = Σ∥ A ∥ , Σ≡0
 
-deflateIndependentOfWf : (A : Tree ℕ) → (acc1 acc2 : Acc _≺₀ₗ_ A) → fst (deflate' A acc1) ≡ fst (deflate' A acc2)
+deflate-rec
+  : (A : Tree ℕ) → Acc _≺₀ₗ_ A
+  → Tree ℕ
+deflate-＋-rec
+  : (A B : Tree ℕ) → Singleton Σ∥ A ∥ → Acc _≺₀ₗ_ (A ＋ B)
+  → Tree ℕ
+
+deflate-＋-rec A B (zero , ΣA≡0) (acc rs) =
+  deflate-rec B (rs B (0B<0LA+B A B ΣA≡0))
+deflate-＋-rec A B (suc _ , ΣA≡s) (acc rs) = 
+  let
+    accA = rs A (0A<0A+B A B (≡suc→≥1 ΣA≡s))
+    C = deflate-rec A accA
+  in C ＋ B
+
+deflate-rec ⟨ zero ⟩ₜ _ = ⟨ zero ⟩ₜ
+deflate-rec ⟨ suc X ⟩ₜ _ = ⟨ suc X ⟩ₜ
+deflate-rec (A ＋ B) (acc r) = deflate-＋-rec A B (inspect' Σ∥ A ∥) (acc r)
+
+deflate : Tree ℕ → Tree ℕ
+deflate A = deflate-rec A (≺₀ₗ-wellFounded A)
+
+deflateIndependentOfWf : (A : Tree ℕ) → (acc1 acc2 : Acc _≺₀ₗ_ A) →
+  deflate-rec A acc1 ≡ deflate-rec A acc2
 deflateIndependentOfWf ⟨ zero ⟩ₜ acc1 acc2 = refl
 deflateIndependentOfWf ⟨ suc X ⟩ₜ acc1 acc2 = refl
-deflateIndependentOfWf (A ＋ B) (acc r1) (acc r2) with inspect' (≡0? Σ∥ A ∥)
-... | yes ΣA≡0 , ΣA≡0-path =
-  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r1))
-    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r1))) ΣA≡0-path ⟩
-  fst (deflate'' A B (yes ΣA≡0) (acc r1))
+deflateIndependentOfWf (A ＋ B) (acc r1) (acc r2) with inspect' Σ∥ A ∥
+... | zero , ΣA≡0 =
+  deflate-＋-rec A B (zero , ΣA≡0) (acc r1)
     ≡⟨ refl ⟩
-  fst (deflate' B (r1 B (0B<0LA+B A B ΣA≡0)))
-    ≡⟨ deflateIndependentOfWf B (r1 B (0B<0LA+B A B ΣA≡0))
-                                (r2 B (0B<0LA+B A B ΣA≡0)) ⟩
-  fst (deflate' B (r2 B (0B<0LA+B A B ΣA≡0)))
+  (deflate-rec B (r1 B 0L-dec))
+    ≡⟨ deflateIndependentOfWf B (r1 B 0L-dec)
+                                (r2 B 0L-dec) ⟩
+  (deflate-rec B (r2 B 0L-dec))
     ≡⟨ refl ⟩
-  fst (deflate'' A B (yes ΣA≡0) (acc r2))
-    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r2))) (sym ΣA≡0-path) ⟩
-  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r2)) ▯
-... | no ΣA≢0 , ΣA≢0-path =
-  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r1))
-    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r1))) ΣA≢0-path ⟩
-  fst (deflate'' A B (no ΣA≢0) (acc r1))
+  (deflate-＋-rec A B (zero , ΣA≡0) (acc r2)) ▯
+  where 0L-dec : 0L∥ B ∥ < 0L∥ A ＋ B ∥ 
+        0L-dec = 0B<0LA+B A B ΣA≡0
+... | suc ΣA , ΣA≢0 =
+  (deflate-＋-rec A B (suc ΣA , ΣA≢0) (acc r1))
     ≡⟨ refl ⟩
-  fst (deflate' A (r1 A (0A<0A+B A B ΣA≢0)))
-    ≡⟨ deflateIndependentOfWf A (r1 A (0A<0A+B A B ΣA≢0))
-                                (r2 A (0A<0A+B A B ΣA≢0)) ⟩
-  fst (deflate' A (r2 A (0A<0A+B A B ΣA≢0)))
+  (deflate-rec A (r1 A 0L-dec)) ＋ B
+    ≡⟨ cong (_＋ B) $ deflateIndependentOfWf
+      A (r1 A 0L-dec) (r2 A 0L-dec) ⟩
+  (deflate-rec A (r2 A 0L-dec)) ＋ B
     ≡⟨ refl ⟩
-  fst (deflate'' A B (no ΣA≢0) (acc r2))
-    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r2))) (sym ΣA≢0-path) ⟩
-  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r2)) ▯
+  (deflate-＋-rec A B (suc ΣA , ΣA≢0) (acc r2)) ▯
+  where 0L-dec : 0L∥ A ∥ < 0L∥ A ＋ B ∥
+        0L-dec = 0A<0A+B A B (≡suc→≥1 ΣA≢0)
 
+deflate-rec-deflates
+  : (A : Tree ℕ) → (acc' : Acc _≺₀ₗ_ A)
+  → 0L∥ deflate-rec A acc' ∥ ≡ 0
+deflate-＋-rec-deflates
+  : (A B : Tree ℕ) → (ΣA : Singleton Σ∥ A ∥) → (acc' : Acc _≺₀ₗ_ (A ＋ B))
+  → 0L∥ deflate-＋-rec A B ΣA acc' ∥ ≡ 0
+deflate-rec-preserves-Σ
+  : (A : Tree ℕ) → (acc' : Acc _≺₀ₗ_ A)
+  → Σ∥ A ∥ ≡ Σ∥ deflate-rec A acc' ∥
+deflate-＋-rec-preserves-Σ
+  : (A B : Tree ℕ) → Singleton Σ∥ A ∥ → (acc' : Acc _≺₀ₗ_ (A ＋ B))
+  → Σ∥ A ＋ B ∥ ≡ Σ∥ deflate-＋-rec A B (inspect' Σ∥ A ∥) acc'  ∥
+
+
+{-
 deflateAB≡deflateB : (A B : Tree ℕ) → Σ∥ A ∥ ≡ 0 → fst (deflate (A ＋ B)) ≡ fst (deflate B)
-deflateAB≡deflateB A B ΣA≡0 with inspect' (≡0? Σ∥ A ∥)
+deflateAB≡deflateB A B ΣA≡0 with inspect' Σ∥ A ∥
 ... | yes ΣA≡0' , ΣA≡0-path =
   fst (deflate (A ＋ B))
     ≡⟨ refl ⟩
-  fst (deflate' (A ＋ B) (≺₀ₗ-wellFounded (A ＋ B)))
+  fst (deflate-rec (A ＋ B) (≺₀ₗ-wellFounded (A ＋ B)))
     ≡⟨ refl ⟩
-  fst (deflate'' A B (≡0? Σ∥ A ∥) (≺₀ₗ-wellFounded (A ＋ B)))
-    ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (≺₀ₗ-wellFounded (A ＋ B))))
+  fst (deflate-＋-rec A B Σ∥ A ∥ (≺₀ₗ-wellFounded (A ＋ B)))
+    ≡⟨ cong (λ ○ → fst (deflate-＋-rec A B ○ (≺₀ₗ-wellFounded (A ＋ B))))
             ΣA≡0-path ⟩
-  fst (deflate'' A B (yes ΣA≡0') (≺₀ₗ-wellFounded (A ＋ B)))
+  fst (deflate-＋-rec A B (yes ΣA≡0') (≺₀ₗ-wellFounded (A ＋ B)))
     ≡⟨ refl ⟩
-  fst (deflate' B (accB→accA 0L∥_∥ _<_ B
+  fst (deflate-rec B (accB→accA 0L∥_∥ _<_ B
     (accℕ (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥) 0L∥ B ∥
       (0B<0LA+B A B ΣA≡0'))))
     ≡⟨ deflateIndependentOfWf B ((accB→accA 0L∥_∥ _<_ B
     (accℕ (forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥) 0L∥ B ∥
       (0B<0LA+B A B ΣA≡0')))) (≺₀ₗ-wellFounded B) ⟩
-  fst (deflate' B (≺₀ₗ-wellFounded B))
+  fst (deflate-rec B (≺₀ₗ-wellFounded B))
     ≡⟨ refl ⟩
   fst (deflate B) ▯
 ... | no ΣA≢0 , _ = absurd (ΣA≢0 ΣA≡0)
 
 deflateAB≡deflateA : (A B : Tree ℕ) → Σ∥ A ∥ ≢ 0 → fst (deflate (A ＋ B)) ≡ fst (deflate A)
-deflateAB≡deflateA A B ΣA≢0' with inspect' (≡0? Σ∥ A ∥)
+deflateAB≡deflateA A B ΣA≢0' with inspect' Σ∥ A ∥
 ... | yes ΣA≡0 , _ = absurd (ΣA≢0' ΣA≡0)
 ... | no ΣA≢0 , ΣA≢0-path =
-  fst (deflate'' A B (≡0? Σ∥ A ∥) (acc r1))
-   ≡⟨ cong (λ ○ → fst (deflate'' A B ○ (acc r1))) ΣA≢0-path ⟩
-  fst (deflate'' A B (no ΣA≢0) (acc r1))
+  fst (deflate-＋-rec A B Σ∥ A ∥ (acc r1))
+   ≡⟨ cong (λ ○ → fst (deflate-＋-rec A B ○ (acc r1))) ΣA≢0-path ⟩
+  fst (deflate-＋-rec A B (no ΣA≢0) (acc r1))
    ≡⟨ refl ⟩
-  fst (deflate' A (r1 A (0A<0A+B A B ΣA≢0)))
+  fst (deflate-rec A (r1 A (0A<0A+B A B ΣA≢0)))
    ≡⟨ deflateIndependentOfWf A (r1 A (0A<0A+B A B ΣA≢0)) (acc r2) ⟩
-  fst (deflate' A (acc r2)) ▯
+  fst (deflate-rec A (acc r2)) ▯
   where
     r1 = (λ y y≺'x →
              accB→accA 0L∥_∥ (λ m n → Σ ℕ (λ k → k +ℕ suc m ≡ n)) y
@@ -162,19 +185,19 @@ deflateAB≡deflateA A B ΣA≢0' with inspect' (≡0? Σ∥ A ∥)
         accB→accA 0L∥_∥ (λ m n → Σ ℕ (λ k → k +ℕ suc m ≡ n)) y
         (accℕ 0L∥ A ∥ 0L∥ y ∥ y≺'x))
 
-deflateMap'' : (A : Tree ℕ) → Dec (Σ∥ A ∥ ≡ 0)
+deflateMap'' : (A : Tree ℕ) → Singleton Σ∥ A ∥
             → ⟦ A ⟧ₛ → ⟦ fst (deflate A) ⟧ₛ
-deflateMap' : (A B : Tree ℕ) → (Σ∥ A ＋ B ∥ ≢ 0) → Dec (Σ∥ A ∥ ≡ 0) 
+deflateMap' : (A B : Tree ℕ) → (Σ∥ A ＋ B ∥ ≢ 0) → Singleton Σ∥ A ∥ 
             → ⟦ A ＋ B ⟧ₛ → ⟦ fst (deflate (A ＋ B)) ⟧ₛ
 
 deflateMap'' C (yes ΣC≡0) a = absurd (Σ≡0→Empty C ΣC≡0 a)
 deflateMap'' ⟨ suc X ⟩ₜ (no ΣC≢0) a = a
 deflateMap'' (A ＋ B) (no ΣC≢0) a =
-  deflateMap' A B (ΣC≢0) (≡0? Σ∥ A ∥) a
+  deflateMap' A B (ΣC≢0) Σ∥ A ∥ a
 
 deflateMap' A B ΣAB≢0 (yes ΣA≡0) (inl a) = absurd (Σ≡0→Empty A ΣA≡0 a)
 deflateMap' A B ΣAB≢0 (yes ΣA≡0) (inr a) =
-  subst ⟦_⟧ₛ (sym $ deflateAB≡deflateB A B ΣA≡0) (deflateMap'' B (≡0? Σ∥ B ∥) a)
+  subst ⟦_⟧ₛ (sym $ deflateAB≡deflateB A B ΣA≡0) (deflateMap'' B Σ∥ B ∥ a)
 deflateMap' A B ΣAB≢0 (no ΣA≢0) (inl a) =
   subst (⟦_⟧ₛ) {!eq'!} (inl (deflateMap'' A (no ΣA≢0) a))
   -- (subst ⟦ deflateMap' A B ΣAB≢0 (no ΣA≢0) ⟧ₛ {!!} (inl (deflateMap'' A (no ΣA≢0) a)))
@@ -183,10 +206,10 @@ deflateMap' A B ΣAB≢0 (no ΣA≢0) (inl a) =
 deflateMap' A B ΣAB≢0 (no ΣA≢0) (inr a) = {!!}
 
 deflateMap : (A : Tree ℕ) → ⟦ A ⟧ₛ → ⟦ fst (deflate A) ⟧ₛ
-deflateMap A a with ≡0? Σ∥ A ∥
+deflateMap A a with Σ∥ A ∥
 deflateMap A a | yes z = absurd (Σ≡0→Empty A z a)
 deflateMap ⟨ suc X ⟩ₜ a | no ¬z = a
-deflateMap (A ＋ B) a | no ¬z with inspect' (≡0? Σ∥ A ∥)
+deflateMap (A ＋ B) a | no ¬z with inspect' Σ∥ A ∥
 deflateMap (A ＋ B) (inl a) | no ¬z | yes ΣA≡0 , ΣA≡0-path = absurd (Σ≡0→Empty A ΣA≡0 a)
 deflateMap (A ＋ B) (inr a) | no ¬z | yes ΣA≡0 , ΣA≡0-path =
   subst ⟦_⟧ₛ (sym (deflateAB≡deflateB A B ΣA≡0)) (deflateMap B a)
