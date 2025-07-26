@@ -78,3 +78,29 @@ finject {suc _} _ fzero = fzero
 finject {suc _} zero (fsuc a) = fsuc (finject zero a)
 finject {suc x} (suc y) (fsuc a) = fsuc (finject {x} (suc y) a)
 
+fmax : ∀ {x} → Fin (suc x)
+fmax {zero} = fzero
+fmax {suc x} = fsuc (fmax {x})
+
+data _<ᶠ_ : {x : ℕ} (a b : Fin x) → Type where
+ <fzero : ∀ {x} {b : Fin x} → fzero <ᶠ fsuc b
+ <fsuc : ∀ {x} {a b : Fin x} →  a <ᶠ b → fsuc a <ᶠ fsuc b
+
+data Trichotomyᶠ {x} (a b : Fin x) : Type where
+  flt : a <ᶠ b → Trichotomyᶠ a b
+  feq : a ≡ b → Trichotomyᶠ a b
+  fgt : b <ᶠ a → Trichotomyᶠ a b
+
+open Trichotomyᶠ
+
+_≟ᶠ-suc_ : ∀ {x} → (a b : Fin x)
+          → Trichotomyᶠ a b → Trichotomyᶠ (fsuc a) (fsuc b) 
+(a ≟ᶠ-suc b) (flt a<b) = flt (<fsuc a<b)
+(a ≟ᶠ-suc b) (feq a≡b) = feq (cong fsuc a≡b)
+(a ≟ᶠ-suc b) (fgt b<a) = fgt (<fsuc b<a)
+
+_≟ᶠ_ : ∀ {x} → (a b : Fin x) → Trichotomyᶠ a b 
+fzero ≟ᶠ fzero = feq refl
+fzero ≟ᶠ fsuc b = flt <fzero
+fsuc a ≟ᶠ fzero = fgt <fzero
+fsuc a ≟ᶠ fsuc b = (a ≟ᶠ-suc b) (a ≟ᶠ b)
