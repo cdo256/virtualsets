@@ -42,4 +42,35 @@ You can use modules as 'where' clauses. See this example from 1Lab.
   sys j (φ = i1) = u j 1=1
 ```
 
-This allows you to access the variables in the where clause as if it were a module-- because it is!!
+This allows you to access the variables in the where clause as if it
+were a module-- because it is!!
+
+## Write your main definitions, simplify them, then write them again
+
+In most programming languages, the only thing that matters about a
+funciton you write is its type and its behaviour. You have probably
+read that Agda and other dependently typed langauges are
+*proof-relevant*. This means that if you write a definition or central
+proof/construciton, then every property you prove about it will
+rely on this term. This means that changing the term even a little can
+result in proofs breaking and often require substantial modification
+to correct.
+
+The takeaway is that if you write a term in Agda that you expect will
+be used multiple times, then making the definitions as short as
+possible helps a lot.
+
+## Avoid `with` clauses in definitions
+
+`with` clauses are a convenient way to expand with extra patterns
+derived from terms computed when matching cases. Unfortunately it
+originates from the depths of hell and will destory your ability to
+reason about your programs. Here are 3 more *reasonable* definitions
+you can use instead:
+
+1. Use case_of_ which has better ability to reason about your code,
+even if the syntax is a bit rough around the edges.
+2. Use a helper funciton in a where clause.
+3. Use a global helper funciton to peform the secondary matching.
+
+## 
