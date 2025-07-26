@@ -11,10 +11,43 @@ open ℕ.ℕ
 private
   variable
     ℓ : Level
+    x y : ℕ
 
 data Fin : ℕ → Type where
   fzero : {n : ℕ} → Fin (suc n)
   fsuc : {n : ℕ} → Fin n → Fin (suc n)
+
+f0 : Fin (1 ℕ.+ x)
+f0 = fzero
+f1 : Fin (2 ℕ.+ x)
+f1 = fsuc f0
+f2 : Fin (3 ℕ.+ x)
+f2 = fsuc f1
+f3 : Fin (4 ℕ.+ x)
+f3 = fsuc f2
+f4 : Fin (5 ℕ.+ x)
+f4 = fsuc f3
+f5 : Fin (6 ℕ.+ x)
+f5 = fsuc f4
+f6 : Fin (7 ℕ.+ x)
+f6 = fsuc f5
+f7 : Fin (8 ℕ.+ x)
+f7 = fsuc f6
+f8 : Fin (9 ℕ.+ x)
+f8 = fsuc f7
+f9 : Fin (10 ℕ.+ x)
+f9 = fsuc f8
+
+{-# DISPLAY fzero = f0 #-}
+{-# DISPLAY fsuc fzero = f1 #-}
+{-# DISPLAY fsuc (fsuc fzero) = f2 #-}
+{-# DISPLAY fsuc (fsuc (fsuc fzero)) = f3 #-}
+{-# DISPLAY fsuc (fsuc (fsuc (fsuc fzero))) = f4 #-}
+{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc fzero)))) = f5 #-}
+{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc (fsuc fzero))))) = f6 #-}
+{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc fzero)))))) = f7 #-}
+{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc fzero))))))) = f8 #-}
+{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc fzero)))))))) = f9 #-}
 
 elim : ∀ {A : {n : ℕ} → Fin (suc n) → Type }
      → ({n : ℕ} → A {n} fzero)
