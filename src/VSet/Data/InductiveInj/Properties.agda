@@ -51,22 +51,35 @@ inc c g ∘ inc b f =
   let h'0 = apply (inc c g) (apply (inc b f) fzero)
   in inc h'0 (g ∘ f)
 
-tensor : ∀ m m' n n' → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
-tensor zero m' n n' (nul m') (nul n') = nul _
-tensor zero m' (suc n) (suc n') (nul m') (inc b g) = 
-  subst (λ ○ → Inj (suc n) ○) (sym (+-suc m' n')) $
-    inc (subst Fin (+-suc m' n') (fshift m' b)) (tensor 0 m' n n' (nul m') g)
-tensor (suc m) (suc m') zero n' (inc b f) (nul n') =
-  let w = tensor m m' zero n' f (nul n')
-  in inc (finject n' b) w
-tensor (suc m) (suc m') (suc n) (suc n') (inc b f) (inc b' g) =
-  let w = tensor m m' (suc n) (suc n') f (inc b' g)
-  in inc (finject (suc n') b) w
++suc : ∀ {m n} → m + suc n ≡ suc (m + n)
++suc {zero}    {n} = refl
++suc {suc m} {n} = cong suc (+-suc m n)
 
--- _⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
--- nul m' ⊕ nul _ = nul _
--- nul m' ⊕ inc b g = subst (λ ○ → Inj (suc (m + n)) {!!}) {!!} (inc {!!} (nul _ ⊕ g))
--- inc b f ⊕ g = {!!}
+shift : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
+shift l (nul _) = nul _
+shift {m = m} {n = suc n} l (inc b f) =
+  subst (Inj m) (sym +suc) $
+    inc (subst Fin +suc (fshift l b)) (shift l f)
+
+tensor : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
+tensor (nul m') g = shift m' g
+tensor (inc b f) (nul n') =
+  inc (finject n' b) $ tensor f (nul n')
+tensor (inc b f) (inc b' g) =
+  inc (finject (suc _) b) $ tensor f (inc b' g)
+
+_⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
+f ⊕ g = tensor f g
+
+test5 : Inj 5 6
+test5 = nul 1 ⊕ cycle-l 4 
+test5' = to-list test5
+
+test6 : Inj 1 2
+test6 = nul 1 ⊕ idInj 1 
+test6' = to-list test6
+
+
 
 -- Injmm→Surjective : ∀ {m} → (f : Inj m m) → Surjective f
 -- Injmm→Surjective {suc m} (inc c f) b = {!!}
