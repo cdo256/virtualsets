@@ -86,12 +86,21 @@ data _<ᶠ_ : {x : ℕ} (a b : Fin x) → Type where
  <fzero : ∀ {x} {b : Fin x} → fzero <ᶠ fsuc b
  <fsuc : ∀ {x} {a b : Fin x} →  a <ᶠ b → fsuc a <ᶠ fsuc b
 
+_≤ᶠ_ : ∀ {x} (a b : Fin x) → Type
+a ≤ᶠ b = (a <ᶠ b) ⊎ (a ≡ b)
+
 data Trichotomyᶠ {x} (a b : Fin x) : Type where
   flt : a <ᶠ b → Trichotomyᶠ a b
   feq : a ≡ b → Trichotomyᶠ a b
   fgt : b <ᶠ a → Trichotomyᶠ a b
 
 open Trichotomyᶠ
+
+data Bichotomyᶠ {x} (a b : Fin x) : Type where
+  fle : a ≤ᶠ b → Bichotomyᶠ a b
+  fgt : b <ᶠ a → Bichotomyᶠ a b
+
+open Bichotomyᶠ
 
 _≟ᶠ-suc_ : ∀ {x} → (a b : Fin x)
           → Trichotomyᶠ a b → Trichotomyᶠ (fsuc a) (fsuc b) 
@@ -105,3 +114,12 @@ fzero ≟ᶠ fsuc b = flt <fzero
 fsuc a ≟ᶠ fzero = fgt <fzero
 fsuc a ≟ᶠ fsuc b = (a ≟ᶠ-suc b) (a ≟ᶠ b)
 
+Trichotomy→Bichotomyᶠ
+  : ∀ {x} {a b : Fin x}
+  → Trichotomyᶠ a b → Bichotomyᶠ a b 
+Trichotomy→Bichotomyᶠ (flt a<b) = fle (inl a<b)
+Trichotomy→Bichotomyᶠ (feq a≡b) = fle (inr a≡b)
+Trichotomy→Bichotomyᶠ (fgt b<a) = fgt b<a
+
+_≤?ᶠ_ : ∀ {x} → (a b : Fin x) → Bichotomyᶠ a b 
+a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
