@@ -104,3 +104,4 @@ fzero ≟ᶠ fzero = feq refl
 fzero ≟ᶠ fsuc b = flt <fzero
 fsuc a ≟ᶠ fzero = fgt <fzero
 fsuc a ≟ᶠ fsuc b = (a ≟ᶠ-suc b) (a ≟ᶠ b)
+

@@ -32,7 +32,9 @@ Fin0-absurd : {A : Type ℓ} → Fin 0 → A
 Fin0-absurd ()
 
 toℕ∘fromℕ≡id : {m : ℕ} → (n : ℕ) → (n<m : n < m) → toℕ {m} (fromℕ n n<m) ≡ n
-toℕ∘fromℕ≡id {zero} n n<0 = absurd {A = λ _ → toℕ {zero} (fromℕ n n<0) ≡ n} (¬-<-zero {n} n<0)
+toℕ∘fromℕ≡id {zero} n n<0 =
+  absurd {A = λ _ → toℕ {zero} (fromℕ n n<0) ≡ n}
+         (¬-<-zero {n} n<0)
 toℕ∘fromℕ≡id {suc m} zero 0<sm = refl
 toℕ∘fromℕ≡id {suc m} (suc n) sn<sm =
   cong suc (toℕ∘fromℕ≡id n (pred-<-pred sn<sm))
@@ -44,6 +46,11 @@ toℕ<m {suc m} (fsuc a) = suc-<-suc (toℕ<m a)
 fsuc-injective : ∀ {n} {i j : Fin n} → fsuc {n} i ≡ fsuc {n} j → i ≡ j
 fsuc-injective {zero} {()} {()} 
 fsuc-injective {suc n} {i} {j} p = cong pred p
+
+<ᶠ→≢ : ∀ {x} → {a b : Fin x} → a <ᶠ b → a ≢ b
+<ᶠ→≢ {a = fzero} {b = fsuc b} <fzero a≡b = fzero≢fsuc b a≡b
+<ᶠ→≢ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≡b =
+  <ᶠ→≢ {a = a} {b = b} a<b (fsuc-injective a≡b)
 
 -- finject : {x : ℕ} → (y : ℕ) → Fin x → Fin (x +ℕ y)
 -- finject {suc x} zero fzero = fzero
