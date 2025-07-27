@@ -26,8 +26,18 @@ apply-inv {suc m} {suc (suc n)} (inc (fsuc c) f) fzero =
 apply-inv {suc m} {suc n} (inc c f) (fsuc b) =
   map-Maybe fsuc $ apply-inv f b
 
+insert-inc : ∀ {m n} → (c : Fin (suc n)) (f : Inj m n)
+           → (a : Fin (suc m)) → (b : Fin (suc n)) 
+           → Bichotomyᶠ b c → Inj (suc m) (suc n)
+
+insert : ∀ {m n} → (f : Inj m n) → (a : Fin (suc m)) → (b : Fin (suc n))
+       → Inj (suc m) (suc n)
+insert f fzero b = inc b f
+insert f (fsuc a) b =
+  {!!}
+
 insert-rev : ∀ {m n} → (f : Inj m n) → (a : Fin (suc m)) → Inj (suc m) (suc n)
-insert-rev (nul _) a = inc f0 (nul _)
+insert-rev (nul _) a = inc fzero (nul _)
 -- (ins (0 2 1 3) 0) = (0 1 3 2 4)
 -- (ins (1 2 3 0) 0) = (0 2 3 4 1)
 insert-rev f fzero = inc fzero f
@@ -79,10 +89,65 @@ test6 : Inj 1 2
 test6 = nul 1 ⊕ idInj 1 
 test6' = to-list test6
 
+-- Injmm-suc : ∀ {m} (b c : Fin (suc (suc m)))
+--           → (f : Inj (suc m) (suc m))
+--           → (Σ[ a ∈ Fin (suc (suc m)) ] apply (inc c f) a ≡ b)
+--           → Σ[ a' ∈ Fin (suc m) ] apply f a' ≡ {!!}
+-- Injmm-suc fzero fzero f (fzero , f'a≡b) = fzero , refl
+-- Injmm-suc fzero fzero f (fsuc a , f'a≡b) =
+--   let a' = {!!}
+--   in {!!} , {!!}
+-- Injmm-suc fzero (fsuc c) f (fzero , f'a≡b) = {!!}
+-- Injmm-suc fzero (fsuc c) f (fsuc a , f'a≡b) = {!!}
+-- Injmm-suc (fsuc b) fzero f (fzero , f'a≡b) = {!!}
+-- Injmm-suc (fsuc b) fzero f (fsuc a , f'a≡b) = {!!}
+-- Injmm-suc (fsuc b) (fsuc c) f (fzero , f'a≡b) = {!!}
+-- Injmm-suc (fsuc b) (fsuc c) f (fsuc a , f'a≡b) = {!!}
 
 
--- Injmm→Surjective : ∀ {m} → (f : Inj m m) → Surjective f
--- Injmm→Surjective {suc m} (inc c f) b = {!!}
+f-f⁻¹-b≡b : ∀ {m} (f : Inj m m) → ∀ b → apply f (apply (inv f) b) ≡ b
+f-f⁻¹-b≡b (inc fzero (nul 0)) fzero = refl
+f-f⁻¹-b≡b {m = suc m} (inc fzero (inc d f)) fzero =
+  apply (inc fzero (inc d f))
+   (apply (inv (inc fzero (inc d f))) fzero)
+    ≡⟨ {!!} ⟩
+  apply (inc fzero (inc d f))
+   (apply {!inv (inc fzero (inc d f))!} fzero)
+    ≡⟨ {!!} ⟩
+  fzero ▯
+f-f⁻¹-b≡b (inc fzero f) (fsuc b) =
+  {!!}
+    ≡⟨ {!!} ⟩
+  {!!} ▯
+f-f⁻¹-b≡b (inc (fsuc c) f) fzero =
+  {!!}
+    ≡⟨ {!!} ⟩
+  {!!} ▯
+f-f⁻¹-b≡b (inc (fsuc c) f) (fsuc b) =
+  {!!}
+    ≡⟨ {!!} ⟩
+  {!!} ▯
+
+f∘f⁻¹≡id : ∀ {m} (f : Inj m m) → f ∘ inv f ≡ idInj m
+f∘f⁻¹≡id (nul 0) = refl
+f∘f⁻¹≡id {m = suc m} (inc fzero f) =
+  inc f0 f ∘ inv (inc f0 f)
+    ≡⟨ refl ⟩
+  inc f0 f ∘ insert-rev (inv f) f0
+    ≡⟨ {!!} ⟩
+  inc f0 f ∘ insert-rev (inv f) f0
+    ≡⟨ {!!} ⟩
+  inc (apply (inc f0 f) (apply (insert-rev (inv f) f0) f0))
+      (f ∘ {!insert-rev {!inv f!} {!f0!}!})
+    ≡⟨ {!!} ⟩
+  idInj (suc m) ▯
+f∘f⁻¹≡id (inc (fsuc b) f) = {!!}
+
+Injmm→Surjective : ∀ {m} → (f : Inj m m) → Surjective f
+Injmm→Surjective {suc m} f b =
+  -- Σ[ a ∈ Fin m ] apply f a ≡ b
+  let a = apply (inv f) b
+  in a , {!!}
 
 
 -- Injmm→Surjective : ∀ {m} → (f : Inj m m) → Surjective f
