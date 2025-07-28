@@ -30,9 +30,6 @@ inc-cong : ∀ {m n} (b b' : Fin (suc n))
          → inc b f ≡ inc b' f'
 inc-cong b b' f f' beq feq' = cong₂ inc beq feq'
 
-Surjective : (f : Inj m n) → Type
-Surjective {m = m} {n = n} f = ∀ (b : Fin n) → Σ[ a ∈ Fin m ] apply f a ≡ b
-
 apply-inv : {m n : ℕ} → (f : Inj m n) → (b : Fin n) → Maybe (Fin m)
 apply-inv {zero} {n} (nul n) b =
   nothing
@@ -76,7 +73,7 @@ module Test-insert where
 
 inv : ∀ {m} → (f : Inj m m) → Inj m m
 inv {zero} (nul zero) = nul zero
-inv {suc m} (inc c f) = insert fzero c (inv f)
+inv {suc m} (inc c f) = insert c fzero (inv f)
 
 test3 = inv (cycle-r 3)
 test4 = inv (cycle-l 3)
@@ -89,7 +86,7 @@ inc c g ∘ inc b f =
   in inc h'0 (g ∘ f)
 
 +suc : ∀ {m n} → m + suc n ≡ suc (m + n)
-+suc {zero}    {n} = refl
++suc {zero} {n} = refl
 +suc {suc m} {n} = cong suc (+-suc m n)
 
 shift1 : ∀ {m n} → (f : Inj m n) → Inj m (suc n)
@@ -105,9 +102,9 @@ tensor : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (
 tensor (nul m') g =
   shift m' g
 tensor (inc b f) (nul n') =
-  inc (finject n' b) $ tensor f (nul n')
+  inc (finject n' b) (tensor f (nul n'))
 tensor (inc b f) (inc b' g) =
-  inc (finject (suc _) b) $ tensor f (inc b' g)
+  inc (finject (suc _) b) (tensor f (inc b' g))
 
 _⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
 f ⊕ g = tensor f g
@@ -119,6 +116,8 @@ test5' = to-list test5
 test6 : Inj 1 2
 test6 = nul 1 ⊕ idInj 1 
 test6' = to-list test6
+
+
 
 
 -- Injmm-suc : ∀ {m} (b c : Fin (suc (suc m)))
@@ -186,6 +185,9 @@ f∘f⁻¹≡id {m = suc m} (inc fzero f) =
     ≡⟨ {!!} ⟩
   idInj (suc m) ▯
 f∘f⁻¹≡id (inc (fsuc b) f) = {!!}
+
+Surjective : (f : Inj m n) → Type
+Surjective {m = m} {n = n} f = ∀ (b : Fin n) → Σ[ a ∈ Fin m ] apply f a ≡ b
 
 Injmm→Surjective : ∀ {m} → (f : Inj m m) → Surjective f
 Injmm→Surjective {suc m} f b =
