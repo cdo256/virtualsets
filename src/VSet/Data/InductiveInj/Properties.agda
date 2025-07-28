@@ -4,6 +4,7 @@ open import VSet.Prelude hiding (_∘_)
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Nat.Order
 open import Cubical.Data.Nat.Properties
+open import Cubical.Data.List.Base hiding ([_])
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
 open import VSet.Data.InductiveInj.Base 
@@ -33,39 +34,49 @@ Surjective : (f : Inj m n) → Type
 Surjective {m = m} {n = n} f = ∀ (b : Fin n) → Σ[ a ∈ Fin m ] apply f a ≡ b
 
 apply-inv : {m n : ℕ} → (f : Inj m n) → (b : Fin n) → Maybe (Fin m)
-apply-inv {zero} {n} (nul n) b = nothing
-apply-inv {suc m} {suc n} (inc fzero f) fzero = just fzero
+apply-inv {zero} {n} (nul n) b =
+  nothing
+apply-inv {suc m} {suc n} (inc fzero f) fzero =
+  just fzero
 -- ((1 2 3 0)⁻¹ 0) = fsuc ((1 2 0)⁻¹ 0)
 apply-inv {suc m} {suc (suc n)} (inc (fsuc c) f) fzero =
-  map-Maybe fsuc $ apply-inv f fzero
+  map-Maybe fsuc (apply-inv f fzero)
 -- ((0 3 2 1)⁻¹ 2) = fsuc ((2 1 0)⁻¹ 1)
 -- ((1 2 3 0)⁻¹ 2) = fsuc ((1 2 0)⁻¹ 1)
 apply-inv {suc m} {suc n} (inc c f) (fsuc b) =
-  map-Maybe fsuc $ apply-inv f b
+  map-Maybe fsuc (apply-inv f b)
 
-insert : ∀ {m n} → (f : Inj m n) → (a : Fin (suc m)) → (b : Fin (suc n))
-       → Inj (suc m) (suc n)
-insert f fzero b = inc b f
-insert (inc {m} {n} c f) (fsuc a) fzero =
-  inc (fsuc c) (insert f a fzero)
-insert (inc {m} {n} c f) (fsuc a) (fsuc b) with b ≤?ᶠ c
-... | fle b≤c = inc (fsuc c) (insert f a b)
-... | fgt c>b = inc (finj c) (insert f a b)
+insert : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
+       → (f : Inj m n) → Inj (suc m) (suc n)
+insert fzero b f = inc b f
+insert (fsuc a) fzero (inc c f) =
+  inc (fsuc c) (insert a fzero f)
+insert (fsuc a) (fsuc b) (inc c f) =
+  inc (fsplice (fsuc b) c) (insert a b f)
 
-insert-rev : ∀ {m n} → (f : Inj m n) → (a : Fin (suc m)) → Inj (suc m) (suc n)
-insert-rev (nul _) a = inc fzero (nul _)
--- (ins (0 2 1 3) 0) = (0 1 3 2 4)
--- (ins (1 2 3 0) 0) = (0 2 3 4 1)
-insert-rev f fzero = inc fzero f
--- (ins (0 2 1 3) 1) = (1 0 3 2 4)
--- (ins (0 2 1 3) 2) = (1 3 0 2 4)
-insert-rev (inc b f) (fsuc a) =
-  let g = insert-rev f a
-  in inc (fsuc b) g
+module Test-insert where
+  -- (1 2 3 4 0)
+  t0 = (cycle-r 4)
+  t0' = to-list t0
+  -- (1 2 5 3 4 0)
+  t1 = insert f2 f5 (cycle-r 4)
+  t1' = to-list t1
+  -- (2 3 1 4 5 0)
+  t2 = insert f2 f1 (cycle-r 4)
+  t2' = to-list t2
+  -- (1 0)
+  t3 = insert f1 f0 (idInj 1)
+  t3' = to-list t3
+  -- (1 2 0)
+  t4 = insert f2 f0 (idInj 2)
+  t4' = to-list t4
+  -- (1 2 0)
+  t5 = insert f2 f0 (cross)
+  t5' = to-list t5
 
 inv : ∀ {m} → (f : Inj m m) → Inj m m
 inv {zero} (nul zero) = nul zero
-inv {suc m} (inc c f) = insert-rev (inv f) c
+inv {suc m} (inc c f) = insert fzero c (inv f)
 
 test3 = inv (cycle-r 3)
 test4 = inv (cycle-l 3)
@@ -81,31 +92,22 @@ inc c g ∘ inc b f =
 +suc {zero}    {n} = refl
 +suc {suc m} {n} = cong suc (+-suc m n)
 
-shift' : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
-shift' l (nul _) = nul _
-shift' {m = m} {n = suc n} l (inc b f) =
-  subst (Inj m) (sym +suc) $
-    inc (subst Fin +suc (fshift l b)) (shift' l f)
+shift1 : ∀ {m n} → (f : Inj m n) → Inj m (suc n)
+shift1 (nul _) = nul _
+shift1 (inc b f) =
+  inc (fsuc b) (shift1 f)
 
 shift : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
-shift l (nul _) = nul _
-shift {m = m} {n = suc n} l (inc b f) =
-  subst (Inj m) (sym +suc) $
-    inc (subst Fin +suc (fshift l b)) (shift l f)
+shift zero f = f
+shift (suc l) f = shift1 (shift l f) 
 
 tensor : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
-tensor (nul m') g = shift m' g
+tensor (nul m') g =
+  shift m' g
 tensor (inc b f) (nul n') =
   inc (finject n' b) $ tensor f (nul n')
 tensor (inc b f) (inc b' g) =
   inc (finject (suc _) b) $ tensor f (inc b' g)
-
--- tensor : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
--- tensor (nul m') g = shift m' g
--- tensor (inc b f) (nul n') =
---   inc (finject n' b) $ tensor f (nul n')
--- tensor (inc b f) (inc b' g) =
---   inc (finject (suc _) b) $ tensor f (inc b' g)
 
 _⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
 f ⊕ g = tensor f g
@@ -117,7 +119,6 @@ test5' = to-list test5
 test6 : Inj 1 2
 test6 = nul 1 ⊕ idInj 1 
 test6' = to-list test6
-
 
 
 -- Injmm-suc : ∀ {m} (b c : Fin (suc (suc m)))
@@ -176,12 +177,12 @@ f∘f⁻¹≡id (nul 0) = refl
 f∘f⁻¹≡id {m = suc m} (inc fzero f) =
   inc f0 f ∘ inv (inc f0 f)
     ≡⟨ refl ⟩
-  inc f0 f ∘ insert-rev (inv f) f0
+  inc f0 f ∘ insert f0 f0 (inv f) 
     ≡⟨ {!!} ⟩
-  inc f0 f ∘ insert-rev (inv f) f0
+  inc f0 f ∘ insert f0 f0 (inv f)
     ≡⟨ {!!} ⟩
-  inc (apply (inc f0 f) (apply (insert-rev (inv f) f0) f0))
-      (f ∘ {!insert-rev {!inv f!} {!f0!}!})
+  inc (apply (inc f0 f) (apply (insert f0 f0 (inv f)) f0))
+      (f ∘ {!insert {!inv f!} f0 {!f0!}!})
     ≡⟨ {!!} ⟩
   idInj (suc m) ▯
 f∘f⁻¹≡id (inc (fsuc b) f) = {!!}
