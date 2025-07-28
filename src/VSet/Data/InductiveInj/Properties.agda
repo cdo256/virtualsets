@@ -7,11 +7,27 @@ open import Cubical.Data.Nat.Properties
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
 open import VSet.Data.InductiveInj.Base 
+open import VSet.Data.InductiveInj.Order 
 open import Cubical.Data.Maybe.Base
 
 private
   variable
     l l' m m' n n' : ℕ
+
+inc-congP : ∀ {m m' n n'}
+          → {b : Fin (suc n)} {b' : Fin (suc n')}
+          → {f : Inj m n} {f' : Inj m' n'}
+          → (meq : m ≡ m') (neq : n ≡ n') (beq : (λ i → Fin (suc (neq i))) [ b ≡ b' ])
+          → (feq' : (λ i → Inj (meq i) (neq i)) [ f ≡ f' ])
+          → (λ i → cong₂ Injsuc meq neq i) [ (inc {m} {n} b f) ≡ inc {m'} {n'} b' f' ]
+inc-congP meq neq beq feq' i =
+  inc {meq i} {neq i} (beq i) (feq' i)
+
+inc-cong : ∀ {m n} (b b' : Fin (suc n))
+         → (f f' : Inj m n)
+         → (beq : b ≡ b') → (feq' : f ≡ f')
+         → inc b f ≡ inc b' f'
+inc-cong b b' f f' beq feq' = cong₂ inc beq feq'
 
 Surjective : (f : Inj m n) → Type
 Surjective {m = m} {n = n} f = ∀ (b : Fin n) → Σ[ a ∈ Fin m ] apply f a ≡ b
@@ -27,15 +43,14 @@ apply-inv {suc m} {suc (suc n)} (inc (fsuc c) f) fzero =
 apply-inv {suc m} {suc n} (inc c f) (fsuc b) =
   map-Maybe fsuc $ apply-inv f b
 
-insert-inc : ∀ {m n} → (c : Fin (suc n)) (f : Inj m n)
-           → (a : Fin (suc m)) → (b : Fin (suc n)) 
-           → Bichotomyᶠ b c → Inj (suc m) (suc n)
-
 insert : ∀ {m n} → (f : Inj m n) → (a : Fin (suc m)) → (b : Fin (suc n))
        → Inj (suc m) (suc n)
 insert f fzero b = inc b f
-insert f (fsuc a) b =
-  {!!}
+insert (inc {m} {n} c f) (fsuc a) fzero =
+  inc (fsuc c) (insert f a fzero)
+insert (inc {m} {n} c f) (fsuc a) (fsuc b) with b ≤?ᶠ c
+... | fle b≤c = inc (fsuc c) (insert f a b)
+... | fgt c>b = inc (finj c) (insert f a b)
 
 insert-rev : ∀ {m n} → (f : Inj m n) → (a : Fin (suc m)) → Inj (suc m) (suc n)
 insert-rev (nul _) a = inc fzero (nul _)
@@ -66,6 +81,12 @@ inc c g ∘ inc b f =
 +suc {zero}    {n} = refl
 +suc {suc m} {n} = cong suc (+-suc m n)
 
+shift' : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
+shift' l (nul _) = nul _
+shift' {m = m} {n = suc n} l (inc b f) =
+  subst (Inj m) (sym +suc) $
+    inc (subst Fin +suc (fshift l b)) (shift' l f)
+
 shift : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
 shift l (nul _) = nul _
 shift {m = m} {n = suc n} l (inc b f) =
@@ -79,6 +100,13 @@ tensor (inc b f) (nul n') =
 tensor (inc b f) (inc b' g) =
   inc (finject (suc _) b) $ tensor f (inc b' g)
 
+-- tensor : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
+-- tensor (nul m') g = shift m' g
+-- tensor (inc b f) (nul n') =
+--   inc (finject n' b) $ tensor f (nul n')
+-- tensor (inc b f) (inc b' g) =
+--   inc (finject (suc _) b) $ tensor f (inc b' g)
+
 _⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
 f ⊕ g = tensor f g
 
@@ -89,6 +117,8 @@ test5' = to-list test5
 test6 : Inj 1 2
 test6 = nul 1 ⊕ idInj 1 
 test6' = to-list test6
+
+
 
 -- Injmm-suc : ∀ {m} (b c : Fin (suc (suc m)))
 --           → (f : Inj (suc m) (suc m))
@@ -105,6 +135,18 @@ test6' = to-list test6
 -- Injmm-suc (fsuc b) (fsuc c) f (fzero , f'a≡b) = {!!}
 -- Injmm-suc (fsuc b) (fsuc c) f (fsuc a , f'a≡b) = {!!}
 
+<ʲ→≢ : ∀ {m n} → {f g : Inj m n}
+     → f <ʲ g → f ≢ g
+<ʲ→≢ {f = f} f<g f≡g = ¬f<f (subst (f <ʲ_) (sym f≡g) f<g)
+
+discreteInj : Discrete (Inj m n)
+discreteInj f g with f ≟ʲ g
+... | jlt f<g = no (<ʲ→≢ f<g)
+... | jeq f≡g = yes f≡g
+... | jgt g<f = no (≢sym (<ʲ→≢ g<f))
+
+isSetInj : isSet (Inj m n)
+isSetInj = Discrete→isSet discreteInj
 
 f-f⁻¹-b≡b : ∀ {m} (f : Inj m m) → ∀ b → apply f (apply (inv f) b) ≡ b
 f-f⁻¹-b≡b (inc fzero (nul 0)) fzero = refl
@@ -169,12 +211,12 @@ Injmm→Surjective {suc m} f b =
 -- Injmm→Surjective {m = suc m} (inc fzero f) (fsuc b) =
 --   let
 --     d : Fin (suc m)
---     d = inc-bigger fzero b
+--     d = fsplice fzero b
 --     a , fa≡b = Injmm→Surjective f b
 --     eq' = 
 --       apply (inc fzero f) (fsuc a)
 --         ≡⟨ refl ⟩
---       inc-bigger fzero (apply f a) 
+--       fsplice fzero (apply f a) 
 --         ≡⟨ refl ⟩
 --       fsuc (apply f a) 
 --         ≡⟨ cong fsuc fa≡b ⟩
@@ -187,9 +229,9 @@ Injmm→Surjective {suc m} f b =
 --     eq' = 
 --       apply (inc (fsuc c) f) (fsuc a)
 --         ≡⟨ refl ⟩
---       inc-bigger (fsuc c) (apply f a)
---         ≡⟨ cong (inc-bigger (fsuc c)) fa≡0 ⟩
---       inc-bigger (fsuc c) fzero 
+--       fsplice (fsuc c) (apply f a)
+--         ≡⟨ cong (fsplice (fsuc c)) fa≡0 ⟩
+--       fsplice (fsuc c) fzero 
 --         ≡⟨ refl ⟩
 --       fzero ▯
 --   in fsuc a , eq' 
@@ -200,11 +242,11 @@ Injmm→Surjective {suc m} f b =
 -- --     eq' = 
 -- --       apply (inc (fsuc c) f) (fsuc fzero)
 -- --         ≡⟨ refl ⟩
--- --       inc-bigger (fsuc c) (apply f fzero) 
--- --         ≡⟨ cong (inc-bigger (fsuc c)) f0≡sb ⟩
--- --       inc-bigger (fsuc c) (fsuc b)
+-- --       fsplice (fsuc c) (apply f fzero) 
+-- --         ≡⟨ cong (fsplice (fsuc c)) f0≡sb ⟩
+-- --       fsplice (fsuc c) (fsuc b)
 -- --         ≡⟨ refl ⟩
--- --       fsuc (inc-bigger c b)
+-- --       fsuc (fsplice c b)
 -- --         ≡⟨ {!!} ⟩
 -- --       fsuc (fsuc b) ▯
 -- --   in fsuc fzero , eq'
@@ -219,9 +261,9 @@ Injmm→Surjective {suc m} f b =
 --     eq' = 
 --       apply (inc (fsuc c) f) (fsuc fzero)
 --         ≡⟨ refl ⟩
---       inc-bigger (fsuc c) (apply f fzero) 
---         ≡⟨ cong (inc-bigger (fsuc c)) f0≡b ⟩
---       inc-bigger (fsuc c) b
+--       fsplice (fsuc c) (apply f fzero) 
+--         ≡⟨ cong (fsplice (fsuc c)) f0≡b ⟩
+--       fsplice (fsuc c) b
 --         ≡⟨ {!!} ⟩
 --       fsuc b ▯
 --   in fsuc fzero , eq'

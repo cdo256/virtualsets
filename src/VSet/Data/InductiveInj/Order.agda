@@ -1,0 +1,69 @@
+module VSet.Data.InductiveInj.Order where
+
+open import VSet.Prelude
+open import Cubical.Data.Prod.Base hiding (map)
+open import Cubical.Data.Nat.Base
+open import Cubical.Data.Nat.Order
+open import Cubical.Data.Nat.Properties
+open import Cubical.Data.List.Base hiding ([_])
+open import VSet.Data.Fin.Base
+open import VSet.Data.Fin.Order
+open import VSet.Data.Fin.Properties
+open import VSet.Data.InductiveInj.Base
+
+private
+  variable
+    m n : ℕ
+
+-- Artificial order for decidability.
+-- Lexicographic with deepest inc inserted taking precidence.
+data _<ʲ_ : {m n : ℕ} (f g : Inj m n) → Type where
+  <j-suc : {m n : ℕ} → {b c : Fin (suc n)} → {f g : Inj m n}
+         → f <ʲ g → inc b f <ʲ inc c g 
+  <j-fin : {m n : ℕ} → {b c : Fin (suc n)} → {f g : Inj m n}
+         → f ≡ g → b <ᶠ c → inc b f <ʲ inc c g 
+
+open _<ʲ_
+
+_≤ʲ_ : {m n : ℕ} (f g : Inj m n) → Type
+f ≤ʲ g = (f <ʲ g) ⊎ (f ≡ g)
+
+data Trichotomyʲ {m n : ℕ} (f g : Inj m n) : Type where
+  jlt : f <ʲ g → Trichotomyʲ f g
+  jeq : f ≡ g → Trichotomyʲ f g
+  jgt : g <ʲ f → Trichotomyʲ f g
+
+open Trichotomyʲ
+
+data Bichotomyʲ {m n : ℕ} (f g : Inj m n) : Type where
+  jle : f ≤ʲ g → Bichotomyʲ f g
+  jgt : g <ʲ f → Bichotomyʲ f g
+
+open Bichotomyʲ
+
+_≟ʲ-suc_ : ∀ {m n} → {b c : Fin (suc n)} → (f g : Inj m n)
+          → Trichotomyᶠ b c → Trichotomyʲ f g
+          → Trichotomyʲ (inc b f) (inc c g) 
+(f ≟ʲ-suc g) _         (jlt f<g) = jlt (<j-suc f<g) 
+(f ≟ʲ-suc g) (flt b<c) (jeq f≡g) = jlt (<j-fin f≡g b<c)
+(f ≟ʲ-suc g) (feq b≡c) (jeq f≡g) = jeq (cong₂ inc b≡c f≡g)
+(f ≟ʲ-suc g) (fgt c<b) (jeq f≡g) = jgt (<j-fin (sym f≡g) c<b)
+(f ≟ʲ-suc g) _         (jgt g<f) = jgt (<j-suc g<f)
+
+_≟ʲ_ : ∀ {m n} → (f g : Inj m n) → Trichotomyʲ f g
+nul _ ≟ʲ nul _ = jeq refl
+inc b f ≟ʲ inc c g = (f ≟ʲ-suc g) (b ≟ᶠ c) (f ≟ʲ g)
+
+Trichotomy→Bichotomyʲ
+  : ∀ {m n} → {f g : Inj m n}
+  → Trichotomyʲ f g → Bichotomyʲ f g 
+Trichotomy→Bichotomyʲ (jlt f<g) = jle (inl f<g)
+Trichotomy→Bichotomyʲ (jeq f≡g) = jle (inr f≡g)
+Trichotomy→Bichotomyʲ (jgt g<f) = jgt g<f
+
+_≤?ʲ_ : ∀ {m n} → (f g : Inj m n) → Bichotomyʲ f g 
+f ≤?ʲ g = Trichotomy→Bichotomyʲ (f ≟ʲ g)
+
+¬f<f : ∀ {f : Inj m n} → ¬ f <ʲ f
+¬f<f {f = inc b g} (<j-suc g<g) = ¬f<f g<g
+¬f<f {f = inc b g} (<j-fin _ b<b) = <ᶠ→≢ b<b refl
