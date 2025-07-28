@@ -1,12 +1,15 @@
 module VSet.Data.InductiveInj.Properties where
 
 open import VSet.Prelude hiding (_∘_)
+open import Cubical.Data.Prod.Base
+open import Cubical.Data.Sum.Base
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Nat.Order
 open import Cubical.Data.Nat.Properties
 open import Cubical.Data.List.Base hiding ([_])
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
+open import VSet.Data.Fin.Properties
 open import VSet.Data.InductiveInj.Base 
 open import VSet.Data.InductiveInj.Order 
 open import Cubical.Data.Maybe.Base
@@ -139,6 +142,18 @@ test6' = to-list test6
      → f <ʲ g → f ≢ g
 <ʲ→≢ {f = f} f<g f≡g = ¬f<f (subst (f <ʲ_) (sym f≡g) f<g)
 
+≡→≮ʲ : ∀ {m n} → {f g : Inj m n}
+     → f ≡ g → ¬ f <ʲ g
+≡→≮ʲ f≡g f<g = <ʲ→≢ f<g f≡g
+
+≮ʲ→≡ : ∀ {m n} → {f g : Inj m n}
+     → ¬ f <ʲ g → ¬ g <ʲ f → f ≡ g
+≮ʲ→≡ {f = nul _} {g = nul _} _ _ = refl
+≮ʲ→≡ {f = inc b f} {g = inc c g} f'≮g' g'≮f' with inc b f ≟ʲ inc c g
+... | jlt f'<g' = absurd (f'≮g' f'<g')
+... | jeq f'≡g' = f'≡g'
+... | jgt g'<f' = absurd (g'≮f' g'<f')
+
 discreteInj : Discrete (Inj m n)
 discreteInj f g with f ≟ʲ g
 ... | jlt f<g = no (<ʲ→≢ f<g)
@@ -148,43 +163,92 @@ discreteInj f g with f ≟ʲ g
 isSetInj : isSet (Inj m n)
 isSetInj = Discrete→isSet discreteInj
 
-f-f⁻¹-b≡b : ∀ {m} (f : Inj m m) → ∀ b → apply f (apply (inv f) b) ≡ b
-f-f⁻¹-b≡b (inc fzero (nul 0)) fzero = refl
-f-f⁻¹-b≡b {m = suc m} (inc fzero (inc d f)) fzero =
-  apply (inc fzero (inc d f))
-   (apply (inv (inc fzero (inc d f))) fzero)
-    ≡⟨ {!!} ⟩
-  apply (inc fzero (inc d f))
-   (apply {!inv (inc fzero (inc d f))!} fzero)
-    ≡⟨ {!!} ⟩
-  fzero ▯
-f-f⁻¹-b≡b (inc fzero f) (fsuc b) =
-  {!!}
-    ≡⟨ {!!} ⟩
-  {!!} ▯
-f-f⁻¹-b≡b (inc (fsuc c) f) fzero =
-  {!!}
-    ≡⟨ {!!} ⟩
-  {!!} ▯
-f-f⁻¹-b≡b (inc (fsuc c) f) (fsuc b) =
-  {!!}
-    ≡⟨ {!!} ⟩
-  {!!} ▯
+insert0≡inc
+  : ∀ {m} (b : Fin (suc m)) (f : Inj m m)
+  → insert fzero b f ≡ inc b f
+insert0≡inc b f = refl
+
+inc-isInjective : ∀ {m n} {b c : Fin (suc n)} {f g : Inj m n}
+                → inc b f ≡ inc c g → (b ≡ c) × (f ≡ g)
+inc-isInjective {b = b} {c} {f} {g} f'≡g'
+  with f ≟ʲ g | b ≟ᶠ c
+... | jlt f<g | _       = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
+                                 (<ʲ→≢ (<j-suc f<g) f'≡g')
+... | jeq f≡g | flt b<c = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
+                                 (<ʲ→≢ (<j-fin f≡g b<c) f'≡g')
+... | jeq f≡g | feq b≡c = (b≡c , f≡g)
+... | jeq f≡g | fgt c<b = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
+                                 (<ʲ→≢ (<j-fin (sym f≡g) c<b) (sym f'≡g'))
+... | jgt g<f | _       = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
+                                 (<ʲ→≢ (<j-suc g<f) (sym f'≡g'))
+
+fsplice-isInjective
+  : ∀ {m} {a : Fin (suc m)} {b c : Fin m}
+  → fsplice a b ≡ fsplice a c → b ≡ c
+fsplice-isInjective {a = a} {fzero} {fzero} splice-eq = refl
+fsplice-isInjective {a = fzero} {b} {c} splice-eq = fsuc-injective splice-eq
+fsplice-isInjective {a = fsuc a} {fzero} {fsuc c} splice-eq =
+  absurd {A = λ _ → fzero ≡ fsuc c}
+         (fzero≢fsuc (fsplice a c) splice-eq)
+fsplice-isInjective {a = fsuc a} {fsuc b} {fzero} splice-eq =
+  absurd {A = λ _ → fsuc b ≡ fzero}
+         (fsuc≢fzero (fsplice a b) splice-eq)
+fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
+  cong fsuc $ fsplice-isInjective (fsuc-injective splice-eq)
+
+insert-isInjective
+  : ∀ {m} {a b : Fin (suc m)} {f g : Inj m m}
+  → insert a b f ≡ insert a b g  → f ≡ g
+insert-isInjective {a = fzero} {b = b} {f = f} {g = g} f'≡g' =
+  proj₂ (inc-isInjective f'≡g')
+insert-isInjective {a = fsuc a} {b = fzero} {f = inc c1 f} {g = inc c2 g} f''≡g'' =
+  let ins-f≡ins-g : insert a f0 f ≡ insert a f0 g
+      ins-f≡ins-g = (proj₂ (inc-isInjective f''≡g''))
+      f≡g : f ≡ g
+      f≡g = insert-isInjective ins-f≡ins-g
+      c1≡c2 : c1 ≡ c2
+      c1≡c2 = fsuc-injective $ proj₁ $ inc-isInjective f''≡g''
+  in cong₂ inc c1≡c2 f≡g
+insert-isInjective {a = fsuc a} {b = fsuc b} {f = inc c1 f} {g = inc c2 g} f''≡g'' =
+  let c1≡c2 : c1 ≡ c2
+      c1≡c2 = fsplice-isInjective (proj₁ (inc-isInjective f''≡g''))
+      f≡g : f ≡ g
+      f≡g = insert-isInjective (proj₂ (inc-isInjective f''≡g''))
+  in cong₂ inc c1≡c2 f≡g
 
 f∘f⁻¹≡id : ∀ {m} (f : Inj m m) → f ∘ inv f ≡ idInj m
 f∘f⁻¹≡id (nul 0) = refl
 f∘f⁻¹≡id {m = suc m} (inc fzero f) =
   inc f0 f ∘ inv (inc f0 f)
     ≡⟨ refl ⟩
-  inc f0 f ∘ insert f0 f0 (inv f) 
-    ≡⟨ {!!} ⟩
   inc f0 f ∘ insert f0 f0 (inv f)
-    ≡⟨ {!!} ⟩
+    ≡⟨ refl ⟩
+  inc f0 f ∘ inc f0 (inv f)
+    ≡⟨ refl ⟩
   inc (apply (inc f0 f) (apply (insert f0 f0 (inv f)) f0))
-      (f ∘ {!insert {!inv f!} f0 {!f0!}!})
+      (f ∘ inv f)
+    ≡⟨ refl ⟩
+  inc (apply (inc f0 f) (apply (inc f0 (inv f)) f0))
+      (f ∘ inv f)
+    ≡⟨ refl ⟩
+  inc (apply (inc f0 f) f0)
+      (f ∘ inv f)
+    ≡⟨ refl ⟩
+  inc f0 (f ∘ inv f)
+    ≡⟨ cong (inc f0) (f∘f⁻¹≡id f) ⟩
+  inc f0 (idInj m)
+    ≡⟨ refl ⟩
+  idInj (suc m) ▯
+f∘f⁻¹≡id {m = suc m} (inc (fsuc b) (inc c f)) =
+  inc (fsuc b) (inc c f) ∘ inv (inc (fsuc b) (inc c f))
+    ≡⟨ refl ⟩
+  inc (fsuc b) (inc c f) ∘ insert (fsuc b) f0 (inv (inc c f))
+    ≡⟨ refl ⟩
+  inc (fsuc b) (inc c f) ∘ insert (fsuc b) f0 (insert c f0 (inv f))
+    ≡⟨ refl ⟩
+  inc (fsuc b) (inc c f) ∘ insert (fsuc b) f0 (insert c f0 (inv f))
     ≡⟨ {!!} ⟩
   idInj (suc m) ▯
-f∘f⁻¹≡id (inc (fsuc b) f) = {!!}
 
 Surjective : (f : Inj m n) → Type
 Surjective {m = m} {n = n} f = ∀ (b : Fin n) → Σ[ a ∈ Fin m ] apply f a ≡ b
