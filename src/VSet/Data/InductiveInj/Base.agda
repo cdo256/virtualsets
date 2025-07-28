@@ -6,6 +6,7 @@ open import Cubical.Data.Nat.Base
 open import Cubical.Data.Nat.Order
 open import Cubical.Data.Nat.Properties
 open import VSet.Data.Fin.Base
+open import VSet.Data.Fin.Order
 open import VSet.Data.Fin.Properties
 open import Cubical.Data.List.Base hiding ([_])
 

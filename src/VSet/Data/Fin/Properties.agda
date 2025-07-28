@@ -5,8 +5,8 @@ open import VSet.Prelude
 import Cubical.Data.Nat as ℕ
 open import Cubical.Data.Nat using (ℕ; +-zero) renaming (_+_ to _+ℕ_)
 open import VSet.Data.Nat.Order
-
 open import VSet.Data.Fin.Base
+open import VSet.Data.Fin.Order
 open import VSet.Function.Injection
 
 open ℕ.ℕ
