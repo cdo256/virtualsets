@@ -57,15 +57,37 @@ Trichotomy→Bichotomyᶠ (fgt b<a) = fgt b<a
 _≤?ᶠ_ : ∀ {x} → (a b : Fin x) → Bichotomyᶠ a b 
 a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
 
-fsplice : ∀ {x : ℕ} → Fin (suc x) → Fin x → Fin (suc x)
-fsplice fzero c = fsuc c
+fsplice : ∀ {x} → Fin (suc x) → Fin x → Fin (suc x)
+fsplice fzero a = fsuc a
 fsplice (fsuc b) fzero = fzero
-fsplice (fsuc b) (fsuc c) = fsuc (fsplice b c)
+fsplice (fsuc b) (fsuc a) = fsuc (fsplice b a)
 
-module Test-fsplice where
-  -- expected: f1 , f2 , f0 , f2
-  t0 : Fin 3 × Fin 3 × Fin 3 × Fin 3
-  t0 = fsplice f0 f0
-     , fsplice f0 f1
-     , fsplice f1 f0
-     , fsplice f1 f1
+-- Alternate definition.
+fsplice' : ∀ {x : ℕ} → Fin (suc x) → Fin x → Fin (suc x)
+fsplice' b a with b ≤?ᶠ finj a
+... | fle b≤a = fsuc a
+... | fgt a<b = finj a
+
+-- Inverse to finj whenever a is not max.
+funinj : Fin (suc (suc x)) → Fin (suc x)
+funinj {x = zero} a = fzero
+funinj {x = suc x} fzero = fzero
+funinj {x = suc zero} (fsuc a) = fzero
+funinj {x = suc (suc x)} (fsuc a) = fsuc (funinj a)
+
+-- Remove a from domain of b
+funsplice : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → .(a ≢ b)
+          → Fin (suc x)
+funsplice {x = zero} _ _ _ = fzero
+funsplice {x = suc x} _ fzero _ = fzero
+funsplice {x = suc x} fzero (fsuc a) _ = a
+funsplice {x = suc x} (fsuc b) (fsuc a) a'≢b' =
+  fsuc (funsplice b a λ a≡b → a'≢b' (cong fsuc a≡b))
+
+-- Alternate definition
+funsplice' : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → a ≢ b
+          → Fin (suc x)
+funsplice' b a a≢b with a ≟ᶠ b
+... | flt a<b = funinj a
+... | feq a≡b = absurd (a≢b a≡b)
+... | fgt b<a = pred a

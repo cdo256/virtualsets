@@ -157,3 +157,33 @@ fzero-cong {x} {y} p i = fzero {p i}
 fzero≡subst-fzero : {x y : ℕ} (p : x ≡ y)
                   → fzero {y} ≡ subst (Fin ∘ suc) p (fzero {x})
 fzero≡subst-fzero {x} {y} p = resubst (Fin ∘ suc) (λ z → fzero {z}) p
+
+fsplice≢b : ∀ {x} → (b : Fin (suc x)) → (a : Fin x) → fsplice b a ≢ b
+fsplice≢b fzero a = fsuc≢fzero a
+fsplice≢b (fsuc b) fzero = fzero≢fsuc b
+fsplice≢b (fsuc b) (fsuc a) ne = 
+  let rec≢b = fsplice≢b b a
+  in rec≢b (fsuc-injective ne)
+
+funsplice-fsplice-inverse
+  : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc x))
+  → funsplice b (fsplice b a) (fsplice≢b b a) ≡ a
+funsplice-fsplice-inverse {zero} fzero fzero = refl
+funsplice-fsplice-inverse {suc x} fzero fzero = refl
+funsplice-fsplice-inverse {suc x} fzero (fsuc a) = refl
+funsplice-fsplice-inverse {zero} (fsuc b) fzero = refl
+funsplice-fsplice-inverse {suc x} (fsuc b) fzero = refl
+funsplice-fsplice-inverse {suc x} (fsuc b) (fsuc a) =
+  funsplice (fsuc b) (fsplice (fsuc b) (fsuc a))
+   (fsplice≢b (fsuc b) (fsuc a))
+    ≡⟨ refl ⟩
+  funsplice (fsuc b) (fsuc (fsplice b a)) 
+   (fsplice≢b (fsuc b) (fsuc a))
+    ≡⟨ refl ⟩
+  fsuc (funsplice b (fsplice b a) 
+   (λ a≡b → fsplice≢b (fsuc b) (fsuc a) (cong fsuc a≡b)))
+    ≡⟨ refl ⟩
+  fsuc (funsplice b (fsplice b a) 
+   (fsplice≢b b a))
+    ≡⟨ cong fsuc (funsplice-fsplice-inverse b a) ⟩
+  fsuc a ▯
