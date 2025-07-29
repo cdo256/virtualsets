@@ -75,6 +75,13 @@ funinj {x = suc x} fzero = fzero
 funinj {x = suc zero} (fsuc a) = fzero
 funinj {x = suc (suc x)} (fsuc a) = fsuc (funinj a)
 
+antisplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
+           → Fin (suc x)
+antisplice _ fzero = fzero
+antisplice fzero (fsuc a) = a
+antisplice {suc x} (fsuc b) (fsuc a) =
+  fsuc (antisplice b a)
+
 -- Remove a from domain of b
 funsplice : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → .(a ≢ b)
           → Fin (suc x)
@@ -86,7 +93,7 @@ funsplice {x = suc x} (fsuc b) (fsuc a) a'≢b' =
 
 -- Alternate definition
 funsplice' : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → a ≢ b
-          → Fin (suc x)
+           → Fin (suc x)
 funsplice' b a a≢b with a ≟ᶠ b
 ... | flt a<b = funinj a
 ... | feq a≡b = absurd (a≢b a≡b)

@@ -52,6 +52,13 @@ fsuc-injective {suc n} {i} {j} p = cong pred p
 <ᶠ→≢ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≡b =
   <ᶠ→≢ {a = a} {b = b} a<b (fsuc-injective a≡b)
 
+<ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a <ᶠ fsuc b → a <ᶠ b
+<ᶠ-respects-pred (<fsuc a'<b') = a'<b'
+
+≤ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
+≤ᶠ-respects-pred (inl a'<b') = inl (<ᶠ-respects-pred a'<b')
+≤ᶠ-respects-pred (inr a'≡b') = inr (fsuc-injective a'≡b')
+
 -- finject : {x : ℕ} → (y : ℕ) → Fin x → Fin (x +ℕ y)
 -- finject {suc x} zero fzero = fzero
 -- finject {suc x} zero (fsuc a) = fsuc (finject zero a)
@@ -187,3 +194,31 @@ funsplice-fsplice-inverse {suc x} (fsuc b) (fsuc a) =
    (fsplice≢b b a))
     ≡⟨ cong fsuc (funsplice-fsplice-inverse b a) ⟩
   fsuc a ▯
+
+fsplice-isInjective
+  : ∀ {m} {a : Fin (suc m)} {b c : Fin m}
+  → fsplice a b ≡ fsplice a c → b ≡ c
+fsplice-isInjective {a = a} {fzero} {fzero} splice-eq = refl
+fsplice-isInjective {a = fzero} {b} {c} splice-eq = fsuc-injective splice-eq
+fsplice-isInjective {a = fsuc a} {fzero} {fsuc c} splice-eq =
+  absurd {A = λ _ → fzero ≡ fsuc c}
+         (fzero≢fsuc (fsplice a c) splice-eq)
+fsplice-isInjective {a = fsuc a} {fsuc b} {fzero} splice-eq =
+  absurd {A = λ _ → fsuc b ≡ fzero}
+         (fsuc≢fzero (fsplice a b) splice-eq)
+fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
+  cong fsuc $ fsplice-isInjective (fsuc-injective splice-eq)
+
+≤→splice≡suc : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+             → a2 ≤ᶠ finj a1 → fsplice a2 a1 ≡ fsuc a1
+≤→splice≡suc fzero fzero a2≤a1 = refl
+≤→splice≡suc fzero (fsuc a2) (inr a2'≡0) = absurd (fsuc≢fzero a2 a2'≡0)
+≤→splice≡suc (fsuc a1) fzero a2≤a1 = refl
+≤→splice≡suc {suc m} (fsuc a1) (fsuc a2) rec-le =
+  cong fsuc (≤→splice≡suc a1 a2 (≤ᶠ-respects-pred rec-le))
+
+>→splice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+             → finj a1 <ᶠ a2 → fsplice a2 a1 ≡ finj a1
+>→splice≡id fzero (fsuc a2) a1<a2 = refl
+>→splice≡id {suc m} (fsuc a1) (fsuc a2) a1<a2 =
+  cong fsuc (>→splice≡id a1 a2 (<ᶠ-respects-pred a1<a2))
