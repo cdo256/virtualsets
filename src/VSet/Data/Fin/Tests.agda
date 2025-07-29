@@ -29,3 +29,11 @@ t1 = funsplice' f0 (fsplice f0 f0) (fsplice≢b f0 f0)
    , funsplice' f0 (fsplice f0 f1) (fsplice≢b f0 f1)
    , funsplice' f1 (fsplice f1 f0) (fsplice≢b f1 f0)
    , funsplice' f1 (fsplice f1 f1) (fsplice≢b f1 f1)
+
+t2 : Fin 2 × Fin 2 × Fin 2 × Fin 2 × Fin 2 × Fin 2
+t2 = antisplice f0 f0 -- eq
+   , antisplice f0 f1 -- pred
+   , antisplice f0 f2 -- pred
+   , antisplice f1 f0 -- eq
+   , antisplice f1 f1 -- eq
+   , antisplice f1 f2 -- pred

@@ -209,16 +209,66 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fzero} splice-eq =
 fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
   cong fsuc $ fsplice-isInjective (fsuc-injective splice-eq)
 
-≤→splice≡suc : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-             → a2 ≤ᶠ finj a1 → fsplice a2 a1 ≡ fsuc a1
-≤→splice≡suc fzero fzero a2≤a1 = refl
-≤→splice≡suc fzero (fsuc a2) (inr a2'≡0) = absurd (fsuc≢fzero a2 a2'≡0)
-≤→splice≡suc (fsuc a1) fzero a2≤a1 = refl
-≤→splice≡suc {suc m} (fsuc a1) (fsuc a2) rec-le =
-  cong fsuc (≤→splice≡suc a1 a2 (≤ᶠ-respects-pred rec-le))
+≤→fsplice≡suc : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+              → a2 ≤ᶠ finj a1 → fsplice a2 a1 ≡ fsuc a1
+≤→fsplice≡suc fzero fzero a2≤a1 = refl
+≤→fsplice≡suc fzero (fsuc a2) (inr a2'≡0) = absurd (fsuc≢fzero a2 a2'≡0)
+≤→fsplice≡suc (fsuc a1) fzero a2≤a1 = refl
+≤→fsplice≡suc {suc m} (fsuc a1) (fsuc a2) rec-le =
+  cong fsuc (≤→fsplice≡suc a1 a2 (≤ᶠ-respects-pred rec-le))
 
->→splice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+>→fsplice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
              → finj a1 <ᶠ a2 → fsplice a2 a1 ≡ finj a1
->→splice≡id fzero (fsuc a2) a1<a2 = refl
->→splice≡id {suc m} (fsuc a1) (fsuc a2) a1<a2 =
-  cong fsuc (>→splice≡id a1 a2 (<ᶠ-respects-pred a1<a2))
+>→fsplice≡id fzero (fsuc a2) a1<a2 = refl
+>→fsplice≡id {suc m} (fsuc a1) (fsuc a2) a1<a2 =
+  cong fsuc (>→fsplice≡id a1 a2 (<ᶠ-respects-pred a1<a2))
+
+-- antisplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
+--            → Fin (suc x)
+-- antisplice _ fzero = fzero
+-- antisplice fzero (fsuc a) = a
+-- antisplice {suc x} (fsuc b) (fsuc a) =
+--   fsuc (antisplice b a)
+
+<→antisplice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                → a2 <ᶠ finj a1 → finj (antisplice a1 a2) ≡ a2
+<→antisplice≡id (fsuc a1) fzero a2<a1 = refl
+<→antisplice≡id {suc m} (fsuc a1) (fsuc a2) (<fsuc a2<a1) =
+  cong fsuc (<→antisplice≡id a1 a2 a2<a1)
+
+≡→antisplice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                → a2 ≡ finj a1 → finj (antisplice a1 a2) ≡ a2
+≡→antisplice≡id fzero fzero _ = refl
+≡→antisplice≡id (fsuc a1) fzero _ = refl
+≡→antisplice≡id fzero (fsuc a2) a2'≡0 = absurd (fsuc≢fzero a2 a2'≡0)
+≡→antisplice≡id {suc m} (fsuc a1) (fsuc a2) a2≡a1 =
+  cong fsuc (≡→antisplice≡id a1 a2 (fsuc-injective a2≡a1))
+
+≤→antisplice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                → a2 ≤ᶠ finj a1 → finj (antisplice a1 a2) ≡ a2
+≤→antisplice≡id a1 a2 (inl a2<a1) = <→antisplice≡id a1 a2 a2<a1
+≤→antisplice≡id a1 a2 (inr a2≡a1) = ≡→antisplice≡id a1 a2 a2≡a1
+
+>→antisplice≡pred : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                  → finj a1 <ᶠ a2 → antisplice a1 a2 ≡ pred a2
+>→antisplice≡pred fzero (fsuc a2) a2>a1 = refl
+>→antisplice≡pred {suc m} (fsuc a1) (fsuc (fsuc a2)) (<fsuc a2>a1) =
+  cong fsuc (>→antisplice≡pred a1 (fsuc a2) a2>a1)
+
+case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
+case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
+  λ{ (fle _) → x
+   ; (fgt _) → y }
+
+fsplice≡case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+             → fsplice a2 a1 ≡ (case≤?ᶠ a2 (finj a1) (fsuc a1) (finj a1))
+fsplice≡case a1 a2 with (a2 ≤?ᶠ finj a1)
+... | fle a2≤a1 = ≤→fsplice≡suc a1 a2 a2≤a1
+... | fgt a2>a1 = >→fsplice≡id a1 a2 a2>a1
+
+antisplice≡case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                → finj (antisplice a1 a2)
+                ≡ (case≤?ᶠ a2 (finj a1) a2 (finj (pred a2)))
+antisplice≡case a1 a2 with (a2 ≤?ᶠ finj a1)
+... | fle a2≤a1 = ≤→antisplice≡id a1 a2 a2≤a1
+... | fgt a2>a1 = cong finj (>→antisplice≡pred a1 a2 a2>a1)
