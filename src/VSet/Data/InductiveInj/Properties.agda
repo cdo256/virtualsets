@@ -51,32 +51,10 @@ insert (fsuc a) fzero (inc c f) =
 insert (fsuc a) (fsuc b) (inc c f) =
   inc (fsplice (fsuc b) c) (insert a b f)
 
-module Test-insert where
-  -- (1 2 3 4 0)
-  t0 = (cycle-r 4)
-  t0' = to-list t0
-  -- (1 2 5 3 4 0)
-  t1 = insert f2 f5 (cycle-r 4)
-  t1' = to-list t1
-  -- (2 3 1 4 5 0)
-  t2 = insert f2 f1 (cycle-r 4)
-  t2' = to-list t2
-  -- (1 0)
-  t3 = insert f1 f0 (idInj 1)
-  t3' = to-list t3
-  -- (1 2 0)
-  t4 = insert f2 f0 (idInj 2)
-  t4' = to-list t4
-  -- (1 2 0)
-  t5 = insert f2 f0 (cross)
-  t5' = to-list t5
 
 inv : ∀ {m} → (f : Inj m m) → Inj m m
 inv {zero} (nul zero) = nul zero
 inv {suc m} (inc c f) = insert c fzero (inv f)
-
-test3 = inv (cycle-r 3)
-test4 = inv (cycle-l 3)
 
 fsuc-apply≡apply-insert
   : ∀ {m} → (b : Fin (suc m)) → (f : Inj m m)
@@ -176,14 +154,6 @@ tensor (inc b f) (inc b' g) =
 
 _⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
 f ⊕ g = tensor f g
-
-test5 : Inj 5 6
-test5 = nul 1 ⊕ cycle-l 4 
-test5' = to-list test5
-
-test6 : Inj 1 2
-test6 = nul 1 ⊕ idInj 1 
-test6' = to-list test6
 
 <ʲ→≢ : ∀ {m n} → {f g : Inj m n}
      → f <ʲ g → f ≢ g
@@ -428,10 +398,3 @@ Injmm-isSurjective {suc (suc m)} (inc b f) y with b ≟ᶠ y
 -- Injmm-isSurjective {m = suc m} (inc (fsuc b) f) (fsuc y) =
 --   let x , fx≡y = Injmm-isSurjective f y
 --   in (fsplice fzero x) , {!cong fsuc fx≡y!}
-
-{-
-y  b
- \/
- /\
-.  x
--}

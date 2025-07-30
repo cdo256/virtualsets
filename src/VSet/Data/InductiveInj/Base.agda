@@ -48,6 +48,3 @@ cycle-l m = inc fmax (idInj m)
 cycle-r : ∀ m → Inj (suc m) (suc m)
 cycle-r zero = idInj 1
 cycle-r (suc m) = inc (fsuc fzero) (cycle-r m)
-
-c1 = to-list (cycle-r 3)
-c2 = to-list (cycle-l 3)
