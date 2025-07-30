@@ -46,11 +46,21 @@ apply-inv (inc b f) y = apply-inv-rec f b y (y ≟ᶠ b)
 insert : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
        → (f : Inj m n) → Inj (suc m) (suc n)
 insert fzero b f = inc b f
-insert (fsuc a) fzero (inc c f) =
-  inc (fsuc c) (insert a fzero f)
-insert (fsuc a) (fsuc b) (inc c f) =
-  inc (fsplice (fsuc b) c) (insert a b f)
+insert (fsuc a) b (inc c f) =
+  inc (fsplice b c) (insert a (antisplice c b) f)
 
+-- insert : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
+--        → (f : Inj m n) → Inj (suc m) (suc n)
+-- insert fzero b f =
+--   inc b f
+-- insert (fsuc a) b (inc c f) with b ≟ᶠ finj c
+-- ... | flt b<c = inc (fsuc c) (insert a (fin-restrict b b<c) f)
+-- ... | feq b≡c = inc (fsuc c) (insert a c f) -- using c≡b
+-- ... | fgt b>c = inc (finj c) (insert a (pred b) f)
+
+
+-- insert (fsuc a) fzero (inc c f) = inc (fsuc c) (insert a fzero f)
+-- insert (fsuc a) (fsuc b) (inc c f) = inc (fsplice (fsuc b) c) (insert a b f)
 
 inv : ∀ {m} → (f : Inj m m) → Inj m m
 inv {zero} (nul zero) = nul zero
