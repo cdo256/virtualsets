@@ -47,6 +47,9 @@ fsuc-injective : ∀ {n} {i j : Fin n} → fsuc {n} i ≡ fsuc {n} j → i ≡ j
 fsuc-injective {zero} {()} {()} 
 fsuc-injective {suc n} {i} {j} p = cong pred p
 
+¬a<a : ∀ {x} → (a : Fin x) → ¬ a <ᶠ a
+¬a<a (fsuc a) (<fsuc a<a) = ¬a<a a a<a
+
 <ᶠ→≢ : ∀ {x} → {a b : Fin x} → a <ᶠ b → a ≢ b
 <ᶠ→≢ {a = fzero} {b = fsuc b} <fzero a≡b = fzero≢fsuc b a≡b
 <ᶠ→≢ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≡b =
@@ -58,6 +61,14 @@ fsuc-injective {suc n} {i} {j} p = cong pred p
 ≤ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
 ≤ᶠ-respects-pred (inl a'<b') = inl (<ᶠ-respects-pred a'<b')
 ≤ᶠ-respects-pred (inr a'≡b') = inr (fsuc-injective a'≡b')
+
+≤ᶠ-respects-fsuc : ∀ {x} → {a b : Fin x} → a ≤ᶠ b → fsuc a ≤ᶠ fsuc b 
+≤ᶠ-respects-fsuc (inl a<b) = inl (<fsuc a<b)
+≤ᶠ-respects-fsuc (inr a≡b) = inr (cong fsuc a≡b)
+
+fzero≤a : ∀ {x : ℕ} → (a : Fin (suc x)) → fzero ≤ᶠ a
+fzero≤a fzero = inr refl
+fzero≤a (fsuc a) = inl <fzero
 
 -- finject : {x : ℕ} → (y : ℕ) → Fin x → Fin (x +ℕ y)
 -- finject {suc x} zero fzero = fzero
@@ -86,6 +97,16 @@ finject0≡subst {suc x} (fsuc a) =
   fsuc (subst Fin (sym (+-zero x)) a)
     ≡⟨ sym (transport-reorder Fin suc fsuc (sym (+-zero x)) a) ⟩
   subst Fin (sym (+-zero (suc x))) (fsuc a) ▯
+
+
+discreteFin : ∀ {x} → Discrete (Fin x)
+discreteFin a b with (a ≟ᶠ b)
+... | flt a<b = no (<ᶠ→≢ a<b)
+... | feq a≡b = yes a≡b
+... | fgt b<a = no (≢sym (<ᶠ→≢ b<a))
+
+isSetFin : ∀ {x} → isSet (Fin x)
+isSetFin = Discrete→isSet discreteFin
 
 finject-injective : {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
 finject-injective {x} zero a b fa≡fb = 
@@ -255,6 +276,21 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
 >→antisplice≡pred {suc m} (fsuc a1) (fsuc (fsuc a2)) (<fsuc a2>a1) =
   cong fsuc (>→antisplice≡pred a1 (fsuc a2) a2>a1)
 
+-- This is borked. I think funinj is too artificial.
+-- a<b→finj-funinj-a≡a
+--   : ∀ {m} → (a b : Fin (suc (suc m)))
+--   → a <ᶠ b → finj (funinj a) ≡ a
+-- a<b→finj-funinj-a≡a {zero} fzero (fsuc b) a<b = refl
+-- a<b→finj-funinj-a≡a {zero} (fsuc fzero) (fsuc fzero) a<b =
+--   absurd (¬a<a f1 a<b)
+-- a<b→finj-funinj-a≡a {suc m} fzero (fsuc b) a<b = refl
+-- a<b→finj-funinj-a≡a {suc zero} (fsuc fzero) (fsuc (fsuc fzero)) (<fsuc a<b) = {!!}
+-- a<b→finj-funinj-a≡a {suc zero} (fsuc (fsuc a)) (fsuc b) (<fsuc a<b) = {!!}
+-- a<b→finj-funinj-a≡a {suc (suc m)} (fsuc a) (fsuc b) (<fsuc a<b) = {!!}
+--   -- finj (funinj (fsuc a)) ≡⟨ {!!} ⟩
+--   -- finj (funinj (fsuc a)) ≡⟨ {!!} ⟩
+--   -- fsuc a ▯
+
 case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
 case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
   λ{ (fle _) → x
@@ -272,3 +308,18 @@ antisplice≡case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
 antisplice≡case a1 a2 with (a2 ≤?ᶠ finj a1)
 ... | fle a2≤a1 = ≤→antisplice≡id a1 a2 a2≤a1
 ... | fgt a2>a1 = cong finj (>→antisplice≡pred a1 a2 a2>a1)
+
+finj∘fsuc≡fsuc∘finj : ∀ {x} (a : Fin (suc x)) → finj (fsuc a) ≡ fsuc (finj a)
+finj∘fsuc≡fsuc∘finj a = refl
+
+weaken<-pred : ∀ {x} {a : Fin (suc x)} {b : Fin x}
+             → a <ᶠ fsuc b → a ≤ᶠ finj b 
+weaken<-pred {a = a} {b = b} <fzero = fzero≤a (finj b)
+weaken<-pred {a = fsuc a} {b = fsuc b} (<fsuc a<b) =
+  ≤ᶠ-respects-fsuc (weaken<-pred a<b)
+
+fin-restrict : ∀ {x} {b : Fin (suc x)} (a : Fin (suc x))
+             → a <ᶠ b → Fin x
+fin-restrict {suc x} fzero  <fzero = fzero
+fin-restrict {suc x} (fsuc a) (<fsuc a<b) = fsuc (fin-restrict a a<b)
+
