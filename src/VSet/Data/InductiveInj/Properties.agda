@@ -66,28 +66,80 @@ inv : ∀ {m} → (f : Inj m m) → Inj m m
 inv {zero} (nul zero) = nul zero
 inv {suc m} (inc c f) = insert c fzero (inv f)
 
-fsuc-apply≡apply-insert
-  : ∀ {m} → (b : Fin (suc m)) → (f : Inj m m)
-  → (y : Fin (suc m)) → (y<b : y <ᶠ b)
-  → (fsuc (apply f (fin-restrict y y<b)))
-  ≡ (apply (insert b f0 f) y)
-fsuc-apply≡apply-insert (fsuc b) (inc c f) fzero 0<b' =
+<→apply-insert≡fsuc-apply
+  : ∀ {m} → (a : Fin (suc m)) → (f : Inj m m)
+  → (y : Fin (suc m)) → (y<a : y <ᶠ a)
+  → (apply (insert a f0 f) y)
+  ≡ (fsuc (apply f (fin-restrict y y<a)))
+<→apply-insert≡fsuc-apply (fsuc a) (inc c f) fzero <fzero =
   cong fsuc (
-    apply (inc c f) (fin-restrict f0 0<b')
-      ≡⟨ cong (apply (inc c f)) {!!} ⟩
+    apply (inc c f) (fin-restrict f0 (<fzero {b = a}))
+      ≡⟨ refl ⟩
     apply (inc c f) fzero
       ≡⟨ refl ⟩
     c ▯)
-fsuc-apply≡apply-insert (fsuc b) (inc c f) (fsuc y) y'<b' = {!!}
-  -- fsuc (apply (inc c f) (fin-restrict y y<b'))
-  --   ≡⟨ {!!} ⟩
-  -- apply (inc (fsuc c) (insert b fzero f)) y
-  --   ≡⟨ refl ⟩
-  -- apply (insert (fsuc b) f0 (inc c f)) y ▯
+<→apply-insert≡fsuc-apply (fsuc a) (inc c f) (fsuc y) (<fsuc y<a) =
+  apply (insert (fsuc a) f0 (inc c f)) (fsuc y)
+    ≡⟨ refl ⟩
+  apply (inc (fsuc c) (insert a fzero f)) (fsuc y)
+    ≡⟨ refl ⟩
+  fsplice (fsuc c) (apply (insert a fzero f) y)
+    ≡⟨ cong (fsplice (fsuc c)) (<→apply-insert≡fsuc-apply a f y y<a) ⟩
+  fsplice (fsuc c) (fsuc (apply f (fin-restrict y y<a)))
+    ≡⟨ refl ⟩
+  fsuc (apply (inc c f) (fin-restrict (fsuc y) (<fsuc y<a))) ▯
 
---   -- just (fsuc (apply (inv f) (fin-restrict y y<b)))
---   --   ≡⟨ {!!} ⟩
---   -- just (apply (insert b f0 (inv f)) y) ▯
+fsplice-fsplice-fsuc
+  : ∀ {m} → (b c : Fin (suc m)) → (f : Inj m m)
+  → fsplice (fsplice (fsuc b) c) b 
+  ≡ fsuc b
+fsplice-fsplice-fsuc fzero fzero f = refl
+fsplice-fsplice-fsuc fzero (fsuc c) f = {!!}
+fsplice-fsplice-fsuc (fsuc b) c f = {!!}
+
+  -- fsplice (fsplice (fsuc b) c) b 
+  --   ≡⟨ {!!} ⟩
+  -- fsuc b ▯
+
+
+apply-insert
+  : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
+  → apply (insert a b f) a
+  ≡ b
+apply-insert fzero fzero (nul 0) = refl
+apply-insert fzero b (inc c f) = refl
+apply-insert (fsuc a) fzero (inc c f) =
+  apply (insert (fsuc a) f0 (inc c f)) (fsuc a)
+    ≡⟨ refl ⟩
+  apply (inc (fsuc c) (insert a f0 f)) (fsuc a)
+    ≡⟨ refl ⟩
+  fsplice (fsuc c) (apply (insert a f0 f) a) 
+    ≡⟨ cong (fsplice (fsuc c)) (apply-insert a f0 f) ⟩
+  fsplice (fsuc c) f0 
+    ≡⟨ refl ⟩
+  f0 ▯
+apply-insert (fsuc a) (fsuc b) (inc c f) =
+  apply (insert (fsuc a) (fsuc b) (inc c f)) (fsuc a)
+    ≡⟨ {!!} ⟩
+  apply (inc (fsplice (fsuc b) c) (insert a b f)) (fsuc a)
+    ≡⟨ refl ⟩
+  fsplice (fsplice (fsuc b) c) (apply (insert a b f) a) 
+    ≡⟨ cong (fsplice (fsplice (fsuc b) c)) (apply-insert a b f) ⟩
+  fsplice (fsplice (fsuc b) c) b 
+    ≡⟨ {!!} ⟩
+  fsuc b ▯
+
+≡→apply-insert≡fsuc-apply
+  : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
+  → (y : Fin (suc m)) → (y≡a : y ≡ a)
+  → (apply (insert a b f) y)
+  ≡ b
+≡→apply-insert≡fsuc-apply fzero fzero (nul .0) fzero _ = refl
+≡→apply-insert≡fsuc-apply a b (inc c f) y y≡a = {!!}
+-- ≡→apply-insert≡fsuc-apply a b (inc c f) y y≡b = {!!}
+  -- {!!}
+  --   ≡⟨ ? ⟩
+  -- ? ▯
 
 inv-is-apply-inv : ∀ {m} → (f : Inj m m) → (y : Fin m)
                  → apply-inv f y ≡ just (apply (inv f) y)
@@ -100,9 +152,14 @@ inv-is-apply-inv (inc b f) y | flt y<b =
   map-Maybe fsuc (just (apply (inv f) (fin-restrict y y<b)))
     ≡⟨ refl ⟩
   just (fsuc (apply (inv f) (fin-restrict y y<b)))
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong just (sym (<→apply-insert≡fsuc-apply b (inv f) y y<b)) ⟩
   just (apply (insert b f0 (inv f)) y) ▯
-inv-is-apply-inv (inc b f) y | feq y≡b = {!!}
+inv-is-apply-inv (inc b f) y | feq y≡b =
+  apply-inv-rec f b y (feq y≡b)
+    ≡⟨ refl ⟩
+  just f0
+    ≡⟨ cong just {!!} ⟩
+  just (apply (insert b f0 (inv f)) y) ▯
 inv-is-apply-inv (inc b f) y | fgt y>b = {!!}
 
 -- inv-is-apply-inv : ∀ {m} → (f : Inj m m) → (y : Fin m) → apply-inv f y ≡ just (apply (inv f) y)
@@ -227,6 +284,7 @@ insert-reorder fzero fzero b1 b2 f =
   insert (fsplice f0 f0) (fsplice b2 b1)
    (insert (antisplice f0 f0) (antisplice b1 b2) f) ▯
 insert-reorder (fsuc a1) a2 b1 b2 f = {!!}
+insert-reorder fzero (fsuc a2) b1 b2 f = {!!}
   -- insert a2 b2 (insert a1 b1 f)
   --   ≡⟨ {!!} ⟩
   -- insert (fsplice a2 a1) (fsplice b2 b1)
@@ -260,7 +318,7 @@ insert-isInjective {a = fsuc a} {b = fsuc b} {f = inc c1 f} {g = inc c2 g} f''�
   let c1≡c2 : c1 ≡ c2
       c1≡c2 = fsplice-isInjective (proj₁ (inc-isInjective f''≡g''))
       f≡g : f ≡ g
-      f≡g = insert-isInjective (proj₂ (inc-isInjective f''≡g''))
+      f≡g = insert-isInjective {!proj₂ (inc-isInjective f''≡g'')!}
   in cong₂ inc c1≡c2 f≡g
 
 f∘f⁻¹≡id : ∀ {m} (f : Inj m m) → f ∘ inv f ≡ idInj m
