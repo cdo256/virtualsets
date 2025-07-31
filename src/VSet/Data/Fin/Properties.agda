@@ -222,21 +222,6 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
 >→antisplice≡pred {suc m} (fsuc a1) (fsuc (fsuc a2)) (<fsuc a2>a1) =
   cong fsuc (>→antisplice≡pred a1 (fsuc a2) a2>a1)
 
--- This is borked. I think funinj is too artificial.
--- a<b→finj-funinj-a≡a
---   : ∀ {m} → (a b : Fin (suc (suc m)))
---   → a <ᶠ b → finj (funinj a) ≡ a
--- a<b→finj-funinj-a≡a {zero} fzero (fsuc b) a<b = refl
--- a<b→finj-funinj-a≡a {zero} (fsuc fzero) (fsuc fzero) a<b =
---   absurd (¬a<a f1 a<b)
--- a<b→finj-funinj-a≡a {suc m} fzero (fsuc b) a<b = refl
--- a<b→finj-funinj-a≡a {suc zero} (fsuc fzero) (fsuc (fsuc fzero)) (<fsuc a<b) = {!!}
--- a<b→finj-funinj-a≡a {suc zero} (fsuc (fsuc a)) (fsuc b) (<fsuc a<b) = {!!}
--- a<b→finj-funinj-a≡a {suc (suc m)} (fsuc a) (fsuc b) (<fsuc a<b) = {!!}
---   -- finj (funinj (fsuc a)) ≡⟨ {!!} ⟩
---   -- finj (funinj (fsuc a)) ≡⟨ {!!} ⟩
---   -- fsuc a ▯
-
 fsplice≡case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
              → fsplice a2 a1 ≡ (case≤?ᶠ a2 (finj a1) (fsuc a1) (finj a1))
 fsplice≡case a1 a2 with (a2 ≤?ᶠ finj a1)
