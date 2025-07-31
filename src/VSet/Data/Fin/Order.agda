@@ -78,3 +78,19 @@ a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
 fzero≤a : ∀ {x : ℕ} → (a : Fin (suc x)) → fzero ≤ᶠ a
 fzero≤a fzero = inr refl
 fzero≤a (fsuc a) = inl <fzero
+
+weaken<-pred : ∀ {x} {a : Fin (suc x)} {b : Fin x}
+             → a <ᶠ fsuc b → a ≤ᶠ finj b 
+weaken<-pred {a = a} {b = b} <fzero = fzero≤a (finj b)
+weaken<-pred {a = fsuc a} {b = fsuc b} (<fsuc a<b) =
+  ≤ᶠ-respects-fsuc (weaken<-pred a<b)
+
+fin-restrict : ∀ {x} {b : Fin (suc x)} (a : Fin (suc x))
+             → a <ᶠ b → Fin x
+fin-restrict {suc x} fzero  <fzero = fzero
+fin-restrict {suc x} (fsuc a) (<fsuc a<b) = fsuc (fin-restrict a a<b)
+
+case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
+case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
+  λ{ (fle _) → x
+   ; (fgt _) → y }

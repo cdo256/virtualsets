@@ -4,6 +4,7 @@ open import VSet.Prelude
 
 import Cubical.Data.Nat as ℕ
 open import Cubical.Data.Nat using (ℕ) renaming (_+_ to _+ℕ_)
+open import Cubical.Data.Maybe
 open import VSet.Data.Nat.Order
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
@@ -36,9 +37,9 @@ antisplice {suc x} (fsuc b) (fsuc a) =
 antisplice' : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
            → Fin (suc x)
 antisplice' b a with a ≟ᶠ finj b
-antisplice' b a | flt a<b = {!fin-restrict ? ?!}
+antisplice' b a | flt a<b = fin-restrict a a<b
 antisplice' b a | feq a≡b = b
-antisplice' b a | fgt a>b = {!!}
+antisplice' b (fsuc a) | fgt a>b = a
 
 -- Remove a from domain of b
 funsplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc x)) → a ≢ b
@@ -54,6 +55,26 @@ funsplice {x = suc (suc x)} (fsuc b) (fsuc a) a'≢b' =
 funsplice' : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → a ≢ b
            → Fin (suc x)
 funsplice' b a a≢b with a ≟ᶠ b
-... | flt a<b = {!fin-restrict!} a
+... | flt a<b = fin-restrict a a<b
 ... | feq a≡b = absurd (a≢b a≡b)
 ... | fgt b<a = pred a
+
+-- Another alternate definition
+funspliceMaybe
+  : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc x))
+  → Maybe (Fin x)
+funspliceMaybe fzero fzero = nothing
+funspliceMaybe {suc x} fzero (fsuc a) = just a
+funspliceMaybe {suc x} (fsuc b) fzero = just fzero
+funspliceMaybe {suc x} (fsuc b) (fsuc a) =
+  map-Maybe fsuc (funspliceMaybe b a)
+
+
+-- Another alternate definition
+funspliceMaybe'
+  : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x)))
+  → Maybe (Fin (suc x))
+funspliceMaybe' b a with a ≟ᶠ b
+... | flt a<b = just (fin-restrict a a<b)
+... | feq a≡b = nothing
+... | fgt b<a = just (pred a)

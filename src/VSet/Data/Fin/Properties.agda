@@ -237,11 +237,6 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
 --   -- finj (funinj (fsuc a)) ≡⟨ {!!} ⟩
 --   -- fsuc a ▯
 
-case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
-case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
-  λ{ (fle _) → x
-   ; (fgt _) → y }
-
 fsplice≡case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
              → fsplice a2 a1 ≡ (case≤?ᶠ a2 (finj a1) (fsuc a1) (finj a1))
 fsplice≡case a1 a2 with (a2 ≤?ᶠ finj a1)
@@ -257,15 +252,3 @@ antisplice≡case a1 a2 with (a2 ≤?ᶠ finj a1)
 
 finj∘fsuc≡fsuc∘finj : ∀ {x} (a : Fin (suc x)) → finj (fsuc a) ≡ fsuc (finj a)
 finj∘fsuc≡fsuc∘finj a = refl
-
-weaken<-pred : ∀ {x} {a : Fin (suc x)} {b : Fin x}
-             → a <ᶠ fsuc b → a ≤ᶠ finj b 
-weaken<-pred {a = a} {b = b} <fzero = fzero≤a (finj b)
-weaken<-pred {a = fsuc a} {b = fsuc b} (<fsuc a<b) =
-  ≤ᶠ-respects-fsuc (weaken<-pred a<b)
-
-fin-restrict : ∀ {x} {b : Fin (suc x)} (a : Fin (suc x))
-             → a <ᶠ b → Fin x
-fin-restrict {suc x} fzero  <fzero = fzero
-fin-restrict {suc x} (fsuc a) (<fsuc a<b) = fsuc (fin-restrict a a<b)
-
