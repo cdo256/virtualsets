@@ -85,3 +85,23 @@ finj (fsuc a) = fsuc (finj a)
 fmax : ∀ {x} → Fin (suc x)
 fmax {zero} = fzero
 fmax {suc x} = fsuc (fmax {x})
+
+fzero≢fsuc : ∀ {x : ℕ} (i : Fin x) → fzero ≢ fsuc i
+fzero≢fsuc {x} i p = transport (cong P p) tt
+  where
+    P : {x : ℕ} → Fin (suc x) → Type
+    P {x} fzero = ⊤
+    P {x} (fsuc a) = ⊥
+
+fsuc≢fzero : ∀ {x : ℕ} (i : Fin x) → fsuc i ≢ fzero 
+fsuc≢fzero a = ≢sym (fzero≢fsuc a) 
+
+Fin0≃⊥ : Fin 0 ≃ ⊥
+Fin0≃⊥ = (λ ()) , record { equiv-proof = absurd }
+
+Fin0-absurd : {A : Type ℓ} → Fin 0 → A
+Fin0-absurd ()
+
+fsuc-injective : ∀ {n} {i j : Fin n} → fsuc {n} i ≡ fsuc {n} j → i ≡ j
+fsuc-injective {zero} {()} {()} 
+fsuc-injective {suc n} {i} {j} p = cong pred p

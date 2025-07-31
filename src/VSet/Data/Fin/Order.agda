@@ -14,7 +14,6 @@ private
     ℓ : Level
     x y : ℕ
 
-
 data _<ᶠ_ : {x : ℕ} (a b : Fin x) → Type where
  <fzero : ∀ {x} {b : Fin x} → fzero <ᶠ fsuc b
  <fsuc : ∀ {x} {a b : Fin x} →  a <ᶠ b → fsuc a <ᶠ fsuc b
@@ -57,44 +56,25 @@ Trichotomy→Bichotomyᶠ (fgt b<a) = fgt b<a
 _≤?ᶠ_ : ∀ {x} → (a b : Fin x) → Bichotomyᶠ a b 
 a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
 
-fsplice : ∀ {x} → Fin (suc x) → Fin x → Fin (suc x)
-fsplice fzero a = fsuc a
-fsplice (fsuc b) fzero = fzero
-fsplice (fsuc b) (fsuc a) = fsuc (fsplice b a)
+¬a<a : ∀ {x} → (a : Fin x) → ¬ a <ᶠ a
+¬a<a (fsuc a) (<fsuc a<a) = ¬a<a a a<a
 
--- Alternate definition.
-fsplice' : ∀ {x : ℕ} → Fin (suc x) → Fin x → Fin (suc x)
-fsplice' b a with b ≤?ᶠ finj a
-... | fle b≤a = fsuc a
-... | fgt a<b = finj a
+<ᶠ→≢ : ∀ {x} → {a b : Fin x} → a <ᶠ b → a ≢ b
+<ᶠ→≢ {a = fzero} {b = fsuc b} <fzero a≡b = fzero≢fsuc b a≡b
+<ᶠ→≢ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≡b =
+  <ᶠ→≢ {a = a} {b = b} a<b (fsuc-injective a≡b)
 
--- Inverse to finj whenever a is not max.
-funinj : Fin (suc (suc x)) → Fin (suc x)
-funinj {x = zero} a = fzero
-funinj {x = suc x} fzero = fzero
-funinj {x = suc zero} (fsuc a) = fzero
-funinj {x = suc (suc x)} (fsuc a) = fsuc (funinj a)
+<ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a <ᶠ fsuc b → a <ᶠ b
+<ᶠ-respects-pred (<fsuc a'<b') = a'<b'
 
-antisplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
-           → Fin (suc x)
-antisplice _ fzero = fzero
-antisplice fzero (fsuc a) = a
-antisplice {suc x} (fsuc b) (fsuc a) =
-  fsuc (antisplice b a)
+≤ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
+≤ᶠ-respects-pred (inl a'<b') = inl (<ᶠ-respects-pred a'<b')
+≤ᶠ-respects-pred (inr a'≡b') = inr (fsuc-injective a'≡b')
 
--- Remove a from domain of b
-funsplice : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → .(a ≢ b)
-          → Fin (suc x)
-funsplice {x = zero} _ _ _ = fzero
-funsplice {x = suc x} _ fzero _ = fzero
-funsplice {x = suc x} fzero (fsuc a) _ = a
-funsplice {x = suc x} (fsuc b) (fsuc a) a'≢b' =
-  fsuc (funsplice b a λ a≡b → a'≢b' (cong fsuc a≡b))
+≤ᶠ-respects-fsuc : ∀ {x} → {a b : Fin x} → a ≤ᶠ b → fsuc a ≤ᶠ fsuc b 
+≤ᶠ-respects-fsuc (inl a<b) = inl (<fsuc a<b)
+≤ᶠ-respects-fsuc (inr a≡b) = inr (cong fsuc a≡b)
 
--- Alternate definition
-funsplice' : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → a ≢ b
-           → Fin (suc x)
-funsplice' b a a≢b with a ≟ᶠ b
-... | flt a<b = funinj a
-... | feq a≡b = absurd (a≢b a≡b)
-... | fgt b<a = pred a
+fzero≤a : ∀ {x : ℕ} → (a : Fin (suc x)) → fzero ≤ᶠ a
+fzero≤a fzero = inr refl
+fzero≤a (fsuc a) = inl <fzero

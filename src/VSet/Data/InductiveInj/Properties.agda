@@ -9,6 +9,7 @@ open import Cubical.Data.Nat.Properties
 open import Cubical.Data.List.Base hiding (elim; [_])
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
+open import VSet.Data.Fin.Splice
 open import VSet.Data.Fin.Properties
 open import VSet.Data.InductiveInj.Base 
 open import VSet.Data.InductiveInj.Order 

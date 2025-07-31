@@ -5,6 +5,8 @@ open import VSet.Data.InductiveInj.Base
 open import Cubical.Data.List.Base
 open import Cubical.Data.Nat.Base
 open import VSet.Data.Fin.Base
+open import VSet.Data.InductiveInj.Base
+open import VSet.Data.InductiveInj.Order
 open import VSet.Data.InductiveInj.Properties
 
 _ : to-list (cycle-r 3) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []

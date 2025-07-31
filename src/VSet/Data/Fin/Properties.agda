@@ -7,6 +7,7 @@ open import Cubical.Data.Nat using (ℕ; +-zero) renaming (_+_ to _+ℕ_)
 open import VSet.Data.Nat.Order
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
+open import VSet.Data.Fin.Splice
 open import VSet.Function.Injection
 
 open ℕ.ℕ
@@ -14,22 +15,6 @@ open ℕ.ℕ
 private
   variable
     ℓ : Level
-
-fzero≢fsuc : ∀ {x : ℕ} (i : Fin x) → fzero ≢ fsuc i
-fzero≢fsuc {x} i p = transport (cong P p) tt
-  where
-    P : {x : ℕ} → Fin (suc x) → Type
-    P {x} fzero = ⊤
-    P {x} (fsuc a) = ⊥
-
-fsuc≢fzero : ∀ {x : ℕ} (i : Fin x) → fsuc i ≢ fzero 
-fsuc≢fzero a = ≢sym (fzero≢fsuc a) 
-
-Fin0≃⊥ : Fin 0 ≃ ⊥
-Fin0≃⊥ = (λ ()) , record { equiv-proof = absurd }
-
-Fin0-absurd : {A : Type ℓ} → Fin 0 → A
-Fin0-absurd ()
 
 toℕ∘fromℕ≡id : {m : ℕ} → (n : ℕ) → (n<m : n < m) → toℕ {m} (fromℕ n n<m) ≡ n
 toℕ∘fromℕ≡id {zero} n n<0 =
@@ -42,44 +27,6 @@ toℕ∘fromℕ≡id {suc m} (suc n) sn<sm =
 toℕ<m : ∀ {m : ℕ} → (a : Fin m) → toℕ a < m 
 toℕ<m {suc m} fzero = 0<suc m
 toℕ<m {suc m} (fsuc a) = suc-<-suc (toℕ<m a)
-
-fsuc-injective : ∀ {n} {i j : Fin n} → fsuc {n} i ≡ fsuc {n} j → i ≡ j
-fsuc-injective {zero} {()} {()} 
-fsuc-injective {suc n} {i} {j} p = cong pred p
-
-¬a<a : ∀ {x} → (a : Fin x) → ¬ a <ᶠ a
-¬a<a (fsuc a) (<fsuc a<a) = ¬a<a a a<a
-
-<ᶠ→≢ : ∀ {x} → {a b : Fin x} → a <ᶠ b → a ≢ b
-<ᶠ→≢ {a = fzero} {b = fsuc b} <fzero a≡b = fzero≢fsuc b a≡b
-<ᶠ→≢ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≡b =
-  <ᶠ→≢ {a = a} {b = b} a<b (fsuc-injective a≡b)
-
-<ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a <ᶠ fsuc b → a <ᶠ b
-<ᶠ-respects-pred (<fsuc a'<b') = a'<b'
-
-≤ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
-≤ᶠ-respects-pred (inl a'<b') = inl (<ᶠ-respects-pred a'<b')
-≤ᶠ-respects-pred (inr a'≡b') = inr (fsuc-injective a'≡b')
-
-≤ᶠ-respects-fsuc : ∀ {x} → {a b : Fin x} → a ≤ᶠ b → fsuc a ≤ᶠ fsuc b 
-≤ᶠ-respects-fsuc (inl a<b) = inl (<fsuc a<b)
-≤ᶠ-respects-fsuc (inr a≡b) = inr (cong fsuc a≡b)
-
-fzero≤a : ∀ {x : ℕ} → (a : Fin (suc x)) → fzero ≤ᶠ a
-fzero≤a fzero = inr refl
-fzero≤a (fsuc a) = inl <fzero
-
--- finject : {x : ℕ} → (y : ℕ) → Fin x → Fin (x +ℕ y)
--- finject {suc x} zero fzero = fzero
--- finject {suc x} zero (fsuc a) = fsuc (finject zero a)
--- finject {suc x} (suc y) fzero = fzero
--- finject {suc x} (suc y) (fsuc a) = fsuc (finject {x} (suc y) a)
-
--- fzero-subst : {x y : ℕ} (p : suc x ≡ suc y) (a : Fin x)
---             → (λ i → {!!} i) [ fzero {n = y} ≡ subst Fin p (fzero {n = x}) ]
--- fzero-subst {x} {y} p a =
---   fzero {n = y} ≡P[ {!!} ][ p ∙P refl ]⟨ Fin ➢ {!!} ⟩ (subst Fin p (fzero {n = x}) ∎P)
 
 finject-fsuc-reorder : ∀ {x y : ℕ} → (a : Fin x)
                       → finject y (fsuc a) ≡ fsuc (finject y a)
@@ -98,15 +45,14 @@ finject0≡subst {suc x} (fsuc a) =
     ≡⟨ sym (transport-reorder Fin suc fsuc (sym (+-zero x)) a) ⟩
   subst Fin (sym (+-zero (suc x))) (fsuc a) ▯
 
-
-discreteFin : ∀ {x} → Discrete (Fin x)
-discreteFin a b with (a ≟ᶠ b)
+_≡?ᶠ_ : ∀ {x} → Discrete (Fin x)
+a ≡?ᶠ b with (a ≟ᶠ b)
 ... | flt a<b = no (<ᶠ→≢ a<b)
 ... | feq a≡b = yes a≡b
 ... | fgt b<a = no (≢sym (<ᶠ→≢ b<a))
 
 isSetFin : ∀ {x} → isSet (Fin x)
-isSetFin = Discrete→isSet discreteFin
+isSetFin = Discrete→isSet _≡?ᶠ_
 
 finject-injective : {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
 finject-injective {x} zero a b fa≡fb = 
