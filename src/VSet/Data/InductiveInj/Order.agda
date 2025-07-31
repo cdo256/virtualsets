@@ -67,3 +67,28 @@ f ≤?ʲ g = Trichotomy→Bichotomyʲ (f ≟ʲ g)
 ¬f<f : ∀ {f : Inj m n} → ¬ f <ʲ f
 ¬f<f {f = inc b g} (<j-suc g<g) = ¬f<f g<g
 ¬f<f {f = inc b g} (<j-fin _ b<b) = <ᶠ→≢ b<b refl
+
+<ʲ→≢ : ∀ {m n} → {f g : Inj m n}
+     → f <ʲ g → f ≢ g
+<ʲ→≢ {f = f} f<g f≡g = ¬f<f (subst (f <ʲ_) (sym f≡g) f<g)
+
+≡→≮ʲ : ∀ {m n} → {f g : Inj m n}
+     → f ≡ g → ¬ f <ʲ g
+≡→≮ʲ f≡g f<g = <ʲ→≢ f<g f≡g
+
+≮ʲ→≡ : ∀ {m n} → {f g : Inj m n}
+     → ¬ f <ʲ g → ¬ g <ʲ f → f ≡ g
+≮ʲ→≡ {f = nul _} {g = nul _} _ _ = refl
+≮ʲ→≡ {f = inc b f} {g = inc c g} f'≮g' g'≮f' with inc b f ≟ʲ inc c g
+... | jlt f'<g' = absurd (f'≮g' f'<g')
+... | jeq f'≡g' = f'≡g'
+... | jgt g'<f' = absurd (g'≮f' g'<f')
+
+discreteInj : Discrete (Inj m n)
+discreteInj f g with f ≟ʲ g
+... | jlt f<g = no (<ʲ→≢ f<g)
+... | jeq f≡g = yes f≡g
+... | jgt g<f = no (≢sym (<ʲ→≢ g<f))
+
+isSetInj : isSet (Inj m n)
+isSetInj = Discrete→isSet discreteInj

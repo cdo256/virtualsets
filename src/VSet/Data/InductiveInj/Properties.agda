@@ -1,6 +1,6 @@
 module VSet.Data.InductiveInj.Properties where
 
-open import VSet.Prelude hiding (_∘_)
+open import VSet.Prelude
 open import Cubical.Data.Prod.Base
 open import Cubical.Data.Sum.Base hiding (elim)
 open import Cubical.Data.Nat.Base hiding (elim)
@@ -19,30 +19,6 @@ open import Cubical.Data.Maybe.Base hiding (elim)
 private
   variable
     l l' m m' n n' : ℕ
-
-
-<→apply-insert≡fsuc-apply
-  : ∀ {m} → (a : Fin (suc m)) → (f : Inj m m)
-  → (y : Fin (suc m)) → (y<a : y <ᶠ a)
-  → (apply (insert a f0 f) y)
-  ≡ (fsuc (apply f (fin-restrict y y<a)))
-<→apply-insert≡fsuc-apply (fsuc a) (inc c f) fzero <fzero =
-  cong fsuc (
-    apply (inc c f) (fin-restrict f0 (<fzero {b = a}))
-      ≡⟨ refl ⟩
-    apply (inc c f) fzero
-      ≡⟨ refl ⟩
-    c ▯)
-<→apply-insert≡fsuc-apply (fsuc a) (inc c f) (fsuc y) (<fsuc y<a) =
-  apply (insert (fsuc a) f0 (inc c f)) (fsuc y)
-    ≡⟨ refl ⟩
-  apply (inc (fsuc c) (insert a fzero f)) (fsuc y)
-    ≡⟨ refl ⟩
-  fsplice (fsuc c) (apply (insert a fzero f) y)
-    ≡⟨ cong (fsplice (fsuc c)) (<→apply-insert≡fsuc-apply a f y y<a) ⟩
-  fsplice (fsuc c) (fsuc (apply f (fin-restrict y y<a)))
-    ≡⟨ refl ⟩
-  fsuc (apply (inc c f) (fin-restrict (fsuc y) (<fsuc y<a))) ▯
 
 fsplice-fsplice-fsuc
   : ∀ {m} → (b c : Fin (suc m)) → (f : Inj m m)
@@ -146,13 +122,6 @@ inv-is-apply-inv (inc b f) y | fgt y>b = {!!}
 -- -- inv-is-apply-inv (inc (fsuc b) f) (fsuc y) = {!!}
 
 
--- Not sure if this is the simplest way to do it.
-_∘_ : ∀ {l m n} → (g : Inj m n) → (f : Inj l m) → Inj l n 
-g ∘ nul _ = nul _
-inc c g ∘ inc b f =
-  let h'0 = apply (inc c g) (apply (inc b f) fzero)
-  in inc h'0 (g ∘ f)
-
 +suc : ∀ {m n} → m + suc n ≡ suc (m + n)
 +suc {zero} {n} = refl
 +suc {suc m} {n} = cong suc (+-suc m n)
@@ -176,31 +145,6 @@ tensor (inc b f) (inc b' g) =
 
 _⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
 f ⊕ g = tensor f g
-
-<ʲ→≢ : ∀ {m n} → {f g : Inj m n}
-     → f <ʲ g → f ≢ g
-<ʲ→≢ {f = f} f<g f≡g = ¬f<f (subst (f <ʲ_) (sym f≡g) f<g)
-
-≡→≮ʲ : ∀ {m n} → {f g : Inj m n}
-     → f ≡ g → ¬ f <ʲ g
-≡→≮ʲ f≡g f<g = <ʲ→≢ f<g f≡g
-
-≮ʲ→≡ : ∀ {m n} → {f g : Inj m n}
-     → ¬ f <ʲ g → ¬ g <ʲ f → f ≡ g
-≮ʲ→≡ {f = nul _} {g = nul _} _ _ = refl
-≮ʲ→≡ {f = inc b f} {g = inc c g} f'≮g' g'≮f' with inc b f ≟ʲ inc c g
-... | jlt f'<g' = absurd (f'≮g' f'<g')
-... | jeq f'≡g' = f'≡g'
-... | jgt g'<f' = absurd (g'≮f' g'<f')
-
-discreteInj : Discrete (Inj m n)
-discreteInj f g with f ≟ʲ g
-... | jlt f<g = no (<ʲ→≢ f<g)
-... | jeq f≡g = yes f≡g
-... | jgt g<f = no (≢sym (<ʲ→≢ g<f))
-
-isSetInj : isSet (Inj m n)
-isSetInj = Discrete→isSet discreteInj
 
 insert0≡inc
   : ∀ {m} (b : Fin (suc m)) (f : Inj m m)
@@ -247,14 +191,14 @@ insert-reorder fzero (fsuc a2) b1 b2 f = {!!}
 
 insert-comp
   : ∀ {l m n : ℕ} (b : Fin (suc m)) (f : Inj l m) (g : Inj m n)
-  → insert b f0 g ∘ insert f0 b f ≡ insert f0 f0 (g ∘ f)
+  → insert b f0 g ∘ʲ insert f0 b f ≡ insert f0 f0 (g ∘ʲ f)
 insert-comp fzero f g = refl
 insert-comp (fsuc b) f (inc c g) =
-  insert (fsuc b) f0 (inc c g) ∘ insert f0 (fsuc b) f
+  insert (fsuc b) f0 (inc c g) ∘ʲ insert f0 (fsuc b) f
     ≡⟨ refl ⟩
-  insert (fsuc b) f0 (inc c g) ∘ inc (fsuc b) f
+  insert (fsuc b) f0 (inc c g) ∘ʲ inc (fsuc b) f
     ≡⟨ {!!} ⟩
-  insert f0 f0 (inc c g ∘ f) ▯
+  insert f0 f0 (inc c g ∘ʲ f) ▯
 
 insert-isInjective
   : ∀ {m} {a b : Fin (suc m)} {f g : Inj m m}
@@ -276,37 +220,37 @@ insert-isInjective {a = fsuc a} {b = fsuc b} {f = inc c1 f} {g = inc c2 g} f''�
       f≡g = insert-isInjective {!proj₂ (inc-isInjective f''≡g'')!}
   in cong₂ inc c1≡c2 f≡g
 
-f∘f⁻¹≡id : ∀ {m} (f : Inj m m) → f ∘ inv f ≡ idInj m
+f∘f⁻¹≡id : ∀ {m} (f : Inj m m) → f ∘ʲ inv f ≡ idInj m
 f∘f⁻¹≡id (nul 0) = refl
 f∘f⁻¹≡id {m = suc m} (inc fzero f) =
-  inc f0 f ∘ inv (inc f0 f)
+  inc f0 f ∘ʲ inv (inc f0 f)
     ≡⟨ refl ⟩
-  inc f0 f ∘ insert f0 f0 (inv f)
+  inc f0 f ∘ʲ insert f0 f0 (inv f)
     ≡⟨ refl ⟩
-  inc f0 f ∘ inc f0 (inv f)
+  inc f0 f ∘ʲ inc f0 (inv f)
     ≡⟨ refl ⟩
   inc (apply (inc f0 f) (apply (insert f0 f0 (inv f)) f0))
-      (f ∘ inv f)
+      (f ∘ʲ inv f)
     ≡⟨ refl ⟩
   inc (apply (inc f0 f) (apply (inc f0 (inv f)) f0))
-      (f ∘ inv f)
+      (f ∘ʲ inv f)
     ≡⟨ refl ⟩
   inc (apply (inc f0 f) f0)
-      (f ∘ inv f)
+      (f ∘ʲ inv f)
     ≡⟨ refl ⟩
-  inc f0 (f ∘ inv f)
+  inc f0 (f ∘ʲ inv f)
     ≡⟨ cong (inc f0) (f∘f⁻¹≡id f) ⟩
   inc f0 (idInj m)
     ≡⟨ refl ⟩
   idInj (suc m) ▯
 f∘f⁻¹≡id {m = suc m} (inc (fsuc b) (inc c f)) =
-  inc (fsuc b) (inc c f) ∘ inv (inc (fsuc b) (inc c f))
+  inc (fsuc b) (inc c f) ∘ʲ inv (inc (fsuc b) (inc c f))
     ≡⟨ refl ⟩
-  inc (fsuc b) (inc c f) ∘ insert (fsuc b) f0 (inv (inc c f))
+  inc (fsuc b) (inc c f) ∘ʲ insert (fsuc b) f0 (inv (inc c f))
     ≡⟨ refl ⟩
-  insert f0 (fsuc b) (inc c f) ∘ insert (fsuc b) f0 (insert c f0 (inv f))
+  insert f0 (fsuc b) (inc c f) ∘ʲ insert (fsuc b) f0 (insert c f0 (inv f))
     ≡⟨ refl ⟩
-  inc (fsuc b) (inc c f) ∘ insert (fsuc b) f0 (insert c f0 (inv f))
+  inc (fsuc b) (inc c f) ∘ʲ insert (fsuc b) f0 (insert c f0 (inv f))
     ≡⟨ {!!} ⟩
   idInj (suc m) ▯
 
