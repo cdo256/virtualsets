@@ -5,6 +5,7 @@ open import VSet.Data.InductiveInj.Base
 open import Cubical.Data.List.Base
 open import Cubical.Data.Nat.Base
 open import VSet.Data.Fin.Base
+open import VSet.Data.Fin.Splice
 open import VSet.Data.InductiveInj.Base
 open import VSet.Data.InductiveInj.Order
 open import VSet.Data.InductiveInj.Inverse
@@ -75,13 +76,13 @@ _ = refl
 _ : to-list (inv (cycle-l 3)) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []
 _ = refl
 
-_ : idInj 2 ∘ cross ≡ cross
+_ : idInj 2 ∘ʲ cross ≡ cross
 _ = refl
 
-_ : cross ∘ idInj 2 ≡ cross
+_ : cross ∘ʲ idInj 2 ≡ cross
 _ = refl
 
-_ : to-list (cross ∘ cross) ≡ to-list (idInj 2)
+_ : to-list (cross ∘ʲ cross) ≡ to-list (idInj 2)
 _ = refl
 
 _ : to-list (shift 1 (idInj 2)) ≡ f1 ∷ f2 ∷ []
@@ -105,3 +106,45 @@ _ = refl
 _ : apply (insert f2 f0 g1) f2 ≡ f0
 _ = refl
 
+_ : apply (insert f0 f2 (idInj 2)) f1 ≡ fsplice f2 (apply (idInj 2) (antisplice f0 f1))
+_ = refl
+
+_ : apply (insert f0 f2 (idInj 2)) f2 ≡ fsplice f2 (apply (idInj 2) (antisplice f0 f2))
+_ = refl
+
+_ : apply (insert f0 f2 (idInj 2)) f2 ≡ fsplice f2 (apply (idInj 2) (antisplice f0 f2))
+_ = refl
+
+_ : apply (insert f1 f0 (idInj 2)) f0 ≡ fsplice f0 (apply (idInj 2) (antisplice f1 f0))
+_ = refl
+
+_ : apply (insert f1 f0 (idInj 2)) f1 ≡ f0
+_ = refl
+
+_ : apply (insert f1 f0 (idInj 2)) f2 ≡ fsplice f0 (apply (idInj 2) (antisplice f1 f2))
+_ = refl
+
+_ : apply (insert f1 f2 cross) f1 ≡ f2
+_ = refl
+
+_ : apply (insert f1 f2 cross) f0 ≡ fsplice f2 (apply cross (antisplice f1 f0))
+_ = refl
+
+_ : apply (insert f1 f2 cross) f2 ≡ fsplice f2 (apply cross (antisplice f1 f2))
+_ = refl
+
+-- (1 2 4 0)
+g2 : Inj 4 5
+g2 = (inc f1 $ inc f1 $ inc f2 $ inc f0 $ nul 1)
+
+_ : insert f1 f3 g2 ≡ (inc f1 $ inc f2 $ inc f1 $ inc f2 $ inc f0 $ nul 1)
+_ = refl
+
+_ : to-list (insert f1 f3 g2) ≡ f1 ∷ f3 ∷ f2 ∷ f5 ∷ f0 ∷ []
+_ = refl
+
+_ : apply (insert f1 f3 g2) f2 ≡ fsplice f3 (apply g2 (antisplice f1 f2))
+_ = refl
+
+_ : apply (insert f4 f3 g2) f2 ≡ fsplice f3 (apply g2 (antisplice f4 f2))
+_ = refl
