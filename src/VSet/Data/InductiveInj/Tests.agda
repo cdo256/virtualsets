@@ -7,6 +7,7 @@ open import Cubical.Data.Nat.Base
 open import VSet.Data.Fin.Base
 open import VSet.Data.InductiveInj.Base
 open import VSet.Data.InductiveInj.Order
+open import VSet.Data.InductiveInj.Inverse
 open import VSet.Data.InductiveInj.Properties
 
 _ : to-list (cycle-r 3) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []
@@ -94,3 +95,13 @@ _ = refl
 
 _ : to-list (nul 1 ⊕ idInj 1) ≡ f1 ∷ []
 _ = refl
+
+g1 : Inj 2 3
+g1 = (inc f2 $ inc f0 $ nul 1) 
+
+_ : (inc f3 $ inc f1 $ inc f0 $ nul 1) ≡ insert f2 f0 g1
+_ = refl
+
+_ : apply (insert f2 f0 g1) f2 ≡ f0
+_ = refl
+

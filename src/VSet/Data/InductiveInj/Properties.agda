@@ -13,59 +13,13 @@ open import VSet.Data.Fin.Splice
 open import VSet.Data.Fin.Properties
 open import VSet.Data.InductiveInj.Base 
 open import VSet.Data.InductiveInj.Order 
+open import VSet.Data.InductiveInj.Inverse 
 open import Cubical.Data.Maybe.Base hiding (elim)
 
 private
   variable
     l l' m m' n n' : ℕ
 
-inc-congP : ∀ {m m' n n'}
-          → {b : Fin (suc n)} {b' : Fin (suc n')}
-          → {f : Inj m n} {f' : Inj m' n'}
-          → (meq : m ≡ m') (neq : n ≡ n') (beq : (λ i → Fin (suc (neq i))) [ b ≡ b' ])
-          → (feq' : (λ i → Inj (meq i) (neq i)) [ f ≡ f' ])
-          → (λ i → cong₂ Injsuc meq neq i) [ (inc {m} {n} b f) ≡ inc {m'} {n'} b' f' ]
-inc-congP meq neq beq feq' i =
-  inc {meq i} {neq i} (beq i) (feq' i)
-
-inc-cong : ∀ {m n} (b b' : Fin (suc n))
-         → (f f' : Inj m n)
-         → (beq : b ≡ b') → (feq' : f ≡ f')
-         → inc b f ≡ inc b' f'
-inc-cong b b' f f' beq feq' = cong₂ inc beq feq'
-
-apply-inv-rec : {m n : ℕ} → (f : Inj m n) → (b y : Fin (suc n)) → Trichotomyᶠ y b → Maybe (Fin (suc m))
-apply-inv : {m n : ℕ} → (f : Inj m n) → (y : Fin n) → Maybe (Fin m)
-
-apply-inv-rec f b y (flt y<b) = map-Maybe fsuc (apply-inv f (fin-restrict y y<b))
-apply-inv-rec f b y (feq y≡b) = just fzero
-apply-inv-rec f b (fsuc y) (fgt y>b) = map-Maybe fsuc (apply-inv f y)
-
-apply-inv {zero} {n} (nul n) y = nothing
-apply-inv (inc b f) y = apply-inv-rec f b y (y ≟ᶠ b)
-
-insert : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
-       → (f : Inj m n) → Inj (suc m) (suc n)
-insert fzero b f = inc b f
-insert (fsuc a) b (inc c f) =
-  inc (fsplice b c) (insert a (antisplice c b) f)
-
--- insert : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
---        → (f : Inj m n) → Inj (suc m) (suc n)
--- insert fzero b f =
---   inc b f
--- insert (fsuc a) b (inc c f) with b ≟ᶠ finj c
--- ... | flt b<c = inc (fsuc c) (insert a (fin-restrict b b<c) f)
--- ... | feq b≡c = inc (fsuc c) (insert a c f) -- using c≡b
--- ... | fgt b>c = inc (finj c) (insert a (pred b) f)
-
-
--- insert (fsuc a) fzero (inc c f) = inc (fsuc c) (insert a fzero f)
--- insert (fsuc a) (fsuc b) (inc c f) = inc (fsplice (fsuc b) c) (insert a b f)
-
-inv : ∀ {m} → (f : Inj m m) → Inj m m
-inv {zero} (nul zero) = nul zero
-inv {suc m} (inc c f) = insert c fzero (inv f)
 
 <→apply-insert≡fsuc-apply
   : ∀ {m} → (a : Fin (suc m)) → (f : Inj m m)
