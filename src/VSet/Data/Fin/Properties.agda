@@ -15,6 +15,9 @@ open ℕ.ℕ
 private
   variable
     ℓ : Level
+    x y z : ℕ
+    a : Fin x
+    b : Fin y
 
 toℕ∘fromℕ≡id : {m : ℕ} → (n : ℕ) → (n<m : n < m) → toℕ {m} (fromℕ n n<m) ≡ n
 toℕ∘fromℕ≡id {zero} n n<0 =
@@ -44,6 +47,12 @@ finject0≡subst {suc x} (fsuc a) =
   fsuc (subst Fin (sym (+-zero x)) a)
     ≡⟨ sym (transport-reorder Fin suc fsuc (sym (+-zero x)) a) ⟩
   subst Fin (sym (+-zero (suc x))) (fsuc a) ▯
+
+_≈?ᶠ_ : ∀ {x} → (a : Fin x) (b : Fin y) → Dec (a ≈ᶠ b)
+a ≈?ᶠ b with (a ≟ᶠ b)
+... | flt a<b = no (<ᶠ→≉ a<b)
+... | feq a≈b = yes a≈b
+... | fgt b<a = no (≉fsym (<ᶠ→≉ b<a))
 
 _≡?ᶠ_ : ∀ {x} → Discrete (Fin x)
 a ≡?ᶠ b with (a ≟ᶠ b)
@@ -132,16 +141,16 @@ fzero≡subst-fzero : {x y : ℕ} (p : x ≡ y)
                   → fzero {y} ≡ subst (Fin ∘ suc) p (fzero {x})
 fzero≡subst-fzero {x} {y} p = resubst (Fin ∘ suc) (λ z → fzero {z}) p
 
-fsplice≢b : ∀ {x} → (b : Fin (suc x)) → (a : Fin x) → fsplice b a ≢ b
-fsplice≢b fzero a = fsuc≢fzero a
-fsplice≢b (fsuc b) fzero = fzero≢fsuc b
-fsplice≢b (fsuc b) (fsuc a) ne = 
-  let rec≢b = fsplice≢b b a
-  in rec≢b (fsuc-injective ne)
+fsplice≉b : ∀ {x} → (b : Fin (suc x)) → (a : Fin x) → fsplice b a ≉ᶠ b
+fsplice≉b fzero a = fsuc≉fzero
+fsplice≉b (fsuc b) fzero = fzero≉fsuc
+fsplice≉b (fsuc b) (fsuc a) ne = 
+  let rec≉b = fsplice≉b b a
+  in rec≉b (≈fsuc-injective ne)
 
 funsplice-fsplice-inverse
   : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc x))
-  → funsplice b (fsplice b a) (fsplice≢b b a) ≡ a
+  → funsplice b (fsplice b a) (fsplice≉b b a) ≡ a
 funsplice-fsplice-inverse {zero} fzero fzero = refl
 funsplice-fsplice-inverse {suc x} fzero fzero = refl
 funsplice-fsplice-inverse {suc x} fzero (fsuc a) = refl
@@ -149,16 +158,16 @@ funsplice-fsplice-inverse {zero} (fsuc b) fzero = refl
 funsplice-fsplice-inverse {suc x} (fsuc b) fzero = refl
 funsplice-fsplice-inverse {suc x} (fsuc b) (fsuc a) =
   funsplice (fsuc b) (fsplice (fsuc b) (fsuc a))
-   (fsplice≢b (fsuc b) (fsuc a))
+   (fsplice≉b (fsuc b) (fsuc a))
     ≡⟨ refl ⟩
   funsplice (fsuc b) (fsuc (fsplice b a)) 
-   (fsplice≢b (fsuc b) (fsuc a))
+   (fsplice≉b (fsuc b) (fsuc a))
     ≡⟨ refl ⟩
   fsuc (funsplice b (fsplice b a) 
-   (λ a≡b → fsplice≢b (fsuc b) (fsuc a) (cong fsuc a≡b)))
+   (λ a≡b → fsplice≉b (fsuc b) (fsuc a) (≈fsuc a≡b)))
     ≡⟨ refl ⟩
   fsuc (funsplice b (fsplice b a) 
-   (fsplice≢b b a))
+   (fsplice≉b b a))
     ≡⟨ cong fsuc (funsplice-fsplice-inverse b a) ⟩
   fsuc a ▯
 
@@ -178,9 +187,9 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
 
 ≤→fsplice≈suc : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
               → a2 ≤ᶠ finj a1 → fsplice a2 a1 ≈ᶠ fsuc a1
-≤→fsplice≈suc fzero fzero a2≤a1 = ?
+≤→fsplice≈suc fzero fzero a2≤a1 = {!!}
 ≤→fsplice≈suc fzero (fsuc a2) (inr a2'≈0) = absurd (fsuc≉fzero a2'≈0)
-≤→fsplice≈suc (fsuc a1) fzero a2≤a1 = ?
+≤→fsplice≈suc (fsuc a1) fzero a2≤a1 = {!!}
 ≤→fsplice≈suc {suc m} (fsuc a1) (fsuc a2) rec-le =
   ≈fsuc (≤→fsplice≈suc a1 a2 (≤ᶠ-respects-pred rec-le))
 
