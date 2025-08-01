@@ -15,15 +15,15 @@ private
   variable
     l l' m m' n n' : ℕ
 
-apply-inv-rec : {m n : ℕ} → (f : Inj m n) → (b y : Fin (suc n)) → Dec (y ≡ b) → Maybe (Fin (suc m))
+apply-inv-rec : {m n : ℕ} → (f : Inj m n) → (b y : Fin (suc n)) → Dec (y ≈ᶠ b) → Maybe (Fin (suc m))
 apply-inv : {m n : ℕ} → (f : Inj m n) → (y : Fin n) → Maybe (Fin m)
 
-apply-inv-rec f b y (yes y≡b) = just fzero
-apply-inv-rec f b y (no y≢b) =
-  map-Maybe fsuc (apply-inv f (funsplice b y y≢b))
+apply-inv-rec f b y (yes y≈b) = just fzero
+apply-inv-rec f b y (no y≉b) =
+  map-Maybe fsuc (apply-inv f (funsplice b y y≉b))
 
 apply-inv (nul _) _ = nothing
-apply-inv (inc b f) y = apply-inv-rec f b y (y ≡?ᶠ b)
+apply-inv (inc b f) y = apply-inv-rec f b y (y ≈?ᶠ b)
 
 insert : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
        → (f : Inj m n) → Inj (suc m) (suc n)
