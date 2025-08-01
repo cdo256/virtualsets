@@ -1,6 +1,6 @@
-module VSet.Data.Inj.Inverse where
+module VSet.Transform.Inverse where
 
-open import VSet.Prelude hiding (_∘_)
+open import VSet.Prelude
 open import Cubical.Data.Nat.Base hiding (elim)
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
