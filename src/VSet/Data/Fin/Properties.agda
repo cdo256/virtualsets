@@ -154,22 +154,22 @@ fsplice≉b (fsuc b) (fsuc a) ne =
 ≉fsuc a≉b (≈fsuc a≈b) = a≉b a≈b
 
 fsuc-funsplice 
-  : ∀ {x : ℕ} → (b a : Fin (suc (suc x))) → (a≉b : a ≉ᶠ b)
+  : ∀ {x : ℕ} → (b a : Fin (suc x)) → (a≉b : a ≉ᶠ b)
   → funsplice (fsuc b) (fsuc a) (≉fsuc a≉b)
   ≡ fsuc (funsplice b a a≉b)
-fsuc-funsplice b a a≉b with (a ≟ᶠ b)
-... | flt a<b = refl
-... | feq a≈b = absurd (a≉b a≈b)
-... | fgt a>b = sym (fsuc∘pred≡id {y = 1} (≉fsym (<ᶠ→≉ (≤<ᶠ-trans (fzero≤a b) a>b))))
+fsuc-funsplice b        a a≉b with (a ≟ᶠ b)
+fsuc-funsplice b        a a≉b | flt a<b = refl
+fsuc-funsplice b        a a≉b | feq a≈b = absurd (a≉b a≈b)
+fsuc-funsplice b (fsuc a) a≉b | fgt a>b = refl
 
 funsplice-irrelevant
   : ∀ {x : ℕ} → (b a : Fin (suc (suc x)))
   → (u v : a ≉ᶠ b)
   → funsplice b a u ≡ funsplice b a v
-funsplice-irrelevant b a u v with (a ≟ᶠ b)
-... | flt a<b = refl
-... | feq a≈b = absurd (u a≈b)
-... | fgt a>b = refl
+funsplice-irrelevant b        a u v with (a ≟ᶠ b)
+funsplice-irrelevant b        a u v | flt a<b = refl
+funsplice-irrelevant b        a u v | feq a≈b = absurd (u a≈b)
+funsplice-irrelevant b (fsuc a) u v | fgt a>b = refl
 
 funsplice-fsplice-inverse
   : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc x))

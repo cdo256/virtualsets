@@ -98,14 +98,14 @@ antisplice' b a = antisplice'-cases b a (a ≤?ᶠ b)
 -- funsplice {x = suc (suc x)} (fsuc b) (fsuc a) a'≉b' =
 --   fsuc (funsplice b a λ a≈b → a'≉b' (≈fsuc a≈b))
 
-funsplice-cases : ∀ {x : ℕ} → (b a : Fin (suc (suc x))) → a ≉ᶠ b
-                → Trichotomyᶠ a b → Fin (suc x)
+funsplice-cases : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
+                → Trichotomyᶠ a b → Fin x
 funsplice-cases b a a≉b (flt a<b) = fin-restrict a a<b
 funsplice-cases b a a≉b (feq a≈b) = absurd (a≉b a≈b)
-funsplice-cases b a a≉b (fgt b<a) = pred a
+funsplice-cases b (fsuc a) a≉b (fgt b<a) = a
 
-funsplice : ∀ {x : ℕ} → (b a : Fin (suc (suc x)))  → a ≉ᶠ b
-           → Fin (suc x)
+funsplice : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
+           → Fin x
 funsplice b a a≉b = funsplice-cases b a a≉b (a ≟ᶠ b)
 
 -- Another alternate definition
