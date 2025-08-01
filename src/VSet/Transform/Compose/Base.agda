@@ -1,4 +1,4 @@
-module VSet.Transform.Compose where
+module VSet.Transform.Compose.Base where
 
 open import VSet.Prelude
 open import Cubical.Data.Prod.Base hiding (map)

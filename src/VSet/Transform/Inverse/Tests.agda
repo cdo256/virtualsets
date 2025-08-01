@@ -62,7 +62,8 @@ _ = refl
 _ : apply (insert f1 f3 g2) f2 ≡ fsplice f3 (apply g2 (antisplice f1 f2))
 _ = refl
 
-_ : apply (insert f4 f3 g2) f2 ≡ fsplice f3 (apply g2 (antisplice f4 f2))
+_ : let a = f4; b = f3; x = f2
+    in λ x≉a : x ≉ᶠ a → apply (insert a b g2) x ≡ fsplice b (apply g2 (funsplice a x {!a≉x!}))
 _ = {!!}
 
 w = (antisplice f4 f2)

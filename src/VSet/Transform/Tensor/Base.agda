@@ -1,4 +1,4 @@
-module VSet.Data.Inj.Tensor where
+module VSet.Transform.Tensor.Base where
 
 open import VSet.Prelude
 open import Cubical.Data.Prod.Base
@@ -13,7 +13,7 @@ open import VSet.Data.Fin.Splice
 open import VSet.Data.Fin.Properties
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
-open import VSet.Data.Inj.Inverse 
+open import VSet.Transform.Inverse.Base
 open import Cubical.Data.Maybe.Base hiding (elim)
 open import VSet.Data.Inj.Properties
 

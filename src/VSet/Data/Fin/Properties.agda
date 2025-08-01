@@ -278,3 +278,22 @@ fsplice≈case a1 a2 with (a2 ≤?ᶠ finj a1)
 
 finj∘fsuc≈fsuc∘finj : ∀ {x} (a : Fin (suc x)) → finj (fsuc a) ≈ᶠ fsuc (finj a)
 finj∘fsuc≈fsuc∘finj a = ≈refl
+
+splice-splice-antisplice 
+  : ∀ {m} →  (b : Fin (suc (suc m))) → (c : Fin (suc m))
+  → fsplice (fsplice b c) (antisplice c b)
+  ≡ b
+splice-splice-antisplice fzero fzero = refl
+splice-splice-antisplice fzero (fsuc c) = refl
+splice-splice-antisplice (fsuc b) fzero = refl
+splice-splice-antisplice {m = suc m} (fsuc b) (fsuc c) =
+  fsplice (fsplice (fsuc b) (fsuc c))
+          (antisplice (fsuc c) (fsuc b))
+    ≡⟨ refl ⟩
+  fsplice (fsuc (fsplice b c))
+          (fsuc (antisplice c b))
+    ≡⟨ refl ⟩
+  fsuc (fsplice (fsplice b c)
+                (antisplice c b))
+    ≡⟨ cong fsuc (splice-splice-antisplice b c) ⟩
+  fsuc b ▯

@@ -8,7 +8,7 @@ open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Splice
 open import VSet.Data.Inj.Base
 open import VSet.Data.Inj.Order
-open import VSet.Data.Inj.Inverse
+open import VSet.Transform.Inverse
 open import VSet.Data.Inj.Properties
 
 _ : to-list (cycle-r 3) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []
@@ -76,24 +76,13 @@ _ = refl
 _ : to-list (inv (cycle-l 3)) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []
 _ = refl
 
-_ : idInj 2 ∘ʲ cross ≡ cross
-_ = refl
+test-fspliceL1-1 : fsplice-lemma1 fzero fzero (λ x → x) fzero fzero (λ ())
+test-fspliceL1-1 = refl
 
-_ : cross ∘ʲ idInj 2 ≡ cross
-_ = refl
+test-fspliceL1-2 : fsplice-lemma1 fzero (fsuc fzero) (λ x → x) fzero fzero (λ ())
+test-fspliceL1-2 = refl
 
-_ : to-list (cross ∘ʲ cross) ≡ to-list (idInj 2)
-_ = refl
+test-fspliceL1-3 : fsplice-lemma1 (fsuc fzero) (fsuc (fsuc fzero)) (λ x → x) (fsuc fzero) (fsuc fzero) (λ ())
+test-fspliceL1-3 = refl
 
-_ : to-list (shift 1 (idInj 2)) ≡ f1 ∷ f2 ∷ []
-_ = refl
-
-_ : to-list (idInj 1 ⊕ idInj 2) ≡ f0 ∷ f1 ∷ f2 ∷ []
-_ = refl
-
-_ : to-list (nul 1 ⊕ cycle-l 4) ≡ f5 ∷ f1 ∷ f2 ∷ f3 ∷ f4 ∷ []
-_ = refl
-
-_ : to-list (nul 1 ⊕ idInj 1) ≡ f1 ∷ []
-_ = refl
 
