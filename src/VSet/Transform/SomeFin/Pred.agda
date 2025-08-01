@@ -1,4 +1,4 @@
-module VSet.Transform.Pred where
+module VSet.Transform.SomeFin.Pred where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Core.Primitives
@@ -34,7 +34,7 @@ module Pred {x y : SomeFin} (f : [ suc x ↣ suc y ]) where
   composition : (ai : (b₁ b₂ : ⟦ x ⟧) → val (ins fzero b₁) ≡ val (ins fzero b₂) → b₁ ≡ b₂)
        → (di : (B₁ B₂ : (suc y) ∖ fst f fzero)
              → del (fst f fzero) B₁ ≡ del (fst f fzero) B₂ → val B₁ ≡ val B₂)
-       → Injective g^
+       → is-injective g^
   composition ai di b₁ b₂ f'b₁≡f'b₂ =
     let
       (c₁ — z≢c₁) = ins fzero b₁

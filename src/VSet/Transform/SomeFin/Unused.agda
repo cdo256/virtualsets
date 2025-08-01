@@ -1,5 +1,5 @@
 -- Functions proven but not currently needed
-module VSet.Transform.Unused where
+module VSet.Transform.SomeFin.Unused where
 
 open import VSet.Prelude
 open import VSet.Function.Injection
@@ -13,8 +13,8 @@ open import VSet.Data.Fin renaming (pred to fpred)
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
 open import VSet.Data.SomeFin.Properties
-open import VSet.Transform.Split using (⊎↔+)
-open import VSet.Transform.Pred
+open import VSet.Transform.SomeFin.Split using (⊎↔+)
+open import VSet.Transform.SomeFin.Pred
 
 inc-func : ∀ {X Y : SomeFin} → (⟦ X ⟧ → ⟦ Y ⟧) → (⟦ suc X ⟧ → ⟦ suc Y ⟧)
 inc-func f fzero = fzero

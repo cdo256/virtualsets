@@ -1,4 +1,4 @@
-module VSet.Transform.Tensor where
+module VSet.Transform.SomeFin.Tensor where
 
 open import VSet.Prelude
 open import VSet.Function.Injection
@@ -13,8 +13,8 @@ open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
 open import VSet.Data.SomeFin.Equality
 open import VSet.Data.SomeFin.Properties
-open import VSet.Transform.Split
-open import VSet.Transform.Pred
+open import VSet.Transform.SomeFin.Split
+open import VSet.Transform.SomeFin.Pred
 
 tensor : ∀ {W X Y Z : SomeFin} → [ W ↣ X ] → [ Y ↣ Z ] → [ W + Y ↣ X + Z ]
 tensor {W} {X} {Y} {Z} f g = ↔to↣ (⊎↔+ X Z) ↣∘↣ ↣-map-⊎ f g ↣∘↣ ↔to↣ (flip-↔ (⊎↔+ W Y))

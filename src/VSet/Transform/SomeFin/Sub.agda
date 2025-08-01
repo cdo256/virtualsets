@@ -1,11 +1,11 @@
-module VSet.Transform.Sub where
+module VSet.Transform.SomeFin.Sub where
 
 open import VSet.Prelude
 open import VSet.Data.Fin hiding (pred)
 
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
-open import VSet.Transform.Pred
+open import VSet.Transform.SomeFin.Pred
 
 sub : {X Y : SomeFin} (A : SomeFin) → (f : [ A + X ↣ A + Y ]) → [ X ↣ Y ]
 sub zero f = f

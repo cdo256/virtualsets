@@ -1,4 +1,4 @@
-module VSet.Transform.Split where
+module VSet.Transform.SomeFin.Split where
 
 open import VSet.Prelude
 open import VSet.Data.Fin

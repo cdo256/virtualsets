@@ -1,4 +1,4 @@
-module VSet.Transform.Inflate where
+module VSet.Transform.SomeFin.Inflate where
 
 open import VSet.Prelude
 
@@ -16,7 +16,7 @@ open import VSet.Relation.WellFounded.Lex
 open import Cubical.Relation.Binary.Base 
 open import VSet.Data.Nat.WellFounded 
 
-open import VSet.Transform.Split hiding (sect; retr)
+open import VSet.Transform.SomeFin.Split hiding (sect; retr)
 
 open WFI
 

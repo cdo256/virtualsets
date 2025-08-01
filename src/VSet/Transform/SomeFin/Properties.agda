@@ -1,4 +1,4 @@
-module VSet.Transform.Properties where
+module VSet.Transform.SomeFin.Properties where
 
 open import VSet.Prelude
 open import VSet.Data.Fin hiding (pred)
@@ -9,10 +9,10 @@ open import VSet.Function.Properties
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
 open import VSet.Data.SomeFin.Equality
-open import VSet.Transform.Sub
-open import VSet.Transform.Tensor
-open import VSet.Transform.Split using (⊎↔+; ⊎→+; +→⊎)
-open import VSet.Transform.Pred
+open import VSet.Transform.SomeFin.Sub
+open import VSet.Transform.SomeFin.Tensor
+open import VSet.Transform.SomeFin.Split using (⊎↔+; ⊎→+; +→⊎)
+open import VSet.Transform.SomeFin.Pred
 
 open import Cubical.Data.Nat.Properties
 

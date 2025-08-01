@@ -1,4 +1,4 @@
-module VSet.Transform.Compose where
+module VSet.Transform.SomeFin.Compose where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
@@ -19,7 +19,7 @@ open import VSet.Function.Properties
 
 open import VSet.Data.SomeFin.Base
 open import VSet.Data.SomeFin.Injection
-open import VSet.Transform.Pred
+open import VSet.Transform.SomeFin.Pred
 
 infixl 8 _⊙_
 

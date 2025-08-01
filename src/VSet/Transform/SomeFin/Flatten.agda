@@ -1,4 +1,4 @@
-module VSet.Transform.Flatten where
+module VSet.Transform.SomeFin.Flatten where
 
 open import VSet.Prelude
 
@@ -9,7 +9,7 @@ open import VSet.Data.SomeFin.Base
 open import VSet.Data.SumTree.Base
 open import VSet.Data.SumTree.Metrics
 
-open import VSet.Transform.Split hiding (sect; retr)
+open import VSet.Transform.SomeFin.Split hiding (sect; retr)
 
 flatten : (A : Tree ℕ) → ⟦ A ⟧ₛ → ⟦ Σ∥ A ∥ ⟧
 flatten ⟨ X ⟩ₜ a = a
