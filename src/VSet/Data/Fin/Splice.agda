@@ -22,10 +22,54 @@ fsplice (fsuc b) fzero = fzero
 fsplice (fsuc b) (fsuc a) = fsuc (fsplice b a)
 
 -- Alternate definition.
+fsplice'-cases : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x) → (Bichotomyᶠ b a)
+               → Fin (suc x)
+fsplice'-cases _ a (fle _) = fsuc a
+fsplice'-cases _ a (fgt _) = finj a
+
+fsplice'-cases-eq
+   : ∀ {x} → {b : Fin (suc x)} → {a : Fin x}
+   → (u v : Bichotomyᶠ b a)
+   → fsplice'-cases b a u ≡ fsplice'-cases b a v
+fsplice'-cases-eq (fle u) (fle v) = refl
+fsplice'-cases-eq (fle u) (fgt v) = absurd (≤ᶠ→≯ᶠ u v)
+fsplice'-cases-eq (fgt u) (fle v) = absurd (≤ᶠ→≯ᶠ v u)
+fsplice'-cases-eq (fgt u) (fgt v) = refl
+
 fsplice' : ∀ {x : ℕ} → Fin (suc x) → Fin x → Fin (suc x)
-fsplice' b a with b ≤?ᶠ finj a
-... | fle b≤a = fsuc a
-... | fgt a<b = finj a
+fsplice' b a = fsplice'-cases b a (b ≤?ᶠ a)
+
+fsplice≡fsplice'
+  : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x)
+  → fsplice b a ≡ fsplice' b a
+fsplice≡fsplice' fzero fzero = refl
+fsplice≡fsplice' fzero (fsuc a) = refl
+fsplice≡fsplice' (fsuc b) fzero = refl
+fsplice≡fsplice' (fsuc b) (fsuc a) with (fsuc b ≤?ᶠ fsuc a)
+... | fle b'≤a' = 
+  fsuc (fsplice b a)
+    ≡⟨ cong fsuc (fsplice≡fsplice' b a) ⟩
+  fsuc (fsplice' b a)
+    ≡⟨ refl ⟩
+  fsuc (fsplice'-cases b a (b ≤?ᶠ a))
+    ≡⟨ cong fsuc (fsplice'-cases-eq (b ≤?ᶠ a) (fle (≤-pred b'≤a'))) ⟩
+  fsuc (fsplice'-cases b a (fle (≤-pred b'≤a')))
+    ≡⟨ refl ⟩
+  fsuc (fsuc a)
+    ≡⟨ refl ⟩
+  fsplice'-cases (fsuc b) (fsuc a) (fle b'≤a') ▯
+... | fgt (<fsuc b>a) =
+  fsuc (fsplice b a)
+    ≡⟨ cong fsuc (fsplice≡fsplice' b a) ⟩
+  fsuc (fsplice' b a)
+    ≡⟨ refl ⟩
+  fsuc (fsplice'-cases b a (b ≤?ᶠ a))
+    ≡⟨ cong fsuc (fsplice'-cases-eq (b ≤?ᶠ a) (fgt b>a)) ⟩
+  fsuc (fsplice'-cases b a (fgt b>a))
+    ≡⟨ refl ⟩
+  fsuc (finj a)
+    ≡⟨ refl ⟩
+  fsplice'-cases (fsuc b) (fsuc a) (fgt (<fsuc b>a)) ▯
 
 antisplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
            → Fin (suc x)
@@ -34,12 +78,17 @@ antisplice fzero (fsuc a) = a
 antisplice {suc x} (fsuc b) (fsuc a) =
   fsuc (antisplice b a)
 
+antisplice'-cases : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
+           → Trichotomyᶠ a (finj b)
+           → Fin (suc x)
+antisplice'-cases b a (flt a<b) = fin-restrict a a<b
+antisplice'-cases b a (feq a≡b) = b
+antisplice'-cases b (fsuc a) (fgt a>b) = a
+
+
 antisplice' : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
            → Fin (suc x)
-antisplice' b a with a ≟ᶠ finj b
-antisplice' b a | flt a<b = fin-restrict a a<b
-antisplice' b a | feq a≡b = b
-antisplice' b (fsuc a) | fgt a>b = a
+antisplice' b a = antisplice'-cases b a (a ≟ᶠ finj b)
 
 -- Remove a from domain of b
 funsplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc x)) → a ≢ b
@@ -52,7 +101,7 @@ funsplice {x = suc (suc x)} (fsuc b) (fsuc a) a'≢b' =
   fsuc (funsplice b a λ a≡b → a'≢b' (cong fsuc a≡b))
 
 -- Alternate definition
-funsplice' : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → a ≢ b
+funsplice' : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → a ≉ᶠ b
            → Fin (suc x)
 funsplice' b a a≢b with a ≟ᶠ b
 ... | flt a<b = fin-restrict a a<b
