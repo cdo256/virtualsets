@@ -14,9 +14,10 @@ private
     ℓ : Level
     x y : ℕ
 
-data _<ᶠ_ : {x : ℕ} (a b : Fin x) → Type where
- <fzero : ∀ {x} {b : Fin x} → fzero <ᶠ fsuc b
- <fsuc : ∀ {x} {a b : Fin x} →  a <ᶠ b → fsuc a <ᶠ fsuc b
+
+data _<ᶠ_ : {x y : ℕ} (a : Fin x) → (b : Fin y) → Type where
+  <fzero : ∀ {x y} {b : Fin y} → (fzero {x}) <ᶠ fsuc b
+  <fsuc : ∀ {x y} {a : Fin x} {b : Fin y} → a <ᶠ b → fsuc a <ᶠ fsuc b
 
 _≤ᶠ_ : ∀ {x} (a b : Fin x) → Type
 a ≤ᶠ b = (a <ᶠ b) ⊎ (a ≡ b)
