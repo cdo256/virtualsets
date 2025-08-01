@@ -12,80 +12,113 @@ open ℕ.ℕ
 private
   variable
     ℓ : Level
-    x y : ℕ
-
+    x y z : ℕ
+    a : Fin x
+    b : Fin y
+    c : Fin z
 
 data _<ᶠ_ : {x y : ℕ} (a : Fin x) → (b : Fin y) → Type where
-  <fzero : ∀ {x y} {b : Fin y} → (fzero {x}) <ᶠ fsuc b
-  <fsuc : ∀ {x y} {a : Fin x} {b : Fin y} → a <ᶠ b → fsuc a <ᶠ fsuc b
+  <fzero : {b : Fin y} → (fzero {x}) <ᶠ fsuc b
+  <fsuc : {a : Fin x} {b : Fin y} → a <ᶠ b → fsuc a <ᶠ fsuc b
 
-_≤ᶠ_ : ∀ {x} (a b : Fin x) → Type
-a ≤ᶠ b = (a <ᶠ b) ⊎ (a ≡ b)
+data _≈ᶠ_ : {x y : ℕ} (a : Fin x) → (b : Fin y) → Type where
+  ≈fzero : (fzero {x}) ≈ᶠ (fzero {y})
+  ≈fsuc : {a : Fin x} {b : Fin y} → a ≈ᶠ b → fsuc a ≈ᶠ fsuc b
+
+≈fsym : a ≈ᶠ b → b ≈ᶠ a
+≈fsym ≈fzero = ≈fzero
+≈fsym (≈fsuc a≈b) = ≈fsuc (≈fsym a≈b)
+
+≈refl : a ≈ᶠ a
+≈refl {a = fzero} = ≈fzero
+≈refl {a = fsuc a} = ≈fsuc (≈refl {a = a})
+
+≡→≈ᶠ : {a b : Fin x} → a ≡ b → a ≈ᶠ b 
+≡→≈ᶠ {a = a} a≡b = subst (a ≈ᶠ_) a≡b ≈refl
+
+≈ᶠ→≡ : {a b : Fin x} → a ≈ᶠ b → a ≡ b
+≈ᶠ→≡ ≈fzero = refl
+≈ᶠ→≡ (≈fsuc a≈b) = cong fsuc (≈ᶠ→≡ a≈b)
+
+_≉ᶠ_ : Fin x → Fin y → Type
+a ≉ᶠ b = ¬ a ≈ᶠ b
+
+fzero≉fsuc : fzero {x} ≉ᶠ fsuc b
+fzero≉fsuc ()
+
+fsuc≉fzero : fsuc a ≉ᶠ fzero {y}
+fsuc≉fzero ()
+
+≈fsuc-injective : fsuc a ≈ᶠ fsuc b → a ≈ᶠ b
+≈fsuc-injective (≈fsuc a≈b) = a≈b
+
+_≤ᶠ_ : (a : Fin x) (b : Fin y) → Type
+_≤ᶠ_ {x = x} {y = y} a b = (a <ᶠ b) ⊎ (a ≈ᶠ b)
 
 isProp<ᶠ : {a b : Fin x} → isProp (a <ᶠ b)
 isProp<ᶠ <fzero <fzero = refl
 isProp<ᶠ (<fsuc x) (<fsuc y) = cong <fsuc (isProp<ᶠ x y)
 
-data Trichotomyᶠ {x} (a b : Fin x) : Type where
+data Trichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
   flt : a <ᶠ b → Trichotomyᶠ a b
-  feq : a ≡ b → Trichotomyᶠ a b
+  feq : a ≈ᶠ b → Trichotomyᶠ a b
   fgt : b <ᶠ a → Trichotomyᶠ a b
 
 open Trichotomyᶠ
 
-data Bichotomyᶠ {x} (a b : Fin x) : Type where
+data Bichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
   fle : a ≤ᶠ b → Bichotomyᶠ a b
   fgt : b <ᶠ a → Bichotomyᶠ a b
 
 open Bichotomyᶠ
 
-_≟ᶠ-suc_ : ∀ {x} → (a b : Fin x)
+_≟ᶠ-suc_ : ∀ {x} → (a : Fin x) (b : Fin y)
           → Trichotomyᶠ a b → Trichotomyᶠ (fsuc a) (fsuc b) 
 (a ≟ᶠ-suc b) (flt a<b) = flt (<fsuc a<b)
-(a ≟ᶠ-suc b) (feq a≡b) = feq (cong fsuc a≡b)
+(a ≟ᶠ-suc b) (feq a≈b) = feq (≈fsuc a≈b)
 (a ≟ᶠ-suc b) (fgt b<a) = fgt (<fsuc b<a)
 
-_≟ᶠ_ : ∀ {x} → (a b : Fin x) → Trichotomyᶠ a b 
-fzero ≟ᶠ fzero = feq refl
+_≟ᶠ_ : ∀ (a : Fin x) (b : Fin y) → Trichotomyᶠ a b 
+fzero ≟ᶠ fzero = feq (≈fzero)
 fzero ≟ᶠ fsuc b = flt <fzero
 fsuc a ≟ᶠ fzero = fgt <fzero
 fsuc a ≟ᶠ fsuc b = (a ≟ᶠ-suc b) (a ≟ᶠ b)
 
 Trichotomy→Bichotomyᶠ
-  : ∀ {x} {a b : Fin x}
+  : ∀ {x} {a : Fin x} {b : Fin y}
   → Trichotomyᶠ a b → Bichotomyᶠ a b 
 Trichotomy→Bichotomyᶠ (flt a<b) = fle (inl a<b)
-Trichotomy→Bichotomyᶠ (feq a≡b) = fle (inr a≡b)
+Trichotomy→Bichotomyᶠ (feq a≈b) = fle (inr a≈b)
 Trichotomy→Bichotomyᶠ (fgt b<a) = fgt b<a
 
-_≤?ᶠ_ : ∀ {x} → (a b : Fin x) → Bichotomyᶠ a b 
+_≤?ᶠ_ : (a : Fin x) (b : Fin y) → Bichotomyᶠ a b 
 a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
 
-¬a<a : ∀ {x} → (a : Fin x) → ¬ a <ᶠ a
+¬a<a : (a : Fin x) → ¬ a <ᶠ a
 ¬a<a (fsuc a) (<fsuc a<a) = ¬a<a a a<a
 
-<ᶠ→≢ : ∀ {x} → {a b : Fin x} → a <ᶠ b → a ≢ b
-<ᶠ→≢ {a = fzero} {b = fsuc b} <fzero a≡b = fzero≢fsuc b a≡b
-<ᶠ→≢ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≡b =
-  <ᶠ→≢ {a = a} {b = b} a<b (fsuc-injective a≡b)
+<ᶠ→≉ : {a : Fin x} {b : Fin y} → a <ᶠ b → a ≉ᶠ b
+<ᶠ→≉ {a = fzero} {b = fsuc b} <fzero a≈b = fzero≉fsuc a≈b
+<ᶠ→≉ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≈b =
+  <ᶠ→≉ {a = a} {b = b} a<b (≈fsuc-injective a≈b)
 
-≤ᶠ→≯ᶠ : ∀ {x} {a b : Fin x} → a ≤ᶠ b → ¬ b <ᶠ a
+≤ᶠ→≯ᶠ : {a : Fin x} {b : Fin y} → a ≤ᶠ b → ¬ b <ᶠ a
 ≤ᶠ→≯ᶠ (inl (<fsuc a<b)) (<fsuc a>b) = ≤ᶠ→≯ᶠ (inl a<b) a>b
-≤ᶠ→≯ᶠ (inr a≡b) a>b = <ᶠ→≢ a>b (sym a≡b)
+≤ᶠ→≯ᶠ (inr a≈b) a>b = <ᶠ→≉ a>b (≈fsym a≈b)
 
-<ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a <ᶠ fsuc b → a <ᶠ b
+<ᶠ-respects-pred : {a : Fin x} {b : Fin y} → fsuc a <ᶠ fsuc b → a <ᶠ b
 <ᶠ-respects-pred (<fsuc a'<b') = a'<b'
 
-≤ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
+≤ᶠ-respects-pred : {a : Fin x} {b : Fin y} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
 ≤ᶠ-respects-pred (inl a'<b') = inl (<ᶠ-respects-pred a'<b')
-≤ᶠ-respects-pred (inr a'≡b') = inr (fsuc-injective a'≡b')
+≤ᶠ-respects-pred (inr a'≈b') = inr (≈fsuc-injective a'≈b')
 
-≤ᶠ-respects-fsuc : ∀ {x} → {a b : Fin x} → a ≤ᶠ b → fsuc a ≤ᶠ fsuc b 
+≤ᶠ-respects-fsuc : {a : Fin x} {b : Fin y} → a ≤ᶠ b → fsuc a ≤ᶠ fsuc b 
 ≤ᶠ-respects-fsuc (inl a<b) = inl (<fsuc a<b)
-≤ᶠ-respects-fsuc (inr a≡b) = inr (cong fsuc a≡b)
+≤ᶠ-respects-fsuc (inr a≈b) = inr (≈fsuc a≈b)
 
-fzero≤a : ∀ {x : ℕ} → (a : Fin (suc x)) → fzero ≤ᶠ a
-fzero≤a fzero = inr refl
+fzero≤a : ∀ {x : ℕ} → (a : Fin (suc x)) → fzero {y} ≤ᶠ a
+fzero≤a fzero = inr ≈fzero
 fzero≤a (fsuc a) = inl <fzero
 
 weaken<-pred : ∀ {x} {a : Fin (suc x)} {b : Fin x}
@@ -99,16 +132,44 @@ fin-restrict : ∀ {x} {b : Fin (suc x)} (a : Fin (suc x))
 fin-restrict {suc x} fzero  <fzero = fzero
 fin-restrict {suc x} (fsuc a) (<fsuc a<b) = fsuc (fin-restrict a a<b)
 
-<ᶠ-trans : ∀ {x} {a b c : Fin x} → a <ᶠ b → b <ᶠ c → a <ᶠ c
+<ᶠ-trans : ∀ {x} {a : Fin x} {b : Fin y} {c : Fin z} → a <ᶠ b → b <ᶠ c → a <ᶠ c
 <ᶠ-trans <fzero (<fsuc b<c) = <fzero
 <ᶠ-trans (<fsuc a<b) (<fsuc b<c) = <fsuc (<ᶠ-trans a<b b<c)
 
--- <-suc : ∀ {x} {a : Fin x} {b : Fin x} → a ≤ᶠ b → a <ᶠ fsuc a 
--- <-suc 
+<-suc : ∀ (a : Fin x) → a <ᶠ fsuc a 
+<-suc fzero = <fzero
+<-suc (fsuc a) = <fsuc (<-suc a)
 
-≤ᶠ→<ᶠ : ∀ {x} {a : Fin x} {b : Fin x} → a ≤ᶠ b → a <ᶠ b
-≤ᶠ→<ᶠ (inl a<b) = {!!}
-≤ᶠ→<ᶠ (inr a≡b) = {!!}
+≤-pred : ∀ {a : Fin x} {b : Fin y} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
+≤-pred (inl (<fsuc a<b)) = inl a<b
+≤-pred (inr (≈fsuc a≈b)) = inr a≈b
+
+fsuc≤fsuc : a ≤ᶠ b → fsuc a ≤ᶠ fsuc b
+fsuc≤fsuc (inl a<b) = inl (<fsuc a<b)
+fsuc≤fsuc (inr a≈b) = inr (≈fsuc a≈b)
+
+≤ᶠ→<ᶠ : ∀ {x} {a : Fin x} {b : Fin x} → a ≤ᶠ b → a <ᶠ fsuc b
+≤ᶠ→<ᶠ {b = b} (inl a<b) = <ᶠ-trans a<b (<-suc b) 
+≤ᶠ→<ᶠ (inr ≈fzero) = <fzero
+≤ᶠ→<ᶠ (inr (≈fsuc a≈b)) = <fsuc (≤ᶠ→<ᶠ (inr a≈b))
+
+<ᶠ→≤ᶠ : ∀ {x} {a : Fin x} {b : Fin x} → a <ᶠ fsuc b → a ≤ᶠ b
+<ᶠ→≤ᶠ {a = fzero} {fzero} a<b' = inr ≈fzero
+<ᶠ→≤ᶠ {a = fzero} {fsuc b} 0<b' = inl <fzero
+<ᶠ→≤ᶠ {a = fsuc a} {fsuc b} (<fsuc a<b) = fsuc≤fsuc (<ᶠ→≤ᶠ a<b)
+
+fin-restrict-≤ : ∀ {x} {b : Fin x} (a : Fin (suc x))
+               → a ≤ᶠ b → Fin x
+fin-restrict-≤ a  = {!!}
+
+fin-restrict' : ∀ {x} {b : Fin x} (a : Fin (suc x))
+              → a ≤ᶠ b → Fin x
+fin-restrict' {x = 0} {b} a x = b
+fin-restrict' {x = suc x} {b = fsuc b} fzero (inl 0<b') = fzero
+fin-restrict' {x = suc x} fzero (inr 0≈b) = fzero
+fin-restrict' {x = suc x} {b = fsuc b} (fsuc a) (inl (<fsuc a<b)) = fsuc (fin-restrict' a (inl a<b))
+fin-restrict' {x = suc x} {b = fzero} (fsuc a) (inr a'≈0) = absurd (fsuc≉fzero a'≈0)
+fin-restrict' {x = suc x} {b = fsuc b} (fsuc a) (inr a'≈b') = fsuc (fin-restrict' a (inr (≈fsuc-injective a'≈b')))
 
 case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
 case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
