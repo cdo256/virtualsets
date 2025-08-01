@@ -89,22 +89,24 @@ antisplice' : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
 antisplice' b a = antisplice'-cases b a (a ≤?ᶠ b)
 
 -- Remove a from domain of b
-funsplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc x)) → a ≉ᶠ b
-          → Fin x 
-funsplice {x = zero} fzero fzero 0≉0 = absurd (0≉0 ≈refl)
-funsplice {x = suc zero} _ _ _ = fzero
-funsplice {x = suc (suc x)} _ fzero _ = fzero
-funsplice {x = suc (suc x)} fzero (fsuc a) _ = a
-funsplice {x = suc (suc x)} (fsuc b) (fsuc a) a'≉b' =
-  fsuc (funsplice b a λ a≈b → a'≉b' (≈fsuc a≈b))
+-- funsplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc x)) → a ≉ᶠ b
+--           → Fin x 
+-- funsplice {x = zero} fzero fzero 0≉0 = absurd (0≉0 ≈refl)
+-- funsplice {x = suc zero} _ _ _ = fzero
+-- funsplice {x = suc x} _ fzero _ = fzero
+-- funsplice {x = suc (suc x)} fzero (fsuc a) _ = a
+-- funsplice {x = suc (suc x)} (fsuc b) (fsuc a) a'≉b' =
+--   fsuc (funsplice b a λ a≈b → a'≉b' (≈fsuc a≈b))
 
--- Alternate definition
-funsplice' : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x))) → a ≉ᶠ b
+funsplice-cases : ∀ {x : ℕ} → (b a : Fin (suc (suc x))) → a ≉ᶠ b
+                → Trichotomyᶠ a b → Fin (suc x)
+funsplice-cases b a a≉b (flt a<b) = fin-restrict a a<b
+funsplice-cases b a a≉b (feq a≈b) = absurd (a≉b a≈b)
+funsplice-cases b a a≉b (fgt b<a) = pred a
+
+funsplice : ∀ {x : ℕ} → (b a : Fin (suc (suc x)))  → a ≉ᶠ b
            → Fin (suc x)
-funsplice' b a a≉b with a ≟ᶠ b
-... | flt a<b = fin-restrict a a<b
-... | feq a≈b = absurd (a≉b a≈b)
-... | fgt b<a = pred a
+funsplice b a a≉b = funsplice-cases b a a≉b (a ≟ᶠ b)
 
 -- Another alternate definition
 funspliceMaybe
