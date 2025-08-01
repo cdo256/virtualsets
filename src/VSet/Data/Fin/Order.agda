@@ -22,6 +22,10 @@ data _<ᶠ_ : {x y : ℕ} (a : Fin x) → (b : Fin y) → Type where
 _≤ᶠ_ : ∀ {x} (a b : Fin x) → Type
 a ≤ᶠ b = (a <ᶠ b) ⊎ (a ≡ b)
 
+isProp<ᶠ : {a b : Fin x} → isProp (a <ᶠ b)
+isProp<ᶠ <fzero <fzero = refl
+isProp<ᶠ (<fsuc x) (<fsuc y) = cong <fsuc (isProp<ᶠ x y)
+
 data Trichotomyᶠ {x} (a b : Fin x) : Type where
   flt : a <ᶠ b → Trichotomyᶠ a b
   feq : a ≡ b → Trichotomyᶠ a b
@@ -65,6 +69,10 @@ a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
 <ᶠ→≢ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≡b =
   <ᶠ→≢ {a = a} {b = b} a<b (fsuc-injective a≡b)
 
+≤ᶠ→≯ᶠ : ∀ {x} {a b : Fin x} → a ≤ᶠ b → ¬ b <ᶠ a
+≤ᶠ→≯ᶠ (inl (<fsuc a<b)) (<fsuc a>b) = ≤ᶠ→≯ᶠ (inl a<b) a>b
+≤ᶠ→≯ᶠ (inr a≡b) a>b = <ᶠ→≢ a>b (sym a≡b)
+
 <ᶠ-respects-pred : ∀ {x} → {a b : Fin x} → fsuc a <ᶠ fsuc b → a <ᶠ b
 <ᶠ-respects-pred (<fsuc a'<b') = a'<b'
 
@@ -90,6 +98,17 @@ fin-restrict : ∀ {x} {b : Fin (suc x)} (a : Fin (suc x))
              → a <ᶠ b → Fin x
 fin-restrict {suc x} fzero  <fzero = fzero
 fin-restrict {suc x} (fsuc a) (<fsuc a<b) = fsuc (fin-restrict a a<b)
+
+<ᶠ-trans : ∀ {x} {a b c : Fin x} → a <ᶠ b → b <ᶠ c → a <ᶠ c
+<ᶠ-trans <fzero (<fsuc b<c) = <fzero
+<ᶠ-trans (<fsuc a<b) (<fsuc b<c) = <fsuc (<ᶠ-trans a<b b<c)
+
+-- <-suc : ∀ {x} {a : Fin x} {b : Fin x} → a ≤ᶠ b → a <ᶠ fsuc a 
+-- <-suc 
+
+≤ᶠ→<ᶠ : ∀ {x} {a : Fin x} {b : Fin x} → a ≤ᶠ b → a <ᶠ b
+≤ᶠ→<ᶠ (inl a<b) = {!!}
+≤ᶠ→<ᶠ (inr a≡b) = {!!}
 
 case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
 case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
