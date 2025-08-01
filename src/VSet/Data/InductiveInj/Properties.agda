@@ -255,7 +255,8 @@ insert-isInjective {a = fsuc a} {b = fsuc b} {f = inc c1 f} {g = inc c2 g} f''�
   let c1≡c2 : c1 ≡ c2
       c1≡c2 = fsplice-isInjective (proj₁ (inc-isInjective f''≡g''))
       f≡g : f ≡ g
-      f≡g = insert-isInjective {!proj₂ (inc-isInjective f''≡g'')!}
+      f≡g = insert-isInjective (proj₂ (inc-isInjective f''≡g'')
+          ∙ cong (λ ○ → insert a (antisplice ○ (fsuc b)) g) (sym c1≡c2))
   in cong₂ inc c1≡c2 f≡g
 
 f∘f⁻¹≡id : ∀ {m} (f : Inj m m) → f ∘ʲ inv f ≡ idInj m
