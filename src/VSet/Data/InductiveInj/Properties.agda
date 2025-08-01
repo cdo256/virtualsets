@@ -212,7 +212,7 @@ inc-isInjective {b = b} {c} {f} {g} f'≡g'
                                  (<ʲ→≢ (<j-suc f<g) f'≡g')
 ... | jeq f≡g | flt b<c = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
                                  (<ʲ→≢ (<j-fin f≡g b<c) f'≡g')
-... | jeq f≡g | feq b≡c = (b≡c , f≡g)
+... | jeq f≡g | feq b≈c = (≈ᶠ→≡ b≈c , f≡g)
 ... | jeq f≡g | fgt c<b = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
                                  (<ʲ→≢ (<j-fin (sym f≡g) c<b) (sym f'≡g'))
 ... | jgt g<f | _       = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}

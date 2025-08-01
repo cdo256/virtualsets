@@ -176,10 +176,14 @@ fsuc≤fsuc (inr a≈b) = inr (≈fsuc a≈b)
 ≉ᶠ→≢ : {a b : Fin x} → a ≉ᶠ b → a ≢ b
 ≉ᶠ→≢ a≉b a≡b = a≉b (≡→≈ᶠ a≡b)
 
+
 <ᶠ→≉ : {a : Fin x} {b : Fin y} → a <ᶠ b → a ≉ᶠ b
 <ᶠ→≉ {a = fzero} {b = fsuc b} <fzero a≈b = fzero≉fsuc a≈b
 <ᶠ→≉ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≈b =
   <ᶠ→≉ {a = a} {b = b} a<b (≈fsuc-injective a≈b)
+
+<ᶠ→≢ : {a b : Fin x} → a <ᶠ b → a ≢ b
+<ᶠ→≢ a<b = ≉ᶠ→≢ (<ᶠ→≉ a<b)
 
 ≤ᶠ→≯ᶠ : {a : Fin x} {b : Fin y} → a ≤ᶠ b → ¬ b <ᶠ a
 ≤ᶠ→≯ᶠ (inl (<fsuc a<b)) (<fsuc a>b) = ≤ᶠ→≯ᶠ (inl a<b) a>b

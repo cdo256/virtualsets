@@ -46,7 +46,7 @@ _≟ʲ-suc_ : ∀ {m n} → {b c : Fin (suc n)} → (f g : Inj m n)
           → Trichotomyʲ (inc b f) (inc c g) 
 (f ≟ʲ-suc g) _         (jlt f<g) = jlt (<j-suc f<g) 
 (f ≟ʲ-suc g) (flt b<c) (jeq f≡g) = jlt (<j-fin f≡g b<c)
-(f ≟ʲ-suc g) (feq b≡c) (jeq f≡g) = jeq (cong₂ inc b≡c f≡g)
+(f ≟ʲ-suc g) (feq b≈c) (jeq f≡g) = jeq (cong₂ inc (≈ᶠ→≡ b≈c) f≡g)
 (f ≟ʲ-suc g) (fgt c<b) (jeq f≡g) = jgt (<j-fin (sym f≡g) c<b)
 (f ≟ʲ-suc g) _         (jgt g<f) = jgt (<j-suc g<f)
 
