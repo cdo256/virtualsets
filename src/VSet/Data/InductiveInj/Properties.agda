@@ -179,26 +179,6 @@ inv-is-apply-inv {suc m} (inc b f) y with y ≡?ᶠ b
 +suc {zero} {n} = refl
 +suc {suc m} {n} = cong suc (+-suc m n)
 
-shift1 : ∀ {m n} → (f : Inj m n) → Inj m (suc n)
-shift1 (nul _) = nul _
-shift1 (inc b f) =
-  inc (fsuc b) (shift1 f)
-
-shift : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
-shift zero f = f
-shift (suc l) f = shift1 (shift l f) 
-
-tensor : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
-tensor (nul m') g =
-  shift m' g
-tensor (inc b f) (nul n') =
-  inc (finject n' b) (tensor f (nul n'))
-tensor (inc b f) (inc b' g) =
-  inc (finject (suc _) b) (tensor f (inc b' g))
-
-_⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
-f ⊕ g = tensor f g
-
 insert0≡inc
   : ∀ {m} (b : Fin (suc m)) (f : Inj m m)
   → insert fzero b f ≡ inc b f
@@ -310,12 +290,6 @@ f∘f⁻¹≡id {m = suc m} (inc (fsuc b) (inc c f)) =
 inv-inc : (f : Inj m m) → (b : Fin (suc m)) → Inj (suc m) (suc m)
 inv-inc f fzero = inc fzero f
 inv-inc (inc b f) (fsuc a) = inc f0 (inv-inc f a)
-
--- inv : (f : Inj m m) → Inj m m
--- inv (nul 0) = nul 0
--- inv (inc b f) =
---   let g = inv f
---   in {!inv-inc g b!}
 
 isInjective : ∀ {A B : Type} (f : A → B) → Type
 isInjective f = ∀ x y → f x ≡ f y → x ≡ y
