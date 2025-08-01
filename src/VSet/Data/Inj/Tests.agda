@@ -1,15 +1,15 @@
-module VSet.Data.InductiveInj.Tests where
+module VSet.Data.Inj.Tests where
 
 open import VSet.Prelude hiding (_∘_)
-open import VSet.Data.InductiveInj.Base
+open import VSet.Data.Inj.Base
 open import Cubical.Data.List.Base
 open import Cubical.Data.Nat.Base
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Splice
-open import VSet.Data.InductiveInj.Base
-open import VSet.Data.InductiveInj.Order
-open import VSet.Data.InductiveInj.Inverse
-open import VSet.Data.InductiveInj.Properties
+open import VSet.Data.Inj.Base
+open import VSet.Data.Inj.Order
+open import VSet.Data.Inj.Inverse
+open import VSet.Data.Inj.Properties
 
 _ : to-list (cycle-r 3) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []
 _ = refl

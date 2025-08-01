@@ -1,4 +1,4 @@
-module VSet.Data.InductiveInj.Properties where
+module VSet.Data.Inj.Properties where
 
 open import VSet.Prelude
 open import Cubical.Data.Prod.Base
@@ -11,9 +11,9 @@ open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
 open import VSet.Data.Fin.Splice
 open import VSet.Data.Fin.Properties
-open import VSet.Data.InductiveInj.Base 
-open import VSet.Data.InductiveInj.Order 
-open import VSet.Data.InductiveInj.Inverse 
+open import VSet.Data.Inj.Base 
+open import VSet.Data.Inj.Order 
+open import VSet.Data.Inj.Inverse 
 open import Cubical.Data.Maybe.Base hiding (elim)
 
 private

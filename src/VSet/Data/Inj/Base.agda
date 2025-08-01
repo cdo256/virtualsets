@@ -1,4 +1,4 @@
-module VSet.Data.InductiveInj.Base where
+module VSet.Data.Inj.Base where
 
 open import VSet.Prelude
 open import Cubical.Data.Prod.Base hiding (map)

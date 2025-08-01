@@ -1,4 +1,4 @@
-module VSet.Data.InductiveInj.Order where
+module VSet.Data.Inj.Order where
 
 open import VSet.Prelude
 open import Cubical.Data.Prod.Base hiding (map)
@@ -9,7 +9,7 @@ open import Cubical.Data.List.Base hiding ([_])
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
 open import VSet.Data.Fin.Properties
-open import VSet.Data.InductiveInj.Base
+open import VSet.Data.Inj.Base
 
 private
   variable
