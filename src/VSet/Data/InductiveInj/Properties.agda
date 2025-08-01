@@ -39,35 +39,42 @@ splice-splice-antisplice {m = suc m} (fsuc b) (fsuc c) =
     ≡⟨ cong fsuc (splice-splice-antisplice b c) ⟩
   fsuc b ▯
 
-apply-insert
+apply-insert≡b
   : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
   → (apply (insert a b f) a)
   ≡ b
-apply-insert fzero fzero (nul 0) = refl
-apply-insert fzero b f =
+apply-insert≡b fzero fzero (nul 0) = refl
+apply-insert≡b fzero b f =
   apply (insert fzero b f) fzero ≡⟨ refl ⟩
   apply (inc b f) fzero ≡⟨ refl ⟩
   b ▯
-apply-insert (fsuc a) b (inc c f) =
+apply-insert≡b (fsuc a) b (inc c f) =
   apply (insert (fsuc a) b (inc c f)) (fsuc a)
     ≡⟨ refl ⟩
   apply (inc (fsplice b c) (insert a (antisplice c b) f)) (fsuc a)
     ≡⟨ refl ⟩
   fsplice (fsplice b c) (apply (insert a (antisplice c b) f) a)
     ≡⟨ cong (fsplice (fsplice b c))
-            (apply-insert a (antisplice c b) f) ⟩
+            (apply-insert≡b a (antisplice c b) f) ⟩
   fsplice (fsplice b c) (antisplice c b)
     ≡⟨ splice-splice-antisplice b c ⟩
   b ▯
 
-apply-insert≡decRec
+apply-insert 
+  : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
+  → (x : Fin (suc m)) → Dec (a ≈ᶠ x)
+  → Fin (suc m)
+apply-insert a b f x (yes a≈x) = b
+apply-insert a b f x (no a≉x) = {!!}
+
+apply∘insert≡apply-insert
   : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
   → (x : Fin (suc m))
   → (apply (insert a b f) x)
   ≡ decRec (λ _ → b)
-           (λ _ → fsplice b (apply f (antisplice {! a!} x)))
-           (a ≡?ᶠ x)
-apply-insert≡decRec a b f x = {!!}
+           (λ _ → fsplice b (apply f {!antisplice {! a!} x!}))
+           (a ≈?ᶠ x)
+apply∘insert≡apply-insert a b f x = {!!}
 
 apply-insert-≢-0
   : ∀ {m} → (a : Fin (suc m)) → (f : Inj m m)
@@ -100,19 +107,17 @@ apply-insert-≢-0 (fsuc a) (inc c f) (fsuc x) a'≢x' with a ≟ᶠ x
   fsplice (fsuc c) (apply (insert a (antisplice c f0) f) x)
     ≡⟨ {!!} ⟩
   {!!} ▯
-... | feq a≡x = absurd (≢cong fsuc a'≢x' a≡x)
+... | feq a≈x = absurd (≢cong fsuc a'≢x' (≈ᶠ→≡ a≈x))
 ... | fgt a>x = {!!}
-
-
 
 inv-is-apply-inv : ∀ {m} → (f : Inj m m) → (y : Fin m)
                  → apply-inv f y ≡ just (apply (inv f) y)
-inv-is-apply-inv {suc m} (inc b f) y with y ≡?ᶠ b
-... | yes y≡b =
-  apply-inv-rec f b y (yes y≡b) ≡⟨ refl ⟩
-  just fzero ≡⟨ cong just (sym (apply-insert b f0 (inv f))) ⟩
+inv-is-apply-inv {suc m} (inc b f) y with y ≈?ᶠ b
+... | yes y≈b =
+  apply-inv-rec f b y (yes y≈b) ≡⟨ refl ⟩
+  just fzero ≡⟨ cong just (sym (apply-insert≡b b f0 (inv f))) ⟩
   just (apply (insert b f0 (inv f)) b)
-    ≡⟨ cong (λ ○ → just (apply (insert b f0 (inv f)) ○)) (sym y≡b) ⟩
+    ≡⟨ cong (λ ○ → just (apply (insert b f0 (inv f)) ○)) (≈ᶠ→≡ (≈fsym y≈b)) ⟩
   just (apply (insert b f0 (inv f)) y) ▯
 ... | no y≢b =
   apply-inv-rec f b y (no y≢b)
@@ -127,16 +132,16 @@ inv-is-apply-inv {suc m} (inc b f) y with y ≡?ᶠ b
 
 -- inv-is-apply-inv : ∀ {m} → (f : Inj m m) → (y : Fin m)
 --                  → apply-inv f y ≡ just (apply (inv f) y)
--- inv-is-apply-inv (inc b f) y with y ≡? b
--- inv-is-apply-inv (inc b f) y | no y≢b =
---   apply-inv-rec f b y (no y≢b)
+-- inv-is-apply-inv (inc b f) y with y ≈? b
+-- inv-is-apply-inv (inc b f) y | no y≉b =
+--   apply-inv-rec f b y (no y≉b)
 --     ≡⟨ {!!} ⟩
---   map-Maybe fsuc (apply-inv f {!funsplice b y y≢b!})
---     ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f {!funsplice b y y≢b!}) ⟩
+--   map-Maybe fsuc (apply-inv f {!funsplice b y y≉b!})
+--     ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f {!funsplice b y y≉b!}) ⟩
 --   map-Maybe fsuc (just (apply (inv f) {!funsplice b y y≢b!}))
 --     ≡⟨ refl ⟩
---   just (fsuc (apply (inv f) {!funsplice b y y≢b!}))
---     ≡⟨ cong just (sym {!≢→apply-insert≡fsuc-apply b (inv f) y y≢b!}) ⟩
+--   just (fsuc (apply (inv f) {!funsplice b y y≉b!}))
+--     ≡⟨ cong just (sym {!≢→apply-insert≡fsuc-apply b (inv f) y y≉b!}) ⟩
 --   just (apply (insert b f0 (inv f)) y) ▯
 -- inv-is-apply-inv {m = suc (suc m)} (inc b f) y | yes y≡b =
 --   apply-inv-rec {m = suc m} f b y (yes y≡b)
@@ -300,8 +305,8 @@ isSurjective {A = A} f = ∀ y → Σ[ x ∈ A ] f x ≡ y
 Inj-isInjective : ∀ {m n} → (f : Inj m n) → isInjective (apply f)
 Inj-isInjective (inc b f) fzero fzero fx≡fy = refl
 Inj-isInjective (inc b f) fzero (fsuc y) fx≡fy =
-  absurd (fsplice≢b b (apply f y) (sym fx≡fy))
+  absurd (fsplice≉b b (apply f y) (≡→≈ᶠ (sym fx≡fy)))
 Inj-isInjective (inc b f) (fsuc x) fzero fx≡fy =
-  absurd (fsplice≢b b (apply f x) fx≡fy)
+  absurd (fsplice≉b b (apply f x) (≡→≈ᶠ fx≡fy))
 Inj-isInjective (inc b f) (fsuc x) (fsuc y) fx≡fy =
   cong fsuc (Inj-isInjective f x y (fsplice-isInjective fx≡fy))
