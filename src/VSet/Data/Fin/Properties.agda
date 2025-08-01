@@ -148,6 +148,29 @@ fsplice≉b (fsuc b) (fsuc a) ne =
   let rec≉b = fsplice≉b b a
   in rec≉b (≈fsuc-injective ne)
 
+≉fsuc
+  : ∀ {x : ℕ} → {b a : Fin (suc x)} → (a≉b : a ≉ᶠ b)
+  → fsuc a ≉ᶠ fsuc b
+≉fsuc a≉b (≈fsuc a≈b) = a≉b a≈b
+
+fsuc-funsplice 
+  : ∀ {x : ℕ} → (b a : Fin (suc (suc x))) → (a≉b : a ≉ᶠ b)
+  → funsplice (fsuc b) (fsuc a) (≉fsuc a≉b)
+  ≡ fsuc (funsplice b a a≉b)
+fsuc-funsplice b a a≉b with (a ≟ᶠ b)
+... | flt a<b = refl
+... | feq a≈b = absurd (a≉b a≈b)
+... | fgt a>b = sym (fsuc∘pred≡id {y = 1} (≉fsym (<ᶠ→≉ (≤<ᶠ-trans (fzero≤a b) a>b))))
+
+funsplice-irrelevant
+  : ∀ {x : ℕ} → (b a : Fin (suc (suc x)))
+  → (u v : a ≉ᶠ b)
+  → funsplice b a u ≡ funsplice b a v
+funsplice-irrelevant b a u v with (a ≟ᶠ b)
+... | flt a<b = refl
+... | feq a≈b = absurd (u a≈b)
+... | fgt a>b = refl
+
 funsplice-fsplice-inverse
   : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc x))
   → funsplice b (fsplice b a) (fsplice≉b b a) ≡ a
@@ -162,9 +185,18 @@ funsplice-fsplice-inverse {suc x} (fsuc b) (fsuc a) =
     ≡⟨ refl ⟩
   funsplice (fsuc b) (fsuc (fsplice b a)) 
    (fsplice≉b (fsuc b) (fsuc a))
-    ≡⟨ refl ⟩
+    ≡⟨ funsplice-irrelevant (fsuc b) (fsuc (fsplice b a))
+       (fsplice≉b (fsuc b) (fsuc a)) (≉fsuc (fsplice≉b b a)) ⟩
+  funsplice (fsuc b) (fsuc (fsplice b a)) 
+   (≉fsuc (fsplice≉b b a))
+    ≡⟨ fsuc-funsplice b (fsplice b a) (fsplice≉b b a) ⟩
+  fsuc (funsplice b (fsplice b a)
+                  (fsplice≉b b a))
+    ≡⟨ cong fsuc (funsplice-irrelevant b (fsplice b a)
+        (fsplice≉b b a)
+        (λ a≈b → fsplice≉b (fsuc b) (fsuc a) (≈fsuc a≈b))) ⟩
   fsuc (funsplice b (fsplice b a) 
-   (λ a≡b → fsplice≉b (fsuc b) (fsuc a) (≈fsuc a≡b)))
+                  (λ a≈b → fsplice≉b (fsuc b) (fsuc a) (≈fsuc a≈b)))
     ≡⟨ refl ⟩
   fsuc (funsplice b (fsplice b a) 
    (fsplice≉b b a))
