@@ -47,9 +47,9 @@ finject0≡subst {suc x} (fsuc a) =
 
 _≡?ᶠ_ : ∀ {x} → Discrete (Fin x)
 a ≡?ᶠ b with (a ≟ᶠ b)
-... | flt a<b = no (<ᶠ→≢ a<b)
-... | feq a≡b = yes a≡b
-... | fgt b<a = no (≢sym (<ᶠ→≢ b<a))
+... | flt a<b = no (≉ᶠ→≢ (<ᶠ→≉ a<b))
+... | feq a≈b = yes (≈ᶠ→≡ a≈b)
+... | fgt b<a = no (≢sym (≉ᶠ→≢ (<ᶠ→≉ b<a)))
 
 isSetFin : ∀ {x} → isSet (Fin x)
 isSetFin = Discrete→isSet _≡?ᶠ_
@@ -179,7 +179,7 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
 ≤→fsplice≡suc : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
               → a2 ≤ᶠ finj a1 → fsplice a2 a1 ≡ fsuc a1
 ≤→fsplice≡suc fzero fzero a2≤a1 = refl
-≤→fsplice≡suc fzero (fsuc a2) (inr a2'≡0) = absurd (fsuc≢fzero a2 a2'≡0)
+≤→fsplice≡suc fzero (fsuc a2) (inr a2'≈0) = absurd (fsuc≉fzero a2'≈0)
 ≤→fsplice≡suc (fsuc a1) fzero a2≤a1 = refl
 ≤→fsplice≡suc {suc m} (fsuc a1) (fsuc a2) rec-le =
   cong fsuc (≤→fsplice≡suc a1 a2 (≤ᶠ-respects-pred rec-le))
@@ -198,10 +198,18 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
 --   fsuc (antisplice b a)
 
 <→antisplice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-                → a2 <ᶠ finj a1 → finj (antisplice a1 a2) ≡ a2
-<→antisplice≡id (fsuc a1) fzero a2<a1 = refl
+                → a2 <ᶠ a1 → antisplice a1 a2 ≈ᶠ a2
+<→antisplice≡id (fsuc a1) fzero a2<a1 = {!!}
 <→antisplice≡id {suc m} (fsuc a1) (fsuc a2) (<fsuc a2<a1) =
-  cong fsuc (<→antisplice≡id a1 a2 a2<a1)
+  ≈fsuc (<→antisplice≡id a1 a2 a2<a1)
+
+≈→antisplice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                → a2 ≈ᶠ a1 → antisplice a1 a2 ≈ᶠ a2
+≈→antisplice≡id fzero fzero _ = {!!}
+≈→antisplice≡id (fsuc a1) fzero _ = {!!}
+≈→antisplice≡id fzero (fsuc a2) a2'≈0 = absurd (fsuc≉fzero a2'≈0)
+≈→antisplice≡id {suc m} (fsuc a1) (fsuc a2) a2≈a1 =
+  ≈fsuc (≈→antisplice≡id a1 a2 (≈fsuc-injective a2≈a1))
 
 ≡→antisplice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
                 → a2 ≡ finj a1 → finj (antisplice a1 a2) ≡ a2
@@ -212,9 +220,9 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
   cong fsuc (≡→antisplice≡id a1 a2 (fsuc-injective a2≡a1))
 
 ≤→antisplice≡id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-                → a2 ≤ᶠ finj a1 → finj (antisplice a1 a2) ≡ a2
+                → a2 ≤ᶠ a1 → antisplice a1 a2 ≈ᶠ a2
 ≤→antisplice≡id a1 a2 (inl a2<a1) = <→antisplice≡id a1 a2 a2<a1
-≤→antisplice≡id a1 a2 (inr a2≡a1) = ≡→antisplice≡id a1 a2 a2≡a1
+≤→antisplice≡id a1 a2 (inr a2≈a1) = ≈→antisplice≡id a1 a2 a2≈a1
 
 >→antisplice≡pred : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
                   → finj a1 <ᶠ a2 → antisplice a1 a2 ≡ pred a2
@@ -228,12 +236,12 @@ fsplice≡case a1 a2 with (a2 ≤?ᶠ finj a1)
 ... | fle a2≤a1 = ≤→fsplice≡suc a1 a2 a2≤a1
 ... | fgt a2>a1 = >→fsplice≡id a1 a2 a2>a1
 
-antisplice≡case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-                → finj (antisplice a1 a2)
-                ≡ (case≤?ᶠ a2 (finj a1) a2 (finj (pred a2)))
-antisplice≡case a1 a2 with (a2 ≤?ᶠ finj a1)
-... | fle a2≤a1 = ≤→antisplice≡id a1 a2 a2≤a1
-... | fgt a2>a1 = cong finj (>→antisplice≡pred a1 a2 a2>a1)
+-- antisplice≡case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+--                 → antisplice a1 a2
+--                 ≈ᶠ case≤?ᶠ a2 (finj a1) a2 (finj (pred a2))
+-- antisplice≡case a1 a2 with (a2 ≤?ᶠ a1)
+-- ... | fle a2≤a1 = ≤→antisplice≡id a1 a2 a2≤a1
+-- ... | fgt a2>a1 = cong finj (>→antisplice≡pred a1 a2 a2>a1)
 
 finj∘fsuc≡fsuc∘finj : ∀ {x} (a : Fin (suc x)) → finj (fsuc a) ≡ fsuc (finj a)
 finj∘fsuc≡fsuc∘finj a = refl
