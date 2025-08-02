@@ -49,3 +49,23 @@ cycle-l m = inc fmax (idInj m)
 cycle-r : ∀ m → Inj (suc m) (suc m)
 cycle-r zero = idInj 1
 cycle-r (suc m) = inc (fsuc fzero) (cycle-r m)
+
+injExt : ∀ {m n} → (f g : Inj m n)
+       → (∀ x → apply f x ≡ apply g x) → f ≡ g
+injExt (nul _) (nul _) _ = refl
+injExt (inc b f) (inc c g) f'x≡g'x =
+  inc b f
+    ≡⟨ cong (λ ○ → inc ○ f) (f'x≡g'x f0) ⟩
+  inc c f
+    ≡⟨ cong (inc c) f≡g ⟩
+  inc c g ▯
+  where
+    fx≡gx : ∀ x → apply f x ≡ apply g x
+    fx≡gx x =
+      apply f x
+        ≡⟨ (fsplice-isInjective
+          ((f'x≡g'x (fsuc x))
+          ∙ sym (cong (λ ○ → fsplice ○ (apply g x)) (f'x≡g'x f0)))) ⟩
+      apply g x ▯
+    f≡g : f ≡ g
+    f≡g = injExt f g fx≡gx
