@@ -174,23 +174,23 @@ funsplice-irrelevant b        a u v | flt a<b = refl
 funsplice-irrelevant b        a u v | feq a≈b = absurd (u a≈b)
 funsplice-irrelevant b (fsuc a) u v | fgt a>b = refl
 
+-- This could be simplified.
 funsplice-fsplice-inverse
   : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x)
-  → funsplice b (fsplice b a) (fsplice≉b b a) ≡ a
+  → (splicea≉b : fsplice b a ≉ᶠ b)
+  → funsplice b (fsplice b a) splicea≉b ≡ a
 funsplice-fsplice-inverse {zero} fzero ()
-funsplice-fsplice-inverse {suc zero} fzero fzero = refl
-funsplice-fsplice-inverse {suc (suc x)} fzero fzero = refl
-funsplice-fsplice-inverse {suc (suc x)} fzero (fsuc a) = refl
-funsplice-fsplice-inverse {suc zero} (fsuc b) fzero = refl
-funsplice-fsplice-inverse {suc (suc x)} (fsuc b) fzero = refl
-funsplice-fsplice-inverse {suc (suc x)} (fsuc b) (fsuc a) =
-  funsplice (fsuc b) (fsplice (fsuc b) (fsuc a))
-   (fsplice≉b (fsuc b) (fsuc a))
+funsplice-fsplice-inverse {suc zero} fzero fzero splicea≉b = refl
+funsplice-fsplice-inverse {suc (suc x)} fzero fzero splicea≉b = refl
+funsplice-fsplice-inverse {suc (suc x)} fzero (fsuc a) splicea≉b = refl
+funsplice-fsplice-inverse {suc zero} (fsuc b) fzero splicea≉b = refl
+funsplice-fsplice-inverse {suc (suc x)} (fsuc b) fzero splicea≉b = refl
+funsplice-fsplice-inverse {suc (suc x)} (fsuc b) (fsuc a) splicea'≉b' =
+  funsplice (fsuc b) (fsplice (fsuc b) (fsuc a)) splicea'≉b'  
     ≡⟨ refl ⟩
-  funsplice (fsuc b) (fsuc (fsplice b a)) 
-   (fsplice≉b (fsuc b) (fsuc a))
+  funsplice (fsuc b) (fsuc (fsplice b a)) splicea'≉b'  
     ≡⟨ funsplice-irrelevant (fsuc b) (fsuc (fsplice b a))
-       (fsplice≉b (fsuc b) (fsuc a)) (≉fsuc (fsplice≉b b a)) ⟩
+       splicea'≉b' (≉fsuc (fsplice≉b b a)) ⟩
   funsplice (fsuc b) (fsuc (fsplice b a)) 
    (≉fsuc (fsplice≉b b a))
     ≡⟨ fsuc-funsplice b (fsplice b a) (fsplice≉b b a) ⟩
@@ -204,7 +204,7 @@ funsplice-fsplice-inverse {suc (suc x)} (fsuc b) (fsuc a) =
     ≡⟨ refl ⟩
   fsuc (funsplice b (fsplice b a) 
    (fsplice≉b b a))
-    ≡⟨ cong fsuc (funsplice-fsplice-inverse b a) ⟩
+    ≡⟨ cong fsuc (funsplice-fsplice-inverse b a (fsplice≉b b a)) ⟩
   fsuc a ▯
 
 fsplice-isInjective
