@@ -101,20 +101,6 @@ insert0≡inc
   → insert fzero b f ≡ inc b f
 insert0≡inc b f = refl
 
-inc-isInjective : ∀ {m n} {b c : Fin (suc n)} {f g : Inj m n}
-                → inc b f ≡ inc c g → (b ≡ c) × (f ≡ g)
-inc-isInjective {b = b} {c} {f} {g} f'≡g'
-  with f ≟ʲ g | b ≟ᶠ c
-... | jlt f<g | _       = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
-                                 (<ʲ→≢ (<j-suc f<g) f'≡g')
-... | jeq f≡g | flt b<c = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
-                                 (<ʲ→≢ (<j-fin f≡g b<c) f'≡g')
-... | jeq f≡g | feq b≈c = (≈ᶠ→≡ b≈c , f≡g)
-... | jeq f≡g | fgt c<b = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
-                                 (<ʲ→≢ (<j-fin (sym f≡g) c<b) (sym f'≡g'))
-... | jgt g<f | _       = absurd {A = λ _ → (b ≡ c) × (f ≡ g)}
-                                 (<ʲ→≢ (<j-suc g<f) (sym f'≡g'))
-
 -- Not sure if this is the easiest way to prove it. There are a lot of cases.
 insert-reorder : ∀ {m n} (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
                          (b1 : Fin (suc n)) (b2 : Fin (suc (suc n)))
