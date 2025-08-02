@@ -31,66 +31,20 @@ inv-is-apply-inv {suc m} (inc b f) y with y ≈?ᶠ b
   just (apply (insert b f0 (inv f)) b)
     ≡⟨ cong (λ ○ → just (apply (insert b f0 (inv f)) ○)) (≈ᶠ→≡ (≈fsym y≈b)) ⟩
   just (apply (insert b f0 (inv f)) y) ▯
-... | no y≢b =
-  apply-inv-rec f b y (no y≢b)
+... | no y≉b =
+  apply-inv-rec f b y (no y≉b)
     ≡⟨ refl ⟩
-  map-Maybe fsuc (apply-inv f (funsplice b y y≢b))
-    ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f (funsplice b y y≢b)) ⟩
-  map-Maybe fsuc (just (apply (inv f) (funsplice b y y≢b)))
+  map-Maybe fsuc (apply-inv f (funsplice b y y≉b))
+    ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f (funsplice b y y≉b)) ⟩
+  map-Maybe fsuc (just (apply (inv f) (funsplice b y y≉b)))
     ≡⟨ refl ⟩
-  just (fsuc (apply (inv f) (funsplice b y y≢b)))
-    ≡⟨ {!!} ⟩
+  just (fsuc (apply (inv f) (funsplice b y y≉b)))
+    ≡⟨ refl ⟩
+  just (apply-insert b f0 (inv f) y (no y≉b))
+    ≡⟨ cong just (apply-insert-irrelevant b f0 (inv f) y (no y≉b) (y ≈?ᶠ b)) ⟩
+  just (apply-insert b f0 (inv f) y (y ≈?ᶠ b))
+    ≡⟨ cong just (sym (apply∘insert≡apply-insert b f0 (inv f) y)) ⟩
   just (apply (insert b f0 (inv f)) y) ▯
-
--- inv-is-apply-inv : ∀ {m} → (f : Inj m m) → (y : Fin m)
---                  → apply-inv f y ≡ just (apply (inv f) y)
--- inv-is-apply-inv (inc b f) y with y ≈? b
--- inv-is-apply-inv (inc b f) y | no y≉b =
---   apply-inv-rec f b y (no y≉b)
---     ≡⟨ {!!} ⟩
---   map-Maybe fsuc (apply-inv f {!funsplice b y y≉b!})
---     ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f {!funsplice b y y≉b!}) ⟩
---   map-Maybe fsuc (just (apply (inv f) {!funsplice b y y≢b!}))
---     ≡⟨ refl ⟩
---   just (fsuc (apply (inv f) {!funsplice b y y≉b!}))
---     ≡⟨ cong just (sym {!≢→apply-insert≡fsuc-apply b (inv f) y y≉b!}) ⟩
---   just (apply (insert b f0 (inv f)) y) ▯
--- inv-is-apply-inv {m = suc (suc m)} (inc b f) y | yes y≡b =
---   apply-inv-rec {m = suc m} f b y (yes y≡b)
---     ≡⟨ refl ⟩
---   just fzero
---     ≡⟨ cong just {!!} ⟩
---   just (apply (insert b f0 (inv f)) y) ▯
--- inv-is-apply-inv {m = suc m} (inc b f) y = {!!}
-
--- inv-is-apply-inv : ∀ {m} → (f : Inj m m) → (y : Fin m) → apply-inv f y ≡ just (apply (inv f) y)
--- inv-is-apply-inv (inc fzero f) fzero = ?
--- inv-is-apply-inv (inc fzero f) (fsuc y) =
---   let rec : apply-inv f y ≡ just (apply (inv f) y)
---       rec = inv-is-apply-inv f y
---   in apply-inv (inc f0 f) (fsuc y) ≡⟨ refl ⟩
---      map-Maybe fsuc (apply-inv f y)
---        ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f y) ⟩
---      map-Maybe fsuc (just (apply (inv f) y)) ≡⟨ refl ⟩
---      just (fsuc (apply (inv f) y)) ≡⟨ refl ⟩
---      just (fsplice f0 (apply (inv f) y)) ≡⟨ refl ⟩
---      just (apply (inc f0 (inv f)) (fsuc y)) ≡⟨ refl ⟩
---      just (apply (insert f0 f0 (inv f)) (fsuc y)) ≡⟨ refl ⟩
---      just (apply (inv (inc f0 f)) (fsuc y)) ▯
--- -- inv-is-apply-inv (inc (fsuc b) f) fzero =
--- --   let rec : apply-inv f fzero ≡ just (apply (inv f) fzero)
--- --       rec = inv-is-apply-inv f fzero 
--- --   in apply-inv (inc f0 f) fzero ≡⟨ refl ⟩
--- --      map-Maybe fsuc (apply-inv f y)
--- --        ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f y) ⟩
--- --      map-Maybe fsuc (just (apply (inv f) y)) ≡⟨ refl ⟩
--- --      just (fsuc (apply (inv f) y)) ≡⟨ refl ⟩
--- --      just (fsplice f0 (apply (inv f) y)) ≡⟨ refl ⟩
--- --      just (apply (inc f0 (inv f)) (fsuc y)) ≡⟨ refl ⟩
--- --      just (apply (insert f0 f0 (inv f)) (fsuc y)) ≡⟨ refl ⟩
--- --      just (apply (inv (inc f0 f)) (fsuc y)) ▯
--- -- inv-is-apply-inv (inc (fsuc b) f) (fsuc y) = {!!}
-
 
 +suc : ∀ {m n} → m + suc n ≡ suc (m + n)
 +suc {zero} {n} = refl
@@ -158,38 +112,7 @@ insert-isInjective {a = fsuc a} {b = fsuc b} {f = inc c1 f} {g = inc c2 g} f''�
   in cong₂ inc c1≡c2 f≡g
 
 f∘f⁻¹≡id : ∀ {m} (f : Inj m m) → f ∘ʲ inv f ≡ idInj m
-f∘f⁻¹≡id (nul 0) = refl
-f∘f⁻¹≡id {m = suc m} (inc fzero f) =
-  inc f0 f ∘ʲ inv (inc f0 f)
-    ≡⟨ refl ⟩
-  inc f0 f ∘ʲ insert f0 f0 (inv f)
-    ≡⟨ refl ⟩
-  inc f0 f ∘ʲ inc f0 (inv f)
-    ≡⟨ refl ⟩
-  inc (apply (inc f0 f) (apply (insert f0 f0 (inv f)) f0))
-      (f ∘ʲ inv f)
-    ≡⟨ refl ⟩
-  inc (apply (inc f0 f) (apply (inc f0 (inv f)) f0))
-      (f ∘ʲ inv f)
-    ≡⟨ refl ⟩
-  inc (apply (inc f0 f) f0)
-      (f ∘ʲ inv f)
-    ≡⟨ refl ⟩
-  inc f0 (f ∘ʲ inv f)
-    ≡⟨ cong (inc f0) (f∘f⁻¹≡id f) ⟩
-  inc f0 (idInj m)
-    ≡⟨ refl ⟩
-  idInj (suc m) ▯
-f∘f⁻¹≡id {m = suc m} (inc (fsuc b) (inc c f)) =
-  inc (fsuc b) (inc c f) ∘ʲ inv (inc (fsuc b) (inc c f))
-    ≡⟨ refl ⟩
-  inc (fsuc b) (inc c f) ∘ʲ insert (fsuc b) f0 (inv (inc c f))
-    ≡⟨ refl ⟩
-  insert f0 (fsuc b) (inc c f) ∘ʲ insert (fsuc b) f0 (insert c f0 (inv f))
-    ≡⟨ refl ⟩
-  inc (fsuc b) (inc c f) ∘ʲ insert (fsuc b) f0 (insert c f0 (inv f))
-    ≡⟨ {!!} ⟩
-  idInj (suc m) ▯
+f∘f⁻¹≡id f = {!!}
 
 inv-inc : (f : Inj m m) → (b : Fin (suc m)) → Inj (suc m) (suc m)
 inv-inc f fzero = inc fzero f
