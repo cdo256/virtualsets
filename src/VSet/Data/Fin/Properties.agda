@@ -172,14 +172,15 @@ funsplice-irrelevant b        a u v | feq a≈b = absurd (u a≈b)
 funsplice-irrelevant b (fsuc a) u v | fgt a>b = refl
 
 funsplice-fsplice-inverse
-  : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc x))
+  : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x)
   → funsplice b (fsplice b a) (fsplice≉b b a) ≡ a
-funsplice-fsplice-inverse {zero} fzero fzero = refl
-funsplice-fsplice-inverse {suc x} fzero fzero = refl
-funsplice-fsplice-inverse {suc x} fzero (fsuc a) = refl
-funsplice-fsplice-inverse {zero} (fsuc b) fzero = refl
-funsplice-fsplice-inverse {suc x} (fsuc b) fzero = refl
-funsplice-fsplice-inverse {suc x} (fsuc b) (fsuc a) =
+funsplice-fsplice-inverse {zero} fzero ()
+funsplice-fsplice-inverse {suc zero} fzero fzero = refl
+funsplice-fsplice-inverse {suc (suc x)} fzero fzero = refl
+funsplice-fsplice-inverse {suc (suc x)} fzero (fsuc a) = refl
+funsplice-fsplice-inverse {suc zero} (fsuc b) fzero = refl
+funsplice-fsplice-inverse {suc (suc x)} (fsuc b) fzero = refl
+funsplice-fsplice-inverse {suc (suc x)} (fsuc b) (fsuc a) =
   funsplice (fsuc b) (fsplice (fsuc b) (fsuc a))
    (fsplice≉b (fsuc b) (fsuc a))
     ≡⟨ refl ⟩
