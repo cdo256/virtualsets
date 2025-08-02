@@ -54,9 +54,6 @@ apply-insert-irrelevant a b f x (no u) (yes v) = absurd (u v)
 apply-insert-irrelevant a b f x (no u) (no v) =
   cong (fsplice b ∘ apply f) (funsplice-irrelevant a x u v)
 
-≉pred : ∀ {x y} {a : Fin x} {b : Fin y} → fsuc a ≉ᶠ fsuc b → a ≉ᶠ b
-≉pred a'≉b' a≈b = a'≉b' (≈fsuc a≈b)
-
 fsplice-fsplice-fsplice-antisplice
   : ∀ {m} → (b : Fin (suc (suc m))) → (x : Fin m) → (c : Fin (suc m)) 
   → fsplice (fsplice b c) (fsplice (antisplice c b) x)

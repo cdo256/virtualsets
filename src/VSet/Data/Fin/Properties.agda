@@ -153,6 +153,9 @@ fsplice≉b (fsuc b) (fsuc a) ne =
   → fsuc a ≉ᶠ fsuc b
 ≉fsuc a≉b (≈fsuc a≈b) = a≉b a≈b
 
+≉pred : ∀ {x y} {a : Fin x} {b : Fin y} → fsuc a ≉ᶠ fsuc b → a ≉ᶠ b
+≉pred a'≉b' a≈b = a'≉b' (≈fsuc a≈b)
+
 fsuc-funsplice 
   : ∀ {x : ℕ} → (b a : Fin (suc x)) → (a≉b : a ≉ᶠ b)
   → funsplice (fsuc b) (fsuc a) (≉fsuc a≉b)
