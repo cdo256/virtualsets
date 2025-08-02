@@ -163,7 +163,7 @@ fsuc-funsplice b        a a≉b | feq a≈b = absurd (a≉b a≈b)
 fsuc-funsplice b (fsuc a) a≉b | fgt a>b = refl
 
 funsplice-irrelevant
-  : ∀ {x : ℕ} → (b a : Fin (suc (suc x)))
+  : ∀ {x : ℕ} → (b a : Fin (suc x))
   → (u v : a ≉ᶠ b)
   → funsplice b a u ≡ funsplice b a v
 funsplice-irrelevant b        a u v with (a ≟ᶠ b)

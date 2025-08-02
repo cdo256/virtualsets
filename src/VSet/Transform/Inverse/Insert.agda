@@ -37,41 +37,39 @@ apply-insert≡b (fsuc a) b (inc c f) =
     ≡⟨ splice-splice-antisplice b c ⟩
   b ▯
 
-apply-insert 
+apply-insert
   : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
   → (x : Fin (suc m)) → Dec (x ≈ᶠ a)
   → Fin (suc m)
 apply-insert a b f x (yes x≈a) = b
 apply-insert a b f x (no x≉a) = fsplice b (apply f (funsplice a x x≉a)) 
 
+apply-insert-irrelevant
+  : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
+  → (x : Fin (suc m)) → (u v : Dec (x ≈ᶠ a))
+  → apply-insert a b f x u ≡ apply-insert a b f x v
+apply-insert-irrelevant a b f x (yes u) (yes v) = refl
+apply-insert-irrelevant a b f x (yes u) (no v) = absurd (v u)
+apply-insert-irrelevant a b f x (no u) (yes v) = absurd (u v)
+apply-insert-irrelevant a b f x (no u) (no v) =
+  cong (fsplice b ∘ apply f) (funsplice-irrelevant a x u v)
+
 ≉pred : ∀ {x y} {a : Fin x} {b : Fin y} → fsuc a ≉ᶠ fsuc b → a ≉ᶠ b
 ≉pred a'≉b' a≈b = a'≉b' (≈fsuc a≈b)
 
-fsplice-lemma1 
-  : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc (suc m))) → (f : Inj m m)
-  → (x : Fin (suc m)) → (c : Fin (suc m)) → (x'≉a' : fsuc x ≉ᶠ fsuc a)
-  → fsplice (fsplice b c) (apply-insert a (antisplice c b) f x
-                                        (x ≈?ᶠ a)) 
-  ≡ fsplice b (apply (inc c f) (fsuc (funsplice a x (≉pred x'≉a')))) 
-fsplice-lemma1 a b f x c x'≉a' with x ≟ᶠ a
-... | flt x<a =
-  fsplice (fsplice b c)
-   (apply-insert a (antisplice c b) f x (no (<ᶠ→≉ x<a)))
-   ≡⟨ {!!} ⟩
-  fsplice b
-   (fsplice c
-    (apply f
-     (funsplice-cases a x (λ a≈b → x'≉a' (≈fsuc a≈b)) (flt x<a)))) ▯
-... | feq x≈a = absurd (x'≉a' (≈fsuc x≈a))
-... | fgt x>a = 
-  fsplice (fsplice b c)
-   (apply-insert a (antisplice c b) f x (no (≉fsym (<ᶠ→≉ x>a))))
-   ≡⟨ {!!} ⟩
-  fsplice b
-   (fsplice c
-    (apply f
-     (funsplice-cases a x (λ a≈b → x'≉a' (≈fsuc a≈b)) (fgt x>a)))) ▯
-
+fsplice-fsplice-fsplice-antisplice
+  : ∀ {m} → (b : Fin (suc (suc m))) → (x : Fin m) → (c : Fin (suc m)) 
+  → fsplice (fsplice b c) (fsplice (antisplice c b) x)
+  ≡ fsplice b (fsplice c x)
+fsplice-fsplice-fsplice-antisplice fzero fzero fzero = refl
+fsplice-fsplice-fsplice-antisplice fzero fzero (fsuc c) = refl
+fsplice-fsplice-fsplice-antisplice fzero (fsuc x) fzero = refl
+fsplice-fsplice-fsplice-antisplice fzero (fsuc x) (fsuc c) = refl
+fsplice-fsplice-fsplice-antisplice (fsuc b) fzero fzero = refl
+fsplice-fsplice-fsplice-antisplice (fsuc b) fzero (fsuc c) = refl
+fsplice-fsplice-fsplice-antisplice (fsuc b) (fsuc x) fzero = refl
+fsplice-fsplice-fsplice-antisplice (fsuc b) (fsuc x) (fsuc c) =
+  cong fsuc (fsplice-fsplice-fsplice-antisplice b x c)
 
 apply∘insert≡apply-insert
   : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
@@ -113,7 +111,17 @@ apply∘insert≡apply-insert (fsuc a) b (inc c f) (fsuc x) | no x'≉a' =
               a (antisplice c b) f x) ⟩
   fsplice (fsplice b c) (apply-insert a (antisplice c b) f x
                                       (x ≈?ᶠ a)) 
-    ≡⟨ {!!} ⟩
+    ≡⟨ cong (fsplice (fsplice b c))
+            (apply-insert-irrelevant
+              a (antisplice c b) f x
+              (x ≈?ᶠ a) (no (≉pred x'≉a'))) ⟩
+  fsplice (fsplice b c) (apply-insert a (antisplice c b) f x
+                                      (no (≉pred x'≉a'))) 
+    ≡⟨ refl ⟩
+  fsplice (fsplice b c) (fsplice (antisplice c b) (apply f (funsplice a x (≉pred x'≉a'))))
+    ≡⟨ fsplice-fsplice-fsplice-antisplice b (apply f (funsplice a x (≉pred x'≉a'))) c ⟩
+  fsplice b (fsplice c (apply f (funsplice a x (≉pred x'≉a'))))
+    ≡⟨ refl ⟩
   fsplice b (apply (inc c f) (fsuc (funsplice a x (≉pred x'≉a')))) 
     ≡⟨ cong (fsplice b ∘ apply (inc c f)) (sym (fsuc-funsplice a x (≉pred x'≉a'))) ⟩
   fsplice b (apply (inc c f) (funsplice (fsuc a) (fsuc x) (≉fsuc (≉pred x'≉a')))) 
@@ -123,37 +131,3 @@ apply∘insert≡apply-insert (fsuc a) b (inc c f) (fsuc x) | no x'≉a' =
   fsplice b (apply (inc c f) (funsplice (fsuc a) (fsuc x) x'≉a')) 
     ≡⟨ refl ⟩
   apply-insert (fsuc a) b (inc c f) (fsuc x) (no x'≉a') ▯
-
-apply-insert-≢-0
-  : ∀ {m} → (a : Fin (suc m)) → (f : Inj m m)
-  → (x : Fin (suc m)) → (a≢x : a ≢ x)
-  → apply (insert a f0 f) x
-  ≡ {!fsplice ? {!apply f ?!}!}
-apply-insert-≢-0 fzero f fzero 0≢0 = absurd (0≢0 refl)
-apply-insert-≢-0 fzero f (fsuc x) _ =
-  apply (insert f0 f0 f) (fsuc x)
-    ≡⟨ refl ⟩
-  apply (inc f0 f) (fsuc x)
-    ≡⟨ refl ⟩
-  {!fsplice f0 (apply f x)!} ▯
-apply-insert-≢-0 (fsuc a) (inc c f) fzero a'≢0 =
-  apply (insert (fsuc a) f0 (inc c f)) f0 
-    ≡⟨ refl ⟩
-  apply (inc (fsplice f0 c) (insert a (antisplice c f0) f)) f0 
-    ≡⟨ refl ⟩
-  fsplice f0 c
-    ≡⟨ {!!} ⟩
-  fsplice {!!} {!!} ▯
-apply-insert-≢-0 (fsuc a) (inc c f) (fsuc x) a'≢x' with a ≟ᶠ x
-... | flt a<x =
-  apply (insert (fsuc a) f0 (inc c f)) (fsuc x)
-    ≡⟨ refl ⟩
-  apply (inc (fsplice f0 c) (insert a (antisplice c f0) f)) (fsuc x)
-    ≡⟨ refl ⟩
-  fsplice (fsplice f0 c) (apply (insert a (antisplice c f0) f) x)
-    ≡⟨ {!!} ⟩
-  fsplice (fsuc c) (apply (insert a (antisplice c f0) f) x)
-    ≡⟨ {!!} ⟩
-  {!!} ▯
-... | feq a≈x = absurd (≢cong fsuc a'≢x' (≈ᶠ→≡ a≈x))
-... | fgt a>x = {!!}
