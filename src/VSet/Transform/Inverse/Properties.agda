@@ -6,6 +6,8 @@ open import Cubical.Data.Sum.Base hiding (elim)
 open import Cubical.Data.Nat.Base hiding (elim)
 open import Cubical.Data.Nat.Order
 open import Cubical.Data.Nat.Properties
+open import Cubical.Data.Maybe.Base hiding (elim)
+open import Cubical.Data.Maybe.Properties
 open import Cubical.Data.List.Base hiding (elim; [_])
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
@@ -16,7 +18,6 @@ open import VSet.Data.Inj.Order
 open import VSet.Transform.Inverse.Base
 open import VSet.Transform.Inverse.Insert
 open import VSet.Transform.Compose.Base
-open import Cubical.Data.Maybe.Base hiding (elim)
 
 private
   variable
@@ -132,3 +133,12 @@ Inj-isInjective (inc b f) (fsuc x) fzero fx≡fy =
   absurd (fsplice≉b b (apply f x) (≡→≈ᶠ fx≡fy))
 Inj-isInjective (inc b f) (fsuc x) (fsuc y) fx≡fy =
   cong fsuc (Inj-isInjective f x y (fsplice-isInjective fx≡fy))
+
+apply-inv≡0→b≈y : {m n : ℕ} → (f : Inj m n) → (b y : Fin (suc n))
+                → apply-inv (inc b f) y ≡ just fzero
+                → y ≈ᶠ b
+apply-inv≡0→b≈y f b y p with y ≈?ᶠ b 
+... | yes y≈b = y≈b
+... | no y≉b with apply-inv f (fjoin b y y≉b)
+...      | nothing = absurd (¬nothing≡just p)
+...      | just x = absurd (fsuc≢fzero x (just-inj (fsuc x) f0 p))

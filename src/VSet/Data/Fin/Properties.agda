@@ -384,3 +384,11 @@ fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc a) fzero = refl
 fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc a) (fsuc c) =
   cong fsuc (fsplice-fsplice-fsplice-fcross b a c)
 
+fcross-fcross-fsplice
+  : ∀ {m} → (b : Fin (suc (suc m))) (c : Fin (suc m))
+  → (fcross (fcross c b) (fsplice b c)) ≡ c
+fcross-fcross-fsplice fzero fzero = refl
+fcross-fcross-fsplice fzero (fsuc c) = refl
+fcross-fcross-fsplice (fsuc b) fzero = refl
+fcross-fcross-fsplice {m = suc m} (fsuc b) (fsuc c) =
+  cong fsuc (fcross-fcross-fsplice b c)
