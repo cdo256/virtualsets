@@ -3,7 +3,7 @@ module VSet.Data.Fin.Properties where
 open import VSet.Prelude
 
 import Cubical.Data.Nat as ℕ
-open import Cubical.Data.Nat using (ℕ; +-zero) renaming (_+_ to _+ℕ_)
+open import Cubical.Data.Nat using (ℕ; +-zero; +-suc) renaming (_+_ to _+ℕ_)
 open import VSet.Data.Nat.Order
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
@@ -63,28 +63,47 @@ a ≡?ᶠ b with (a ≟ᶠ b)
 isSetFin : ∀ {x} → isSet (Fin x)
 isSetFin = Discrete→isSet _≡?ᶠ_
 
+-- finject-injective : {z : ℕ} {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
+-- finject-injective {z = z} {x = x} zero a b fa≡fb = 
+--   a
+--     ≡⟨ sym (subst⁻Subst Fin (sym (+-zero x)) a) ⟩
+--   subst Fin (+-zero x) (subst Fin (sym (+-zero x)) a)
+--     ≡⟨ cong (subst Fin (+-zero x)) (sym (finject0≡subst a)) ⟩
+--   subst Fin (+-zero x) (finject zero a)
+--     ≡⟨ cong (subst Fin (+-zero x)) fa≡fb ⟩
+--   (λ {w} b → fshift z b) fa≡fb a
+
+finject≡finj-finject : {x : ℕ} → (y : ℕ) → (a : Fin x)
+                     → finject {x} (suc y) a
+                     ≡ subst Fin (sym (+-suc x y)) (finj (finject {x} y a))
+finject≡finj-finject = {!!}
+
+finj-injective : {x : ℕ} → is-injective (finj {x})
+finj-injective fzero fzero fx≡fy = refl
+finj-injective fzero (fsuc y) fx≡fy = absurd (fzero≢fsuc (finj y) fx≡fy)
+finj-injective (fsuc x) fzero fx≡fy = absurd (fsuc≢fzero (finj x) fx≡fy)
+finj-injective (fsuc x) (fsuc y) fx≡fy =
+  cong fsuc (finj-injective x y (fsuc-injective fx≡fy))
+
+-- Easier to do the dumb way. as in the suc y case.
 finject-injective : {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
 finject-injective {x} zero a b fa≡fb = 
-  let step1 : finject zero ≡ subst Fin (sym (+-zero x))
-      step1 = funExt finject0≡subst
-  in a
-       ≡⟨ sym (subst⁻Subst Fin (sym (+-zero x)) a) ⟩
-     subst Fin (+-zero x) (subst Fin (sym (+-zero x)) a)
-       ≡⟨ cong (subst Fin (+-zero x)) (sym (finject0≡subst a)) ⟩
-     subst Fin (+-zero x) (finject zero a)
-       ≡⟨ cong (subst Fin (+-zero x)) fa≡fb ⟩
-     subst Fin (+-zero x) (finject zero b)
-       ≡⟨ cong (subst Fin (+-zero x)) (finject0≡subst b) ⟩
-     subst Fin (+-zero x) (subst Fin (sym (+-zero x)) b)
-       ≡⟨ (subst⁻Subst Fin (sym (+-zero x)) b) ⟩
-     b ▯
-finject-injective {x} (suc y) fzero fzero _ = refl
-finject-injective {x} (suc y) fzero (fsuc b) f0≡fsb =
-  absurd {A = λ _ → fzero ≡ fsuc b} (fzero≢fsuc (finject (suc y) b) f0≡fsb)
-finject-injective {x} (suc y) (fsuc a) fzero fsa≡f0 =
-  absurd {A = λ _ → fsuc a ≡ fzero} (fsuc≢fzero (finject (suc y) a) fsa≡f0)
-finject-injective {x} (suc y) (fsuc a) (fsuc b) fsa≡fsb =
-  cong fsuc (finject-injective (suc y) a b (fsuc-injective fsa≡fsb))
+  a
+    ≡⟨ sym (subst⁻Subst Fin (sym (+-zero x)) a) ⟩
+  subst Fin (+-zero x) (subst Fin (sym (+-zero x)) a)
+    ≡⟨ cong (subst Fin (+-zero x)) (sym (finject0≡subst a)) ⟩
+  subst Fin (+-zero x) (finject zero a)
+    ≡⟨ cong (subst Fin (+-zero x)) fa≡fb ⟩
+  subst Fin (+-zero x) (finject zero b)
+    ≡⟨ cong (subst Fin (+-zero x)) (finject0≡subst b) ⟩
+  subst Fin (+-zero x) (subst Fin (sym (+-zero x)) b)
+    ≡⟨ subst⁻Subst Fin (sym (+-zero x)) b ⟩
+  b ▯
+finject-injective {x} (suc y) fzero fzero fa≡fb = refl
+finject-injective {x} (suc y) fzero (fsuc b) fa≡fb = absurd (fzero≢fsuc (finject (suc y) b) fa≡fb)
+finject-injective {x} (suc y) (fsuc a) fzero fa≡fb = absurd (fsuc≢fzero (finject (suc y) a) fa≡fb)
+finject-injective {x} (suc y) (fsuc a) (fsuc b) fa≡fb =
+  cong fsuc (finject-injective (suc y) a b (fsuc-injective fa≡fb))
 
 subst-fsuc-reorder
   : ∀ {x y : ℕ} → (p : x ≡ y) → (a : Fin x)
