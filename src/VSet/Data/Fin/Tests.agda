@@ -26,19 +26,19 @@ _ : t0 ≡ (f1 , f2 , f0 , f2)
 _ = refl
 
 t1 : Fin 2 × Fin 2 × Fin 2 × Fin 2
-t1 = funsplice f0 (fsplice f0 f0) (fsplice≉b f0 f0)
-   , funsplice f0 (fsplice f0 f1) (fsplice≉b f0 f1)
-   , funsplice f1 (fsplice f1 f0) (fsplice≉b f1 f0)
-   , funsplice f1 (fsplice f1 f1) (fsplice≉b f1 f1)
+t1 = fjoin f0 (fsplice f0 f0) (fsplice≉b f0 f0)
+   , fjoin f0 (fsplice f0 f1) (fsplice≉b f0 f1)
+   , fjoin f1 (fsplice f1 f0) (fsplice≉b f1 f0)
+   , fjoin f1 (fsplice f1 f1) (fsplice≉b f1 f1)
 _ : t1 ≡ (f0 , f1 , f0 , f1)
 _ = refl
 
 t2 : Fin 2 × Fin 2 × Fin 2 × Fin 2 × Fin 2 × Fin 2
-t2 = antisplice' f0 f0 -- eq
-   , antisplice' f0 f1 -- pred
-   , antisplice' f0 f2 -- pred
-   , antisplice' f1 f0 -- eq
-   , antisplice' f1 f1 -- eq
-   , antisplice' f1 f2 -- pred
+t2 = fcross' f0 f0 -- eq
+   , fcross' f0 f1 -- pred
+   , fcross' f0 f2 -- pred
+   , fcross' f1 f0 -- eq
+   , fcross' f1 f1 -- eq
+   , fcross' f1 f2 -- pred
 _ : t2 ≡ (f0 , f0 , f1 , f0 , f1 , f1)
 _ = refl

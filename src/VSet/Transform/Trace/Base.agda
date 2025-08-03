@@ -21,7 +21,7 @@ remove : ∀ {m n} → (a : Fin (suc m))
 remove fzero (inc b f) = f
 remove {suc m} {suc n} (fsuc a) (inc c f) =
   let b = apply f a
-  in inc (funsplice (fsplice c b) c (≉fsym (fsplice≉b c b)))
+  in inc (fjoin (fsplice c b) c (≉fsym (fsplice≉b c b)))
          (remove a f) 
 
 inverses
@@ -33,9 +33,9 @@ inverses fzero b (inc c f) = refl
 inverses (fsuc fzero) b (inc c f) =
   remove (fsuc fzero) (insert (fsuc fzero) b (inc c f))
     ≡⟨ refl ⟩
-  remove (fsuc fzero) (inc (fsplice b c) (insert fzero (antisplice c b) f))
+  remove (fsuc fzero) (inc (fsplice b c) (insert fzero (fcross c b) f))
     ≡⟨ refl ⟩
-  remove (fsuc fzero) (inc (fsplice b c) (inc (antisplice c b) f))
+  remove (fsuc fzero) (inc (fsplice b c) (inc (fcross c b) f))
     ≡⟨ refl ⟩
   inc (funsplice (fsplice (fsplice b c) (antisplice c b)) (fsplice b c)
           (≉fsym (fsplice≉b (fsplice b c) (antisplice c b)))) f 
@@ -66,10 +66,10 @@ inverses (fsuc a) b (inc c f) =
   inc (funsplice (fsplice (fsplice b c) {!!}) (fsplice b c) {!!})
       {!!}
     ≡⟨ {!!} ⟩
-  inc (funsplice (fsplice (fsplice b c) {!!}) {!!} (≉fsym (fsplice≉b {!!} {!!})))
+  inc (fjoin (fsplice (fsplice b c) {!!}) {!!} (≉fsym (fsplice≉b {!!} {!!})))
       (remove {!!} {!!})
     ≡⟨ {!!} ⟩
-  inc (antisplice {!!} (fsplice b c)) (remove {!!} {!!})
+  inc (fcross {!!} (fsplice b c)) (remove {!!} {!!})
     ≡⟨ {!!} ⟩
   inc c f ▯
 

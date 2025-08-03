@@ -63,43 +63,33 @@ a ≡?ᶠ b with (a ≟ᶠ b)
 isSetFin : ∀ {x} → isSet (Fin x)
 isSetFin = Discrete→isSet _≡?ᶠ_
 
--- finject-injective : {z : ℕ} {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
--- finject-injective {z = z} {x = x} zero a b fa≡fb = 
---   a
---     ≡⟨ sym (subst⁻Subst Fin (sym (+-zero x)) a) ⟩
---   subst Fin (+-zero x) (subst Fin (sym (+-zero x)) a)
---     ≡⟨ cong (subst Fin (+-zero x)) (sym (finject0≡subst a)) ⟩
---   subst Fin (+-zero x) (finject zero a)
---     ≡⟨ cong (subst Fin (+-zero x)) fa≡fb ⟩
---   (λ {w} b → fshift z b) fa≡fb a
-
 subst-fsuc-reorder
   : ∀ {x y : ℕ} → (p : x ≡ y) → (a : Fin x)
   → transport (λ i → Fin (suc (p i))) (fsuc a)
   ≡ fsuc (transport (λ i → Fin (p i)) a)
 subst-fsuc-reorder p a = transport-reorder Fin suc fsuc p a
 
--- fshift-fsuc-reorder : ∀ {x y : ℕ} → (a : Fin y)
---                     → fshift x {suc y} (fsuc {y} a)
---                     ≡ subst Fin (sym (ℕ.+-suc x y)) (fsuc (fshift x {y} a))
--- fshift-fsuc-reorder {zero} {suc y} a =
---   fshift zero (fsuc a)
---     ≡⟨ refl ⟩
---   fsuc a
---     ≡⟨ cong fsuc (sym (substRefl {B = Fin} a)) ⟩
---   fsuc (subst Fin (sym (ℕ.+-suc 0 y)) a)
---     ≡⟨ refl ⟩
---   fsuc (subst Fin (sym (ℕ.+-suc 0 y)) (fshift 0 {suc y} a))
---     ≡⟨ sym (subst-fsuc-reorder (λ i → ℕ.+-suc 0 y (~ i)) a) ⟩
---   subst Fin (sym (ℕ.+-suc 0 (suc y))) (fsuc (fshift 0 {suc y} a)) ▯
--- fshift-fsuc-reorder {suc x} {suc y} a =
---   fshift (suc x) (fsuc a)
---     ≡⟨ refl ⟩
---   fsuc (fshift x (fsuc a))
---     ≡⟨ {!!} ⟩
---   subst Fin (sym (ℕ.+-suc (suc x) (suc y))) (fshift (suc (suc x)) a)
---     ≡⟨ refl ⟩
---   subst Fin (sym (ℕ.+-suc (suc x) (suc y))) (fsuc (fshift (suc x) a)) ▯
+fshift-fsuc-reorder : ∀ {x y : ℕ} → (a : Fin y)
+                    → fshift x {suc y} (fsuc {y} a)
+                    ≡ subst Fin (sym (ℕ.+-suc x y)) (fsuc (fshift x {y} a))
+fshift-fsuc-reorder {zero} {suc y} a =
+  fshift zero (fsuc a)
+    ≡⟨ refl ⟩
+  fsuc a
+    ≡⟨ cong fsuc (sym (substRefl {B = Fin} a)) ⟩
+  fsuc (subst Fin (sym (ℕ.+-suc 0 y)) a)
+    ≡⟨ refl ⟩
+  fsuc (subst Fin (sym (ℕ.+-suc 0 y)) (fshift 0 {suc y} a))
+    ≡⟨ sym (subst-fsuc-reorder (λ i → ℕ.+-suc 0 y (~ i)) a) ⟩
+  subst Fin (sym (ℕ.+-suc 0 (suc y))) (fsuc (fshift 0 {suc y} a)) ▯
+fshift-fsuc-reorder {suc x} {suc y} a =
+  fshift (suc x) (fsuc a)
+    ≡⟨ refl ⟩
+  fsuc (fshift x (fsuc a))
+    ≡⟨ {!!} ⟩
+  subst Fin (sym (ℕ.+-suc (suc x) (suc y))) (fshift (suc (suc x)) a)
+    ≡⟨ refl ⟩
+  subst Fin (sym (ℕ.+-suc (suc x) (suc y))) (fsuc (fshift (suc x) a)) ▯
 
 fshift-injective : {x : ℕ} → (y : ℕ) → is-injective (fshift x {y})
 fshift-injective {zero} y a b fa≡fb = fa≡fb
@@ -171,78 +161,78 @@ finject-injective {x} (suc y) (fsuc a) (fsuc b) fa≡fb =
   cong fsuc (finject-injective (suc y) a b (fsuc-injective fa≡fb))
 
 
-fsuc-funsplice 
+fsuc-fjoin 
   : ∀ {x : ℕ} → (b a : Fin (suc x)) → (a≉b : a ≉ᶠ b)
-  → funsplice (fsuc b) (fsuc a) (≉fsuc a≉b)
-  ≡ fsuc (funsplice b a a≉b)
-fsuc-funsplice b        a a≉b with (a ≟ᶠ b)
-fsuc-funsplice b        a a≉b | flt a<b = refl
-fsuc-funsplice b        a a≉b | feq a≈b = absurd (a≉b a≈b)
-fsuc-funsplice b (fsuc a) a≉b | fgt a>b = refl
+  → fjoin (fsuc b) (fsuc a) (≉fsuc a≉b)
+  ≡ fsuc (fjoin b a a≉b)
+fsuc-fjoin b        a a≉b with (a ≟ᶠ b)
+fsuc-fjoin b        a a≉b | flt a<b = refl
+fsuc-fjoin b        a a≉b | feq a≈b = absurd (a≉b a≈b)
+fsuc-fjoin b (fsuc a) a≉b | fgt a>b = refl
 
-funsplice-irrelevant
+fjoin-irrelevant
   : ∀ {x : ℕ} → (b a : Fin (suc x))
   → (u v : a ≉ᶠ b)
-  → funsplice b a u ≡ funsplice b a v
-funsplice-irrelevant b        a u v with (a ≟ᶠ b)
-funsplice-irrelevant b        a u v | flt a<b = refl
-funsplice-irrelevant b        a u v | feq a≈b = absurd (u a≈b)
-funsplice-irrelevant b (fsuc a) u v | fgt a>b = refl
+  → fjoin b a u ≡ fjoin b a v
+fjoin-irrelevant b        a u v with (a ≟ᶠ b)
+fjoin-irrelevant b        a u v | flt a<b = refl
+fjoin-irrelevant b        a u v | feq a≈b = absurd (u a≈b)
+fjoin-irrelevant b (fsuc a) u v | fgt a>b = refl
 
-funsplice-cong
+fjoin-cong
   : ∀ {x} → {b1 b2 a1 a2 : Fin (suc x)}
   → (p : b1 ≡ b2) → (q : a1 ≡ a2)
   → (ne : a1 ≉ᶠ b1)
-  → funsplice b1 a1 ne ≡ funsplice b2 a2 (subst2 _≉ᶠ_ q p ne)
-funsplice-cong {b1 = b1} {b2} {a1} {a2} p q ne i =
-  funsplice (p i) (q i) (subst2-filler _≉ᶠ_ q p ne i)
+  → fjoin b1 a1 ne ≡ fjoin b2 a2 (subst2 _≉ᶠ_ q p ne)
+fjoin-cong {b1 = b1} {b2} {a1} {a2} p q ne i =
+  fjoin (p i) (q i) (subst2-filler _≉ᶠ_ q p ne i)
 
 -- This could be simplified.
-funsplice-fsplice-inverse
+fjoin-fsplice-inverse
   : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x)
-  → (splicea≉b : fsplice b a ≉ᶠ b)
-  → funsplice b (fsplice b a) splicea≉b ≡ a
-funsplice-fsplice-inverse {zero} fzero ()
-funsplice-fsplice-inverse {suc zero} fzero fzero splicea≉b = refl
-funsplice-fsplice-inverse {suc (suc x)} fzero fzero splicea≉b = refl
-funsplice-fsplice-inverse {suc (suc x)} fzero (fsuc a) splicea≉b = refl
-funsplice-fsplice-inverse {suc zero} (fsuc b) fzero splicea≉b = refl
-funsplice-fsplice-inverse {suc (suc x)} (fsuc b) fzero splicea≉b = refl
-funsplice-fsplice-inverse {suc (suc x)} (fsuc b) (fsuc a) splicea'≉b' =
-  funsplice (fsuc b) (fsplice (fsuc b) (fsuc a)) splicea'≉b'  
+  → (fsplicea≉b : fsplice b a ≉ᶠ b)
+  → fjoin b (fsplice b a) fsplicea≉b ≡ a
+fjoin-fsplice-inverse {zero} fzero ()
+fjoin-fsplice-inverse {suc zero} fzero fzero fsplicea≉b = refl
+fjoin-fsplice-inverse {suc (suc x)} fzero fzero fsplicea≉b = refl
+fjoin-fsplice-inverse {suc (suc x)} fzero (fsuc a) fsplicea≉b = refl
+fjoin-fsplice-inverse {suc zero} (fsuc b) fzero fsplicea≉b = refl
+fjoin-fsplice-inverse {suc (suc x)} (fsuc b) fzero fsplicea≉b = refl
+fjoin-fsplice-inverse {suc (suc x)} (fsuc b) (fsuc a) fsplicea'≉b' =
+  fjoin (fsuc b) (fsplice (fsuc b) (fsuc a)) fsplicea'≉b'  
     ≡⟨ refl ⟩
-  funsplice (fsuc b) (fsuc (fsplice b a)) splicea'≉b'  
-    ≡⟨ funsplice-irrelevant (fsuc b) (fsuc (fsplice b a))
-       splicea'≉b' (≉fsuc (fsplice≉b b a)) ⟩
-  funsplice (fsuc b) (fsuc (fsplice b a)) 
+  fjoin (fsuc b) (fsuc (fsplice b a)) fsplicea'≉b'  
+    ≡⟨ fjoin-irrelevant (fsuc b) (fsuc (fsplice b a))
+       fsplicea'≉b' (≉fsuc (fsplice≉b b a)) ⟩
+  fjoin (fsuc b) (fsuc (fsplice b a)) 
    (≉fsuc (fsplice≉b b a))
-    ≡⟨ fsuc-funsplice b (fsplice b a) (fsplice≉b b a) ⟩
-  fsuc (funsplice b (fsplice b a)
+    ≡⟨ fsuc-fjoin b (fsplice b a) (fsplice≉b b a) ⟩
+  fsuc (fjoin b (fsplice b a)
                   (fsplice≉b b a))
-    ≡⟨ cong fsuc (funsplice-irrelevant b (fsplice b a)
+    ≡⟨ cong fsuc (fjoin-irrelevant b (fsplice b a)
         (fsplice≉b b a)
         (λ a≈b → fsplice≉b (fsuc b) (fsuc a) (≈fsuc a≈b))) ⟩
-  fsuc (funsplice b (fsplice b a) 
+  fsuc (fjoin b (fsplice b a) 
                   (λ a≈b → fsplice≉b (fsuc b) (fsuc a) (≈fsuc a≈b)))
     ≡⟨ refl ⟩
-  fsuc (funsplice b (fsplice b a) 
+  fsuc (fjoin b (fsplice b a) 
    (fsplice≉b b a))
-    ≡⟨ cong fsuc (funsplice-fsplice-inverse b a (fsplice≉b b a)) ⟩
+    ≡⟨ cong fsuc (fjoin-fsplice-inverse b a (fsplice≉b b a)) ⟩
   fsuc a ▯
 
 fsplice-isInjective
   : ∀ {m} {a : Fin (suc m)} {b c : Fin m}
   → fsplice a b ≡ fsplice a c → b ≡ c
-fsplice-isInjective {a = a} {fzero} {fzero} splice-eq = refl
-fsplice-isInjective {a = fzero} {b} {c} splice-eq = fsuc-injective splice-eq
-fsplice-isInjective {a = fsuc a} {fzero} {fsuc c} splice-eq =
+fsplice-isInjective {a = a} {fzero} {fzero} fsplice-eq = refl
+fsplice-isInjective {a = fzero} {b} {c} fsplice-eq = fsuc-injective fsplice-eq
+fsplice-isInjective {a = fsuc a} {fzero} {fsuc c} fsplice-eq =
   absurd {A = λ _ → fzero ≡ fsuc c}
-         (fzero≢fsuc (fsplice a c) splice-eq)
-fsplice-isInjective {a = fsuc a} {fsuc b} {fzero} splice-eq =
+         (fzero≢fsuc (fsplice a c) fsplice-eq)
+fsplice-isInjective {a = fsuc a} {fsuc b} {fzero} fsplice-eq =
   absurd {A = λ _ → fsuc b ≡ fzero}
-         (fsuc≢fzero (fsplice a b) splice-eq)
-fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
-  cong fsuc $ fsplice-isInjective (fsuc-injective splice-eq)
+         (fsuc≢fzero (fsplice a b) fsplice-eq)
+fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} fsplice-eq =
+  cong fsuc $ fsplice-isInjective (fsuc-injective fsplice-eq)
 
 ≤→fsplice≈suc : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
               → a2 ≤ᶠ finj a1 → fsplice a2 a1 ≈ᶠ fsuc a1
@@ -258,37 +248,30 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} splice-eq =
 >→fsplice≈id {suc m} (fsuc a1) (fsuc a2) a1<a2 =
   ≈fsuc (>→fsplice≈id a1 a2 (<ᶠ-respects-pred a1<a2))
 
--- antisplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
---            → Fin (suc x)
--- antisplice _ fzero = fzero
--- antisplice fzero (fsuc a) = a
--- antisplice {suc x} (fsuc b) (fsuc a) =
---   fsuc (antisplice b a)
+<→fcross≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                → a2 <ᶠ a1 → fcross a1 a2 ≈ᶠ a2
+<→fcross≈id (fsuc a1) fzero a2<a1 = {!!}
+<→fcross≈id {suc m} (fsuc a1) (fsuc a2) (<fsuc a2<a1) =
+  ≈fsuc (<→fcross≈id a1 a2 a2<a1)
 
-<→antisplice≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-                → a2 <ᶠ a1 → antisplice a1 a2 ≈ᶠ a2
-<→antisplice≈id (fsuc a1) fzero a2<a1 = {!!}
-<→antisplice≈id {suc m} (fsuc a1) (fsuc a2) (<fsuc a2<a1) =
-  ≈fsuc (<→antisplice≈id a1 a2 a2<a1)
+≈→fcross≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                → a2 ≈ᶠ a1 → fcross a1 a2 ≈ᶠ a2
+≈→fcross≈id fzero fzero _ = {!!}
+≈→fcross≈id (fsuc a1) fzero _ = {!!}
+≈→fcross≈id fzero (fsuc a2) a2'≈0 = absurd (fsuc≉fzero a2'≈0)
+≈→fcross≈id {suc m} (fsuc a1) (fsuc a2) a2≈a1 =
+  ≈fsuc (≈→fcross≈id a1 a2 (≈fsuc-injective a2≈a1))
 
-≈→antisplice≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-                → a2 ≈ᶠ a1 → antisplice a1 a2 ≈ᶠ a2
-≈→antisplice≈id fzero fzero _ = {!!}
-≈→antisplice≈id (fsuc a1) fzero _ = {!!}
-≈→antisplice≈id fzero (fsuc a2) a2'≈0 = absurd (fsuc≉fzero a2'≈0)
-≈→antisplice≈id {suc m} (fsuc a1) (fsuc a2) a2≈a1 =
-  ≈fsuc (≈→antisplice≈id a1 a2 (≈fsuc-injective a2≈a1))
+≤→fcross≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                → a2 ≤ᶠ a1 → fcross a1 a2 ≈ᶠ a2
+≤→fcross≈id a1 a2 (inl a2<a1) = <→fcross≈id a1 a2 a2<a1
+≤→fcross≈id a1 a2 (inr a2≈a1) = ≈→fcross≈id a1 a2 a2≈a1
 
-≤→antisplice≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-                → a2 ≤ᶠ a1 → antisplice a1 a2 ≈ᶠ a2
-≤→antisplice≈id a1 a2 (inl a2<a1) = <→antisplice≈id a1 a2 a2<a1
-≤→antisplice≈id a1 a2 (inr a2≈a1) = ≈→antisplice≈id a1 a2 a2≈a1
-
->→antisplice≈pred : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-                  → finj a1 <ᶠ a2 → antisplice a1 a2 ≈ᶠ pred a2
->→antisplice≈pred fzero (fsuc a2) a2>a1 = ≈refl
->→antisplice≈pred {suc m} (fsuc a1) (fsuc (fsuc a2)) (<fsuc a2>a1) =
-  ≈fsuc (>→antisplice≈pred a1 (fsuc a2) a2>a1)
+>→fcross≈pred : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+                  → finj a1 <ᶠ a2 → fcross a1 a2 ≈ᶠ pred a2
+>→fcross≈pred fzero (fsuc a2) a2>a1 = ≈refl
+>→fcross≈pred {suc m} (fsuc a1) (fsuc (fsuc a2)) (<fsuc a2>a1) =
+  ≈fsuc (>→fcross≈pred a1 (fsuc a2) a2>a1)
 
 fsplice≈case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
              → fsplice a2 a1 ≈ᶠ(case≤?ᶠ a2 (finj a1) (fsuc a1) (finj a1))
@@ -296,93 +279,93 @@ fsplice≈case a1 a2 with (a2 ≤?ᶠ finj a1)
 ... | fle a2≤a1 = ≤→fsplice≈suc a1 a2 a2≤a1
 ... | fgt a2>a1 = >→fsplice≈id a1 a2 a2>a1
 
--- antisplice≈case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
---                 → antisplice a1 a2
+-- fcross≈case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
+--                 → fcross a1 a2
 --                 ≈ᶠ case≤?ᶠ a2 (finj a1) a2 (finj (pred a2))
--- antisplice≈case a1 a2 with (a2 ≤?ᶠ a1)
--- ... | fle a2≤a1 = ≤→antisplice≈id a1 a2 a2≤a1
--- ... | fgt a2>a1 = cong finj (>→antisplice≈pred a1 a2 a2>a1)
+-- fcross≈case a1 a2 with (a2 ≤?ᶠ a1)
+-- ... | fle a2≤a1 = ≤→fcross≈id a1 a2 a2≤a1
+-- ... | fgt a2>a1 = cong finj (>→fcross≈pred a1 a2 a2>a1)
 
 finj∘fsuc≈fsuc∘finj : ∀ {x} (a : Fin (suc x)) → finj (fsuc a) ≈ᶠ fsuc (finj a)
 finj∘fsuc≈fsuc∘finj a = ≈refl
 
-splice-splice-antisplice 
+fsplice-fsplice-fcross 
   : ∀ {m} →  (b : Fin (suc (suc m))) → (c : Fin (suc m))
-  → fsplice (fsplice b c) (antisplice c b)
+  → fsplice (fsplice b c) (fcross c b)
   ≡ b
-splice-splice-antisplice fzero fzero = refl
-splice-splice-antisplice fzero (fsuc c) = refl
-splice-splice-antisplice (fsuc b) fzero = refl
-splice-splice-antisplice {m = suc m} (fsuc b) (fsuc c) =
+fsplice-fsplice-fcross fzero fzero = refl
+fsplice-fsplice-fcross fzero (fsuc c) = refl
+fsplice-fsplice-fcross (fsuc b) fzero = refl
+fsplice-fsplice-fcross {m = suc m} (fsuc b) (fsuc c) =
   fsplice (fsplice (fsuc b) (fsuc c))
-          (antisplice (fsuc c) (fsuc b))
+          (fcross (fsuc c) (fsuc b))
     ≡⟨ refl ⟩
   fsplice (fsuc (fsplice b c))
-          (fsuc (antisplice c b))
+          (fsuc (fcross c b))
     ≡⟨ refl ⟩
   fsuc (fsplice (fsplice b c)
-                (antisplice c b))
-    ≡⟨ cong fsuc (splice-splice-antisplice b c) ⟩
+                (fcross c b))
+    ≡⟨ cong fsuc (fsplice-fsplice-fcross b c) ⟩
   fsuc b ▯
 
-funsplice-fsplice-fsplice-antisplice-fsplice
+fjoin-fsplice-fsplice-fcross-fsplice
   : ∀ {n} → (b : Fin (suc (suc n)))
   → (c : Fin (suc n))
-  → (ne : fsplice b c ≉ᶠ fsplice (fsplice b c) (antisplice c b))
-  → funsplice (fsplice (fsplice b c) (antisplice c b)) (fsplice b c) ne
-  ≡ funsplice b (fsplice b c)
+  → (ne : fsplice b c ≉ᶠ fsplice (fsplice b c) (fcross c b))
+  → fjoin (fsplice (fsplice b c) (fcross c b)) (fsplice b c) ne
+  ≡ fjoin b (fsplice b c)
               (subst (fsplice b c ≉ᶠ_)
-                     (splice-splice-antisplice b c) ne)
-funsplice-fsplice-fsplice-antisplice-fsplice b c ne i
-  = funsplice (splice-splice-antisplice b c i) (fsplice b c)
-              (subst-filler (fsplice b c ≉ᶠ_) (splice-splice-antisplice b c) ne i)
+                     (fsplice-fsplice-fcross b c) ne)
+fjoin-fsplice-fsplice-fcross-fsplice b c ne i
+  = fjoin (fsplice-fsplice-fcross b c i) (fsplice b c)
+              (subst-filler (fsplice b c ≉ᶠ_) (fsplice-fsplice-fcross b c) ne i)
 
-funsplice-fsplice'
+fjoin-fsplice'
   : ∀ {n} → (b : Fin (suc n))
   → (c : Fin (suc (suc n))) 
   → (ne : c ≉ᶠ fsplice' c b)
-  → (funsplice (fsplice' c b) c ne)
-  ≡ antisplice' b c
-funsplice-fsplice' b c ne with c ≤?ᶠ b
-funsplice-fsplice' b c ne | fle c≤b =
-  funsplice (fsplice'-cases c b (fle c≤b)) c ne
+  → (fjoin (fsplice' c b) c ne)
+  ≡ fcross' b c
+fjoin-fsplice' b c ne with c ≤?ᶠ b
+fjoin-fsplice' b c ne | fle c≤b =
+  fjoin (fsplice'-cases c b (fle c≤b)) c ne
     ≡⟨ refl ⟩
-  funsplice-cases (fsuc b) c ne (c ≟ᶠ fsuc b)
-    ≡⟨ cong (funsplice-cases (fsuc b) c ne)
+  fjoin-cases (fsuc b) c ne (c ≟ᶠ fsuc b)
+    ≡⟨ cong (fjoin-cases (fsuc b) c ne)
             (isPropTrichotomyᶠ (c ≟ᶠ fsuc b) (flt (≤ᶠ→<ᶠ c≤b))) ⟩
-  funsplice-cases (fsuc b) c ne (flt (≤ᶠ→<ᶠ c≤b))
+  fjoin-cases (fsuc b) c ne (flt (≤ᶠ→<ᶠ c≤b))
     ≡⟨ refl ⟩
   fin-restrict-< c (≤ᶠ→<ᶠ c≤b)
     ≡⟨ refl ⟩
   fin-restrict-≤ c c≤b
     ≡⟨ refl ⟩
-  antisplice'-cases b c (fle c≤b) ▯
-funsplice-fsplice' b (fsuc c) ne | fgt c>b =
-  funsplice-cases (fsplice'-cases (fsuc c) b (fgt c>b)) (fsuc c) ne
+  fcross'-cases b c (fle c≤b) ▯
+fjoin-fsplice' b (fsuc c) ne | fgt c>b =
+  fjoin-cases (fsplice'-cases (fsuc c) b (fgt c>b)) (fsuc c) ne
                   (fsuc c ≟ᶠ fsplice'-cases (fsuc c) b (fgt c>b))
     ≡⟨ refl ⟩
-  funsplice-cases (finj b) (fsuc c) ne (fsuc c ≟ᶠ finj b)
-    ≡⟨ cong (funsplice-cases (finj b) (fsuc c) ne)
+  fjoin-cases (finj b) (fsuc c) ne (fsuc c ≟ᶠ finj b)
+    ≡⟨ cong (fjoin-cases (finj b) (fsuc c) ne)
               (isPropTrichotomyᶠ (fsuc c ≟ᶠ finj b) (fgt (<ᶠ-inj-l c>b))) ⟩
-  funsplice-cases (finj b) (fsuc c) ne (fgt (<ᶠ-inj-l c>b))
+  fjoin-cases (finj b) (fsuc c) ne (fgt (<ᶠ-inj-l c>b))
     ≡⟨ refl ⟩
   c
     ≡⟨ refl ⟩
   pred (fsuc c)
     ≡⟨ refl ⟩
-  antisplice'-cases b (fsuc c) (fgt c>b) ▯
+  fcross'-cases b (fsuc c) (fgt c>b) ▯
 
-funsplice-fsplice-fsplice-fsplice
+fjoin-fsplice-fsplice-fsplice
   : ∀ {n} → (a : Fin (suc (suc n))) → (b : Fin (suc n))
   → (c : Fin (suc n)) 
   → (ne : fsplice a c ≉ᶠ fsplice (fsplice a c) b)
-  → (funsplice (fsplice (fsplice a c) b) (fsplice a c) ne)
-  ≡ antisplice b (fsplice a c)
-funsplice-fsplice-fsplice-fsplice a b c ne =
-  funsplice (fsplice (fsplice a c) b) (fsplice a c) ne
-    ≡⟨ funsplice-cong (fsplice≡fsplice' (fsplice a c) b) refl ne ⟩
-  funsplice (fsplice' (fsplice a c) b) (fsplice a c) _
-    ≡⟨ funsplice-fsplice' b (fsplice a c) _ ⟩
-  antisplice' b (fsplice a c)
-    ≡⟨ sym (antisplice≡antisplice' b (fsplice a c)) ⟩
-  antisplice b (fsplice a c) ▯
+  → (fjoin (fsplice (fsplice a c) b) (fsplice a c) ne)
+  ≡ fcross b (fsplice a c)
+fjoin-fsplice-fsplice-fsplice a b c ne =
+  fjoin (fsplice (fsplice a c) b) (fsplice a c) ne
+    ≡⟨ fjoin-cong (fsplice≡fsplice' (fsplice a c) b) refl ne ⟩
+  fjoin (fsplice' (fsplice a c) b) (fsplice a c) _
+    ≡⟨ fjoin-fsplice' b (fsplice a c) _ ⟩
+  fcross' b (fsplice a c)
+    ≡⟨ sym (fcross≡fcross' b (fsplice a c)) ⟩
+  fcross b (fsplice a c) ▯

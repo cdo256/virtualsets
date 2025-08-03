@@ -71,78 +71,68 @@ fsplice≡fsplice' (fsuc b) (fsuc a) with (fsuc b ≤?ᶠ fsuc a)
     ≡⟨ refl ⟩
   fsplice'-cases (fsuc b) (fsuc a) (fgt (<fsuc b>a)) ▯
 
-antisplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
+fcross : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
            → Fin (suc x)
-antisplice _ fzero = fzero
-antisplice fzero (fsuc a) = a
-antisplice {suc x} (fsuc b) (fsuc a) =
-  fsuc (antisplice b a)
+fcross _ fzero = fzero
+fcross fzero (fsuc a) = a
+fcross {suc x} (fsuc b) (fsuc a) =
+  fsuc (fcross b a)
 
-antisplice'-cases
+fcross'-cases
   : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
   → Bichotomyᶠ a b
   → Fin (suc x)
-antisplice'-cases b a (fle a≤b) = fin-restrict-≤ a a≤b
-antisplice'-cases b a (fgt a>b) = pred a
+fcross'-cases b a (fle a≤b) = fin-restrict-≤ a a≤b
+fcross'-cases b a (fgt a>b) = pred a
 
-antisplice' : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
+fcross' : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
            → Fin (suc x)
-antisplice' b a = antisplice'-cases b a (a ≤?ᶠ b)
+fcross' b a = fcross'-cases b a (a ≤?ᶠ b)
 
--- Remove a from domain of b
--- funsplice : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc x)) → a ≉ᶠ b
---           → Fin x 
--- funsplice {x = zero} fzero fzero 0≉0 = absurd (0≉0 ≈refl)
--- funsplice {x = suc zero} _ _ _ = fzero
--- funsplice {x = suc x} _ fzero _ = fzero
--- funsplice {x = suc (suc x)} fzero (fsuc a) _ = a
--- funsplice {x = suc (suc x)} (fsuc b) (fsuc a) a'≉b' =
---   fsuc (funsplice b a λ a≈b → a'≉b' (≈fsuc a≈b))
-
-funsplice-cases : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
+fjoin-cases : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
                 → Trichotomyᶠ a b → Fin x
-funsplice-cases b a a≉b (flt a<b) = fin-restrict-< a a<b
-funsplice-cases b a a≉b (feq a≈b) = absurd (a≉b a≈b)
-funsplice-cases b (fsuc a) a≉b (fgt b<a) = a
+fjoin-cases b a a≉b (flt a<b) = fin-restrict-< a a<b
+fjoin-cases b a a≉b (feq a≈b) = absurd (a≉b a≈b)
+fjoin-cases b (fsuc a) a≉b (fgt b<a) = a
 
-funsplice : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
+fjoin : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
            → Fin x
-funsplice b a a≉b = funsplice-cases b a a≉b (a ≟ᶠ b)
+fjoin b a a≉b = fjoin-cases b a a≉b (a ≟ᶠ b)
 
 -- Another alternate definition
-funspliceMaybe
+fjoinMaybe
   : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc x))
   → Maybe (Fin x)
-funspliceMaybe fzero fzero = nothing
-funspliceMaybe {suc x} fzero (fsuc a) = just a
-funspliceMaybe {suc x} (fsuc b) fzero = just fzero
-funspliceMaybe {suc x} (fsuc b) (fsuc a) =
-  map-Maybe fsuc (funspliceMaybe b a)
+fjoinMaybe fzero fzero = nothing
+fjoinMaybe {suc x} fzero (fsuc a) = just a
+fjoinMaybe {suc x} (fsuc b) fzero = just fzero
+fjoinMaybe {suc x} (fsuc b) (fsuc a) =
+  map-Maybe fsuc (fjoinMaybe b a)
 
 -- Another alternate definition
-funspliceMaybe'
+fjoinMaybe'
   : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x)))
   → Maybe (Fin (suc x))
-funspliceMaybe' b a with a ≟ᶠ b
+fjoinMaybe' b a with a ≟ᶠ b
 ... | flt a<b = just (fin-restrict-< a a<b)
 ... | feq a≡b = nothing
 ... | fgt b<a = just (pred a)
 
-antisplice≡antisplice'
+fcross≡fcross'
   : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
-  → antisplice b a ≡ antisplice' b a
-antisplice≡antisplice' fzero fzero = refl
-antisplice≡antisplice' fzero (fsuc a) = refl
-antisplice≡antisplice' (fsuc b) fzero = refl
-antisplice≡antisplice' {x = suc x} (fsuc b) (fsuc a) with a ≤?ᶠ b 
+  → fcross b a ≡ fcross' b a
+fcross≡fcross' fzero fzero = refl
+fcross≡fcross' fzero (fsuc a) = refl
+fcross≡fcross' (fsuc b) fzero = refl
+fcross≡fcross' {x = suc x} (fsuc b) (fsuc a) with a ≤?ᶠ b 
 ... | fle a≤b =
-  antisplice (fsuc b) (fsuc a)
+  fcross (fsuc b) (fsuc a)
     ≡⟨ refl ⟩
-  fsuc (antisplice b a)
-    ≡⟨ cong fsuc (antisplice≡antisplice' b a) ⟩
-  fsuc (antisplice'-cases b a (a ≤?ᶠ b))
-    ≡⟨ cong (fsuc ∘ antisplice'-cases b a) (isPropBichotomyᶠ (a ≤?ᶠ b) (fle a≤b)) ⟩
-  fsuc (antisplice'-cases b a (fle a≤b))
+  fsuc (fcross b a)
+    ≡⟨ cong fsuc (fcross≡fcross' b a) ⟩
+  fsuc (fcross'-cases b a (a ≤?ᶠ b))
+    ≡⟨ cong (fsuc ∘ fcross'-cases b a) (isPropBichotomyᶠ (a ≤?ᶠ b) (fle a≤b)) ⟩
+  fsuc (fcross'-cases b a (fle a≤b))
     ≡⟨ refl ⟩
   fsuc (fin-restrict-≤ a a≤b)
     ≡⟨ refl ⟩
@@ -152,24 +142,24 @@ antisplice≡antisplice' {x = suc x} (fsuc b) (fsuc a) with a ≤?ᶠ b
     ≡⟨ refl ⟩
   fin-restrict-≤ (fsuc a) (fsuc≤fsuc a≤b)
     ≡⟨ refl ⟩
-  antisplice'-cases (fsuc b) (fsuc a) (≤?ᶠ-suc (fle a≤b))
-    ≡⟨ cong (antisplice'-cases (fsuc b) (fsuc a))
+  fcross'-cases (fsuc b) (fsuc a) (≤?ᶠ-suc (fle a≤b))
+    ≡⟨ cong (fcross'-cases (fsuc b) (fsuc a))
             (isPropBichotomyᶠ (≤?ᶠ-suc (fle a≤b)) (fsuc a ≤?ᶠ fsuc b)) ⟩
-  antisplice'-cases (fsuc b) (fsuc a) (fsuc a ≤?ᶠ fsuc b) ▯
+  fcross'-cases (fsuc b) (fsuc a) (fsuc a ≤?ᶠ fsuc b) ▯
 ... | fgt a>b =
-  antisplice (fsuc b) (fsuc a)
+  fcross (fsuc b) (fsuc a)
     ≡⟨ refl ⟩
-  fsuc (antisplice b a)
-    ≡⟨ cong fsuc (antisplice≡antisplice' b a) ⟩
-  fsuc (antisplice'-cases b a (a ≤?ᶠ b))
-    ≡⟨ cong (fsuc ∘ antisplice'-cases b a) (isPropBichotomyᶠ (a ≤?ᶠ b) (fgt a>b)) ⟩
-  fsuc (antisplice'-cases b a (fgt a>b))
+  fsuc (fcross b a)
+    ≡⟨ cong fsuc (fcross≡fcross' b a) ⟩
+  fsuc (fcross'-cases b a (a ≤?ᶠ b))
+    ≡⟨ cong (fsuc ∘ fcross'-cases b a) (isPropBichotomyᶠ (a ≤?ᶠ b) (fgt a>b)) ⟩
+  fsuc (fcross'-cases b a (fgt a>b))
     ≡⟨ refl ⟩
   fsuc (pred a)
     ≡⟨ fsuc∘pred≡id {y = 1} (≉fsym (<ᶠ→≉ (≤<ᶠ-trans (fzero≤a b) a>b))) ⟩
   a
     ≡⟨ refl ⟩
-  antisplice'-cases (fsuc b) (fsuc a) (≤?ᶠ-suc (fgt a>b))
-    ≡⟨ cong (antisplice'-cases (fsuc b) (fsuc a))
+  fcross'-cases (fsuc b) (fsuc a) (≤?ᶠ-suc (fgt a>b))
+    ≡⟨ cong (fcross'-cases (fsuc b) (fsuc a))
             (isPropBichotomyᶠ (≤?ᶠ-suc (fgt a>b)) (fsuc a ≤?ᶠ fsuc b)) ⟩
-  antisplice'-cases (fsuc b) (fsuc a) (fsuc a ≤?ᶠ fsuc b) ▯
+  fcross'-cases (fsuc b) (fsuc a) (fsuc a ≤?ᶠ fsuc b) ▯

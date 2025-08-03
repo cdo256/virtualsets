@@ -34,11 +34,11 @@ inv-is-apply-inv {suc m} (inc b f) y with y ≈?ᶠ b
 ... | no y≉b =
   apply-inv-rec f b y (no y≉b)
     ≡⟨ refl ⟩
-  map-Maybe fsuc (apply-inv f (funsplice b y y≉b))
-    ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f (funsplice b y y≉b)) ⟩
-  map-Maybe fsuc (just (apply (inv f) (funsplice b y y≉b)))
+  map-Maybe fsuc (apply-inv f (fjoin b y y≉b))
+    ≡⟨ cong (map-Maybe fsuc) (inv-is-apply-inv f (fjoin b y y≉b)) ⟩
+  map-Maybe fsuc (just (apply (inv f) (fjoin b y y≉b)))
     ≡⟨ refl ⟩
-  just (fsuc (apply (inv f) (funsplice b y y≉b)))
+  just (fsuc (apply (inv f) (fjoin b y y≉b)))
     ≡⟨ refl ⟩
   just (apply-insert b f0 (inv f) y (no y≉b))
     ≡⟨ cong just (apply-insert-irrelevant b f0 (inv f) y (no y≉b) (y ≈?ᶠ b)) ⟩
@@ -61,23 +61,23 @@ insert-reorder : ∀ {m n} (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
                → (f : Inj m n)
                → insert a2 b2 (insert a1 b1 f)
                ≡ insert (fsplice a2 a1) (fsplice b2 b1)
-                   (insert (antisplice a1 a2) (antisplice b1 b2) f)
+                   (insert (fcross a1 a2) (fcross b1 b2) f)
 insert-reorder fzero fzero b1 b2 f =
   insert f0 b2 (insert f0 b1 f)
     ≡⟨ refl ⟩
   inc b2 (inc b1 f)
     ≡⟨ {!!} ⟩
   insert f1 (fsplice b2 b1)
-   (inc (antisplice b1 b2) f)
+   (inc (fcross b1 b2) f)
     ≡⟨ refl ⟩
   insert (fsplice f0 f0) (fsplice b2 b1)
-   (insert (antisplice f0 f0) (antisplice b1 b2) f) ▯
+   (insert (fcross f0 f0) (fcross b1 b2) f) ▯
 insert-reorder (fsuc a1) a2 b1 b2 f = {!!}
 insert-reorder fzero (fsuc a2) b1 b2 f = {!!}
   -- insert a2 b2 (insert a1 b1 f)
   --   ≡⟨ {!!} ⟩
   -- insert (fsplice a2 a1) (fsplice b2 b1)
-  --  (insert (antisplice a1 a2) (antisplice b1 b2) f) ▯
+  --  (insert (fcross a1 a2) (fcross b1 b2) f) ▯
 
 insert-comp
   : ∀ {l m n : ℕ} (b : Fin (suc m)) (f : Inj l m) (g : Inj m n)
@@ -108,7 +108,7 @@ insert-isInjective {a = fsuc a} {b = fsuc b} {f = inc c1 f} {g = inc c2 g} f''�
       c1≡c2 = fsplice-isInjective (proj₁ (inc-isInjective f''≡g''))
       f≡g : f ≡ g
       f≡g = insert-isInjective (proj₂ (inc-isInjective f''≡g'')
-          ∙ cong (λ ○ → insert a (antisplice ○ (fsuc b)) g) (sym c1≡c2))
+          ∙ cong (λ ○ → insert a (fcross ○ (fsuc b)) g) (sym c1≡c2))
   in cong₂ inc c1≡c2 f≡g
 
 f∘f⁻¹≡id : ∀ {m} (f : Inj m m) → f ∘ʲ inv f ≡ idInj m
