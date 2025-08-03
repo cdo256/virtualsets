@@ -260,3 +260,27 @@ isPropTrichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
 ... | flt a<b = refl
 ... | feq a≈b = refl
 ... | fgt a>b = refl
+
+≈ᶠ-inj : ∀ (a : Fin x) → finj a ≈ᶠ a
+≈ᶠ-inj fzero = ≈fzero
+≈ᶠ-inj (fsuc a) = ≈fsuc (≈ᶠ-inj a)
+
+≈ᶠ-inject : ∀ y → (a : Fin x) → finject y a ≈ᶠ a
+≈ᶠ-inject y fzero = ≈fzero
+≈ᶠ-inject zero (fsuc a) = ≈fsuc (≈ᶠ-inject 0 a)
+≈ᶠ-inject (suc y) (fsuc a) = ≈fsuc (≈ᶠ-inject (suc y) a)
+
+<ᶠ-respects-≈ᶠ : ∀ {w x y z : ℕ}
+               → {a : Fin w} {b : Fin x} {c : Fin y} {d : Fin z}
+               → a ≈ᶠ b → b <ᶠ c → c ≈ᶠ d → a <ᶠ d
+<ᶠ-respects-≈ᶠ ≈fzero <fzero (≈fsuc c≈d) = <fzero
+<ᶠ-respects-≈ᶠ (≈fsuc a≈b) (<fsuc b<c) (≈fsuc c≈d) =
+  <fsuc (<ᶠ-respects-≈ᶠ a≈b b<c c≈d)
+
+<ᶠ-inject : (x' y' : ℕ) (a : Fin x) (b : Fin y) → a <ᶠ b → finject x' a <ᶠ finject y' b 
+<ᶠ-inject x' y' a b a<b =
+  <ᶠ-respects-≈ᶠ (≈ᶠ-inject x' a) a<b (≈fsym (≈ᶠ-inject y' b))
+
+<ᶠ-inj-l : {a : Fin x} {b : Fin y} → a <ᶠ b → finj a <ᶠ b 
+<ᶠ-inj-l a<b =
+  <ᶠ-respects-≈ᶠ (≈ᶠ-inj _) a<b (≈refl)
