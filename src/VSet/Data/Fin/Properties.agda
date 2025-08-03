@@ -73,38 +73,6 @@ isSetFin = Discrete→isSet _≡?ᶠ_
 --     ≡⟨ cong (subst Fin (+-zero x)) fa≡fb ⟩
 --   (λ {w} b → fshift z b) fa≡fb a
 
-finject≡finj-finject : {x : ℕ} → (y : ℕ) → (a : Fin x)
-                     → finject {x} (suc y) a
-                     ≡ subst Fin (sym (+-suc x y)) (finj (finject {x} y a))
-finject≡finj-finject = {!!}
-
-finj-injective : {x : ℕ} → is-injective (finj {x})
-finj-injective fzero fzero fx≡fy = refl
-finj-injective fzero (fsuc y) fx≡fy = absurd (fzero≢fsuc (finj y) fx≡fy)
-finj-injective (fsuc x) fzero fx≡fy = absurd (fsuc≢fzero (finj x) fx≡fy)
-finj-injective (fsuc x) (fsuc y) fx≡fy =
-  cong fsuc (finj-injective x y (fsuc-injective fx≡fy))
-
--- Easier to do the dumb way. as in the suc y case.
-finject-injective : {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
-finject-injective {x} zero a b fa≡fb = 
-  a
-    ≡⟨ sym (subst⁻Subst Fin (sym (+-zero x)) a) ⟩
-  subst Fin (+-zero x) (subst Fin (sym (+-zero x)) a)
-    ≡⟨ cong (subst Fin (+-zero x)) (sym (finject0≡subst a)) ⟩
-  subst Fin (+-zero x) (finject zero a)
-    ≡⟨ cong (subst Fin (+-zero x)) fa≡fb ⟩
-  subst Fin (+-zero x) (finject zero b)
-    ≡⟨ cong (subst Fin (+-zero x)) (finject0≡subst b) ⟩
-  subst Fin (+-zero x) (subst Fin (sym (+-zero x)) b)
-    ≡⟨ subst⁻Subst Fin (sym (+-zero x)) b ⟩
-  b ▯
-finject-injective {x} (suc y) fzero fzero fa≡fb = refl
-finject-injective {x} (suc y) fzero (fsuc b) fa≡fb = absurd (fzero≢fsuc (finject (suc y) b) fa≡fb)
-finject-injective {x} (suc y) (fsuc a) fzero fa≡fb = absurd (fsuc≢fzero (finject (suc y) a) fa≡fb)
-finject-injective {x} (suc y) (fsuc a) (fsuc b) fa≡fb =
-  cong fsuc (finject-injective (suc y) a b (fsuc-injective fa≡fb))
-
 subst-fsuc-reorder
   : ∀ {x y : ℕ} → (p : x ≡ y) → (a : Fin x)
   → transport (λ i → Fin (suc (p i))) (fsuc a)
@@ -174,6 +142,34 @@ fsplice≉b (fsuc b) (fsuc a) ne =
 
 ≉pred : ∀ {x y} {a : Fin x} {b : Fin y} → fsuc a ≉ᶠ fsuc b → a ≉ᶠ b
 ≉pred a'≉b' a≈b = a'≉b' (≈fsuc a≈b)
+
+finj-injective : {x : ℕ} → is-injective (finj {x})
+finj-injective fzero fzero fx≡fy = refl
+finj-injective fzero (fsuc y) fx≡fy = absurd (fzero≢fsuc (finj y) fx≡fy)
+finj-injective (fsuc x) fzero fx≡fy = absurd (fsuc≢fzero (finj x) fx≡fy)
+finj-injective (fsuc x) (fsuc y) fx≡fy =
+  cong fsuc (finj-injective x y (fsuc-injective fx≡fy))
+
+-- Easier to do the dumb way. as in the suc y case.
+finject-injective : {x : ℕ} → (y : ℕ) → is-injective (finject {x} y)
+finject-injective {x} zero a b fa≡fb = 
+  a
+    ≡⟨ sym (subst⁻Subst Fin (sym (+-zero x)) a) ⟩
+  subst Fin (+-zero x) (subst Fin (sym (+-zero x)) a)
+    ≡⟨ cong (subst Fin (+-zero x)) (sym (finject0≡subst a)) ⟩
+  subst Fin (+-zero x) (finject zero a)
+    ≡⟨ cong (subst Fin (+-zero x)) fa≡fb ⟩
+  subst Fin (+-zero x) (finject zero b)
+    ≡⟨ cong (subst Fin (+-zero x)) (finject0≡subst b) ⟩
+  subst Fin (+-zero x) (subst Fin (sym (+-zero x)) b)
+    ≡⟨ subst⁻Subst Fin (sym (+-zero x)) b ⟩
+  b ▯
+finject-injective {x} (suc y) fzero fzero fa≡fb = refl
+finject-injective {x} (suc y) fzero (fsuc b) fa≡fb = absurd (fzero≢fsuc (finject (suc y) b) fa≡fb)
+finject-injective {x} (suc y) (fsuc a) fzero fa≡fb = absurd (fsuc≢fzero (finject (suc y) a) fa≡fb)
+finject-injective {x} (suc y) (fsuc a) (fsuc b) fa≡fb =
+  cong fsuc (finject-injective (suc y) a b (fsuc-injective fa≡fb))
+
 
 fsuc-funsplice 
   : ∀ {x : ℕ} → (b a : Fin (suc x)) → (a≉b : a ≉ᶠ b)
