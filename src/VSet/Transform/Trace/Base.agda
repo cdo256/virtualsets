@@ -1,6 +1,8 @@
 module VSet.Transform.Trace.Base where
 
+open import VSet.Prelude
 open import Cubical.Data.Maybe.Base hiding (elim)
+open import Cubical.Data.Maybe.Properties
 open import Cubical.Data.Nat.Base hiding (elim)
 open import Cubical.Relation.Nullary.Base 
 open import VSet.Data.Fin.Base
@@ -10,7 +12,8 @@ open import VSet.Data.Fin.Splice
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
 open import VSet.Transform.Inverse.Base 
-open import VSet.Prelude
+open import VSet.Transform.Inverse.Insert
+open import VSet.Transform.Inverse.Properties
 
 private
   variable
@@ -24,60 +27,38 @@ remove {suc m} {suc n} (fsuc a) (inc c f) =
   in inc (fjoin (fsplice c b) c (≉fsym (fsplice≉b c b)))
          (remove a f) 
 
-inverses
-  : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
-  → (f : Inj m n)
-  → remove a (insert a b f) ≡ f
-inverses fzero b (nul _) = refl
-inverses fzero b (inc c f) = refl
-inverses (fsuc fzero) b (inc c f) =
-  remove (fsuc fzero) (insert (fsuc fzero) b (inc c f))
-    ≡⟨ refl ⟩
-  remove (fsuc fzero) (inc (fsplice b c) (insert fzero (fcross c b) f))
-    ≡⟨ refl ⟩
-  remove (fsuc fzero) (inc (fsplice b c) (inc (fcross c b) f))
-    ≡⟨ refl ⟩
-  inc (funsplice (fsplice (fsplice b c) (antisplice c b)) (fsplice b c)
-          (≉fsym (fsplice≉b (fsplice b c) (antisplice c b)))) f 
-    ≡⟨ cong (λ ○ → inc ○ f) (funsplice-irrelevant
-         (fsplice (fsplice b c) (antisplice c b))
-         (fsplice b c)
-         (≉fsym (fsplice≉b (fsplice b c) (antisplice c b)))
-         (≉fsym (fsplice≉b (fsplice b c) (antisplice c b)))) ⟩
-  inc (funsplice (fsplice (fsplice b c) (antisplice c b)) (fsplice b c)
-          (≉fsym (fsplice≉b (fsplice b c) (antisplice c b)))) f 
-    ≡⟨ cong (λ ○ → inc ○ f) (funsplice-fsplice-fsplice-antisplice-fsplice b f c
-       (≉fsym (fsplice≉b (fsplice b c) (antisplice c b)))) ⟩ 
-  inc (funsplice b (fsplice b c)
-    (subst (_≉ᶠ_ (fsplice b c)) (splice-splice-antisplice b c)
-      (≉fsym (fsplice≉b (fsplice b c) (antisplice c b))))) f 
-    ≡⟨ cong (λ ○ → inc ○ f) {!funsplice-fsplice-inverse b c {!subst (_≉ᶠ_ (fsplice b c)) (splice-splice-antisplice b c)
-      (≉fsym (fsplice≉b (fsplice b c) (antisplice c b)))!}!} ⟩
-  inc (funsplice b (fsplice b c)
-    {!!}) f 
-    ≡⟨ cong (λ ○ → inc ○ f) {!funsplice-fsplice-inverse {!b!} {!!}!} ⟩
-  inc c f ▯
-inverses (fsuc a) b (inc c f) =
-  let b' = apply f {!!} in
-  remove (fsuc a) (insert (fsuc a) b (inc c f))
-    ≡⟨ refl ⟩
-  remove (fsuc a) (inc (fsplice b c) (insert a (antisplice c b) f))
-    ≡⟨ {!!} ⟩
-  inc (funsplice (fsplice (fsplice b c) {!!}) (fsplice b c) {!!})
-      {!!}
-    ≡⟨ {!!} ⟩
-  inc (fjoin (fsplice (fsplice b c) {!!}) {!!} (≉fsym (fsplice≉b {!!} {!!})))
-      (remove {!!} {!!})
-    ≡⟨ {!!} ⟩
-  inc (fcross {!!} (fsplice b c)) (remove {!!} {!!})
-    ≡⟨ {!!} ⟩
-  inc c f ▯
+trace1-cases : (b : Fin (suc n)) → (f : Inj (suc m) (suc n))
+             → (a'? : Maybe (Fin (suc (suc m))))
+             → Inj (suc m) (suc n)
+trace1-cases b f nothing = f
+trace1-cases b f (just a') = insert (pred a') b (remove (pred a') f)
 
 trace1 : (f : Inj (suc m) (suc n)) → Inj m n
-trace1 (inc fzero f) = f -- (0 x y z)
-trace1 (inc (fsuc b) f) with apply-inv (inc (fsuc b) f) f0
-... | nothing = f
-... | just a = {!!}
+trace1 {m = 0} _ = nul _
+trace1 {m = suc m} (inc fzero f) = f
+trace1 {m = suc m} {n = suc n} (inc (fsuc b) f) =
+  trace1-cases b f (apply-inv (inc (fsuc b) f) f0)
+
+
+-- trace1 : (f : Inj (suc m) (suc n)) → Inj m n
+-- trace1 {m = 0} _ = nul _
+-- trace1 {m = suc m} (inc fzero f) = f -- (0 x y z)
+-- trace1 {m = suc m} {n = suc n} (inc (fsuc b) f)
+--   with inspect' (apply-inv (inc (fsuc b) f) f0)
+-- ... | nothing , p = f
+-- ... | just fzero , p =
+--   let 0≈b' = apply-inv≡0→b≈y f (fsuc b) f0 p
+--   in absurd (fzero≉fsuc 0≈b')
+-- ... | just (fsuc a) , p with inspect' (apply-inv f fzero)
+-- ...      | nothing , q = absurd (¬nothing≡just (cong (map-Maybe fsuc) (sym q) ∙ p))
+-- ...      | just x , q = {!!}
+--   where
+--     x≡a : x ≡ a
+--     x≡a = fsuc-injective (just-inj (fsuc x) (fsuc a) (cong (map-Maybe fsuc) (sym q) ∙ p))
+--     g : Inj m n 
+--     g = remove x f
+--     h : Inj (suc m) (suc n)
+--     h = insert x b g
 
 trace : (l : ℕ) → (f : Inj (l + m) (l + n)) → Inj m n
 trace = {!!}
