@@ -200,6 +200,12 @@ fin-restrict-≤ : ∀ {x} {b : Fin x} (a : Fin y)
                → a ≤ᶠ b → Fin x
 fin-restrict-≤ a a≤b = fin-restrict-< a (≤ᶠ→<ᶠ a≤b)
 
+fin-restrict-<≡fin-restrict-≤ 
+  : ∀ {x} {y} → {b : Fin x} (a : Fin y) → (a≤b : a ≤ᶠ b)
+  → fin-restrict-< a (≤ᶠ→<ᶠ a≤b) ≡ fin-restrict-≤ a a≤b
+fin-restrict-<≡fin-restrict-≤ a a≤b =
+  refl
+
 fin-restrict' : ∀ {x} {b : Fin x} (a : Fin (suc x))
               → a ≤ᶠ b → Fin x
 fin-restrict' {x = 0} {b} a x = b
