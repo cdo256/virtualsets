@@ -24,18 +24,6 @@ remove {suc m} {suc n} (fsuc a) (inc c f) =
   in inc (funsplice (fsplice c b) c (≉fsym (fsplice≉b c b)))
          (remove a f) 
 
-funsplice-fsplice-fsplice-antisplice-fsplice
-  : ∀ {m n} → (b : Fin (suc (suc n)))
-  → (f : Inj m n) → (c : Fin (suc n))
-  → (ne : fsplice b c ≉ᶠ fsplice (fsplice b c) (antisplice c b))
-  → funsplice (fsplice (fsplice b c) (antisplice c b)) (fsplice b c) ne
-  ≡ funsplice b (fsplice b c)
-              (subst (fsplice b c ≉ᶠ_)
-                     (splice-splice-antisplice b c) ne)
-funsplice-fsplice-fsplice-antisplice-fsplice b f c ne i
-  = funsplice (splice-splice-antisplice b c i) (fsplice b c)
-              (subst-filler (fsplice b c ≉ᶠ_) (splice-splice-antisplice b c) ne i)
-
 inverses
   : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
   → (f : Inj m n)

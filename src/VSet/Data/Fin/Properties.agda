@@ -189,6 +189,14 @@ funsplice-irrelevant b        a u v | flt a<b = refl
 funsplice-irrelevant b        a u v | feq a≈b = absurd (u a≈b)
 funsplice-irrelevant b (fsuc a) u v | fgt a>b = refl
 
+funsplice-cong
+  : ∀ {x} → {b1 b2 a1 a2 : Fin (suc x)}
+  → (p : b1 ≡ b2) → (q : a1 ≡ a2)
+  → (ne : a1 ≉ᶠ b1)
+  → funsplice b1 a1 ne ≡ funsplice b2 a2 (subst2 _≉ᶠ_ q p ne)
+funsplice-cong {b1 = b1} {b2} {a1} {a2} p q ne i =
+  funsplice (p i) (q i) (subst2-filler _≉ᶠ_ q p ne i)
+
 -- This could be simplified.
 funsplice-fsplice-inverse
   : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x)
@@ -316,3 +324,65 @@ splice-splice-antisplice {m = suc m} (fsuc b) (fsuc c) =
                 (antisplice c b))
     ≡⟨ cong fsuc (splice-splice-antisplice b c) ⟩
   fsuc b ▯
+
+funsplice-fsplice-fsplice-antisplice-fsplice
+  : ∀ {n} → (b : Fin (suc (suc n)))
+  → (c : Fin (suc n))
+  → (ne : fsplice b c ≉ᶠ fsplice (fsplice b c) (antisplice c b))
+  → funsplice (fsplice (fsplice b c) (antisplice c b)) (fsplice b c) ne
+  ≡ funsplice b (fsplice b c)
+              (subst (fsplice b c ≉ᶠ_)
+                     (splice-splice-antisplice b c) ne)
+funsplice-fsplice-fsplice-antisplice-fsplice b c ne i
+  = funsplice (splice-splice-antisplice b c i) (fsplice b c)
+              (subst-filler (fsplice b c ≉ᶠ_) (splice-splice-antisplice b c) ne i)
+
+funsplice-fsplice'
+  : ∀ {n} → (b : Fin (suc n))
+  → (c : Fin (suc (suc n))) 
+  → (ne : c ≉ᶠ fsplice' c b)
+  → (funsplice (fsplice' c b) c ne)
+  ≡ antisplice' b c
+funsplice-fsplice' b c ne with c ≤?ᶠ b
+funsplice-fsplice' b c ne | fle c≤b =
+  funsplice (fsplice'-cases c b (fle c≤b)) c ne
+    ≡⟨ refl ⟩
+  funsplice-cases (fsuc b) c ne (c ≟ᶠ fsuc b)
+    ≡⟨ cong (funsplice-cases (fsuc b) c ne)
+            (isPropTrichotomyᶠ (c ≟ᶠ fsuc b) (flt (≤ᶠ→<ᶠ c≤b))) ⟩
+  funsplice-cases (fsuc b) c ne (flt (≤ᶠ→<ᶠ c≤b))
+    ≡⟨ refl ⟩
+  fin-restrict-< c (≤ᶠ→<ᶠ c≤b)
+    ≡⟨ refl ⟩
+  fin-restrict-≤ c c≤b
+    ≡⟨ refl ⟩
+  antisplice'-cases b c (fle c≤b) ▯
+funsplice-fsplice' b (fsuc c) ne | fgt c>b =
+  funsplice-cases (fsplice'-cases (fsuc c) b (fgt c>b)) (fsuc c) ne
+                  (fsuc c ≟ᶠ fsplice'-cases (fsuc c) b (fgt c>b))
+    ≡⟨ refl ⟩
+  funsplice-cases (finj b) (fsuc c) ne (fsuc c ≟ᶠ finj b)
+    ≡⟨ cong (funsplice-cases (finj b) (fsuc c) ne)
+              (isPropTrichotomyᶠ (fsuc c ≟ᶠ finj b) (fgt (<ᶠ-inj-l c>b))) ⟩
+  funsplice-cases (finj b) (fsuc c) ne (fgt (<ᶠ-inj-l c>b))
+    ≡⟨ refl ⟩
+  c
+    ≡⟨ refl ⟩
+  pred (fsuc c)
+    ≡⟨ refl ⟩
+  antisplice'-cases b (fsuc c) (fgt c>b) ▯
+
+funsplice-fsplice-fsplice-fsplice
+  : ∀ {n} → (a : Fin (suc (suc n))) → (b : Fin (suc n))
+  → (c : Fin (suc n)) 
+  → (ne : fsplice a c ≉ᶠ fsplice (fsplice a c) b)
+  → (funsplice (fsplice (fsplice a c) b) (fsplice a c) ne)
+  ≡ antisplice b (fsplice a c)
+funsplice-fsplice-fsplice-fsplice a b c ne =
+  funsplice (fsplice (fsplice a c) b) (fsplice a c) ne
+    ≡⟨ funsplice-cong (fsplice≡fsplice' (fsplice a c) b) refl ne ⟩
+  funsplice (fsplice' (fsplice a c) b) (fsplice a c) _
+    ≡⟨ funsplice-fsplice' b (fsplice a c) _ ⟩
+  antisplice' b (fsplice a c)
+    ≡⟨ sym (antisplice≡antisplice' b (fsplice a c)) ⟩
+  antisplice b (fsplice a c) ▯
