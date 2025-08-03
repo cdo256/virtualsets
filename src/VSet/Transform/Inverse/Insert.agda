@@ -17,7 +17,7 @@ private
     l l' m m' n n' : ℕ
 
 apply-insert≡b
-  : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
+  : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n)) → (f : Inj m n)
   → (apply (insert a b f) a)
   ≡ b
 apply-insert≡b fzero fzero (nul 0) = refl
@@ -34,18 +34,18 @@ apply-insert≡b (fsuc a) b (inc c f) =
     ≡⟨ cong (fsplice (fsplice b c))
             (apply-insert≡b a (fcross c b) f) ⟩
   fsplice (fsplice b c) (fcross c b)
-    ≡⟨ splice-splice-fcross b c ⟩
+    ≡⟨ fsplice-fsplice-fcross b c ⟩
   b ▯
 
 apply-insert
-  : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
+  : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n)) → (f : Inj m n)
   → (x : Fin (suc m)) → Dec (x ≈ᶠ a)
-  → Fin (suc m)
+  → Fin (suc n)
 apply-insert a b f x (yes x≈a) = b
 apply-insert a b f x (no x≉a) = fsplice b (apply f (fjoin a x x≉a)) 
 
 apply-insert-irrelevant
-  : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
+  : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n)) → (f : Inj m n)
   → (x : Fin (suc m)) → (u v : Dec (x ≈ᶠ a))
   → apply-insert a b f x u ≡ apply-insert a b f x v
 apply-insert-irrelevant a b f x (yes u) (yes v) = refl
@@ -53,20 +53,6 @@ apply-insert-irrelevant a b f x (yes u) (no v) = absurd (v u)
 apply-insert-irrelevant a b f x (no u) (yes v) = absurd (u v)
 apply-insert-irrelevant a b f x (no u) (no v) =
   cong (fsplice b ∘ apply f) (fjoin-irrelevant a x u v)
-
-fsplice-fsplice-fsplice-fcross
-  : ∀ {m} → (b : Fin (suc (suc m))) → (x : Fin m) → (c : Fin (suc m)) 
-  → fsplice (fsplice b c) (fsplice (fcross c b) x)
-  ≡ fsplice b (fsplice c x)
-fsplice-fsplice-fsplice-fcross fzero fzero fzero = refl
-fsplice-fsplice-fsplice-fcross fzero fzero (fsuc c) = refl
-fsplice-fsplice-fsplice-fcross fzero (fsuc x) fzero = refl
-fsplice-fsplice-fsplice-fcross fzero (fsuc x) (fsuc c) = refl
-fsplice-fsplice-fsplice-fcross (fsuc b) fzero fzero = refl
-fsplice-fsplice-fsplice-fcross (fsuc b) fzero (fsuc c) = refl
-fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc x) fzero = refl
-fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc x) (fsuc c) =
-  cong fsuc (fsplice-fsplice-fsplice-fcross b x c)
 
 apply∘insert≡apply-insert
   : ∀ {m} → (a : Fin (suc m)) → (b : Fin (suc m)) → (f : Inj m m)
@@ -115,8 +101,8 @@ apply∘insert≡apply-insert (fsuc a) b (inc c f) (fsuc x) | no x'≉a' =
   fsplice (fsplice b c) (apply-insert a (fcross c b) f x
                                       (no (≉pred x'≉a'))) 
     ≡⟨ refl ⟩
-  fsplice (fsplice b c) (fsplice (antisplice c b) (apply f (fjoin a x (≉pred x'≉a'))))
-    ≡⟨ fsplice-fsplice-fsplice-antisplice b (apply f (fjoin a x (≉pred x'≉a'))) c ⟩
+  fsplice (fsplice b c) (fsplice (fcross c b) (apply f (fjoin a x (≉pred x'≉a'))))
+    ≡⟨ fsplice-fsplice-fsplice-fcross b (apply f (fjoin a x (≉pred x'≉a'))) c ⟩
   fsplice b (fsplice c (apply f (fjoin a x (≉pred x'≉a'))))
     ≡⟨ refl ⟩
   fsplice b (apply (inc c f) (fsuc (fjoin a x (≉pred x'≉a')))) 

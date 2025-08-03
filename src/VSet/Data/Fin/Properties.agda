@@ -369,3 +369,18 @@ fjoin-fsplice-fsplice-fsplice a b c ne =
   fcross' b (fsplice a c)
     ≡⟨ sym (fcross≡fcross' b (fsplice a c)) ⟩
   fcross b (fsplice a c) ▯
+
+fsplice-fsplice-fsplice-fcross
+  : ∀ {m} → (b : Fin (suc (suc m))) → (a : Fin m) → (c : Fin (suc m)) 
+  → fsplice (fsplice b c) (fsplice (fcross c b) a)
+  ≡ fsplice b (fsplice c a)
+fsplice-fsplice-fsplice-fcross fzero fzero fzero = refl
+fsplice-fsplice-fsplice-fcross fzero fzero (fsuc c) = refl
+fsplice-fsplice-fsplice-fcross fzero (fsuc a) fzero = refl
+fsplice-fsplice-fsplice-fcross fzero (fsuc a) (fsuc c) = refl
+fsplice-fsplice-fsplice-fcross (fsuc b) fzero fzero = refl
+fsplice-fsplice-fsplice-fcross (fsuc b) fzero (fsuc c) = refl
+fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc a) fzero = refl
+fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc a) (fsuc c) =
+  cong fsuc (fsplice-fsplice-fsplice-fcross b a c)
+
