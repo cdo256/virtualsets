@@ -78,9 +78,10 @@ antisplice fzero (fsuc a) = a
 antisplice {suc x} (fsuc b) (fsuc a) =
   fsuc (antisplice b a)
 
-antisplice'-cases : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
-           → Bichotomyᶠ a b
-           → Fin (suc x)
+antisplice'-cases
+  : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
+  → Bichotomyᶠ a b
+  → Fin (suc x)
 antisplice'-cases b a (fle a≤b) = fin-restrict-≤ a a≤b
 antisplice'-cases b a (fgt a>b) = pred a
 
@@ -100,7 +101,7 @@ antisplice' b a = antisplice'-cases b a (a ≤?ᶠ b)
 
 funsplice-cases : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
                 → Trichotomyᶠ a b → Fin x
-funsplice-cases b a a≉b (flt a<b) = fin-restrict a a<b
+funsplice-cases b a a≉b (flt a<b) = fin-restrict-< a a<b
 funsplice-cases b a a≉b (feq a≈b) = absurd (a≉b a≈b)
 funsplice-cases b (fsuc a) a≉b (fgt b<a) = a
 
@@ -123,7 +124,7 @@ funspliceMaybe'
   : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x)))
   → Maybe (Fin (suc x))
 funspliceMaybe' b a with a ≟ᶠ b
-... | flt a<b = just (fin-restrict a a<b)
+... | flt a<b = just (fin-restrict-< a a<b)
 ... | feq a≡b = nothing
 ... | fgt b<a = just (pred a)
 

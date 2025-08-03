@@ -119,11 +119,6 @@ weaken<-pred {a = a} {b = b} <fzero = fzero≤a (finj b)
 weaken<-pred {a = fsuc a} {b = fsuc b} (<fsuc a<b) =
   ≤ᶠ-respects-fsuc (weaken<-pred a<b)
 
-fin-restrict : ∀ {x} {b : Fin (suc x)} (a : Fin (suc x))
-             → a <ᶠ b → Fin x
-fin-restrict {suc x} fzero  <fzero = fzero
-fin-restrict {suc x} (fsuc a) (<fsuc a<b) = fsuc (fin-restrict a a<b)
-
 ≈ᶠ-trans : ∀ {x} {a : Fin x} {b : Fin y} {c : Fin z} → a ≈ᶠ b → b ≈ᶠ c → a ≈ᶠ c
 ≈ᶠ-trans ≈fzero ≈fzero = ≈fzero
 ≈ᶠ-trans (≈fsuc a≈b) (≈fsuc b≈c) = ≈fsuc (≈ᶠ-trans a≈b b≈c)
