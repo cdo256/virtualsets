@@ -39,26 +39,6 @@ trace1 {m = suc m} (inc fzero f) = f
 trace1 {m = suc m} {n = suc n} (inc (fsuc b) f) =
   trace1-cases b f (apply-inv (inc (fsuc b) f) f0)
 
-
--- trace1 : (f : Inj (suc m) (suc n)) → Inj m n
--- trace1 {m = 0} _ = nul _
--- trace1 {m = suc m} (inc fzero f) = f -- (0 x y z)
--- trace1 {m = suc m} {n = suc n} (inc (fsuc b) f)
---   with inspect' (apply-inv (inc (fsuc b) f) f0)
--- ... | nothing , p = f
--- ... | just fzero , p =
---   let 0≈b' = apply-inv≡0→b≈y f (fsuc b) f0 p
---   in absurd (fzero≉fsuc 0≈b')
--- ... | just (fsuc a) , p with inspect' (apply-inv f fzero)
--- ...      | nothing , q = absurd (¬nothing≡just (cong (map-Maybe fsuc) (sym q) ∙ p))
--- ...      | just x , q = {!!}
---   where
---     x≡a : x ≡ a
---     x≡a = fsuc-injective (just-inj (fsuc x) (fsuc a) (cong (map-Maybe fsuc) (sym q) ∙ p))
---     g : Inj m n 
---     g = remove x f
---     h : Inj (suc m) (suc n)
---     h = insert x b g
-
 trace : (l : ℕ) → (f : Inj (l + m) (l + n)) → Inj m n
-trace = {!!}
+trace zero f = f
+trace (suc l) f = (trace l (trace1 f))
