@@ -75,8 +75,7 @@ fshift (suc x) a = fsuc (fshift x a)
 
 finject : {x : ℕ} → (y : ℕ) → Fin x → Fin (x +ℕ y)
 finject {suc _} _ fzero = fzero
-finject {suc _} zero (fsuc a) = fsuc (finject zero a)
-finject {suc x} (suc y) (fsuc a) = fsuc (finject {x} (suc y) a)
+finject {suc x} y (fsuc a) = fsuc (finject {x} y a)
 
 finj : {x : ℕ} → (a : Fin x) → Fin (suc x)
 finj fzero = fzero
