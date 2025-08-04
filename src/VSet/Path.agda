@@ -6,8 +6,8 @@ open import Cubical.Foundations.Transport public hiding (transpEquiv)
 open import Cubical.Core.Primitives
 open import Cubical.Data.Empty renaming (elim to absurd)
 open import Cubical.Foundations.GroupoidLaws
-
 open import Cubical.Data.Prod.Base
+open import Cubical.Data.Prod.Properties
 
 private
   variable
@@ -41,6 +41,7 @@ module _ {A : Type ℓ} {B : A -> Type ℓ'} where
   inspect'' : (f : (x : A) → B x) (x : A) → B x × (Reveal f · x is f x)
   inspect'' f x = f x , inspect f x
 
+
 transport-reorder
   : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
   → (f : A → A) (g : {z : A} → B z → B (f z)) (p : x ≡ y) (a : B x)
@@ -70,6 +71,105 @@ transport-reorder B f g p a =
                  (transport (λ i → B (f (p i))) (g a))
                  (g (transport (λ i → B (p i)) a)))
           (lCancel (cong f p)) composite
+
+-- subst2-reorder
+--   : ∀ {ℓ ℓ'} {A A' : Type ℓ} (B : A → A' → Type ℓ') {x y : A} {w z : A'}
+--   → (f : A → A) (f' : A' → A') (g : {z : A} {z' : A'} → B z z' → B (f z) (f' z'))
+--   → (p : x ≡ y) (q : w ≡ z) (a : B x w)
+--   -- → subst2 B (cong f p) (cong f' q) (g a)
+--   -- ≡ g (subst2 B p q a)
+--   → transport (λ i → B (f (p i)) (f' (q i))) (g a)
+--   ≡ g (transport (λ i → B (p i) (q i)) a)
+-- -- transport-reorder
+-- --   : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
+-- --   → (f : A → A) (g : {z : A} → B z → B (f z)) (p : x ≡ y) (a : B x)
+-- --   → transport (λ i → B (f (p i))) (g a)
+-- --   ≡ g (transport (λ i → B (p i)) a)
+-- subst2-reorder B f f' g p q a = 
+--   let 
+--     step1 : (λ j → B (f (p (~ j))) (f' (q (~ j))))
+--       [ transport (λ i → B (f (p i)) (f' (q i))) (g a)
+--       ≡ g a
+--       ]
+--     step1 = symP (transport-filler (λ i → B (f (p i)) (f' (q i))) (g a))
+--     step2 : (λ j → B (f (p j)) (f' (q j)))
+--       [ g a
+--       ≡ g (transport (λ i → B (p i) (q i)) a)
+--       ]
+--     step2 = congP (λ i ○ → g ○) (transport-filler (λ i → B (p i) (q i)) a)
+--     composite : (λ i → B ((sym (cong f p) ∙ (cong f p)) i)
+--                          ((sym (cong f' q) ∙ (cong f' q)) i))
+--       [ transport (λ i → B (f (p i)) (f' (q i))) (g a)
+--       ≡ g (transport (λ i → B (p i) (q i)) a)
+--       ]
+--     composite = compPathP' {B = λ x → {!!}} step1 step2
+--   in
+--     -- Our path index goes out and back along the same path,
+--     -- so contract that to a point to give a non-dependent path.
+--     subst2 (λ ○ ◻ → PathP (λ i → B (○ i) (◻ i))
+--                  (transport (λ i → B (f (p i)) (f' (q i))) (g a))
+--                  (g (transport (λ i → B (p i) (q i)) a)))
+--           (lCancel (cong f p)) (lCancel (cong f' q)) composite
+
+subst-reorder
+  : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
+  → (f : A → A) (g : {z : A} → B z → B (f z)) (p : x ≡ y) (a : B x)
+  → subst B (cong f p) (g a)
+  ≡ g (subst B p a)
+subst-reorder B f g p a = transport-reorder B f g p a
+
+subst2-reorder
+  : ∀ {ℓ ℓ'} {A A' : Type ℓ} (B : A → A' → Type ℓ') {x y : A} {w z : A'}
+  → (f : A → A) (f' : A' → A') (g : {z : A} {z' : A'} → B z z' → B (f z) (f' z'))
+  → (p : x ≡ y) (q : w ≡ z) (a : B x w)
+  -- → subst2 B (cong f p) (cong f' q) (g a)
+  -- ≡ g (subst2 B p q a)
+  → transport (λ i → B (f (p i)) (f' (q i))) (g a)
+  ≡ g (transport (λ i → B (p i) (q i)) a)
+subst2-reorder {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {A'} B {x = x} {y} {w = w} {z} f f' g p q a =
+  subst2 (λ ○ □ → transport ○ (g' a) ≡ g (transport □ a))
+         {!!} {!!} reorder'
+  where
+      C : A × A' → Type ℓ'
+      C (x , y) = B x y
+      h : A × A' → A × A'
+      h (x , y) = f x , f' y
+      g' : {z : A × A'} → C z → C (h z)
+      g' {x , y} w = g w
+      reorder : subst C (cong h (×≡ p q)) (g a)
+              ≡ g' (subst C (×≡ p q) a)
+      reorder = transport-reorder C h g' (×≡ p q) a
+      reorder' : transport (λ i → C (h (×≡ p q i))) (g' a)
+              ≡ g' (transport (λ i → C (×≡ p q i)) a)
+      reorder' = reorder
+      -- sq : {!(λ j → ?) [ (λ i → C (h (×≡ p q i))) ≡ (λ i → B (p i) (q i)) ]!}
+      sq : Type (ℓ-suc ℓ')
+      sq = Square (λ i → C (h (×≡ p q i))) (λ i → B (p i) (q i))
+                  refl refl 
+      sq' : sq
+      sq' = λ i j → {!!}
+      
+      -- Q : {!Path (C (h (p i0 , q i0)) ≡ B (f (p i0)) (f' (q i0))!}
+      -- Q = λ i j → C (h (p i , q i)) ≡ B (f (p i)) (f' (q i))
+      -- P : λ i → C (h (p i , q i)) ≡ B (f (p i)) (f' (q i))
+      -- P = refl
+      -- w : (λ i → C (h (×≡ p q i))) ≡ (λ i → B (p i) (q i)) 
+      -- w = {!Square ? ?!}
+
+
+-- B = Inj
+-- A = A' = ℕ
+-- x = y = m + n
+-- w = ((suc l') + m') + n'
+-- z = (suc l') + (m' + n')
+-- f = f' = suc
+-- g = shift1
+-- p = refl
+-- q = +-assoc l' m' n'
+
+-- subst2-shift1-reorder
+--   : subst2 Inj refl (+-assoc (suc l') m' n') (shift1 (shift l' (f ⊕ g)))
+--   ≡ shift1 (subst2 Inj refl (+-assoc l' m' n') (shift l' (f ⊕ g)))
 
 
 resubst : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ')
