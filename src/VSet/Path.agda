@@ -149,29 +149,6 @@ subst2-reorder {ℓ = ℓ} {ℓ' = ℓ'} {A = A} {A'} B {x = x} {y} {w = w} {z} 
       sq' : sq
       sq' = λ i j → {!!}
       
-      -- Q : {!Path (C (h (p i0 , q i0)) ≡ B (f (p i0)) (f' (q i0))!}
-      -- Q = λ i j → C (h (p i , q i)) ≡ B (f (p i)) (f' (q i))
-      -- P : λ i → C (h (p i , q i)) ≡ B (f (p i)) (f' (q i))
-      -- P = refl
-      -- w : (λ i → C (h (×≡ p q i))) ≡ (λ i → B (p i) (q i)) 
-      -- w = {!Square ? ?!}
-
-
--- B = Inj
--- A = A' = ℕ
--- x = y = m + n
--- w = ((suc l') + m') + n'
--- z = (suc l') + (m' + n')
--- f = f' = suc
--- g = shift1
--- p = refl
--- q = +-assoc l' m' n'
-
--- subst2-shift1-reorder
---   : subst2 Inj refl (+-assoc (suc l') m' n') (shift1 (shift l' (f ⊕ g)))
---   ≡ shift1 (subst2 Inj refl (+-assoc l' m' n') (shift l' (f ⊕ g)))
-
-
 resubst : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ')
         → (c : (z : A) → B z)
         → {x y : A} (p : x ≡ y)
@@ -193,7 +170,6 @@ resubst B c {x = x} {y = y} p =
                   (c y)
                   (subst B p (c x)))
            (lCancel p) composite
-
 
 infixr 2 ≡P⟨⟩-syntax
 infixr 2 step-≡P 
