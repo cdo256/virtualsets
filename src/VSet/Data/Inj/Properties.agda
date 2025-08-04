@@ -1,0 +1,56 @@
+module VSet.Data.Inj.Properties where
+
+open import VSet.Prelude
+open import Cubical.Data.Prod.Base
+open import Cubical.Data.Sum.Base hiding (elim)
+open import Cubical.Data.Nat.Base hiding (elim)
+open import Cubical.Data.Nat.Order
+open import Cubical.Data.Nat.Properties
+open import Cubical.Data.List.Base hiding (elim; [_])
+open import Cubical.Data.Maybe.Base hiding (elim)
+open import VSet.Data.Fin.Base
+open import VSet.Data.Fin.Order
+open import VSet.Data.Fin.Splice
+open import VSet.Data.Fin.Properties
+open import VSet.Data.Inj.Base 
+open import VSet.Data.Inj.Order 
+open import Cubical.Foundations.GroupoidLaws
+
+private
+  variable
+    l l' m m' n n' : ℕ
+
+
+subst2-inc-reorder 
+  : ∀ {m m' n n'} (p : m ≡ n) (q : m' ≡ n')
+  → (a : Fin (suc m'))
+  → (f : Inj m m')
+  → inc (subst (Fin ∘ suc) q a) (subst2 Inj p q f)
+  ≡ subst2 Injsuc p q (inc a f)
+subst2-inc-reorder {m} {m'} {n} {n'} p q a f =
+  let b : Fin (suc n')
+      b = subst (Fin ∘ suc) q a
+      r : (λ i → Fin (suc (q i))) [ a ≡ b ]
+      r = transport-filler (λ i → Fin (suc (q i))) a
+      g : Inj n n'
+      g = subst2 Inj p q f
+      s : (λ i → Inj (p i) (q i)) [ f ≡ g ]
+      s = transport-filler (λ i → Inj (p i) (q i)) f
+      step1 : (λ i → cong₂ Injsuc p q i)
+            [ inc {m} {m'} a f ≡ inc {n} {n'} b g ]
+      step1 i = inc {p i} {q i} (r i) (s i)
+      step2 : (λ i → cong₂ Injsuc p q i)
+            [ inc a f
+            ≡ subst2 Injsuc p q (inc a f)
+            ]
+      step2 = transport-filler (λ i → Injsuc (p i) (q i)) (inc a f)
+      composite : (λ i → Injsuc ((sym p ∙ p) i) ((sym q ∙ q) i))
+        [ inc b g
+        ≡ subst2 Injsuc p q (inc a f)
+        ]
+      composite = compPathP' step1 step2
+  in subst2 (λ ○ □ → PathP (λ i → (Injsuc (○ i) (□ i)))
+                  (inc b g)
+                  (subst2 Injsuc p q (inc a f)))
+           (lCancel p) (lCancel q) composite
+
