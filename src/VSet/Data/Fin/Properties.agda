@@ -392,3 +392,57 @@ fcross-fcross-fsplice fzero (fsuc c) = refl
 fcross-fcross-fsplice (fsuc b) fzero = refl
 fcross-fcross-fsplice {m = suc m} (fsuc b) (fsuc c) =
   cong fsuc (fcross-fcross-fsplice b c)
+
+finject-+ : ∀ (x y z : ℕ) → (a : Fin x)
+          → finject z (finject y a)
+          ≡ subst Fin (ℕ.+-assoc x y z) (finject (y ℕ.+ z) a)
+finject-+ (suc x) zero z fzero =
+  finject z (finject zero fzero)
+    ≡⟨ refl ⟩
+  finject z fzero 
+    ≡⟨ refl ⟩
+  fzero 
+    ≡⟨ fzero≡subst-fzero (ℕ.+-assoc x zero z) ⟩
+  subst Fin (ℕ.+-assoc (suc x) zero z) fzero 
+    ≡⟨ refl ⟩
+  subst Fin (ℕ.+-assoc (suc x) zero z) (finject (zero +ℕ z) fzero) ▯
+finject-+ (suc x) zero z (fsuc a) =
+  finject z (finject zero (fsuc a))
+    ≡⟨ refl ⟩
+  finject z (fsuc (finject zero a))
+    ≡⟨ refl ⟩
+  fsuc (finject z (finject zero a))
+    ≡⟨ cong fsuc (finject-+ x 0 z a) ⟩
+  fsuc (subst Fin (ℕ.+-assoc x zero z) (finject (zero +ℕ z) a))
+    ≡⟨ sym (subst-fsuc-reorder (ℕ.+-assoc x zero z) (finject (zero +ℕ z) a)) ⟩
+  subst Fin (ℕ.+-assoc (suc x) zero z) (fsuc (finject (zero +ℕ z) a))
+    ≡⟨ refl ⟩
+  subst Fin (ℕ.+-assoc (suc x) zero z) (finject (zero +ℕ z) (fsuc a)) ▯
+finject-+ (suc x) (suc y) z fzero =
+  finject z (finject (suc y) fzero)
+    ≡⟨ refl ⟩
+  finject z fzero
+    ≡⟨ refl ⟩
+  fzero
+    ≡⟨ fzero≡subst-fzero (ℕ.+-assoc x (suc y) z) ⟩
+  subst Fin (ℕ.+-assoc (suc x) (suc y) z) fzero
+    ≡⟨ refl ⟩
+  subst Fin (ℕ.+-assoc (suc x) (suc y) z) (finject (suc y +ℕ z) fzero) ▯ 
+finject-+ (suc x) (suc y) z (fsuc a) =
+  finject z (finject (suc y) (fsuc a))
+    ≡⟨ refl ⟩
+  finject z (fsuc (finject (suc y) a))
+    ≡⟨ refl ⟩
+  fsuc (finject z (finject (suc y) a))
+    ≡⟨ {!refl!} ⟩
+  fsuc (subst Fin (ℕ.+-assoc x (suc y) z) (finject (suc y +ℕ z) a))
+    ≡⟨ sym (subst-fsuc-reorder (ℕ.+-assoc x (suc y) z) (finject (suc y +ℕ z) a)) ⟩
+  subst Fin (ℕ.+-assoc (suc x) (suc y) z) (fsuc (finject (suc y +ℕ z) a))
+    ≡⟨ refl ⟩
+  subst Fin (ℕ.+-assoc (suc x) (suc y) z) (finject (suc y +ℕ z) (fsuc a)) ▯ 
+
+-- subst-fsuc-reorder
+--   : ∀ {x y : ℕ} → (p : x ≡ y) → (a : Fin x)
+--   → transport (λ i → Fin (suc (p i))) (fsuc a)
+--   ≡ fsuc (transport (λ i → Fin (p i)) a)
+-- subst-fsuc-reorder p a = transport-reorder Fin suc fsuc p a
