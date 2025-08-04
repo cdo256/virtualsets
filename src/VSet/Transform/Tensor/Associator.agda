@@ -55,14 +55,14 @@ shift-tensor {m} {m'} {n} {n'} (suc l') f g =
                            (+-assoc l' m' n') (shift l' (f ⊕ g))) ⟩
   subst2 Inj refl (+-assoc (suc l') m' n') (shift (suc l') (f ⊕ g)) ▯
 
-α-p : (l l' : ℕ) {m m' n n' : ℕ}
+α-p : (l l' m m' n n' : ℕ)
     → Inj (l + (m + n)) (l' + (m' + n'))
     ≡ Inj ((l + m) + n) ((l' + m') + n')
-α-p l l' {m} {m'} {n} {n'} =
+α-p l l' m m' n n' =
   cong₂ Inj (+-assoc l m n) (+-assoc l' m' n')
 
 assoc : {l l' m m' n n' : ℕ} (f : Inj l l') (g : Inj m m') (h : Inj n n')
-  → ((f ⊕ g) ⊕ h) ≡ transport (α-p l l') (f ⊕ (g ⊕ h))
+  → ((f ⊕ g) ⊕ h) ≡ transport (α-p l l' m m' n n') (f ⊕ (g ⊕ h))
 assoc {zero} {l'} {m} {m'} {n} {n'} (nul _) g h =
   (nul l' ⊕ g) ⊕ h
     ≡⟨ refl ⟩
@@ -91,18 +91,40 @@ assoc {suc l} {suc l'} {m} {m'} {n} {n'} (inc b f) g h =
   subst2 Inj (+-assoc (suc l) m n) (+-assoc (suc l') m' n')
          (inc b f ⊕ (g ⊕ h)) ▯
 
-module Inverses {l l' m m' n n' : ℕ}
-       (f : Inj l l') (g : Inj m m') (h : Inj n n') where
+module _ {l l' m m' n n' : ℕ} where
+  α-iso : Iso (Inj (l + (m + n)) (l' + (m' + n')))
+              (Inj ((l + m) + n) ((l' + m') + n'))
+  α-iso = pathToIso (α-p l l' m m' n n')
 
-  α : ((f ⊕ g) ⊕ h) ≡ transport (α-p l l') (f ⊕ (g ⊕ h))
-  α = assoc f g h
+  α : Inj (l + (m + n)) (l' + (m' + n')) → Inj ((l + m) + n) ((l' + m') + n')
+  α = Iso.fun α-iso 
 
-  α⁻¹ : (f ⊕ (g ⊕ h))
-      ≡ transport (sym (α-p l l')) ((f ⊕ g) ⊕ h)
-  α⁻¹ =
-    (f ⊕ (g ⊕ h))
-      ≡⟨ sym (transport⁻Transport (α-p l l') (f ⊕ (g ⊕ h))) ⟩
-    transport (sym (α-p l l'))
-      (transport (α-p l l') (f ⊕ (g ⊕ h))) 
-      ≡⟨ sym (cong (transport (sym (α-p l l'))) α) ⟩
-    transport (sym (α-p l l')) ((f ⊕ g) ⊕ h) ▯
+  α⁻¹ : Inj ((l + m) + n) ((l' + m') + n') → Inj (l + (m + n)) (l' + (m' + n')) 
+  α⁻¹ = Iso.inv α-iso 
+
+  -- α : Inj (l + (m + n)) (l' + (m' + n')) → Inj ((l + m) + n) ((l' + m') + n')
+  -- α = transport (α-p l l' m m' n n')
+
+  -- α⁻¹ : Inj ((l + m) + n) ((l' + m') + n') → Inj (l + (m + n)) (l' + (m' + n')) 
+  -- α⁻¹ = transport (sym (α-p l l'))
+
+  -- sect : section α α⁻¹
+  -- sect f = transportTransport⁻ (α-p l l') f
+
+  -- retr : retract α α⁻¹
+  -- retr f = transport⁻Transport (α-p l l') f
+
+  -- isomorphism : Iso (Inj (l + (m + n)) (l' + (m' + n'))) 
+  --                   (Inj ((l + m) + n) ((l' + m') + n'))
+  -- isomorphism = iso α α⁻¹ sect retr
+
+  -- unassoc : (f : Inj l l') (g : Inj m m') (h : Inj n n')
+  --   → (f ⊕ (g ⊕ h))
+  --   ≡ transport (sym (α-p l l' m m' n n')) ((f ⊕ g) ⊕ h)
+  -- unassoc f g h =
+  --   (f ⊕ (g ⊕ h))
+  --     ≡⟨ sym (transport⁻Transport (α-p l l') (f ⊕ (g ⊕ h))) ⟩
+  --   transport (sym (α-p l l' m m' n n'))
+  --     (transport (α-p l l') (f ⊕ (g ⊕ h))) 
+  --     ≡⟨ sym (cong (transport (sym (α-p l l'))) (assoc f g h)) ⟩
+  --   transport (sym (α-p l l')) ((f ⊕ g) ⊕ h) ▯
