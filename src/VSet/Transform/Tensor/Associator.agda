@@ -55,9 +55,15 @@ shift-tensor {m} {m'} {n} {n'} (suc l') f g =
                            (+-assoc l' m' n') (shift l' (f ⊕ g))) ⟩
   subst2 Inj refl (+-assoc (suc l') m' n') (shift (suc l') (f ⊕ g)) ▯
 
-α : {l l' m m' n n' : ℕ} (f : Inj l l') (g : Inj m m') (h : Inj n n')
-  → ((f ⊕ g) ⊕ h) ≡ subst2 Inj (+-assoc l m n) (+-assoc l' m' n') (f ⊕ (g ⊕ h))
-α {zero} {l'} {m} {m'} {n} {n'} (nul _) g h =
+α-p : (l l' : ℕ) {m m' n n' : ℕ}
+    → Inj (l + (m + n)) (l' + (m' + n'))
+    ≡ Inj ((l + m) + n) ((l' + m') + n')
+α-p l l' {m} {m'} {n} {n'} =
+  cong₂ Inj (+-assoc l m n) (+-assoc l' m' n')
+
+assoc : {l l' m m' n n' : ℕ} (f : Inj l l') (g : Inj m m') (h : Inj n n')
+  → ((f ⊕ g) ⊕ h) ≡ transport (α-p l l') (f ⊕ (g ⊕ h))
+assoc {zero} {l'} {m} {m'} {n} {n'} (nul _) g h =
   (nul l' ⊕ g) ⊕ h
     ≡⟨ refl ⟩
   (shift l' g) ⊕ h
@@ -65,7 +71,7 @@ shift-tensor {m} {m'} {n} {n'} (suc l') f g =
   subst2 Inj refl (+-assoc l' m' n') (shift l' (g ⊕ h))
     ≡⟨ refl ⟩
   subst2 Inj (+-assoc zero m n) (+-assoc l' m' n') (nul l' ⊕ (g ⊕ h)) ▯
-α {suc l} {suc l'} {m} {m'} {n} {n'} (inc b f) g h =
+assoc {suc l} {suc l'} {m} {m'} {n} {n'} (inc b f) g h =
   (inc b f ⊕ g) ⊕ h
     ≡⟨ refl ⟩
   (inc (finject m' b) (f ⊕ g)) ⊕ h
@@ -74,7 +80,7 @@ shift-tensor {m} {m'} {n} {n'} (suc l') f g =
     ≡⟨ cong (λ ○ → inc ○ ((f ⊕ g) ⊕ h)) (finject-+ (suc l') m' n' b)  ⟩
   inc (subst (Fin ∘ suc) (+-assoc l' m' n') (finject (m' + n') b)) ((f ⊕ g) ⊕ h)
     ≡⟨ cong (inc (subst (Fin ∘ suc) (+-assoc l' m' n') (finject (m' + n') b)))
-            (α f g h) ⟩
+            (assoc f g h) ⟩
   inc (subst (Fin ∘ suc) (+-assoc l' m' n') (finject (m' + n') b))
       (subst2 Inj (+-assoc l m n) (+-assoc l' m' n') (f ⊕ (g ⊕ h)))
     ≡⟨ subst2-inc-reorder (+-assoc l m n) (+-assoc l' m' n')
@@ -84,3 +90,19 @@ shift-tensor {m} {m'} {n} {n'} (suc l') f g =
     ≡⟨ refl ⟩
   subst2 Inj (+-assoc (suc l) m n) (+-assoc (suc l') m' n')
          (inc b f ⊕ (g ⊕ h)) ▯
+
+module Inverses {l l' m m' n n' : ℕ}
+       (f : Inj l l') (g : Inj m m') (h : Inj n n') where
+
+  α : ((f ⊕ g) ⊕ h) ≡ transport (α-p l l') (f ⊕ (g ⊕ h))
+  α = assoc f g h
+
+  α⁻¹ : (f ⊕ (g ⊕ h))
+      ≡ transport (sym (α-p l l')) ((f ⊕ g) ⊕ h)
+  α⁻¹ =
+    (f ⊕ (g ⊕ h))
+      ≡⟨ sym (transport⁻Transport (α-p l l') (f ⊕ (g ⊕ h))) ⟩
+    transport (sym (α-p l l'))
+      (transport (α-p l l') (f ⊕ (g ⊕ h))) 
+      ≡⟨ sym (cong (transport (sym (α-p l l'))) α) ⟩
+    transport (sym (α-p l l')) ((f ⊕ g) ⊕ h) ▯
