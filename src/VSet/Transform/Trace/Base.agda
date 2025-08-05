@@ -14,18 +14,11 @@ open import VSet.Data.Inj.Order
 open import VSet.Transform.Inverse.Base 
 open import VSet.Transform.Inverse.Insert
 open import VSet.Transform.Inverse.Properties
+open import VSet.Transform.Elementary.Base
 
 private
   variable
     l l' m m' n n' : ℕ
-
-remove : ∀ {m n} → (a : Fin (suc m))
-       → (f : Inj (suc m) (suc n)) → Inj m n
-remove fzero (inc b f) = f
-remove {suc m} {suc n} (fsuc a) (inc c f) =
-  let b = apply f a
-  in inc (fjoin (fsplice c b) c (≉fsym (fsplice≉b c b)))
-         (remove a f) 
 
 trace1-cases : (b : Fin (suc n)) → (f : Inj (suc m) (suc n))
              → (a'? : Maybe (Fin (suc (suc m))))

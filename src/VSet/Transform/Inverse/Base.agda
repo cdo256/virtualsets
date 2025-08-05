@@ -10,6 +10,7 @@ open import VSet.Data.Fin.Splice
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
 open import VSet.Prelude
+open import VSet.Transform.Elementary.Base 
 
 private
   variable
@@ -24,12 +25,6 @@ apply-inv-rec f b y (no y≉b) =
 
 apply-inv (nul _) _ = nothing
 apply-inv (inc b f) y = apply-inv-rec f b y (y ≈?ᶠ b)
-
-insert : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
-       → (f : Inj m n) → Inj (suc m) (suc n)
-insert fzero b f = inc b f
-insert (fsuc a) b (inc c f) =
-  inc (fsplice b c) (insert a (fcross c b) f)
 
 inv : ∀ {m} → (f : Inj m m) → Inj m m
 inv {zero} (nul zero) = nul zero

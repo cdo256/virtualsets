@@ -68,7 +68,6 @@ _ = {!!}
 
 w = (fcross f4 f2)
 
-
 -- insert 4 3 (1 2 4 0) ≡ (1 2 5 0 3)
 _ : apply (insert f4 f3 g2) f2 ≡ {!!}
 _ = {!!}

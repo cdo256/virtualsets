@@ -9,6 +9,7 @@ open import VSet.Data.Fin.Properties
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
 open import VSet.Transform.Inverse.Base
+open import VSet.Transform.Elementary.Base
 open import Cubical.Data.Maybe.Base hiding (elim)
 open import Cubical.Relation.Nullary.Base 
 
