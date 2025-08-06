@@ -46,6 +46,12 @@ a ≉ᶠ b = ¬ a ≈ᶠ b
 ≈ᶠ→≡ ≈fzero = refl
 ≈ᶠ→≡ (≈fsuc a≈b) = cong fsuc (≈ᶠ→≡ a≈b)
 
+≢→≉ᶠ : {a b : Fin x} → a ≢ b → a ≉ᶠ b 
+≢→≉ᶠ {a = a} a≢b a≈b = a≢b (≈ᶠ→≡ a≈b)
+
+≉ᶠ→≢ : {a b : Fin x} → a ≉ᶠ b → a ≢ b
+≉ᶠ→≢ a≉b a≡b = a≉b (≡→≈ᶠ a≡b)
+
 fzero≉fsuc : fzero {x} ≉ᶠ fsuc b
 fzero≉fsuc ()
 
@@ -167,10 +173,6 @@ fsuc≤fsuc (inr a≈b) = inr (≈fsuc a≈b)
 
 ¬a<a : {a : Fin x} → ¬ a <ᶠ a
 ¬a<a {a = fsuc a} (<fsuc a<a) = ¬a<a a<a
-
-≉ᶠ→≢ : {a b : Fin x} → a ≉ᶠ b → a ≢ b
-≉ᶠ→≢ a≉b a≡b = a≉b (≡→≈ᶠ a≡b)
-
 
 <ᶠ→≉ : {a : Fin x} {b : Fin y} → a <ᶠ b → a ≉ᶠ b
 <ᶠ→≉ {a = fzero} {b = fsuc b} <fzero a≈b = fzero≉fsuc a≈b

@@ -384,12 +384,21 @@ fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc a) fzero = refl
 fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc a) (fsuc c) =
   cong fsuc (fsplice-fsplice-fsplice-fcross b a c)
 
+fcross0≡0 : ∀ {m} → (a : Fin (suc m))
+          → fcross a fzero ≡ fzero
+fcross0≡0 fzero = refl
+fcross0≡0 (fsuc a) = refl
+
+fcross0s≡pred : ∀ {m} → (a : Fin (suc m))
+              → fcross f0 (fsuc a) ≡ a
+fcross0s≡pred a = refl
+
 fcross-fcross-fsplice
   : ∀ {m} → (b : Fin (suc (suc m))) (c : Fin (suc m))
   → (fcross (fcross c b) (fsplice b c)) ≡ c
 fcross-fcross-fsplice fzero fzero = refl
 fcross-fcross-fsplice fzero (fsuc c) = refl
-fcross-fcross-fsplice (fsuc b) fzero = refl
+fcross-fcross-fsplice (fsuc b) fzero = fcross0≡0 b
 fcross-fcross-fsplice {m = suc m} (fsuc b) (fsuc c) =
   cong fsuc (fcross-fcross-fsplice b c)
 
@@ -446,3 +455,30 @@ finject-+ (suc x) (suc y) z (fsuc a) =
 --   → transport (λ i → Fin (suc (p i))) (fsuc a)
 --   ≡ fsuc (transport (λ i → Fin (p i)) a)
 -- subst-fsuc-reorder p a = transport-reorder Fin suc fsuc p a
+
+fsplice-fcross-fcross-fsplice
+  : {n : ℕ} → (b : Fin (suc (suc n))) (c : Fin (suc n)) (d : Fin n)
+  → fsplice (fcross (fsplice c d) b) (fcross d c)
+  ≡ (fcross (fsplice (fcross c b) d) (fsplice b c))
+fsplice-fcross-fcross-fsplice fzero fzero d = refl
+fsplice-fcross-fcross-fsplice fzero (fsuc c) fzero = refl
+fsplice-fcross-fcross-fsplice fzero (fsuc c) (fsuc d) = refl
+fsplice-fcross-fcross-fsplice (fsuc b) fzero fzero = sym (fcross0≡0 (fsplice b f0))
+fsplice-fcross-fcross-fsplice (fsuc b) fzero (fsuc d) = sym (fcross0≡0 (fsplice b (fsuc d)))
+fsplice-fcross-fcross-fsplice (fsuc b) (fsuc c) fzero = refl
+fsplice-fcross-fcross-fsplice (fsuc b) (fsuc c) (fsuc d) =
+  cong fsuc (fsplice-fcross-fcross-fsplice b c d)
+
+fcross-fcross-fcross-fsplice
+  : {n : ℕ} → (b : Fin (suc (suc n))) (c : Fin (suc n)) (d : Fin n)
+  → fcross (fcross d c) (fcross (fsplice c d) b)
+  ≡ fcross d (fcross c b)
+fcross-fcross-fcross-fsplice fzero fzero fzero = refl
+fcross-fcross-fcross-fsplice fzero fzero (fsuc d) = refl
+fcross-fcross-fcross-fsplice fzero (fsuc c) fzero = fcross0≡0 c
+fcross-fcross-fcross-fsplice fzero (fsuc c) (fsuc d) = refl
+fcross-fcross-fcross-fsplice (fsuc b) fzero fzero = refl
+fcross-fcross-fcross-fsplice (fsuc b) fzero (fsuc d) = refl
+fcross-fcross-fcross-fsplice (fsuc b) (fsuc c) fzero = refl
+fcross-fcross-fcross-fsplice (fsuc b) (fsuc c) (fsuc d) =
+  cong fsuc (fcross-fcross-fcross-fsplice b c d)
