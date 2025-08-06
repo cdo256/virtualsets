@@ -11,9 +11,12 @@ open import VSet.Data.Fin.Splice
 open import VSet.Data.Fin.Properties
 open import Cubical.Data.List.Base hiding ([_])
 open import VSet.Data.Inj.Base
+open import VSet.Transform.Elementary.Base 
 
-_∘ʲ_ : ∀ {l m n} → (g : Inj m n) → (f : Inj l m) → Inj l n 
-g ∘ʲ nul _ = nul _
-inc c g ∘ʲ inc b f =
-  let h'0 = apply (inc c g) (apply (inc b f) fzero)
-  in inc h'0 (g ∘ʲ f)
+_∘ʲ_ : ∀ {l m n} (g : Inj m n) (f : Inj l m) → Inj l n 
+_∘ʲ_ g (nul _) = nul _
+_∘ʲ_ {suc l} {suc m} {suc n} g (inc b f) =
+  inc (apply g b) (remove b g ∘ʲ f)
+
+_∘⁻ʲ_ : ∀ {l m n} (f : Inj l m) (g : Inj m n) → Inj l n 
+f ∘⁻ʲ g = g ∘ʲ f
