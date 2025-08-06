@@ -11,6 +11,7 @@ open import VSet.Data.Fin.Properties
 open import VSet.Data.Fin.Splice 
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
+open import VSet.Transform.Elementary.Base 
 open import VSet.Transform.Inverse.Base 
 open import VSet.Transform.Inverse.Insert
 open import VSet.Transform.Inverse.Properties
@@ -33,7 +34,7 @@ remove-insert (fsuc fzero) b (inc c f) =
   remove (fsuc fzero) (inc (fsplice b c) (insert fzero (fcross c b) f))
     ≡⟨ refl ⟩
   remove (fsuc fzero) (inc (fsplice b c) (inc (fcross c b) f))
-    ≡⟨ refl ⟩
+    ≡⟨ {!!} ⟩
   inc (fjoin (fsplice (fsplice b c) (fcross c b)) (fsplice b c)
           (≉fsym (fsplice≉b (fsplice b c) (fcross c b)))) f 
     ≡⟨ cong (λ ○ → inc ○ f) (fjoin-fsplice-fsplice-fcross-fsplice b c
@@ -50,7 +51,7 @@ remove-insert {m = suc m} {n = suc n} (fsuc a) b (inc c f) =
   remove (fsuc a) (insert (fsuc a) b (inc c f))
     ≡⟨ refl ⟩
   remove (fsuc a) (inc (fsplice b c) (insert a (fcross c b) f))
-    ≡⟨ refl ⟩
+    ≡⟨ {!!} ⟩
   inc (fjoin (fsplice (fsplice b c) b') (fsplice b c)
                  (≉fsym (fsplice≉b (fsplice b c) b')))
       (remove a (insert a (fcross c b) f))

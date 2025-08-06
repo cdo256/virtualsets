@@ -9,6 +9,7 @@ open import VSet.Data.Fin.Properties
 open import VSet.Data.Fin.Splice 
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
+open import VSet.Transform.Elementary.Base 
 open import VSet.Transform.Inverse.Base 
 open import VSet.Transform.Trace.Base 
 open import VSet.Prelude
@@ -16,8 +17,6 @@ open import VSet.Prelude
 private
   variable
     l l' m m' n n' : ℕ
-
-
 
 _ : remove f0 (inc f3 (nul 4)) ≡ (nul 4)
 _ = refl

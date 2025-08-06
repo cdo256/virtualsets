@@ -128,18 +128,18 @@ deflateIndependentOfWf (A ＋ B) (acc r1) (acc r2) with inspect' Σ∥ A ∥
   where 0L-dec : 0L∥ A ∥ < 0L∥ A ＋ B ∥
         0L-dec = 0A<0A+B A B (≡suc→≥1 ΣA≢0)
 
-deflate-rec-deflates
-  : (A : Tree ℕ) → (acc' : Acc _≺₀ₗ_ A)
-  → 0L∥ deflate-rec A acc' ∥ ≡ 0
-deflate-＋-rec-deflates
-  : (A B : Tree ℕ) → (ΣA : Singleton Σ∥ A ∥) → (acc' : Acc _≺₀ₗ_ (A ＋ B))
-  → 0L∥ deflate-＋-rec A B ΣA acc' ∥ ≡ 0
-deflate-rec-preserves-Σ
-  : (A : Tree ℕ) → (acc' : Acc _≺₀ₗ_ A)
-  → Σ∥ A ∥ ≡ Σ∥ deflate-rec A acc' ∥
-deflate-＋-rec-preserves-Σ
-  : (A B : Tree ℕ) → Singleton Σ∥ A ∥ → (acc' : Acc _≺₀ₗ_ (A ＋ B))
-  → Σ∥ A ＋ B ∥ ≡ Σ∥ deflate-＋-rec A B (inspect' Σ∥ A ∥) acc'  ∥
+-- deflate-rec-deflates
+--   : (A : Tree ℕ) → (acc' : Acc _≺₀ₗ_ A)
+--   → 0L∥ deflate-rec A acc' ∥ ≡ 0
+-- deflate-＋-rec-deflates
+--   : (A B : Tree ℕ) → (ΣA : Singleton Σ∥ A ∥) → (acc' : Acc _≺₀ₗ_ (A ＋ B))
+--   → 0L∥ deflate-＋-rec A B ΣA acc' ∥ ≡ 0
+-- deflate-rec-preserves-Σ
+--   : (A : Tree ℕ) → (acc' : Acc _≺₀ₗ_ A)
+--   → Σ∥ A ∥ ≡ Σ∥ deflate-rec A acc' ∥
+-- deflate-＋-rec-preserves-Σ
+--   : (A B : Tree ℕ) → Singleton Σ∥ A ∥ → (acc' : Acc _≺₀ₗ_ (A ＋ B))
+--   → Σ∥ A ＋ B ∥ ≡ Σ∥ deflate-＋-rec A B (inspect' Σ∥ A ∥) acc'  ∥
 
 
 {-

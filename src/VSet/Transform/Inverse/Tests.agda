@@ -1,4 +1,4 @@
-module VSet.Transform.InverseTests where
+module VSet.Transform.Inverse.Tests where
 
 open import VSet.Prelude
 open import Cubical.Data.Nat.Base hiding (elim)
@@ -11,7 +11,8 @@ open import VSet.Data.Inj.Order
 open import Cubical.Data.Maybe.Base hiding (elim)
 open import Cubical.Relation.Nullary.Base 
 open import Cubical.Data.List
-open import VSet.Transform.Inverse
+open import VSet.Transform.Elementary.Base
+open import VSet.Transform.Inverse.Base
 
 g1 : Inj 2 3
 g1 = (inc f2 $ inc f0 $ nul 1) 
@@ -62,15 +63,9 @@ _ = refl
 _ : apply (insert f1 f3 g2) f2 ≡ fsplice f3 (apply g2 (fcross f1 f2))
 _ = refl
 
-_ : let a = f4; b = f3; x = f2
-    in λ x≉a : x ≉ᶠ a → apply (insert a b g2) x ≡ fsplice b (apply g2 (fjoin a x {!a≉x!}))
-_ = {!!}
-
-w = (fcross f4 f2)
-
 -- insert 4 3 (1 2 4 0) ≡ (1 2 5 0 3)
-_ : apply (insert f4 f3 g2) f2 ≡ {!!}
-_ = {!!}
+_ : apply (insert f4 f3 g2) f2 ≡ f5
+_ = refl
 
-_ : fcross {x = 4} f4 f2 ≡ f2
+_ : fcross {x = 5} f4 f2 ≡ f2
 _ = refl

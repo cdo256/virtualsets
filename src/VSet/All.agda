@@ -70,4 +70,3 @@ open import VSet.Transform.Tensor.Properties
 open import VSet.Transform.Trace.Base
 open import VSet.Transform.Trace.Properties
 open import VSet.Transform.Trace.Tests
-open import VSet.VSet

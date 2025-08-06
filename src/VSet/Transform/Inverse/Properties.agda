@@ -15,6 +15,7 @@ open import VSet.Data.Fin.Splice
 open import VSet.Data.Fin.Properties
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
+open import VSet.Transform.Elementary.Base
 open import VSet.Transform.Inverse.Base
 open import VSet.Transform.Inverse.Insert
 open import VSet.Transform.Compose.Base
@@ -97,8 +98,12 @@ insert-isInjective
 insert-isInjective {a = fzero} {b = b} {f = f} {g = g} f'≡g' =
   proj₂ (inc-isInjective f'≡g')
 insert-isInjective {a = fsuc a} {b = fzero} {f = inc c1 f} {g = inc c2 g} f''≡g'' =
-  let ins-f≡ins-g : insert a f0 f ≡ insert a f0 g
-      ins-f≡ins-g = (proj₂ (inc-isInjective f''≡g''))
+  let u : insert a (fcross c1 f0) f ≡ insert a (fcross c2 f0) g
+      u = (proj₂ (inc-isInjective f''≡g''))
+      ins-f≡ins-g : insert a f0 f ≡ insert a f0 g
+      ins-f≡ins-g = subst2 (λ ○ □ → insert a ○ f ≡ insert a □ g)
+                           (fcross0≡0 c1) (fcross0≡0 c2)
+                           (proj₂ (inc-isInjective f''≡g''))
       f≡g : f ≡ g
       f≡g = insert-isInjective ins-f≡ins-g
       c1≡c2 : c1 ≡ c2

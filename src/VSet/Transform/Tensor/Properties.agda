@@ -1,4 +1,4 @@
-module VSet.Transform.Tensor.Base where
+module VSet.Transform.Tensor.Properties where
 
 open import VSet.Prelude
 open import Cubical.Data.Prod.Base
