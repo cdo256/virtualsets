@@ -24,6 +24,9 @@ g = (inc f3 $ inc f2 $ inc f2 $ inc f0 $ nul 2)
 _ : bubble f3 g ≡ (inc f4 $ inc f2 $ inc f3 $ inc f0 $ nul 3)
 _ = refl
 
+_ : bubble f0 g ≡ (inc f4 $ inc f3 $ inc f3 $ inc f1 $ nul 3)
+_ = refl
+
 _ : excise f0 g ≡ (inc f2 $ inc f3 $ inc f0 $ nul 3)
 _ =
   excise f0 (inc f3 $ inc f2 $ inc f2 $ inc f0 $ nul 2) ≡⟨ refl ⟩

@@ -16,21 +16,21 @@ private
   variable
     l l' m m' n n' : ℕ
 
+-- Insert a pair, and shift domain and codomain over.
 insert : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
        → (f : Inj m n) → Inj (suc m) (suc n)
 insert fzero b f = inc b f
 insert (fsuc a) b (inc c f) =
   inc (fsplice b c) (insert a (fcross c b) f)
 
--- Take out one element and shift everything over.
+-- Take out one element and shift everything back one place.
 remove : ∀ {m n} → (a : Fin (suc m))
        → (f : Inj (suc m) (suc n)) → Inj m n
 remove fzero (inc b f) = f
 remove {suc m} {suc n} (fsuc a) (inc c f) =
-  let b = apply f a
-  in inc (fjoin (fsplice c b) c (≉fsym (fsplice≉b c b)))
-         (remove a f) 
+  inc (fcross (apply f a) c) (remove a f) 
 
+-- Splice all outputs around a pivot b 
 bubble : ∀ {m n} → (b : Fin (suc n))
        → (f : Inj m n) → Inj m (suc n)
 bubble b (nul _) = nul _
