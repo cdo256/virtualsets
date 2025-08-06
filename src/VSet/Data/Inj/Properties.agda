@@ -15,11 +15,20 @@ open import VSet.Data.Fin.Properties
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
 open import Cubical.Foundations.GroupoidLaws
+open import VSet.Function.Injection
 
 private
   variable
     l l' m m' n n' : ℕ
 
+apply-Inj-isInjective : (f : Inj m n) → is-injective (apply f)
+apply-Inj-isInjective f fzero fzero fx≡fy = refl
+apply-Inj-isInjective (inc b f) fzero (fsuc y) fx≡fy =
+  absurd (fsplice≉b b (apply f y) (≡→≈ᶠ (sym fx≡fy)))
+apply-Inj-isInjective (inc b f) (fsuc x) fzero fx≡fy =
+  absurd (fsplice≉b b (apply f x) (≡→≈ᶠ fx≡fy))
+apply-Inj-isInjective (inc b f) (fsuc x) (fsuc y) fx≡fy =
+  cong fsuc (apply-Inj-isInjective f x y (fsplice-isInjective fx≡fy))
 
 subst2-inc-reorder 
   : ∀ {m m' n n'} (p : m ≡ n) (q : m' ≡ n')
@@ -48,6 +57,7 @@ subst2-inc-reorder {m} {m'} {n} {n'} p q a f =
         [ inc b g
         ≡ subst2 Injsuc p q (inc a f)
         ]
+      -- This actually isn't directly applicable.
       composite = compPathP' step1 step2
   in subst2 (λ ○ □ → PathP (λ i → (Injsuc (○ i) (□ i)))
                   (inc b g)
