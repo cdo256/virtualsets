@@ -1,20 +1,19 @@
 module VSet.Cat.Base where
 
 open import Cubical.Categories.Category
-open import VSet.Data.SomeFin.Base
-open import VSet.Data.SomeFin.Injection
-open import VSet.Transform.Compose
-
--- _⊙_ : ∀ {X Y Z} → [ Y ↣ Z ] → [ X ↣ Y ] → [ X ↣ Z ]
+open import Cubical.Data.Nat
+open import VSet.Data.Inj.Base 
+open import VSet.Transform.Compose.Base
+open import VSet.Transform.Compose.Properties
 
 VSetCat : Category _ _
 VSetCat = record
-  { ob = SomeFin
-  ; Hom[_,_] = [_↣_]
-  ; id = id↣
-  ; _⋆_ = λ f g → g ⊙ f
-  ; ⋆IdL = {!!}
-  ; ⋆IdR = {!!}
+  { ob = ℕ
+  ; Hom[_,_] = Inj
+  ; id = λ {n} → idInj n
+  ; _⋆_ = _∘⁻ʲ_
+  ; ⋆IdL = ∘ʲ-idR
+  ; ⋆IdR = ∘ʲ-idL
   ; ⋆Assoc = {!!}
   ; isSetHom = {!!}
   }
