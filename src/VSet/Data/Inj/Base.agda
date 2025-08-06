@@ -34,6 +34,13 @@ to-list (nul _) = []
 to-list (inc b f) =
   b ∷ map (fsplice b) (to-list f)
 
+_∈ʲ_ : ∀ {n m : ℕ} → (b : Fin n) → (Inj m n) → Type
+b ∈ʲ f = Σ[ a ∈ Fin _ ] apply f a ≡ b
+
+_∉ʲ_ : ∀ {n m : ℕ} → (b : Fin n) → (Inj m n) → Type
+b ∉ʲ f = ¬ b ∈ʲ f
+
+
 idInj : ∀ m → Inj m m
 idInj zero = nul zero
 idInj (suc m) = inc fzero (idInj m)
