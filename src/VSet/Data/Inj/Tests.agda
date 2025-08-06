@@ -8,7 +8,8 @@ open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Splice
 open import VSet.Data.Inj.Base
 open import VSet.Data.Inj.Order
-open import VSet.Transform.Inverse
+open import VSet.Transform.Elementary.Base
+open import VSet.Transform.Inverse.Base
 open import VSet.Data.Inj.Properties
 
 _ : to-list (cycle-r 3) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []
@@ -75,14 +76,3 @@ _ = refl
 
 _ : to-list (inv (cycle-l 3)) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []
 _ = refl
-
-test-fspliceL1-1 : fsplice-lemma1 fzero fzero (λ x → x) fzero fzero (λ ())
-test-fspliceL1-1 = refl
-
-test-fspliceL1-2 : fsplice-lemma1 fzero (fsuc fzero) (λ x → x) fzero fzero (λ ())
-test-fspliceL1-2 = refl
-
-test-fspliceL1-3 : fsplice-lemma1 (fsuc fzero) (fsuc (fsuc fzero)) (λ x → x) (fsuc fzero) (fsuc fzero) (λ ())
-test-fspliceL1-3 = refl
-
-

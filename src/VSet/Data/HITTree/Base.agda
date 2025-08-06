@@ -54,10 +54,7 @@ module Bit→Bin where
   f 𝟙 = just 𝟙
   f (A ⊕ B) = join (f A) (f B)
 
-  preserves-size : {!!} 
 
-
-bubble : {!!}
 
 norm : BitTree → BitTree
 norm = {!!}

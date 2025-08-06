@@ -117,23 +117,23 @@ module BigStep where
   ¬≪◎ {A} (inl eq) = ⊻≢◎ eq
   ¬≪◎ {A} (inr (inl α')) = ◎¬α-right α'
 
-  ≪'-acc : {X Y : Tree} → Y ≪' X → Acc _≪'_ Y
-  ≪'-acc {_} {_} (inl eq , ne) = absurd (ne eq)
-  ≪'-acc {A ⊻ (B ⊻ C)} {(D ⊻ E) ⊻ F} (inr (inl α') , ne)
-    -- This should be a single atomic swap, but I'm not sure how to
-    -- split this up so it terminates.
-    = acc λ X less → ≪'-acc less
-  ≪'-acc {A ⊻ (B ⊻ C)} {(D ⊻ E) ⊻ F} (inr (inr x) , ne) = {!!}
-  ≪'-acc {◎} {◎} (inr _ , ne) = absurd (ne refl)
-  ≪'-acc {◎} {_ ⊻ _} (inr (inl α') , _) = absurd (◎¬α-right α')
-  ≪'-acc {_ ⊻ _} {◎} (inr (inl ()) , ne)
-  ≪'-acc {_ ⊻ _} {◎} (inr (inr ()) , ne)
-  ≪'-acc {◎ ⊻ C} {◎ ⊻ F} (inr (inr x) , ne) = {!!}
-  ≪'-acc {◎ ⊻ C} {(D ⊻ D₁) ⊻ F} x = {!!}
-  ≪'-acc {(A ⊻ A₁) ⊻ C} {D ⊻ F} x = {!!}
-    where
-      wfrec : {A : Tree} → WFRec _≪'_ (Acc _≪'_) A
-      wfrec = {!!}
+  -- ≪'-acc : {X Y : Tree} → Y ≪' X → Acc _≪'_ Y
+  -- ≪'-acc {_} {_} (inl eq , ne) = absurd (ne eq)
+  -- ≪'-acc {A ⊻ (B ⊻ C)} {(D ⊻ E) ⊻ F} (inr (inl α') , ne)
+  --   -- This should be a single atomic swap, but I'm not sure how to
+  --   -- split this up so it terminates.
+  --   = acc λ X less → ≪'-acc less
+  -- ≪'-acc {A ⊻ (B ⊻ C)} {(D ⊻ E) ⊻ F} (inr (inr x) , ne) = {!!}
+  -- ≪'-acc {◎} {◎} (inr _ , ne) = absurd (ne refl)
+  -- ≪'-acc {◎} {_ ⊻ _} (inr (inl α') , _) = absurd (◎¬α-right α')
+  -- ≪'-acc {_ ⊻ _} {◎} (inr (inl ()) , ne)
+  -- ≪'-acc {_ ⊻ _} {◎} (inr (inr ()) , ne)
+  -- ≪'-acc {◎ ⊻ C} {◎ ⊻ F} (inr (inr x) , ne) = {!!}
+  -- ≪'-acc {◎ ⊻ C} {(D ⊻ D₁) ⊻ F} x = {!!}
+  -- ≪'-acc {(A ⊻ A₁) ⊻ C} {D ⊻ F} x = {!!}
+  --   where
+  --     wfrec : {A : Tree} → WFRec _≪'_ (Acc _≪'_) A
+  --     wfrec = {!!}
 
   ≪'-WellFounded : WellFounded _≪'_
   ≪'-WellFounded A = {!!}
