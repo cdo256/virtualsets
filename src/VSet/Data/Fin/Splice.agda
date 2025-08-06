@@ -71,12 +71,18 @@ fsplice≡fsplice' (fsuc b) (fsuc a) with (fsuc b ≤?ᶠ fsuc a)
     ≡⟨ refl ⟩
   fsplice'-cases (fsuc b) (fsuc a) (fgt (<fsuc b>a)) ▯
 
-fcross : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
-           → Fin (suc x)
-fcross _ fzero = fzero
+fcross : ∀ {x : ℕ} → (b : Fin x) → (a : Fin (suc x)) → Fin x
+fcross fzero fzero = fzero
+fcross (fsuc b) fzero = fzero
 fcross fzero (fsuc a) = a
-fcross {suc x} (fsuc b) (fsuc a) =
-  fsuc (fcross b a)
+fcross (fsuc b) (fsuc a) = fsuc (fcross b a)
+
+fcross₂ : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
+            → Fin (suc x)
+fcross₂ _ fzero = fzero
+fcross₂ fzero (fsuc a) = a
+fcross₂ {suc x} (fsuc b) (fsuc a) =
+  fsuc (fcross₂ b a)
 
 fcross'-cases
   : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
@@ -86,7 +92,7 @@ fcross'-cases b a (fle a≤b) = fin-restrict-≤ a a≤b
 fcross'-cases b a (fgt a>b) = pred a
 
 fcross' : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
-           → Fin (suc x)
+        → Fin (suc x)
 fcross' b a = fcross'-cases b a (a ≤?ᶠ b)
 
 fjoin-cases : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
