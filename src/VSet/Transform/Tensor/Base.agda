@@ -35,3 +35,6 @@ tensor {n' = n'} (inc b f) g = inc (finject n' b) (tensor f g)
 
 _⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
 f ⊕ g = tensor f g
+
+𝟘 : Inj 0 0
+𝟘 = nul 0
