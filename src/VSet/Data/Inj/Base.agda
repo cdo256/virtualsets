@@ -45,6 +45,9 @@ idInj : ∀ m → Inj m m
 idInj zero = nul zero
 idInj (suc m) = inc fzero (idInj m)
 
+𝟙 : ∀ {m} → Inj m m
+𝟙 {m} = idInj m
+
 cross : Inj 2 2
 cross = inc (fsuc fzero) $ inc fzero $ nul 0
 
