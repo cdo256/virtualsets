@@ -3,7 +3,7 @@ module VSet.Transform.Trace.Tests where
 open import Cubical.Data.Maybe.Base hiding (elim)
 open import Cubical.Data.Nat.Base hiding (elim)
 open import Cubical.Relation.Nullary.Base 
-open import VSet.Data.Fin.Base
+open import VSet.Data.Fin.Base renaming (pred to fpred)
 open import VSet.Data.Fin.Order
 open import VSet.Data.Fin.Properties
 open import VSet.Data.Fin.Splice 
@@ -42,3 +42,29 @@ _ = refl
 _ : insert f1 f0 (remove f1 (inc f2 (inc f0 (nul 4)))) ≡ inc f2 (inc f0 (nul 4))
 _ = refl
 
+_ : pred (inc f2 $ nul 3) ≡ nul 3
+_ = refl
+
+_ : pred (inc f0 $ nul 0) ≡ nul 0
+_ = refl
+
+_ : pred (inc f1 $ inc f0 $ nul 0) ≡ (inc f0 $ nul 0)
+_ = refl
+
+_ : pred (inc f0 $ inc f0 $ nul 1) ≡ (inc f0 $ nul 1)
+_ = refl
+
+_ : pred (inc f1 $ inc f0 $ nul 1) ≡ (inc f0 $ nul 1)
+_ = refl
+
+_ : pred (inc f2 $ inc f0 $ nul 1) ≡ (inc f1 $ nul 1)
+_ = refl
+
+_ : pred (inc f0 $ inc f1 $ nul 1) ≡ (inc f1 $ nul 1)
+_ = refl
+
+_ : pred (inc f1 $ inc f1 $ nul 1) ≡ (inc f1 $ nul 1)
+_ = refl
+
+_ : pred (inc f2 $ inc f1 $ nul 1) ≡ (inc f1 $ nul 1)
+_ = refl
