@@ -43,7 +43,7 @@ module SmallStep where
   α-base-type ((A ⊻ B) ⊻ C) (A' ⊻ (B' ⊻ C')) = (A ≡ A') × (B ≡ B') × (C ≡ C')
   α-base-type _ _ = ⊥
 
-  infixl 10 _<_ _≪_
+  infixl 10 _<_
 
   _<_ : Tree → Tree → Type
   cong-type :  Tree → Tree → Type

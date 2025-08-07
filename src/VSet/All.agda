@@ -19,6 +19,7 @@ open import VSet.Data.Inj.Tests
 open import VSet.Data.VecFun.Base
 open import VSet.Data.VecFun.Properties
 open import VSet.Data.VecFun.Tests
+open import VSet.Data.Maybe
 open import VSet.Data.Nat.Order
 open import VSet.Data.Nat.Properties
 open import VSet.Data.Nat.WellFounded
@@ -50,6 +51,7 @@ open import VSet.Transform.Compose.Properties
 open import VSet.Transform.Compose.Tests
 open import VSet.Transform.Elementary.Base
 open import VSet.Transform.Elementary.Tests
+open import VSet.Transform.Elementary.Properties
 open import VSet.Transform.Inverse.Base
 open import VSet.Transform.Inverse.Insert
 open import VSet.Transform.Inverse.Properties

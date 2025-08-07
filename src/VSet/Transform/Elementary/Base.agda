@@ -41,3 +41,4 @@ bubble b (inc c f) =
 excise : ∀ {m n} → (a : Fin (suc m))
        → (f : Inj (suc m) (suc n)) → Inj m (suc n)
 excise a f = bubble (apply f a) (remove a f)
+
