@@ -11,6 +11,7 @@ open import VSet.Data.Fin.Properties
 open import VSet.Data.Fin.Splice
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
+open import VSet.Data.Inj.Properties 
 open import VSet.Data.Maybe
 open import VSet.Transform.Elementary.Base 
 open import VSet.Transform.Inverse.Base 
@@ -27,7 +28,7 @@ private
 pred-0 : (f : Inj m n)
        → pred (inc f0 f) ≡ f
 pred-0 {zero} (nul _) = refl
-pred-0 {suc m} f = {!!}
+pred-0 {suc m} {suc n} f = refl
 
 remove-insert
   : ∀ {m n} → (a : Fin (suc m)) → (b : Fin (suc n))
@@ -189,3 +190,53 @@ thm1-2-1-pred {m = m} {n = suc n} f (inc b g) with inspect' (apply f f0)
 --     ≡⟨ {!!} ⟩
 --   nul m ▯
 -- thm1-2-1 f (inc b g) = {!!}
+
+open import Cubical.Data.Nat.Properties
+
+Thm1-2-2-Pred : ∀ {l m n} (f : Inj m n) (g : Inj (suc l) (suc m)) → Type
+Thm1-2-2-Pred {l} {m} {n} f g = (f' ∘ʲ g) —1 ≡ f ∘ʲ (g —1)
+  where
+    f' : Inj (suc m) (suc n)
+    f' = subst2 Inj (+-comm m 1) (+-comm n 1) (f ⊕ 𝟙)
+
+  -- inc (apply g b) (remove b g ∘ʲ f)
+
+thm1-2-2-pred : ∀ {l m n} (f : Inj m n) (g : Inj (suc l) (suc m))
+              → Thm1-2-2-Pred f g
+thm1-2-2-pred {zero} {zero} {n} (nul _) (inc fzero (nul _)) = refl
+thm1-2-2-pred {l} {suc m} {suc n} (inc b f) (inc fzero g) with b
+... | b =
+  (f' ∘ʲ inc fzero g) —1
+    ≡⟨ refl ⟩
+  (inc (apply f' fzero) (remove fzero f' ∘ʲ g)) —1
+    ≡⟨ {!!} ⟩
+  inc b f ∘ʲ g
+    ≡⟨ cong (inc b f ∘ʲ_) (sym (pred-0 g) ) ⟩
+  inc b f ∘ʲ (inc fzero g —1) ▯
+  where
+    f' : Inj (suc (suc m)) (suc (suc n))
+    f' = subst2 Inj (+-comm (suc m) 1) (+-comm (suc n) 1) ((inc b f) ⊕ 𝟙)
+    u : f' ≡ inc (finj b) (subst2 Inj (+-comm m 1) (+-comm n 1) (f ⊕ 𝟙))
+    u =
+      subst2 Inj (+-comm (suc m) 1) (+-comm (suc n) 1) ((inc b f) ⊕ 𝟙)
+        ≡⟨ refl  ⟩
+      subst2 Inj (+-comm (suc m) 1) (+-comm (suc n) 1) (inc (finject 1 b) (f ⊕ 𝟙))
+        ≡⟨ sym (subst2-inc-reorder (+-comm m 1) (+-comm n 1) (finject 1 b) (f ⊕ 𝟙)) ⟩
+      inc (subst (Fin ∘ suc) (+-comm n 1) (finject 1 b))
+          (subst2 Inj (+-comm m 1) (+-comm n 1) (tensor f 𝟙))
+        ≡⟨ {!!} ⟩
+      inc (finj b)
+          (subst2 Inj (+-comm m 1) (+-comm n 1) (tensor f 𝟙))
+        ≡⟨ {!!} ⟩
+      inc (finj b) (subst2 Inj (+-comm m 1) (+-comm n 1) (tensor f 𝟙)) ▯
+thm1-2-2-pred {l} {suc m} {suc n} (inc b f) (inc (fsuc c) g) = {!!}
+  -- (f' ∘ʲ (inc c g)) —1
+  --   ≡⟨ refl ⟩
+  -- (inc (apply f' c) (remove c f' ∘ʲ g)) —1
+  --   ≡⟨ {!!} ⟩
+  -- (inc (apply f' c) (remove c f' ∘ʲ g)) —1
+  --   ≡⟨ {!!} ⟩
+  -- (inc b f ∘ʲ (inc c g —1)) ▯
+  -- where
+  --   f' : Inj (suc m) (suc n)
+  --   f' = subst2 Inj (+-comm m 1) (+-comm n 1) ((inc b f) ⊕ 𝟙)
