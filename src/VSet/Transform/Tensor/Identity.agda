@@ -24,11 +24,11 @@ private
     l l' m m' n n' : ℕ
 
 module _ {l l' : ℕ} where
-  η-p : Inj (0 + l) (0 + l') ≡ Inj l l'
-  η-p = refl
+  η-p : Inj (l + 0) (l' + 0) ≡ Inj l l'
+  η-p = cong₂ Inj (+-zero l) (+-zero l')
 
-  η-iso : Iso (Inj (0 + l) (0 + l')) (Inj l l')
+  η-iso : Iso (Inj (l + 0) (l' + 0)) (Inj l l')
   η-iso = pathToIso η-p
 
-  η : Inj (0 + l) (0 + l') → Inj l l'
+  η : Inj (l + 0) (l' + 0) → Inj l l'
   η = transport η-p
