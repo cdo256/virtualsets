@@ -37,3 +37,8 @@ trace : (l : ℕ) → (f : Inj (l + m) (l + n)) → Inj m n
 trace zero f = f
 trace (suc l) f = (trace l (pred f))
 
+infixl 30 trace
+infixl 50 pred
+
+syntax trace l f = f — l
+syntax pred f = f —1

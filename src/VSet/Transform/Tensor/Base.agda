@@ -33,8 +33,9 @@ tensor : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (
 tensor (nul m') g = shift m' g
 tensor {n' = n'} (inc b f) g = inc (finject n' b) (tensor f g)
 
-_⊕_ : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
-f ⊕ g = tensor f g
-
 𝟘 : Inj 0 0
 𝟘 = nul 0
+
+infixl 30 tensor -- \o+
+
+syntax tensor f g = f ⊕ g
