@@ -26,3 +26,8 @@ x≮0 x (y , y+x'≡0) = snotz (+-comm (suc x) y ∙ y+x'≡0)
 
 path-suc-pred : {x y : ℕ} (p : suc x ≡ suc y) → cong (suc ∘ predℕ) p ≡ p
 path-suc-pred {x} {y} p = isSetℕ (suc x) (suc y) (cong (suc ∘ predℕ) p) p
+
+infixl 6 _+⁻_
+
+_+⁻_ : ℕ → ℕ → ℕ
+x +⁻ y = y + x
