@@ -72,44 +72,37 @@ transport-reorder B f g p a =
                  (g (transport (λ i → B (p i)) a)))
           (lCancel (cong f p)) composite
 
--- subst2-reorder
---   : ∀ {ℓ ℓ'} {A A' : Type ℓ} (B : A → A' → Type ℓ') {x y : A} {w z : A'}
---   → (f : A → A) (f' : A' → A') (g : {z : A} {z' : A'} → B z z' → B (f z) (f' z'))
---   → (p : x ≡ y) (q : w ≡ z) (a : B x w)
---   -- → subst2 B (cong f p) (cong f' q) (g a)
---   -- ≡ g (subst2 B p q a)
---   → transport (λ i → B (f (p i)) (f' (q i))) (g a)
---   ≡ g (transport (λ i → B (p i) (q i)) a)
--- -- transport-reorder
--- --   : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
--- --   → (f : A → A) (g : {z : A} → B z → B (f z)) (p : x ≡ y) (a : B x)
--- --   → transport (λ i → B (f (p i))) (g a)
--- --   ≡ g (transport (λ i → B (p i)) a)
--- subst2-reorder B f f' g p q a = 
---   let 
---     step1 : (λ j → B (f (p (~ j))) (f' (q (~ j))))
---       [ transport (λ i → B (f (p i)) (f' (q i))) (g a)
---       ≡ g a
---       ]
---     step1 = symP (transport-filler (λ i → B (f (p i)) (f' (q i))) (g a))
---     step2 : (λ j → B (f (p j)) (f' (q j)))
---       [ g a
---       ≡ g (transport (λ i → B (p i) (q i)) a)
---       ]
---     step2 = congP (λ i ○ → g ○) (transport-filler (λ i → B (p i) (q i)) a)
---     composite : (λ i → B ((sym (cong f p) ∙ (cong f p)) i)
---                          ((sym (cong f' q) ∙ (cong f' q)) i))
---       [ transport (λ i → B (f (p i)) (f' (q i))) (g a)
---       ≡ g (transport (λ i → B (p i) (q i)) a)
---       ]
---     composite = compPathP' {B = λ x → {!!}} step1 step2
---   in
---     -- Our path index goes out and back along the same path,
---     -- so contract that to a point to give a non-dependent path.
---     subst2 (λ ○ ◻ → PathP (λ i → B (○ i) (◻ i))
---                  (transport (λ i → B (f (p i)) (f' (q i))) (g a))
---                  (g (transport (λ i → B (p i) (q i)) a)))
---           (lCancel (cong f p)) (lCancel (cong f' q)) composite
+subst2-reorder
+  : ∀ {ℓ ℓ'} {A A' : Type ℓ} (B : A → A' → Type ℓ') {x y : A} {w z : A'}
+  → (f : A → A) (f' : A' → A') (g : {z : A} {z' : A'} → B z z' → B (f z) (f' z'))
+  → (p : x ≡ y) (q : w ≡ z) (a : B x w)
+  → transport (λ i → B (f (p i)) (f' (q i))) (g a)
+  ≡ g (transport (λ i → B (p i) (q i)) a)
+subst2-reorder B f f' g p q a = 
+  let 
+    step1 : (λ j → B (f (p (~ j))) (f' (q (~ j))))
+      [ transport (λ i → B (f (p i)) (f' (q i))) (g a)
+      ≡ g a
+      ]
+    step1 = symP (transport-filler (λ i → B (f (p i)) (f' (q i))) (g a))
+    step2 : (λ j → B (f (p j)) (f' (q j)))
+      [ g a
+      ≡ g (transport (λ i → B (p i) (q i)) a)
+      ]
+    step2 = congP (λ i ○ → g ○) (transport-filler (λ i → B (p i) (q i)) a)
+    composite : (λ i → B ((sym (cong f p) ∙ (cong f p)) i)
+                         ((sym (cong f' q) ∙ (cong f' q)) i))
+      [ transport (λ i → B (f (p i)) (f' (q i))) (g a)
+      ≡ g (transport (λ i → B (p i) (q i)) a)
+      ]
+    composite = compPathP' {B = λ x → {!!}} step1 step2
+  in
+    -- Our path index goes out and back along the same path,
+    -- so contract that to a point to give a non-dependent path.
+    subst2 (λ ○ ◻ → PathP (λ i → B (○ i) (◻ i))
+                 (transport (λ i → B (f (p i)) (f' (q i))) (g a))
+                 (g (transport (λ i → B (p i) (q i)) a)))
+          (lCancel (cong f p)) (lCancel (cong f' q)) composite
 
 subst-reorder
   : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ') {x y : A}
@@ -148,7 +141,6 @@ subst-reorder' B B' g p a =
                  (g (transport (λ i → B (p i)) a)))
           (lCancel p) composite
 
-import Cubical.Foundations.Path
 
 subst2-reorder'
   : ∀ {ℓ ℓ'} {A A' : Type ℓ}
