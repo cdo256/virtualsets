@@ -151,13 +151,26 @@ fzero≡cast-fzero : {x y : ℕ} (p : x ≡ y)
                  → fzero {y} ≡ fcast (cong suc p) (fzero {x})
 fzero≡cast-fzero p = refl
 
+ℕ+1 : ∀ {x : ℕ} → x ℕ.+ 1 ≡ suc x
+ℕ+1 {x} = ℕ.+-comm x 1
+
 finject1≡finj : {x : ℕ} (a : Fin x)
-              → finject 1 a ≡ fcast (ℕ.+-comm 1 x) (finj a)
-finject1≡finj {zero} ()
-finject1≡finj {suc x} fzero = refl
+               → finject 1 a ≡ subst Fin (sym ℕ+1) (finj a)
+finject1≡finj {suc x} fzero = fzero≡subst-fzero (sym ℕ+1)
 finject1≡finj {suc x} (fsuc a) =
-  finject 1 (fsuc a) ≡⟨ refl ⟩
+  finject 1 (fsuc a) ≡⟨ finject-fsuc-reorder a ⟩
   fsuc (finject 1 a) ≡⟨ cong fsuc (finject1≡finj a) ⟩
+  fsuc (subst Fin (sym ℕ+1) (finj a)) ≡⟨ sym (subst-fsuc-reorder (sym ℕ+1) (finj a)) ⟩
+  subst Fin (sym ℕ+1) (fsuc (finj a)) ≡⟨ refl ⟩
+  subst Fin (sym ℕ+1) (finj (fsuc a)) ▯
+
+finject1≡finj' : {x : ℕ} (a : Fin x)
+              → finject 1 a ≡ fcast (ℕ.+-comm 1 x) (finj a)
+finject1≡finj' {zero} ()
+finject1≡finj' {suc x} fzero = refl
+finject1≡finj' {suc x} (fsuc a) =
+  finject 1 (fsuc a) ≡⟨ refl ⟩
+  fsuc (finject 1 a) ≡⟨ cong fsuc (finject1≡finj' a) ⟩
   fsuc (fcast (ℕ.+-comm 1 x) (finj a))
     ≡⟨ cong fsuc ((fcast-irrelevant (ℕ.+-comm 1 x) ((ℕ.injSuc ((λ i → suc (suc x)) ∙ (λ i → suc (ℕ.+-comm 1 x i))))) (finj a))) ⟩
   fcast (ℕ.+-comm 1 (suc x)) (fsuc (finj a)) ≡⟨ refl ⟩
