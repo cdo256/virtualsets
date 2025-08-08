@@ -18,14 +18,41 @@ applyId : ∀ {m : ℕ} (a : Fin m) → apply (idInj m) a ≡ a
 applyId fzero = refl
 applyId (fsuc a) = cong fsuc (applyId a)
 
+remove-comp : ∀ {l m n : ℕ} (f : Inj (suc l) (suc m))
+            → (g : Inj (suc m) (suc n)) (a : Fin (suc l))
+            → (remove (apply f a) g ∘ʲ remove a f) ≡ remove a (g ∘ʲ f)
+remove-comp (inc b f) g fzero = refl
+remove-comp {l = suc l} {m = suc m} {n = zero} (inc b f) (inc _ ())
+remove-comp {l = suc l} {m = suc m} {n = suc n} (inc b f) g (fsuc a) =
+  remove (apply (inc b f) (fsuc a)) g ∘ʲ remove (fsuc a) (inc b f)
+    ≡⟨ refl ⟩
+  remove (fsplice b (apply f a)) g ∘ʲ remove (fsuc a) (inc b f)
+    ≡⟨ {!!} ⟩
+  inc (fcross (apply (remove b g ∘ʲ f) a) (apply g b)) (remove a (remove b g ∘ʲ f))
+    ≡⟨ refl ⟩
+  remove (fsuc a) (inc (apply g b) (remove b g ∘ʲ f))
+    ≡⟨ refl ⟩
+  remove (fsuc a) (g ∘ʲ inc b f) ▯
+
 removeId : ∀ {m : ℕ} (a : Fin (suc m)) → remove a (idInj (suc m)) ≡ idInj m
 removeId fzero = refl
-removeId {m = m} (fsuc a) =
-  remove (fsuc a) (idInj (suc m))
+removeId {m = zero} (fsuc a) = Fin0-absurd a
+removeId {m = suc m} (fsuc a) =
+  remove (fsuc a) (idInj (suc (suc m)))
     ≡⟨ refl ⟩
-  remove (fsuc a) (inc fzero (idInj m))
-    ≡⟨ {!!} ⟩
-  idInj m ▯
+  remove (fsuc a) (inc fzero (idInj (suc m)))
+    ≡⟨ refl ⟩
+  inc (fcross (apply (idInj (suc m)) a) f0) (remove a (idInj (suc m)))
+    ≡⟨ cong (λ ○ → inc ○ (remove a (idInj (suc m)))) ( ≈ᶠ→≡ u') ⟩
+  inc f0 (remove a (idInj (suc m)))
+    ≡⟨ cong (inc f0) (removeId a) ⟩
+  idInj (suc m) ▯
+  where
+    u : fcross (apply ((idInj (suc m))) a) (f0 {suc m}) ≈ᶠ (f0 {suc m})
+    u = ≤→fcross≈id (apply ((idInj (suc m))) a) f0
+                    (fzero≤a (apply (inc f0 (idInj m)) a))
+    u' : fcross (apply (idInj (suc m)) a) (f0 {suc m}) ≈ᶠ (f0 {m})
+    u' = ≈ᶠ-trans u ≈fzero
 
 ∘ʲ-idL : ∀ {m n : ℕ} (f : Inj m n) → idInj n ∘ʲ f ≡ f
 ∘ʲ-idL (nul _) = refl
@@ -33,9 +60,11 @@ removeId {m = m} (fsuc a) =
  idInj (suc n) ∘ʲ inc b f
    ≡⟨ refl ⟩
  inc (apply (idInj (suc n)) b) (remove b (idInj (suc n)) ∘ʲ f)
-   ≡⟨ cong₂ inc (applyId b) {!!} ⟩
+   ≡⟨ cong₂ inc (applyId b) refl ⟩
  inc b (remove b (idInj (suc n)) ∘ʲ f)
-   ≡⟨ cong₂ inc {!∘ʲ-idL!} {!!} ⟩
+   ≡⟨ cong (λ ○ → inc b (○ ∘ʲ f)) (removeId b) ⟩
+ inc b (idInj n ∘ʲ f)
+   ≡⟨ cong₂ inc refl (∘ʲ-idL f) ⟩
  inc b f ▯
 
 ∘ʲ-idR : ∀ {m n : ℕ} (f : Inj m n) → f ∘ʲ idInj m ≡ f
@@ -46,25 +75,6 @@ removeId {m = m} (fsuc a) =
   inc b f ∘ʲ inc fzero (idInj m)
     ≡⟨ cong (inc b) (∘ʲ-idR f) ⟩
   inc b f ▯
-
--- ∘ʲ-assoc : ∀ {k l m n : ℕ} → (h : Inj m n) → (g : Inj l m) → (f : Inj k l)
---          → h ∘ʲ (g ∘ʲ f) ≡ (h ∘ʲ g) ∘ʲ f
--- ∘ʲ-assoc (nul _) (nul _) (nul _) = refl
--- ∘ʲ-assoc (inc _ _) _ (nul _) = refl
--- ∘ʲ-assoc (inc c h) (inc b g) (inc a f) =
---  inc c h ∘ʲ (inc b g ∘ʲ inc a f)
---    ≡⟨ refl ⟩
---  inc (apply (inc c h) (apply (inc b g) a))
---      (remove (apply (inc b g) a) (inc c h) ∘ʲ (remove a (inc b g) ∘ʲ f))
---    ≡⟨ {!!} ⟩
---  inc (apply (inc (apply (inc c h) b) (remove b (inc c h) ∘ʲ g)) a)
---      (remove a (inc (apply (inc c h) b) (remove b (inc c h) ∘ʲ g)) ∘ʲ f)
---    ≡⟨ refl ⟩
---  (inc c h ∘ʲ inc b g) ∘ʲ inc a f ▯
---  where
---    u : apply (inc c h) (apply (inc b g) a)
---      ≡ apply (inc (apply (inc c h) b) (remove b (inc c h) ∘ʲ g)) a
---    u = {!!}
 
 apply-fsplice-apply
   : ∀ {m n : ℕ} → (f : Inj (suc m) (suc n))
@@ -130,7 +140,15 @@ apply-apply {suc l} {suc m} {suc n} g (inc b f) (fsuc a) =
    ≡⟨ refl ⟩
  inc (apply h (apply g a))
      (remove (apply g a) h ∘ʲ (remove a g ∘ʲ f))
-   ≡⟨ {!!} ⟩
+   ≡⟨ cong₂ inc (apply-apply h g a) {!p!} ⟩
  inc (apply (h ∘ʲ g) a) (remove a (h ∘ʲ g) ∘ʲ f)
    ≡⟨ refl ⟩
  (h ∘ʲ g) ∘ʲ inc a f ▯
+ where
+   p : remove (apply g a) h ∘ʲ (remove a g ∘ʲ f)
+     ≡ remove a (h ∘ʲ g) ∘ʲ f
+   p = remove (apply g a) h ∘ʲ (remove a g ∘ʲ f)
+        ≡⟨ ∘ʲ-assoc (remove (apply g a) h) (remove a g) f ⟩
+       (remove (apply g a) h ∘ʲ remove a g) ∘ʲ f
+        ≡⟨ cong (_∘ʲ f) {!remove-comp!} ⟩
+       remove a (h ∘ʲ g) ∘ʲ f ▯
