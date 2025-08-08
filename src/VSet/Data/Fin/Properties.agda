@@ -5,6 +5,7 @@ open import VSet.Prelude
 import Cubical.Data.Nat as ℕ
 open import Cubical.Data.Nat using (ℕ; +-zero; +-suc) renaming (_+_ to _+ℕ_)
 open import VSet.Data.Nat.Order
+open import VSet.Data.Nat.Properties
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
 open import VSet.Data.Fin.Splice
@@ -36,6 +37,32 @@ finject-fsuc-reorder : ∀ {x y : ℕ} → (a : Fin x)
 finject-fsuc-reorder {suc x} {zero} a = refl
 finject-fsuc-reorder {suc x} {suc y} a = refl
 finject-fsuc-reorder {zero} {suc y} a = refl
+
+-- Like subst but computes on constructors. See std library.
+fcast : (x ≡ y) → Fin x → Fin y
+fcast {x = zero} {y = zero} p a = a
+fcast {x = zero} {y = suc y} p a = absurd (ℕ.znots p)
+fcast {x = suc x} {y = zero} p a = absurd (ℕ.snotz p)
+fcast {x = suc x} {y = suc y} p fzero = fzero
+fcast {x = suc x} {y = suc y} p (fsuc a) = fsuc (fcast (ℕ.injSuc p) a)
+
+fcast-refl : (p : x ≡ x) → (a : Fin x) → fcast p a ≡ a
+fcast-refl p fzero = refl
+fcast-refl p (fsuc a) =
+  cong fsuc (fcast-refl (cong ℕ.predℕ p) a)
+
+fcast-irrelevant : (p q : x ≡ y) → (a : Fin x) → fcast p a ≡ fcast q a
+fcast-irrelevant {x = zero} {y = zero} p q a = refl
+fcast-irrelevant {x = zero} {y = suc y} p q a = absurd (ℕ.znots p)
+fcast-irrelevant {x = suc x} {y = zero} p q a = absurd (ℕ.snotz p)
+fcast-irrelevant {x = suc x} {y = suc y} p q fzero = refl
+fcast-irrelevant {x = suc x} {y = suc y} p q (fsuc a) =
+  cong fsuc (fcast-irrelevant (ℕ.injSuc p) (ℕ.injSuc q) a)
+
+finject0≡fcast : {x : ℕ} (a : Fin x)
+               → finject {x} zero a ≡ fcast (sym (+-zero x)) a
+finject0≡fcast fzero = refl
+finject0≡fcast (fsuc a) = cong fsuc (finject0≡fcast a)
 
 finject0≡subst : {x : ℕ} (a : Fin x)
                → finject {x} zero a ≡ subst Fin (sym (+-zero x)) a
@@ -86,8 +113,10 @@ fshift-fsuc-reorder {suc x} {suc y} a =
   fshift (suc x) (fsuc a)
     ≡⟨ refl ⟩
   fsuc (fshift x (fsuc a))
-    ≡⟨ {!!} ⟩
-  subst Fin (sym (ℕ.+-suc (suc x) (suc y))) (fshift (suc (suc x)) a)
+    ≡⟨ cong fsuc (fshift-fsuc-reorder a) ⟩
+  fsuc (subst Fin (sym (ℕ.+-suc (x) (suc y))) (fshift (suc x) a))
+    ≡⟨ sym (subst-fsuc-reorder (sym (ℕ.+-suc (x) (suc y))) (fshift (suc x) a)) ⟩
+  subst Fin (cong suc (sym (ℕ.+-suc (x) (suc y)))) (fsuc (fshift (suc x) a))
     ≡⟨ refl ⟩
   subst Fin (sym (ℕ.+-suc (suc x) (suc y))) (fsuc (fshift (suc x) a)) ▯
 
@@ -117,6 +146,22 @@ fzero-cong {x} {y} p i = fzero {p i}
 fzero≡subst-fzero : {x y : ℕ} (p : x ≡ y)
                   → fzero {y} ≡ subst (Fin ∘ suc) p (fzero {x})
 fzero≡subst-fzero {x} {y} p = resubst (Fin ∘ suc) (λ z → fzero {z}) p
+
+fzero≡cast-fzero : {x y : ℕ} (p : x ≡ y)
+                 → fzero {y} ≡ fcast (cong suc p) (fzero {x})
+fzero≡cast-fzero p = refl
+
+finject1≡finj : {x : ℕ} (a : Fin x)
+              → finject 1 a ≡ fcast (ℕ.+-comm 1 x) (finj a)
+finject1≡finj {zero} ()
+finject1≡finj {suc x} fzero = refl
+finject1≡finj {suc x} (fsuc a) =
+  finject 1 (fsuc a) ≡⟨ refl ⟩
+  fsuc (finject 1 a) ≡⟨ cong fsuc (finject1≡finj a) ⟩
+  fsuc (fcast (ℕ.+-comm 1 x) (finj a))
+    ≡⟨ cong fsuc ((fcast-irrelevant (ℕ.+-comm 1 x) ((ℕ.injSuc ((λ i → suc (suc x)) ∙ (λ i → suc (ℕ.+-comm 1 x i))))) (finj a))) ⟩
+  fcast (ℕ.+-comm 1 (suc x)) (fsuc (finj a)) ≡⟨ refl ⟩
+  fcast (ℕ.+-comm 1 (suc x)) (finj (fsuc a)) ▯
 
 fsplice≉b : ∀ {x} → (b : Fin (suc x)) → (a : Fin x) → fsplice b a ≉ᶠ b
 fsplice≉b fzero a = fsuc≉fzero
@@ -236,7 +281,7 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} fsplice-eq =
 
 ≤→fsplice≈suc : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
               → a2 ≤ᶠ finj a1 → fsplice a2 a1 ≈ᶠ fsuc a1
-≤→fsplice≈suc fzero fzero a2≤a1 = {!!}
+≤→fsplice≈suc fzero fzero a2≤a1 = ≈fsuc ≈fzero
 ≤→fsplice≈suc fzero (fsuc a2) (inr a2'≈0) = absurd (fsuc≉fzero a2'≈0)
 ≤→fsplice≈suc (fsuc a1) fzero a2≤a1 = {!!}
 ≤→fsplice≈suc {suc m} (fsuc a1) (fsuc a2) rec-le =
@@ -250,14 +295,14 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} fsplice-eq =
 
 <→fcross≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
                 → a2 <ᶠ a1 → fcross a1 a2 ≈ᶠ a2
-<→fcross≈id (fsuc a1) fzero a2<a1 = {!!}
+<→fcross≈id (fsuc a1) fzero a2<a1 = ≈fzero
 <→fcross≈id {suc m} (fsuc a1) (fsuc a2) (<fsuc a2<a1) =
   ≈fsuc (<→fcross≈id a1 a2 a2<a1)
 
 ≈→fcross≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
                 → a2 ≈ᶠ a1 → fcross a1 a2 ≈ᶠ a2
-≈→fcross≈id fzero fzero _ = {!!}
-≈→fcross≈id (fsuc a1) fzero _ = {!!}
+≈→fcross≈id fzero fzero _ = ≈fzero
+≈→fcross≈id (fsuc a1) fzero _ = ≈fzero
 ≈→fcross≈id fzero (fsuc a2) a2'≈0 = absurd (fsuc≉fzero a2'≈0)
 ≈→fcross≈id {suc m} (fsuc a1) (fsuc a2) a2≈a1 =
   ≈fsuc (≈→fcross≈id a1 a2 (≈fsuc-injective a2≈a1))
@@ -449,6 +494,49 @@ finject-+ (suc x) (suc y) z (fsuc a) =
   subst Fin (ℕ.+-assoc (suc x) (suc y) z) (fsuc (finject (suc y +ℕ z) a))
     ≡⟨ refl ⟩
   subst Fin (ℕ.+-assoc (suc x) (suc y) z) (finject (suc y +ℕ z) (fsuc a)) ▯ 
+
+
+subst0≡fcast0 : {x y : ℕ} (p : x ≡ y)
+              → subst (Fin ∘ suc) p (fzero {x}) ≡ fcast (cong suc p) (fzero {x})
+subst0≡fcast0 p = sym (fzero≡subst-fzero p)
+
+subst≡fcast : ∀ {x y : ℕ} (p : x ≡ y) (a : Fin x)
+            → subst Fin p a ≡ fcast p a 
+subst≡fcast {suc x} {zero} p a = absurd (ℕ.snotz p)
+subst≡fcast {suc x} {suc y} p fzero = s
+  where
+    q : x ≡ y
+    q = cong ℕ.predℕ p
+    u : cong suc q ≡ p
+    u = path-suc-pred p
+    w : fzero {y} ≡ subst (Fin ∘ suc) q (fzero {x})
+    w = fzero≡subst-fzero q
+    r : subst (Fin ∘ suc) q f0 ≡ fcast (cong suc q) f0
+    r = subst0≡fcast0 {x = x} {y = y} q
+    r' : subst Fin (cong suc q) f0 ≡ fcast (cong suc q) f0
+    r' = r
+    s : subst Fin p f0 ≡ fcast p f0
+    s = subst (λ ○ → subst Fin ○ f0 ≡ fcast ○ f0) u r'
+subst≡fcast {suc x} {suc y} p (fsuc a) =
+  subst Fin p (fsuc a)
+    ≡⟨ cong (λ ○ → subst Fin ○ (fsuc a)) (sym (path-suc-pred p)) ⟩
+  subst Fin (cong suc q) (fsuc a)
+    ≡⟨ subst-fsuc-reorder (cong ℕ.predℕ p) a ⟩
+  fsuc (subst Fin q a)
+    ≡⟨ cong fsuc (subst≡fcast q a) ⟩
+  fsuc (fcast q a)
+    ≡⟨ refl ⟩
+  fcast (cong suc q) (fsuc a)
+    ≡⟨ refl ⟩
+  fcast p (fsuc a) ▯ 
+  where
+    q : x ≡ y
+    q = ℕ.injSuc p
+
+finject-+' : ∀ (x y z : ℕ) → (a : Fin x)
+           → finject z (finject y a)
+           ≡ fcast (ℕ.+-assoc x y z) (finject (y ℕ.+ z) a)
+finject-+' x y z a = {!!}
 
 -- subst-fsuc-reorder
 --   : ∀ {x y : ℕ} → (p : x ≡ y) → (a : Fin x)

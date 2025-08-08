@@ -24,6 +24,21 @@ data Inj : ℕ → ℕ → Type where
 Injsuc : ℕ → ℕ → Type
 Injsuc m n = Inj (suc m) (suc n)
 
+jcast : ∀ {m m' n n' : ℕ} → m ≡ m' → n ≡ n' → Inj m n → Inj m' n'
+jcast {zero} {zero} {n} {n'} p q (nul _) = nul _
+jcast {zero} {suc m'} {n} {n'} p q (nul _) = absurd (znots p)
+jcast {suc m} {zero} {suc n} {n'} p q (inc b f) = absurd (snotz p)
+jcast {suc m} {suc m'} {suc n} {zero} p q (inc b f) = absurd (snotz q)
+jcast {suc m} {suc m'} {suc n} {suc n'} p q (inc b f) =
+  inc (fcast q b) (jcast (injSuc p) (injSuc q) f)
+
+jcast-refl : ∀ {m n : ℕ} (p : m ≡ m) (q : n ≡ n)
+           → (f : Inj m n) → jcast p q f ≡ f
+jcast-refl p q (nul _) = refl
+jcast-refl p q (inc b f) =
+  cong₂ inc (fcast-refl q b)
+        (jcast-refl (injSuc p) (injSuc q) f)
+
 apply : ∀ {m n} → Inj m n → Fin m → Fin n
 apply (inc b inj) fzero = b
 apply (inc b inj) (fsuc a) =
@@ -39,7 +54,6 @@ b ∈ʲ f = Σ[ a ∈ Fin _ ] apply f a ≡ b
 
 _∉ʲ_ : ∀ {n m : ℕ} → (b : Fin n) → (Inj m n) → Type
 b ∉ʲ f = ¬ b ∈ʲ f
-
 
 idInj : ∀ m → Inj m m
 idInj zero = nul zero

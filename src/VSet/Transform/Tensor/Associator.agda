@@ -37,6 +37,36 @@ shift1-tensor {m} {m'} {n} {n'} (inc b f) g =
     ≡⟨ refl ⟩
   shift1 (inc b f ⊕ g) ▯
 
+shift-tensor-cast
+  : (l' : ℕ) (f : Inj m m') (g : Inj n n')
+  → (shift l' f) ⊕ g ≡ jcast refl (+-assoc l' m' n') (shift l' (f ⊕ g))
+shift-tensor-cast {m} {m'} {n} {n'} zero f g = 
+  shift zero f ⊕ g ≡⟨ refl ⟩
+  shift zero (f ⊕ g) ≡⟨ sym (jcast-refl _ _ _) ⟩
+  jcast refl (+-assoc zero m' n') (shift zero (f ⊕ g)) ▯
+shift-tensor-cast {m} {m'} {n} {n'} (suc l') f g =
+  (shift (suc l') f) ⊕ g
+    ≡⟨ refl ⟩
+  (shift1 (shift l' f)) ⊕ g
+    ≡⟨ shift1-tensor (shift l' f) g ⟩
+  shift1 ((shift l' f) ⊕ g)
+    ≡⟨ cong shift1 (shift-tensor-cast l' f g) ⟩
+  shift1 (jcast refl (+-assoc l' m' n') (shift l' (f ⊕ g)))
+    ≡⟨ {!!} ⟩
+  jcast refl (cong suc (+-assoc l' m' n')) (shift1 (shift l' (f ⊕ g)))
+    ≡⟨ refl ⟩
+  jcast refl (+-assoc (suc l') m' n') (shift (suc l') (f ⊕ g)) ▯
+
+-- jcast-reorder
+--   : ∀ {m m' n n' : ℕ}
+--   → (ϕ : ℕ → ℕ) (ψ : ℕ → ℕ) (η : {x y : ℕ} → Inj x y → Inj (ϕ x) (ψ y))
+--   → (p : m ≡ m') (q : n ≡ n') (f : Inj m n)
+--   → jcast (cong ϕ p) (cong ψ q) (η f)
+--   ≡ η (jcast p q f)
+-- jcast-reorder {zero} {zero} {n} {n'} ϕ ψ η p q (nul _) = {!!}
+-- jcast-reorder {zero} {suc m'} {n} {n'} ϕ ψ η p q (nul _) = {!!}
+-- jcast-reorder {suc m} {m'} {n} {n'} ϕ ψ η p q (inc b f) = {!!}
+
 shift-tensor : (l' : ℕ) (f : Inj m m') (g : Inj n n')
              → (shift l' f) ⊕ g ≡ subst2 Inj refl (+-assoc l' m' n') (shift l' (f ⊕ g))
 shift-tensor {m} {m'} {n} {n'} zero f g =

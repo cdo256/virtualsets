@@ -17,7 +17,6 @@ cong-inj-suc {X} {Y} p =
   compPath→Square {p = cong (suc ∘ predℕ) p} {q = p} {r = λ i → suc X} {s = λ i → suc Y}
                   {!!}
   where
-    
     R : ℕ → Type
     R zero = ⊥
     R (suc W) = {!!}
@@ -25,3 +24,5 @@ cong-inj-suc {X} {Y} p =
 x≮0 : (x : ℕ) → ¬ x < 0
 x≮0 x (y , y+x'≡0) = snotz (+-comm (suc x) y ∙ y+x'≡0)
 
+path-suc-pred : {x y : ℕ} (p : suc x ≡ suc y) → cong (suc ∘ predℕ) p ≡ p
+path-suc-pred {x} {y} p = isSetℕ (suc x) (suc y) (cong (suc ∘ predℕ) p) p
