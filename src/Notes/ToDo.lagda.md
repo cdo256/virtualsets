@@ -15,39 +15,6 @@ open import VSet.Data.SomeFin.Injection
 open import Cubical.Foundations.Equiv.Base 
 ```
 
-## Top level
-
-- Show that virtual sets form a Traced Monoidal Category
-- Define VSet category
-- Prove monoidal laws
-  - Requires paths between members of equal types a : Fin i; b : Fin j.
-- Prove trace laws
-- Use the Int construction
-- Prove composition is associative within the trace
-
-## Funciton definitions
-
-- Injection - Done
-- Iso - Done
-- Properties
-  - ↣-map-⊎ - Done
-  - _↣∘↣_ - Done
-  - ↔to↣  - Done
-
-## Path types
-
-- `subst-inv` - subst is involutive. - Done
-
-### Depdendent Paths
-
-- reasoning syntax for dependent paths - Done, but causes unsolved metas when used.
-  frustratingly not in cubical, but is in 1lab, so had to recreated it in my code
-
-I had to fill in a lot of my knowledge about cubical type theory which took a day.
-
-Given the complexity, I'm not sure that defining my morphism equality to be based on dependent paths was the best decision. It seemed natural to pick dependent paths in cubical agda becauase they're one of the main benefits that is given by cubical type theory, and they are very elegant in theory. Neither library provided satisfactory tooling to reason with dependent paths. That being said, the whole thing would be obviated if I switched to classical agda, as `x ≡ y` means that `a : Fin x` automatically gives that `a : Fin y` whenever the path can be computed.
-
-
 ## Data
 
 ### Fin
@@ -72,51 +39,37 @@ Given the complexity, I'm not sure that defining my morphism equality to be base
 - pred-<-pred - Done
 - suc-<-suc - Done
 
-### Explore Trees
+## Transformations on Inj
 
-Aborted
+### Elementary
 
-### Define SomeFin
+Define elementary operations:
+- insert - Done
+- remove - Done
+- bubble - Done
+- excise - Done
 
-This is the central abstraction around Nats and Fins
+## Cat
 
-#### Minus operator on SomeFin - Done
+### Base
 
-To express removing a single element (for pred).
-- Define minus operator 
-- \­suc - Done
-- \­pred - Done
-- sa\0≡a - Done
-- ins - Done
-- |Fin1|≡1 - Done
-- del - Done
+- Construct VSetCat.
 
-#### Equality on SomeFin
+### Monoidal
 
-Define ≈ as below: - Done
-```agda
-record _≈_ {A B X Y : ℕ} (f : [ A ↣ X ]) (g : [ B ↣ Y ]) : Type where
-  field
-    p : A ≡ B
-    q : X ≡ Y
-    path : (λ i → cong₂ FinFun p q i) [ fst f ≡ fst g ]
-```
+- Show _⊕_ is a bifunctor - In progress
+  - Show _⊕_ preserves composition - In progress
+- Show idenity triangle commutes.
+- Show monoidal pentagon commutes.
+- Show _⊕_ is symmetric.
 
-- Define _≈_ - Done
-- Define ≈refl; ≈sym; ≈trans - Done
-- Define reasoning syntax for ≈ - Done though could use some qol improvements.
-- ≈transport - done
-- ≈transport-fun - done, untested
-- ≈transport-filler - done
-- from≡ - done
+### Traced
 
-#### Injection
+- Tightening
+- Sliding
+- Vanishing - Sketched
+- Strength - WIP
 
-Define abstraction for the basic category
-- Define arrow - Done
-- Define identity arrow - Done
+### Compact Closed
 
-
-## Transform
-
-
+- Dual construciton
