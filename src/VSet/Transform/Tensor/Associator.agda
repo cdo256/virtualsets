@@ -42,7 +42,7 @@ shift-tensor-cast
   → (shift l' f) ⊕ g ≡ jcast refl (+-assoc l' m' n') (shift l' (f ⊕ g))
 shift-tensor-cast {m} {m'} {n} {n'} zero f g = 
   shift zero f ⊕ g ≡⟨ refl ⟩
-  shift zero (f ⊕ g) ≡⟨ sym (jcast-refl _ _ _) ⟩
+  shift zero (f ⊕ g) ≡⟨ sym (jcast-loop _ _ _) ⟩
   jcast refl (+-assoc zero m' n') (shift zero (f ⊕ g)) ▯
 shift-tensor-cast {m} {m'} {n} {n'} (suc l') f g =
   (shift (suc l') f) ⊕ g

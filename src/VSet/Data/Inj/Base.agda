@@ -32,12 +32,12 @@ jcast {suc m} {suc m'} {suc n} {zero} p q (inc b f) = absurd (snotz q)
 jcast {suc m} {suc m'} {suc n} {suc n'} p q (inc b f) =
   inc (fcast q b) (jcast (injSuc p) (injSuc q) f)
 
-jcast-refl : ∀ {m n : ℕ} (p : m ≡ m) (q : n ≡ n)
+jcast-loop : ∀ {m n : ℕ} (p : m ≡ m) (q : n ≡ n)
            → (f : Inj m n) → jcast p q f ≡ f
-jcast-refl p q (nul _) = refl
-jcast-refl p q (inc b f) =
-  cong₂ inc (fcast-refl q b)
-        (jcast-refl (injSuc p) (injSuc q) f)
+jcast-loop p q (nul _) = refl
+jcast-loop p q (inc b f) =
+  cong₂ inc (fcast-loop q b)
+        (jcast-loop (injSuc p) (injSuc q) f)
 
 apply : ∀ {m n} → Inj m n → Fin m → Fin n
 apply (inc b inj) fzero = b

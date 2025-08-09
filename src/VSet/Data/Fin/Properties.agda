@@ -45,10 +45,10 @@ fcast {x = suc x} {y = zero} p a = absurd (ℕ.snotz p)
 fcast {x = suc x} {y = suc y} p fzero = fzero
 fcast {x = suc x} {y = suc y} p (fsuc a) = fsuc (fcast (ℕ.injSuc p) a)
 
-fcast-refl : (p : x ≡ x) → (a : Fin x) → fcast p a ≡ a
-fcast-refl p fzero = refl
-fcast-refl p (fsuc a) =
-  cong fsuc (fcast-refl (cong ℕ.predℕ p) a)
+fcast-loop : (p : x ≡ x) → (a : Fin x) → fcast p a ≡ a
+fcast-loop p fzero = refl
+fcast-loop p (fsuc a) =
+  cong fsuc (fcast-loop (cong ℕ.predℕ p) a)
 
 fcast-irrelevant : (p q : x ≡ y) → (a : Fin x) → fcast p a ≡ fcast q a
 fcast-irrelevant {x = zero} {y = zero} p q a = refl
