@@ -18,8 +18,8 @@ private
     ℓ ℓ' : Level
 
 accℕ : (A B : ℕ) → B < A → Acc _<_ B
-accℕ zero B B<0 = absurd {A = λ _ → Acc _<_ B} (x≮0 B B<0)
-accℕ (suc A) zero _ = acc (λ C C<0 → absurd {A = λ _ → Acc _<_ C} (x≮0 C C<0))
+accℕ zero B B<0 = absurd (x≮0 B B<0)
+accℕ (suc A) zero _ = acc (λ C C<0 → absurd (x≮0 C C<0))
 accℕ (suc A) (suc B) B'<A' =
   acc (λ C C'≤B' → accℕ A C (≤-trans C'≤B' (pred-≤-pred B'<A')))
 

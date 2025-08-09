@@ -9,7 +9,7 @@ open import Cubical.Core.Primitives public
 open import Agda.Primitive public
 
 open import Cubical.Data.Equality.Base public using (id)
-open import Cubical.Data.Empty public renaming (elim to absurd)
+open import Cubical.Data.Empty public renaming (rec to absurd) hiding (elim)
 open import Cubical.Data.Unit.Base public renaming (Unit to ⊤)
 open import Cubical.Relation.Nullary public
 open import Cubical.Data.Prod hiding (map) public

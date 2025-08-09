@@ -61,7 +61,7 @@ toℕ fzero = zero
 toℕ (fsuc x) = suc (toℕ x)
 
 fromℕ : ∀ {n} → (a : ℕ) → (a < n) → Fin n
-fromℕ {zero} a a<0 = absurd {A = λ _ → Fin 0} (¬-<-zero {a} a<0)
+fromℕ {zero} a a<0 = absurd {A = Fin 0} (¬-<-zero {a} a<0)
 fromℕ {suc n} zero _ = fzero
 fromℕ {suc n} (suc a) sa<sn = fsuc (fromℕ {n} a (pred-<-pred {a} {n} sa<sn))
 
@@ -96,7 +96,7 @@ fsuc≢fzero : ∀ {x : ℕ} (i : Fin x) → fsuc i ≢ fzero
 fsuc≢fzero a = ≢sym (fzero≢fsuc a) 
 
 Fin0≃⊥ : Fin 0 ≃ ⊥
-Fin0≃⊥ = (λ ()) , record { equiv-proof = absurd }
+Fin0≃⊥ = (λ ()) , record { equiv-proof = λ y → absurd y }
 
 Fin0-absurd : {A : Type ℓ} → Fin 0 → A
 Fin0-absurd ()

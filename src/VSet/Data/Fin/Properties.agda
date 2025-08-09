@@ -22,8 +22,7 @@ private
 
 toℕ∘fromℕ≡id : {m : ℕ} → (n : ℕ) → (n<m : n < m) → toℕ {m} (fromℕ n n<m) ≡ n
 toℕ∘fromℕ≡id {zero} n n<0 =
-  absurd {A = λ _ → toℕ {zero} (fromℕ n n<0) ≡ n}
-         (¬-<-zero {n} n<0)
+  absurd (¬-<-zero {n} n<0)
 toℕ∘fromℕ≡id {suc m} zero 0<sm = refl
 toℕ∘fromℕ≡id {suc m} (suc n) sn<sm =
   cong suc (toℕ∘fromℕ≡id n (pred-<-pred sn<sm))
@@ -284,11 +283,9 @@ fsplice-isInjective
 fsplice-isInjective {a = a} {fzero} {fzero} fsplice-eq = refl
 fsplice-isInjective {a = fzero} {b} {c} fsplice-eq = fsuc-injective fsplice-eq
 fsplice-isInjective {a = fsuc a} {fzero} {fsuc c} fsplice-eq =
-  absurd {A = λ _ → fzero ≡ fsuc c}
-         (fzero≢fsuc (fsplice a c) fsplice-eq)
+  absurd (fzero≢fsuc (fsplice a c) fsplice-eq)
 fsplice-isInjective {a = fsuc a} {fsuc b} {fzero} fsplice-eq =
-  absurd {A = λ _ → fsuc b ≡ fzero}
-         (fsuc≢fzero (fsplice a b) fsplice-eq)
+  absurd (fsuc≢fzero (fsplice a b) fsplice-eq)
 fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} fsplice-eq =
   cong fsuc $ fsplice-isInjective (fsuc-injective fsplice-eq)
 
