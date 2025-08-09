@@ -29,6 +29,12 @@ shift : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
 shift zero f = f
 shift (suc l) f = shift1 (shift l f) 
 
+shift' : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
+shift' {m = 0} l (nul _) = nul (l + _)
+shift' {m = suc m} {n = suc n} l (inc b f) =
+  subst2 Inj refl (sym p) $ inc (subst Fin p (fshift l b)) (shift' l f)
+  where p = +-suc l n
+
 tensor : ∀ {m m' n n'} → (f : Inj m m') → (g : Inj n n') → Inj (m + n) (m' + n')
 tensor (nul m') g = shift m' g
 tensor {n' = n'} (inc b f) g = inc (finject n' b) (tensor f g)
