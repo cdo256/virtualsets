@@ -513,20 +513,13 @@ subst0≡fcast0 p = sym (fzero≡subst-fzero p)
 subst≡fcast : ∀ {x y : ℕ} (p : x ≡ y) (a : Fin x)
             → subst Fin p a ≡ fcast p a 
 subst≡fcast {suc x} {zero} p a = absurd (ℕ.snotz p)
-subst≡fcast {suc x} {suc y} p fzero = s
+subst≡fcast {suc x} {suc y} p fzero =
+  subst (λ ○ → subst Fin ○ f0 ≡ fcast ○ f0) (path-suc-pred p) base
   where
-    q : x ≡ y
-    q = cong ℕ.predℕ p
-    u : cong suc q ≡ p
-    u = path-suc-pred p
-    w : fzero {y} ≡ subst (Fin ∘ suc) q (fzero {x})
-    w = fzero≡subst-fzero q
-    r : subst (Fin ∘ suc) q f0 ≡ fcast (cong suc q) f0
-    r = subst0≡fcast0 {x = x} {y = y} q
-    r' : subst Fin (cong suc q) f0 ≡ fcast (cong suc q) f0
-    r' = r
-    s : subst Fin p f0 ≡ fcast p f0
-    s = subst (λ ○ → subst Fin ○ f0 ≡ fcast ○ f0) u r'
+    x≡y : x ≡ y
+    x≡y = cong ℕ.predℕ p
+    base : subst Fin (cong suc x≡y) f0 ≡ fcast (cong suc x≡y) f0
+    base = subst0≡fcast0 {x = x} {y = y} x≡y
 subst≡fcast {suc x} {suc y} p (fsuc a) =
   subst Fin p (fsuc a)
     ≡⟨ cong (λ ○ → subst Fin ○ (fsuc a)) (sym (path-suc-pred p)) ⟩
