@@ -130,8 +130,8 @@ assoc {suc l} {suc l'} {m} {m'} {n} {n'} (inc b f) g h =
             (assoc f g h) ⟩
   inc (subst (Fin ∘ suc) (+-assoc l' m' n') (finject (m' + n') b))
       (subst2 Inj (+-assoc l m n) (+-assoc l' m' n') (f ⊕ (g ⊕ h)))
-    ≡⟨ subst2-inc-reorder (+-assoc l m n) (+-assoc l' m' n')
-                          (finject (m' + n') b) (f ⊕ (g ⊕ h)) ⟩
+    ≡⟨ sym (subst2-inc-reorder (+-assoc l m n) (+-assoc l' m' n')
+                               (finject (m' + n') b) (f ⊕ (g ⊕ h))) ⟩
   subst2 Injsuc (+-assoc l m n) (+-assoc l' m' n')
         (inc (finject (m' + n') b) (f ⊕ (g ⊕ h)))
     ≡⟨ refl ⟩

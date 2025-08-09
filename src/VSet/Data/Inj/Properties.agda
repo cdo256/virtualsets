@@ -8,6 +8,7 @@ open import Cubical.Data.Nat.Order
 open import Cubical.Data.Nat.Properties
 open import Cubical.Data.List.Base hiding (elim; [_])
 open import Cubical.Data.Maybe.Base hiding (elim)
+open import VSet.Data.Nat.Properties
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
 open import VSet.Data.Fin.Splice
@@ -34,8 +35,8 @@ subst2-inc-reorder
   : ∀ {m m' n n'} (p : m ≡ n) (q : m' ≡ n')
   → (a : Fin (suc m'))
   → (f : Inj m m')
-  → inc (subst (Fin ∘ suc) q a) (subst2 Inj p q f)
-  ≡ subst2 Injsuc p q (inc a f)
+  → subst2 Injsuc p q (inc a f)
+  ≡ inc (subst (Fin ∘ suc) q a) (subst2 Inj p q f)
 subst2-inc-reorder {m} {m'} {n} {n'} p q a f =
   let b : Fin (suc n')
       b = subst (Fin ∘ suc) q a
@@ -59,8 +60,7 @@ subst2-inc-reorder {m} {m'} {n} {n'} p q a f =
         ]
       -- This actually isn't directly applicable.
       composite = compPathP' step1 step2
-  in subst2 (λ ○ □ → PathP (λ i → (Injsuc (○ i) (□ i)))
-                  (inc b g)
-                  (subst2 Injsuc p q (inc a f)))
-           (lCancel p) (lCancel q) composite
+  in sym (subst2 (λ ○ □ → PathP (λ i → (Injsuc (○ i) (□ i)))
+                          (inc b g) (subst2 Injsuc p q (inc a f)))
+           (lCancel p) (lCancel q) composite)
 

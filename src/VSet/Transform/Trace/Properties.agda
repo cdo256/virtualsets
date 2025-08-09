@@ -128,6 +128,8 @@ f⁻¹0≡∅→remove0≡pred {m = suc m} {n = suc n} (inc (fsuc b) f) c 0≡c'
     -- v = mapMaybeNothing f⁻¹0≡∅
 
 
+
+
 thm1-2-1-pred
   : (f : Inj (suc m) (suc n)) (g : Inj l m)
   → pred (f ∘ʲ (𝟙 {1} ⊕ g)) ≡ (pred f) ∘ʲ g
@@ -255,7 +257,7 @@ thm1-2-5 {A = suc A} {suc B} {X} {Y} f =
 
 thm1-2-6 : (f : Inj (X +⁻ A) (Y +⁻ A)) (g : Inj W Z)
          → {!g ⊕⁻ (f — A) ≡ (g ⊕⁻ f) — A!}
-
+thm1-2-6 = {!!} 
 thm1-2-2-pred : ∀ {l m n} (f : Inj m n) (g : Inj (suc l) (suc m))
               → Thm1-2-2-Pred f g
 thm1-2-2-pred {l} {m} {n} f (inc b g) =
@@ -300,7 +302,7 @@ thm1-2-2-pred {l} {m} {n} f (inc b g) =
 --       subst2 Inj ℕ+1 ℕ+1 ((inc b f) ⊕ 𝟙)
 --         ≡⟨ refl  ⟩
 --       subst2 Inj ℕ+1 ℕ+1 (inc (finject 1 b) (f ⊕ 𝟙))
---         ≡⟨ sym (subst2-inc-reorder ℕ+1 ℕ+1 (finject 1 b) (f ⊕ 𝟙)) ⟩
+--         ≡⟨ (subst2-inc-reorder ℕ+1 ℕ+1 (finject 1 b) (f ⊕ 𝟙)) ⟩
 --       inc (subst (Fin ∘ suc) ℕ+1 (finject 1 b))
 --           (subst2 Inj (+-comm m 1) ℕ+1 (tensor f 𝟙))
 --         ≡⟨ cong (λ ○ → inc ○ (subst2 Inj (+-comm m 1) ℕ+1 (tensor f 𝟙))) v ⟩
