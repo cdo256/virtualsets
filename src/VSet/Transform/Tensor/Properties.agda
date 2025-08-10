@@ -143,16 +143,111 @@ apply-shift (suc l) {suc m} {suc n} (inc b f) a =
     ≡⟨ refl ⟩
   fshift (suc l) (apply (inc b f) a) ▯
 
-shift1-remove
-  : {l m n : ℕ} (f : Inj l m) (g : Inj m n) (b : Fin (suc m)) (c : Fin (suc n))
-  → shift1 (remove b (inc c g) ∘ʲ f)
-  ≡ remove b (inc (fsuc c) (shift1 g)) ∘ʲ f
-shift1-remove {l} {m} {n} f g b c = {!!}
+remove-shift1 : {m n : ℕ} → (f : Inj (suc m) (suc n)) (a : Fin (suc m))
+              → remove a (shift1 f) ≡ shift1 (remove a f)
+remove-shift1 {m} {n} (inc b f) fzero = refl
+remove-shift1 {zero} {n} (inc b (nul .n)) (fsuc ())
+remove-shift1 {suc m} {suc n} (inc b f) (fsuc a) =
+  remove (fsuc a) (shift1 (inc b f))
+    ≡⟨ refl ⟩
+  remove (fsuc a) (inc (fsuc b) (shift1 f))
+    ≡⟨ refl ⟩
+  inc (fcross (apply (shift1 f) a) (fsuc b)) (remove a (shift1 f))
+    ≡⟨ cong₂ inc (cong (λ ○ → fcross ○ (fsuc b)) (apply-shift1 f a))
+                 (remove-shift1 f a) ⟩
+  inc (fsuc (fcross (apply f a) b)) (shift1 (remove a f))
+    ≡⟨ refl ⟩
+  shift1 (inc (fcross (apply f a) b) (remove a f))
+    ≡⟨ refl ⟩
+  shift1 (remove (fsuc a) (inc b f)) ▯
 
 ∘ʲ-preserves-shift1
   : {l m n : ℕ} → (g : Inj m n) (f : Inj l m)
-  → (shift1 (g ∘ʲ f))
+  → shift1 (g ∘ʲ f)
   ≡ (shift1 g) ∘ʲ f
+
+shift1-remove-comp
+  : {l m n : ℕ} (f : Inj l m) (g : Inj m n) (d : Fin (suc m)) (c : Fin (suc n))
+  → shift1 (remove d (inc c g) ∘ʲ f)
+  ≡ remove d (inc (fsuc c) (shift1 g)) ∘ʲ f
+
+shift1-remove-comp {zero} {m} {n} (nul m) g d c = refl
+shift1-remove-comp {suc l} {suc m} {suc n} (inc b f) g fzero c =
+  shift1 (remove fzero (inc c g) ∘ʲ inc b f)
+    ≡⟨ refl ⟩
+  shift1 (g ∘ʲ inc b f)
+    ≡⟨ ∘ʲ-preserves-shift1 g (inc b f) ⟩
+  (shift1 g) ∘ʲ inc b f
+    ≡⟨ refl ⟩
+  remove fzero (inc (fsuc c) (shift1 g)) ∘ʲ inc b f ▯
+shift1-remove-comp {suc l} {suc m} {suc n} (inc b f) g (fsuc d) c =
+  shift1 (remove (fsuc d) (inc c g) ∘ʲ inc b f)
+    ≡⟨ refl ⟩
+  shift1 (inc (apply (remove (fsuc d) (inc c g)) b)
+              (remove b (remove (fsuc d) (inc c g)) ∘ʲ f))
+    ≡⟨ refl ⟩
+  inc (fsuc (apply (remove (fsuc d) (inc c g)) b))
+      (shift1 (remove b (remove (fsuc d) (inc c g)) ∘ʲ f))
+    ≡⟨ cong₂ inc (u b c d) (v b c d f) ⟩
+  inc (apply (inc (fcross (apply (shift1 g) d) (fsuc c))
+                  (remove d (shift1 g))) b)
+      (remove b (inc (fcross (apply (shift1 g) d) (fsuc c))
+                             (remove d (shift1 g))) ∘ʲ f) 
+    ≡⟨ refl ⟩
+     inc (fcross (apply (shift1 g) d) (fsuc c)) (remove d (shift1 g))
+  ∘ʲ inc b f
+    ≡⟨ refl ⟩
+  remove (fsuc d) (inc (fsuc c) (shift1 g)) ∘ʲ inc b f ▯
+  where
+    u : ∀ b c d
+      → fsuc (apply (remove (fsuc d) (inc c g)) b)
+      ≡ apply (inc (fcross (apply (shift1 g) d) (fsuc c))
+                   (remove d (shift1 g))) b
+    u fzero c d =
+      fsuc (apply (remove (fsuc d) (inc c g)) fzero)
+        ≡⟨ refl ⟩
+      fsuc (apply (inc (fcross (apply g d) c) (remove d g)) fzero)
+        ≡⟨ refl ⟩
+      fsuc (fcross (apply g d) c)
+        ≡⟨ refl ⟩
+      fcross (fsuc (apply g d)) (fsuc c)
+        ≡⟨ cong (λ ○ → fcross ○ (fsuc c)) (sym (apply-shift1 g d)) ⟩
+      fcross (apply (shift1 g) d) (fsuc c)
+        ≡⟨ refl ⟩
+      apply (inc (fcross (apply (shift1 g) d) (fsuc c))
+                   (remove d (shift1 g))) fzero ▯
+    u (fsuc b) c d =
+      fsuc (apply (remove (fsuc d) (inc c g)) (fsuc b))
+        ≡⟨ refl ⟩
+      fsuc (fsplice (fcross (apply g d) c) (apply (remove d g) b))
+        ≡⟨ refl ⟩
+      fsplice (fcross (fsuc (apply g d)) (fsuc c))
+              (fsuc (apply (remove d g) b))
+        ≡⟨ cong (fsplice (fcross (fsuc (apply g d)) (fsuc c)))
+                ( sym (apply-shift1 (remove d g) b)
+                ∙ (sym $ cong (λ ○ → apply ○ b) (remove-shift1 g d))) ⟩
+      fsplice (fcross (fsuc (apply g d)) (fsuc c))
+              (apply (remove d (shift1 g)) b)
+        ≡⟨ cong (λ ○ → fsplice (fcross ○ (fsuc c)) (apply (remove d (shift1 g)) b))
+                (sym (apply-shift1 g d)) ⟩
+      apply (inc (fcross (apply (shift1 g) d) (fsuc c))
+                 (remove d (shift1 g))) (fsuc b) ▯
+    v : ∀ b c d f
+      → shift1 (remove b (remove (fsuc d) (inc c g)) ∘ʲ f)
+      ≡ remove b (inc (fcross (apply (shift1 g) d) (fsuc c))
+                      (remove d (shift1 g))) ∘ʲ f
+    v b c d f =
+      shift1 (remove b (remove (fsuc d) (inc c g)) ∘ʲ f)
+        ≡⟨ refl ⟩
+      shift1 (remove b (inc (fcross (apply g d) c) (remove d g)) ∘ʲ f)
+        ≡⟨ shift1-remove-comp f (remove d g) b (fcross (apply g d) c) ⟩
+      remove b (inc (fsuc (fcross (apply g d) c)) (shift1 (remove d g))) ∘ʲ f
+        ≡⟨ cong (λ ○ → remove b ○ ∘ʲ f)
+                (cong₂ inc (cong₂ fcross (sym (apply-shift1 g d)) refl)
+                           (sym (remove-shift1 g d))) ⟩
+      remove b (inc (fcross (apply (shift1 g) d) (fsuc c)) (remove d (shift1 g)))
+        ∘ʲ f ▯
+
 ∘ʲ-preserves-shift1 {zero} {m} {n} g (nul m) =
   shift1 (g ∘ʲ nul m)
     ≡⟨ refl ⟩
