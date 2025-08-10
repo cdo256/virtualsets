@@ -13,6 +13,7 @@ open import VSet.Data.Fin.Splice
 open import VSet.Data.Fin.Properties
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
+open import VSet.Data.Inj.Properties 
 open import VSet.Transform.Elementary.Base
 open import VSet.Transform.Inverse.Base
 open import VSet.Transform.Compose.Base
@@ -108,16 +109,28 @@ nul-⊕-nul {suc m} {n} =
   nul m'' ⊕ inc (apply g' b) (remove b g' ∘ʲ g)
     ≡⟨ refl ⟩
   shift m'' (inc (apply g' b) (remove b g' ∘ʲ g))
-    ≡⟨ subst-reorder (Inj (suc n)) {!!} {!!} (sym p) {!!} ⟩
-  subst (Inj (suc n)) {!!} ((f' ⊕ g') ∘ʲ {!inc {!subst Fin p (fshift m' b)!} {!shift' m' g!}!})
+    ≡⟨ shift≡shift' m'' (inc (apply g' b) (remove b g' ∘ʲ g)) ⟩
+  shift' m'' (inc (apply g' b) (remove b g' ∘ʲ g))
+    ≡⟨ refl ⟩
+  subst2 Inj refl (sym q)
+         (inc (subst Fin q (fshift m'' (apply g' b)))
+              (shift' m'' (remove b g' ∘ʲ g)))
+    ≡⟨ cong (subst2 Inj refl (sym q)) refl ⟩
+  subst2 Inj refl (sym q)
+         (inc (subst Fin q {!!}) {!!})
     ≡⟨ {!!} ⟩
-  (f' ⊕ g') ∘ʲ subst (Inj (suc n)) (sym p) (inc (subst Fin p (fshift m' b)) (shift' m' g))
+  subst2 Inj refl (sym q)
+         (subst2 Inj p q (f' ⊕ g')
+         ∘ʲ inc (subst Fin p (fshift m' b)) (shift' m' g))
+    ≡⟨ {!!} ⟩
+  (f' ⊕ g') ∘ʲ subst2 Inj refl (sym p) (inc (subst Fin p (fshift m' b)) (shift' m' g))
     ≡⟨ cong ((f' ⊕ g') ∘ʲ_) (sym (shift≡shift' m' (inc b g))) ⟩
   (f' ⊕ g') ∘ʲ shift m' (inc b g)
     ≡⟨ refl ⟩
   (f' ⊕ g') ∘ʲ (nul m' ⊕ inc b g) ▯
   where
     p = +-suc m' n'
+    q = +-suc m'' n''
 ⊕-preserves-∘ {suc m} {suc m'} {m''} {zero} {n'} {n''} (inc b f) f' (nul .n') g' = {!!}
 ⊕-preserves-∘ {m} {m'} {m''} {n} {n'} {n''} (inc b f) f' (inc b₁ g) g' = {!!}
 
