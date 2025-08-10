@@ -194,7 +194,7 @@ shift1 (inc b f) = inc (fsuc b) (shift1 f)
 
 shift : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
 shift zero f = f
-shift (suc l) f = shift1 (shift l f) 
+shift (suc l) f = shift1 (shift l f)
 ```
 
 This lets us define tensor `f ⊕ g` which works by recursing on f,
@@ -214,3 +214,14 @@ inc b f ⊕ g = inc (finject _ b) (f ⊕ g)
 𝟘 = nul 0
 ```
 
+There is an alternate representation to `shift` which recurses on the
+structure of f first rather than the offset. It has to make use of
+subst since `l + suc n` is not definitionally equal to `suc (l + n)`.
+
+```
+shift' : ∀ {m n} → (l : ℕ) → (f : Inj m n) → Inj m (l + n)
+shift' {m = 0} l (nul _) = nul (l + _)
+shift' {m = suc m} {n = suc n} l (inc b f) =
+  subst2 Inj refl (sym p) $ inc (subst Fin p (fshift l b)) (shift' l f)
+  where p = +-suc l n
+```
