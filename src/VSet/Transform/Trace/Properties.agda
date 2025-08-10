@@ -290,7 +290,7 @@ thm1-2-2-pred {l} {m} {n} f (inc b g) =
 --     f' : Inj (suc (suc m)) (suc (suc n))
 --     f' = subst2 Inj ℕ+1 ℕ+1 ((inc b f) ⊕ 𝟙)
 --     f₂ : Inj (suc m) (suc n)
---     f₂ = subst2 Inj ℕ+1 ℕ+1 (tensor f 𝟙)
+       --     f₂ = subst2 Inj ℕ+1 ℕ+1 (tensor f 𝟙)
 --     v : subst (Fin ∘ suc) ℕ+1 (finject 1 b) ≡ finj b
 --     v = subst (Fin ∘ suc) ℕ+1 (finject 1 b)
 --           ≡⟨ cong (subst (Fin ∘ suc) ℕ+1) (finject1≡finj b) ⟩

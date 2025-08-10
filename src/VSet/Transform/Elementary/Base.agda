@@ -23,7 +23,8 @@ insert fzero b f = inc b f
 insert (fsuc a) b (inc c f) =
   inc (fsplice b c) (insert a (fcross c b) f)
 
--- Take out one element and shift everything back one place.
+-- Take out one element and shift everything back one place to fill
+-- the gap.
 remove : ∀ {m n} → (a : Fin (suc m))
        → (f : Inj (suc m) (suc n)) → Inj m n
 remove fzero (inc b f) = f
