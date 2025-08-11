@@ -217,6 +217,28 @@ finject-injective {x} (suc y) (fsuc a) fzero fa≡fb = absurd (fsuc≢fzero (fin
 finject-injective {x} (suc y) (fsuc a) (fsuc b) fa≡fb =
   cong fsuc (finject-injective (suc y) a b (fsuc-injective fa≡fb))
 
+toℕ-finject : {x : ℕ} (y : ℕ) (a : Fin x) → toℕ (finject y a) ≡ toℕ a
+toℕ-finject y fzero = refl
+toℕ-finject y (fsuc a) = cong suc (toℕ-finject y a)
+
+toℕ-fshift : (x : ℕ) {y : ℕ}  (a : Fin y) → toℕ (fshift x a) ≡ toℕ a ℕ.+ x
+toℕ-fshift zero fzero = refl
+toℕ-fshift (suc x) fzero = cong suc (toℕ-fshift x f0)
+toℕ-fshift zero (fsuc a) = cong suc (sym (+-zero (toℕ a)))
+toℕ-fshift (suc x) (fsuc a) = cong suc u
+  where
+    u : toℕ (fshift x (fsuc a)) ≡ toℕ a +ℕ suc x
+    u = toℕ (fshift x (fsuc a)) ≡⟨ toℕ-fshift x (fsuc a) ⟩
+        suc (toℕ a) +ℕ x ≡⟨ sym (+-suc (toℕ a) x) ⟩
+        toℕ a +ℕ suc x ▯
+
+toℕ-finject-< : {x : ℕ} (y : ℕ) (a : Fin x) → toℕ (finject y a) < x
+toℕ-finject-< {suc x} y fzero = 0<suc x
+toℕ-finject-< {suc x} y (fsuc a) = suc-<-suc (toℕ-finject-< y a)
+
+toℕ-fshift-≥ : (x : ℕ) {y : ℕ} (a : Fin y) → toℕ (fshift x a) ≥ x 
+toℕ-fshift-≥ zero a = zero-≤
+toℕ-fshift-≥ (suc x) a = suc-≤-suc (toℕ-fshift-≥ x a)
 
 fsuc-fjoin 
   : ∀ {x : ℕ} → (b a : Fin (suc x)) → (a≉b : a ≉ᶠ b)
