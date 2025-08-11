@@ -76,6 +76,24 @@ shift≡shift' {suc m} {suc n} (suc l) (inc b f) =
     p = +-suc l n
     q = +-suc (suc l) n 
 
+⊕-pivot-l : {m m' n n' : ℕ} (f : Inj m m') (g : Inj n n')
+          → (a : Fin (m + n)) → toℕ a < m
+          → toℕ (apply (f ⊕ g) a) < m'
+⊕-pivot-l {zero} {m'} {n} {n'} (nul m') g a a<0 =
+  absurd (¬-<-zero a<0)
+⊕-pivot-l {suc m} {suc m'} {n} {n'} (inc b f) g fzero 0<sm =
+  toℕ-finject-< n' b
+⊕-pivot-l {suc m} {suc m'} {n} {n'} (inc b f) g (fsuc a) sa<sm =
+  v
+  where
+    u : fsplice (finject n' b) (apply (f ⊕ g) a) ≡ {!!}
+    u = fsplice (finject n' b) (apply (f ⊕ g) a) ≡⟨ {!!} ⟩
+        fsplice (finject n' b) (apply (f ⊕ g) a) ≡⟨ {!!} ⟩
+        {!!} ▯
+    v : toℕ (fsplice (finject n' b) (apply (tensor f g) a)) < suc m'
+    v = {!!}
+    
+
 𝟙⊕𝟙≡𝟙 : 𝟙 {m} ⊕ 𝟙 {n} ≡ 𝟙 {m + n}
 𝟙⊕𝟙≡𝟙 {zero} {n} = refl
 𝟙⊕𝟙≡𝟙 {suc m} {n} = cong (inc f0) (𝟙⊕𝟙≡𝟙 {m} {n})
@@ -112,6 +130,25 @@ w : {l m n : ℕ} → (b : Fin (suc n))
   ≡ {!!}
 w {zero} {m} {n} b g = {!!}
 w {suc l} {m} {n} b g = {!!}
+
+-- comp-shift1 : {k l m n : ℕ} (g : Inj m n) (f : Inj l m) (c : Fin (suc n))
+--             → toℕ c < k
+--             → inc c g ∘ʲ shift k f ≡ shift k (g ∘ʲ f)
+-- comp-shift1 {zero} {m} {n} g (nul _) c =
+--   inc c g ∘ʲ shift1 (nul _) ≡⟨ refl ⟩
+--   inc c g ∘ʲ nul _ ≡⟨ refl ⟩
+--   nul _ ≡⟨ {!!} ⟩
+--   {!!} ▯
+-- comp-shift1 {suc l} {suc m} {suc n} g (inc b f) c =
+--   inc c g ∘ʲ shift1 (inc b f)
+--     ≡⟨ refl ⟩
+--   inc c g ∘ʲ inc (fsuc b) (shift1 f)
+--     ≡⟨ refl ⟩
+--   inc (apply (inc c g) (fsuc b)) (remove (fsuc b) (inc c g) ∘ʲ shift1 f)
+--     ≡⟨ refl ⟩
+--   inc (fsplice c (apply g b)) (inc (fcross (apply g b) c) (remove b g) ∘ʲ shift1 f)
+--     ≡⟨ {!!} ⟩
+--   {!!} ▯
 
 apply-shift1 : {m n : ℕ} (f : Inj m n) (a : Fin m)
              → apply (shift1 f) a ≡ fsuc (apply f a)
@@ -261,7 +298,7 @@ shift1-remove-comp {suc l} {suc m} {suc n} (inc b f) g (fsuc d) c =
     ≡⟨ refl ⟩
   inc (fsuc (apply (inc c g) b)) (shift1 (remove b (inc c g) ∘ʲ f))
     ≡⟨ cong₂ inc (sym (apply-shift1 (inc c g) b))
-                 {!!} ⟩
+                 (shift1-remove-comp f g b c) ⟩
   inc (apply (inc (fsuc c) (shift1 g)) b) (remove b (inc (fsuc c) (shift1 g)) ∘ʲ f)
     ≡⟨ refl ⟩
   inc (fsuc c) (shift1 g) ∘ʲ inc b f
@@ -290,103 +327,155 @@ shift1-remove-comp {suc l} {suc m} {suc n} (inc b f) g (fsuc d) c =
     ≡⟨ refl ⟩
   shift1 (shift k (inc c g ∘ʲ inc b f))
     ≡⟨ cong shift1 (∘ʲ-preserves-shift k (inc c g) (inc b f)) ⟩
-  shift1 ((shift k (inc c g)) ∘ʲ inc b f)
-    ≡⟨ {!!} ⟩
-  shift1 ((shift k (inc c g)) ∘ʲ inc b f)
-    ≡⟨ {!!} ⟩
-  shift (suc k) (inc (apply (inc c g) b) (remove b (inc c g) ∘ʲ f))
-    ≡⟨ {!!} ⟩
-  inc (apply (shift (suc k) (inc c g)) b) (remove b (shift (suc k) (inc c g)) ∘ʲ f)
+  shift1 (shift k (inc c g) ∘ʲ inc b f)
+    ≡⟨ ∘ʲ-preserves-shift1 (shift k (inc c g)) (inc b f) ⟩
+  shift1 (shift k (inc c g)) ∘ʲ inc b f
     ≡⟨ refl ⟩
   shift (suc k) (inc c g) ∘ʲ inc b f ▯
+
+peel-l : (k : ℕ) {m n : ℕ} (f : Inj (k + m) n) → Inj m n
+peel-l zero f = f
+peel-l (suc k) {n = suc n} f = peel-l k (excise f0 f)
+
+peel-r : (k : ℕ) {m n : ℕ} (f : Inj (m + k) n) → Inj m n
+peel-r zero {m} {n} f = jcast (+-zero m) refl f
+peel-r (suc k) {zero} {n} f = nul n
+peel-r (suc k) {suc m} {suc n} f = peel-r k (jcast (+-suc m k) refl (excise fmax f))
+
+-- tensor-comp-shift : {m m' m'' n n' n'' : ℕ} (g : Inj m n) (h : Inj k k') (f : Inj l m)
+--                   → toℕ c < k
+--                   → g ∘ʲ shift (suc k) f ≡ shift k (g ∘ʲ f)
+-- tensor-comp-shift {zero} {m} {n} g c (nul _) = refl
+-- tensor-comp-shift {suc l} {suc m} {suc n} g c (inc b f) =
+--   inc c g ∘ʲ shift1 (inc b f)
+--     ≡⟨ refl ⟩
+--   inc c g ∘ʲ inc (fsuc b) (shift1 f)
+--     ≡⟨ {!!} ⟩
+--   inc (apply (inc c g) (fsuc b)) (remove (fsuc b) (inc c g) ∘ʲ shift1 f)
+--     ≡⟨ {!!} ⟩
+--   inc (fsuc (apply g b)) (shift1 (remove b g ∘ʲ f))
+--     ≡⟨ refl ⟩
+--   shift1 (inc (apply g b) (remove b g ∘ʲ f))
+--     ≡⟨ refl ⟩
+--   shift1 (g ∘ʲ inc b f) ▯
+
+
+-- inc-comp-shift : (k : ℕ) {l m n : ℕ} (g : Inj (k + m) n) (c : Fin (suc n)) (f : Inj l m)
+--                → toℕ c < k
+--                → inc c g ∘ʲ shift (suc k) f ≡ shift (suc k) (g ∘ʲ f)
+-- inc-comp-shift {zero} {m} {n} g c (nul _) = refl
+-- inc-comp-shift {suc l} {suc m} {suc n} g c (inc b f) =
+--   inc c g ∘ʲ shift1 (inc b f)
+--     ≡⟨ refl ⟩
+--   inc c g ∘ʲ inc (fsuc b) (shift1 f)
+--     ≡⟨ {!!} ⟩
+--   inc (apply (inc c g) (fsuc b)) (remove (fsuc b) (inc c g) ∘ʲ shift1 f)
+--     ≡⟨ {!!} ⟩
+--   inc (fsuc (apply g b)) (shift1 (remove b g ∘ʲ f))
+--     ≡⟨ refl ⟩
+--   shift1 (inc (apply g b) (remove b g ∘ʲ f))
+--     ≡⟨ refl ⟩
+--   shift1 (g ∘ʲ inc b f) ▯
+
+⊕-peel-l : {m m' m'' n n' n'' : ℕ} (f' : Inj m' m'')
+         → (g : Inj (suc n) (suc n')) (g' : Inj (suc n') (suc n''))
+         → shift m'' (g' ∘ʲ g) ≡ (f' ⊕ g') ∘ʲ shift m' g 
+⊕-peel-l {m' = zero} {m'' = m''} (nul m'') g g' =
+  shift m'' (g' ∘ʲ g)
+    ≡⟨ ∘ʲ-preserves-shift m'' g' g ⟩
+  (shift m'' g') ∘ʲ g
+    ≡⟨ refl ⟩
+  (nul m'' ⊕ g') ∘ʲ g ▯
+⊕-peel-l {m' = suc m'} {m'' = suc m''} {n'' = n''} (inc b f') g g' =
+  shift (suc m'') (g' ∘ʲ g)
+    ≡⟨ {!!} ⟩
+  (inc (finject (suc n'') b) (f' ⊕ g')) ∘ʲ shift (suc m') g
+    ≡⟨ refl ⟩
+  (inc b f' ⊕ g') ∘ʲ shift (suc m') g ▯
 
 ⊕-preserves-∘ : ∀ {m m' m'' n n' n''}
               → (f : Inj m m') (f' : Inj m' m'') (g : Inj n n') (g' : Inj n' n'')
               → (f' ∘ʲ f) ⊕ (g' ∘ʲ g) ≡ (f' ⊕ g') ∘ʲ (f ⊕ g)
-⊕-preserves-∘ {zero} {m'} {m''} {zero} {n'} {n''} (nul m') f' (nul n') g' =
-  (f' ∘ʲ nul m') ⊕ (g' ∘ʲ nul n')
+⊕-preserves-∘ {zero} {suc m'} {m''} {zero} {n'} {n''} (nul (suc m')) f' (nul n') g' =
+  (f' ∘ʲ nul (suc m')) ⊕ (g' ∘ʲ nul n')
     ≡⟨ refl ⟩
   (nul m'') ⊕ (nul n'')
     ≡⟨ nul-⊕-nul {m''} ⟩
   nul (m'' + n'')
     ≡⟨ refl ⟩
-  (f' ⊕ g') ∘ʲ nul (m' + n')
-    ≡⟨ cong (tensor f' g' ∘ʲ_) (sym (nul-⊕-nul {m'})) ⟩
-  (f' ⊕ g') ∘ʲ (nul m' ⊕ nul n') ▯
-⊕-preserves-∘ {zero} {zero} {zero} {suc n} {suc n'} {suc n''}
-              (nul zero) (nul zero) (inc b g) (inc b' g') =
-  (nul zero ∘ʲ nul zero) ⊕ (inc b' g' ∘ʲ inc b g)
+  (f' ⊕ g') ∘ʲ nul ((suc m') + n')
+    ≡⟨ cong (tensor f' g' ∘ʲ_) (sym (nul-⊕-nul {suc m'})) ⟩
+  (f' ⊕ g') ∘ʲ (nul (suc m') ⊕ nul n') ▯
+⊕-preserves-∘ {zero} {zero} {m''} {n} {n'} {n''}
+              (nul zero) (nul m'') g g' =
+  (nul m'' ∘ʲ nul zero) ⊕ (g' ∘ʲ g)
     ≡⟨ refl ⟩
-  nul zero ⊕ (inc b' g' ∘ʲ inc b g)
+  nul m'' ⊕ (g' ∘ʲ g)
     ≡⟨ refl ⟩
-  inc b' g' ∘ʲ inc b g
+  shift m'' (g' ∘ʲ g)
+    ≡⟨ ∘ʲ-preserves-shift m'' g' g ⟩
+  shift m'' g' ∘ʲ g
     ≡⟨ refl ⟩
-  (nul zero ⊕ inc b' g') ∘ʲ (nul zero ⊕ inc b g) ▯
-⊕-preserves-∘ {zero} {zero} {suc m''} {suc n} {suc n'} {suc n''}
-              (nul zero) (nul (suc m'')) (inc b g) (inc b' g') =
-  (nul (suc m'') ∘ʲ nul zero) ⊕ (inc b' g' ∘ʲ inc b g)
+  (nul m'' ⊕ g') ∘ʲ (nul zero ⊕ g) ▯
+-- ⊕-preserves-∘ {zero} {m'} {m''} {suc n} {suc n'} {suc n''} (nul m') f' (inc b g) g' =
+--   (f' ∘ʲ nul m') ⊕ (g' ∘ʲ inc b g)
+--     ≡⟨ refl ⟩
+--   nul m'' ⊕ inc (apply g' b) (remove b g' ∘ʲ g)
+--     ≡⟨ refl ⟩
+--   shift m'' (inc (apply g' b) (remove b g' ∘ʲ g))
+--     ≡⟨ shift≡shift' m'' (inc (apply g' b) (remove b g' ∘ʲ g)) ⟩
+--   shift' m'' (inc (apply g' b) (remove b g' ∘ʲ g))
+--     ≡⟨ refl ⟩
+--   subst2 Inj refl (sym q)
+--          (inc (subst Fin q (fshift m'' (apply g' b)))
+--               (shift' m'' (remove b g' ∘ʲ g)))
+--     ≡⟨ {!!} ⟩
+--   subst2 Inj refl (sym q)
+--          (inc (apply (subst2 Inj p q (f' ⊕ g')) (subst Fin p (fshift m' b)))
+--               (remove (subst Fin p (fshift m' b)) (subst2 Inj p q (f' ⊕ g'))
+--               ∘ʲ (shift' m' g)))
+--     ≡⟨ {!!} ⟩
+--   subst2 Inj refl (sym q)
+--          (subst2 Inj p q (f' ⊕ g')
+--          ∘ʲ subst (Inj (suc n)) p (subst (Inj (suc n)) (sym p)
+--             (inc (subst Fin p (fshift m' b)) (shift' m' g))))
+--     ≡⟨  cong (λ ○ → subst2 Inj refl (sym q)
+--          (subst2 Inj p q (f' ⊕ g')
+--          ∘ʲ ○)) (subst-filler (Inj (suc n)) (λ i → suc (m' + n')) {!!})  ⟩
+--   subst2 Inj refl (sym q)
+--          (subst2 Inj p q (f' ⊕ g')
+--          ∘ʲ inc (subst Fin p (fshift m' b)) (shift' m' g))
+--     ≡⟨ u ⟩
+--   (f' ⊕ g') ∘ʲ subst2 Inj refl (sym p) (inc (subst Fin p (fshift m' b)) (shift' m' g))
+--     ≡⟨ cong ((f' ⊕ g') ∘ʲ_) (sym (shift≡shift' m' (inc b g))) ⟩
+--   (f' ⊕ g') ∘ʲ shift m' (inc b g)
+--     ≡⟨ refl ⟩
+--   (f' ⊕ g') ∘ʲ (nul m' ⊕ inc b g) ▯
+--   where
+--     p = +-suc m' n'
+--     q = +-suc m'' n''
+
+⊕-preserves-∘ {zero} {suc m'} {suc m''} {suc n} {suc n'} {suc n''}
+              (nul (suc m')) (inc b' f') (inc c g) g' =
+  (inc b' f' ∘ʲ nul (suc m')) ⊕ (g' ∘ʲ inc c g)
     ≡⟨ refl ⟩
-  nul (suc m'') ⊕ (inc b' g' ∘ʲ inc b g)
+  nul (suc m'') ⊕ (g' ∘ʲ inc c g)
     ≡⟨ refl ⟩
-  shift1 (shift m'' (inc b' g' ∘ʲ inc b g))
+  shift (suc m'') (g' ∘ʲ inc c g)
+    ≡⟨ refl ⟩
+  shift1 (shift m'' (g' ∘ʲ inc c g))
+    ≡⟨ cong shift1 (shift≡shift' m'' (g' ∘ʲ inc c g)) ⟩
+  shift1 (shift' m'' (g' ∘ʲ inc c g))
     ≡⟨ {!!} ⟩
-  shift1 (shift m'' (inc b' g')) ∘ʲ inc b g
+  inc (finject _ b') (f' ⊕ g') ∘ʲ shift1 (shift' m' (inc c g))
+    ≡⟨ cong (inc (finject _ b') (f' ⊕ g') ∘ʲ_ ∘ shift1)
+            (sym (shift≡shift' m' (inc c g))) ⟩
+  inc (finject _ b') (f' ⊕ g') ∘ʲ shift1 (shift m' (inc c g))
     ≡⟨ refl ⟩
-  shift (suc m'') (inc b' g') ∘ʲ inc b g
+  inc (finject _ b') (f' ⊕ g') ∘ʲ shift (suc m') (inc c g)
     ≡⟨ refl ⟩
-  (nul (suc m'') ⊕ inc b' g') ∘ʲ (nul zero ⊕ inc b g) ▯
-  where
-    p = +-suc zero n'
-    q = +-suc (suc m'') n''
-⊕-preserves-∘ {zero} {zero} {m''} {suc n} {suc n'} {suc n''} (nul zero) (nul m'') (inc b g) g' =
-  (nul m'' ∘ʲ nul zero) ⊕ (g' ∘ʲ inc b g)
+  (inc b' f' ⊕ g') ∘ʲ shift (suc m') (inc c g)
     ≡⟨ refl ⟩
-  nul m'' ⊕ inc (apply g' b) (remove b g' ∘ʲ g)
-    ≡⟨ {!!} ⟩
-  ((nul m'' ⊕ g') ∘ʲ inc b g)
-    ≡⟨ {!!} ⟩
-  ((nul m'' ⊕ g') ∘ʲ (nul zero ⊕ inc b g)) ▯
-  where
-    p = +-suc zero n'
-    q = +-suc m'' n''
-⊕-preserves-∘ {zero} {m'} {m''} {suc n} {suc n'} {suc n''} (nul m') f' (inc b g) g' =
-  (f' ∘ʲ nul m') ⊕ (g' ∘ʲ inc b g)
-    ≡⟨ refl ⟩
-  nul m'' ⊕ inc (apply g' b) (remove b g' ∘ʲ g)
-    ≡⟨ refl ⟩
-  shift m'' (inc (apply g' b) (remove b g' ∘ʲ g))
-    ≡⟨ shift≡shift' m'' (inc (apply g' b) (remove b g' ∘ʲ g)) ⟩
-  shift' m'' (inc (apply g' b) (remove b g' ∘ʲ g))
-    ≡⟨ refl ⟩
-  subst2 Inj refl (sym q)
-         (inc (subst Fin q (fshift m'' (apply g' b)))
-              (shift' m'' (remove b g' ∘ʲ g)))
-    ≡⟨ {!!} ⟩
-  subst2 Inj refl (sym q)
-         (inc (apply (subst2 Inj p q (f' ⊕ g')) (subst Fin p (fshift m' b)))
-              (remove (subst Fin p (fshift m' b)) (subst2 Inj p q (f' ⊕ g'))
-              ∘ʲ (shift' m' g)))
-    ≡⟨ {!!} ⟩
-  subst2 Inj refl (sym q)
-         (subst2 Inj p q (f' ⊕ g')
-         ∘ʲ subst (Inj (suc n)) p (subst (Inj (suc n)) (sym p)
-            (inc (subst Fin p (fshift m' b)) (shift' m' g))))
-    ≡⟨  cong (λ ○ → subst2 Inj refl (sym q)
-         (subst2 Inj p q (f' ⊕ g')
-         ∘ʲ ○)) (subst-filler (Inj (suc n)) (λ i → suc (m' + n')) {!!})  ⟩
-  subst2 Inj refl (sym q)
-         (subst2 Inj p q (f' ⊕ g')
-         ∘ʲ inc (subst Fin p (fshift m' b)) (shift' m' g))
-    ≡⟨ u ⟩
-  (f' ⊕ g') ∘ʲ subst2 Inj refl (sym p) (inc (subst Fin p (fshift m' b)) (shift' m' g))
-    ≡⟨ cong ((f' ⊕ g') ∘ʲ_) (sym (shift≡shift' m' (inc b g))) ⟩
-  (f' ⊕ g') ∘ʲ shift m' (inc b g)
-    ≡⟨ refl ⟩
-  (f' ⊕ g') ∘ʲ (nul m' ⊕ inc b g) ▯
-  where
-    p = +-suc m' n'
-    q = +-suc m'' n''
-    u : {!inc (subst Fin p (fshift m' b)) (shift' m' g) ≡!}
+  (inc b' f' ⊕ g') ∘ʲ (nul (suc m') ⊕ inc c g) ▯
 ⊕-preserves-∘ {suc m} {suc m'} {m''} {zero} {n'} {n''} (inc b f) f' (nul .n') g' = {!!}
 ⊕-preserves-∘ {m} {m'} {m''} {n} {n'} {n''} (inc b f) f' (inc b₁ g) g' = {!!}
-
