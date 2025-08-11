@@ -17,6 +17,9 @@ data Fin : ℕ → Type where
   fzero : {n : ℕ} → Fin (suc n)
   fsuc : {n : ℕ} → Fin n → Fin (suc n)
 
+⟦_⟧ : ℕ → Type
+⟦_⟧ = Fin
+
 f0 : Fin (1 ℕ.+ x)
 f0 = fzero
 f1 : Fin (2 ℕ.+ x)

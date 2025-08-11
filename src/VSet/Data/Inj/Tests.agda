@@ -8,8 +8,8 @@ open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Splice
 open import VSet.Data.Inj.Base
 open import VSet.Data.Inj.Order
-open import VSet.Transform.Elementary.Base
-open import VSet.Transform.Inverse.Base
+open import VSet.Transform.Inj.Elementary.Base
+open import VSet.Transform.Inj.Inverse.Base
 open import VSet.Data.Inj.Properties
 
 _ : to-list (cycle-r 3) ≡ f1 ∷ f2 ∷ f3 ∷ f0 ∷ []

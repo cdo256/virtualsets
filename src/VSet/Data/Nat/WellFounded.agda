@@ -4,7 +4,7 @@ module VSet.Data.Nat.WellFounded where
 open import VSet.Prelude
 open import VSet.Data.Nat hiding (_+_; _<_)
 open import VSet.Data.Nat.Properties
-open import VSet.Data.SomeFin.Base
+open import VSet.Data.Fin.Base
 open import VSet.Data.SumTree.Base
 open import Cubical.Data.Nat.Order
 open import Cubical.Induction.WellFounded

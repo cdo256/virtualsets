@@ -9,9 +9,9 @@ open import Cubical.Data.Nat.Properties
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
 open import VSet.Data.Inj.Properties 
-open import VSet.Transform.Compose.Base
-open import VSet.Transform.Tensor.Base
-open import VSet.Transform.Tensor.Properties
+open import VSet.Transform.Inj.Compose.Base
+open import VSet.Transform.Inj.Tensor.Base
+open import VSet.Transform.Inj.Tensor.Properties
 open import VSet.Cat.Base
 
 open Category

@@ -9,7 +9,7 @@ open import VSet.Data.Fin.Splice
 open import VSet.Data.Fin.Properties
 open import VSet.Data.VecFun.Base
 open import VSet.Data.Inj.Base
-open import VSet.Transform.Elementary.Base
+open import VSet.Transform.Inj.Elementary.Base
 
 Inj→VecFun : {m n : ℕ} → Inj m n → VecFun m n
 Inj→VecFun (nul _) = []
