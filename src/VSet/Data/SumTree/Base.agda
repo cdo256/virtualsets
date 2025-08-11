@@ -2,7 +2,7 @@ module VSet.Data.SumTree.Base where
 
 open import VSet.Prelude
 open import VSet.Data.Nat hiding (_+_; _<_)
-open import VSet.Data.SomeFin.Base
+open import VSet.Data.Fin.Base
 open import Cubical.Data.Nat.Order
 
 infix 30 _＋_

@@ -7,8 +7,8 @@ open import Cubical.Data.Nat.Properties
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
 open import VSet.Data.Inj.Properties 
-open import VSet.Transform.Compose.Base
-open import VSet.Transform.Compose.Properties
+open import VSet.Transform.Inj.Compose.Base
+open import VSet.Transform.Inj.Compose.Properties
 
 VSetCat : Category _ _
 VSetCat = record

@@ -1,8 +1,8 @@
 module VSet.Data.SumTree.Metrics where
 
 open import VSet.Prelude
-open import VSet.Data.Nat hiding (_+_; _<_)
-open import VSet.Data.SomeFin.Base
+open import VSet.Data.Nat hiding (_<_)
+open import VSet.Data.Fin.Base
 open import Cubical.Data.Nat.Order
 open import VSet.Data.Nat.WellFounded
 open import VSet.Data.SumTree.Base

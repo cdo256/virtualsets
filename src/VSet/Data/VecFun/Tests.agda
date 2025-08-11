@@ -10,7 +10,7 @@ open import VSet.Data.Fin.Properties
 open import VSet.Data.VecFun.Base
 open import VSet.Data.VecFun.Properties
 open import VSet.Data.Inj.Base
-open import VSet.Transform.Elementary.Base
+open import VSet.Transform.Inj.Elementary.Base
 
 g : Inj 4 6 -- (3 2 4 0)
 g = (inc f3 $ inc f2 $ inc f2 $ inc f0 $ nul 2)

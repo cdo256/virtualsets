@@ -1,9 +1,9 @@
 module VSet.Data.SumTree.WellFounded where
 
 open import VSet.Prelude
-open import VSet.Data.Nat hiding (_+_; _<_)
+open import VSet.Data.Nat hiding (_<_)
 open import VSet.Data.Nat.Properties
-open import VSet.Data.SomeFin.Base
+open import VSet.Data.Fin.Base
 open import VSet.Data.SumTree.Base
 open import VSet.Data.SumTree.Metrics
 open import VSet.Data.Nat.WellFounded
