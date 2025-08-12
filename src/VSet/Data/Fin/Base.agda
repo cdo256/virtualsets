@@ -88,15 +88,15 @@ fmax : ∀ {x} → Fin (suc x)
 fmax {zero} = fzero
 fmax {suc x} = fsuc (fmax {x})
 
-fzero≢fsuc : ∀ {x : ℕ} (i : Fin x) → fzero ≢ fsuc i
-fzero≢fsuc {x} i p = transport (cong P p) tt
+fzero≢fsuc : ∀ {x : ℕ} {i : Fin x} → fzero ≢ fsuc i
+fzero≢fsuc {x} p = transport (cong P p) tt
   where
     P : {x : ℕ} → Fin (suc x) → Type
     P {x} fzero = ⊤
     P {x} (fsuc a) = ⊥
 
-fsuc≢fzero : ∀ {x : ℕ} (i : Fin x) → fsuc i ≢ fzero 
-fsuc≢fzero a = ≢sym (fzero≢fsuc a) 
+fsuc≢fzero : ∀ {x : ℕ} {i : Fin x} → fsuc i ≢ fzero 
+fsuc≢fzero = ≢sym fzero≢fsuc 
 
 Fin0≃⊥ : Fin 0 ≃ ⊥
 Fin0≃⊥ = (λ ()) , record { equiv-proof = λ y → absurd y }

@@ -195,8 +195,8 @@ fsplice≉b (fsuc b) (fsuc a) ne =
 
 finj-injective : {x : ℕ} → is-injective (finj {x})
 finj-injective fzero fzero fx≡fy = refl
-finj-injective fzero (fsuc y) fx≡fy = absurd (fzero≢fsuc (finj y) fx≡fy)
-finj-injective (fsuc x) fzero fx≡fy = absurd (fsuc≢fzero (finj x) fx≡fy)
+finj-injective fzero (fsuc y) fx≡fy = absurd (fzero≢fsuc fx≡fy)
+finj-injective (fsuc x) fzero fx≡fy = absurd (fsuc≢fzero fx≡fy)
 finj-injective (fsuc x) (fsuc y) fx≡fy =
   cong fsuc (finj-injective x y (fsuc-injective fx≡fy))
 
@@ -215,8 +215,8 @@ finject-injective {x} zero a b fa≡fb =
     ≡⟨ subst⁻Subst Fin (sym (+-zero x)) b ⟩
   b ▯
 finject-injective {x} (suc y) fzero fzero fa≡fb = refl
-finject-injective {x} (suc y) fzero (fsuc b) fa≡fb = absurd (fzero≢fsuc (finject (suc y) b) fa≡fb)
-finject-injective {x} (suc y) (fsuc a) fzero fa≡fb = absurd (fsuc≢fzero (finject (suc y) a) fa≡fb)
+finject-injective {x} (suc y) fzero (fsuc b) fa≡fb = absurd (fzero≢fsuc fa≡fb)
+finject-injective {x} (suc y) (fsuc a) fzero fa≡fb = absurd (fsuc≢fzero fa≡fb)
 finject-injective {x} (suc y) (fsuc a) (fsuc b) fa≡fb =
   cong fsuc (finject-injective (suc y) a b (fsuc-injective fa≡fb))
 
@@ -308,9 +308,9 @@ fsplice-isInjective
 fsplice-isInjective {a = a} {fzero} {fzero} fsplice-eq = refl
 fsplice-isInjective {a = fzero} {b} {c} fsplice-eq = fsuc-injective fsplice-eq
 fsplice-isInjective {a = fsuc a} {fzero} {fsuc c} fsplice-eq =
-  absurd (fzero≢fsuc (fsplice a c) fsplice-eq)
+  absurd (fzero≢fsuc fsplice-eq)
 fsplice-isInjective {a = fsuc a} {fsuc b} {fzero} fsplice-eq =
-  absurd (fsuc≢fzero (fsplice a b) fsplice-eq)
+  absurd (fsuc≢fzero fsplice-eq)
 fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} fsplice-eq =
   cong fsuc $ fsplice-isInjective (fsuc-injective fsplice-eq)
 
@@ -612,7 +612,7 @@ open _∖_
 
 module DelZeroSuc {x : ℕ} (b :  ⟦ x ⟧) where
   B : (suc x ∖ fzero)
-  B = fsuc b — fzero≢fsuc b
+  B = fsuc b — fzero≢fsuc {i = b}
 
   del-zero-suc : del fzero B ≡ b
   del-zero-suc with (del fzero B) | inspect (del fzero) B
@@ -622,7 +622,7 @@ module DelZeroSuc {x : ℕ} (b :  ⟦ x ⟧) where
 open DelZeroSuc using (del-zero-suc)
 
 del-suc-zero : ∀ {x} (a : ⟦ suc x ⟧)
-             → del (fsuc a) (fzero — fsuc≢fzero a) ≡ fzero
+             → del (fsuc a) (fzero — fsuc≢fzero {i = a}) ≡ fzero
 del-suc-zero a = refl
 
 del-suc-suc : ∀ {x} (a b : ⟦ suc x ⟧) → (a'≢b' : fsuc a ≢ fsuc b)
@@ -647,9 +647,9 @@ del-inj {x = suc x} fzero (fsuc b — a≢b) (fsuc c — a≢c) b'≡c' =
 del-inj {x = suc x} (fsuc a) (fzero — a≢b) (fzero — a≢c) b'≡c' =
   refl
 del-inj {x = suc x} (fsuc a) (fzero — a≢b) (fsuc c — a≢c) b'≡c' =
-  absurd (fzero≢fsuc (del a (c — ≢cong fsuc a≢c)) b'≡c')
+  absurd (fzero≢fsuc b'≡c')
 del-inj {x = suc x} (fsuc a) (fsuc b — a≢b) (fzero — a≢c) b'≡c'
-  = absurd (fsuc≢fzero (del a (b — ≢cong fsuc a≢b)) b'≡c')
+  = absurd (fsuc≢fzero b'≡c')
 del-inj {x = suc x} (fsuc a) (fsuc b — a≢b) (fsuc c — a≢c) b'≡c'
   = cong fsuc (del-inj {x = x} a (b — ≢cong fsuc a≢b) (c — {!!}) {!!})
 --   with a | b | c

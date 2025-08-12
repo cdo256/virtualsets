@@ -35,15 +35,15 @@ elim : ∀ {A : {n : ℕ} → Fin (suc n) → Type }
 elim {A = A} z s m fzero = z
 elim {A = A} z s (suc m) (fsuc a) = s a (elim {A = A} z s m a)
 
-fzero≢fsuc : ∀ {x : ℕ} (i : Fin x) → fzero ≢ fsuc i
-fzero≢fsuc {x} i p = transport (cong P p) tt
+fzero≢fsuc : ∀ {x : ℕ} {i : Fin x} → fzero ≢ fsuc i
+fzero≢fsuc {x} {i} p = transport (cong P p) tt
   where
     P : {x : ℕ} → Fin (suc x) → Type
     P {x} fzero = ⊤ 
     P {x} (fsuc a) = ⊥
 
-fsuc≢fzero : ∀ {n} (i : Fin n) → fsuc i ≢ fzero 
-fsuc≢fzero a = ≢sym (fzero≢fsuc a) 
+fsuc≢fzero : ∀ {n} {i : Fin n} → fsuc i ≢ fzero 
+fsuc≢fzero {i = i} = ≢sym (fzero≢fsuc {i = i}) 
 
 toℕ : ∀ {n} → Fin n → ℕ 
 toℕ fzero = zero
@@ -70,10 +70,10 @@ fromℕ∘toℕ≡id {suc m} (fsuc a) =
   fromℕ (toℕ (fsuc a)) (toℕ<m (fsuc a)) ≡⟨ refl ⟩
   fromℕ (suc (toℕ a)) (suc-≤-suc (toℕ<m a)) ≡⟨ {!refl!} ⟩
   fsuc (fromℕ (toℕ a) (toℕ<m a)) ≡⟨ cong fsuc (fromℕ∘toℕ≡id a) ⟩
-  fsuc a ▯
+  fsuc a ∎ 
 
 fsuc-injective : ∀ {n} {i j : Fin n} → fsuc i ≡ fsuc j → i ≡ j
 fsuc-injective {suc n} {fzero} {fzero} p = refl
-fsuc-injective {suc n} {fzero} {fsuc j} p = absurd (fzero≢fsuc j {!!})
+fsuc-injective {suc n} {fzero} {fsuc j} p = absurd (fzero≢fsuc {!!})
 fsuc-injective {suc n} {fsuc i} {j} p = {!!}
 ```

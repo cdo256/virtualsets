@@ -146,4 +146,4 @@ apply-inv≡0→b≈y f b y p with y ≈?ᶠ b
 ... | yes y≈b = y≈b
 ... | no y≉b with apply-inv f (fjoin b y y≉b)
 ...      | nothing = absurd (¬nothing≡just p)
-...      | just x = absurd (fsuc≢fzero x (just-inj (fsuc x) f0 p))
+...      | just x = absurd (fsuc≢fzero (just-inj (fsuc x) f0 p))

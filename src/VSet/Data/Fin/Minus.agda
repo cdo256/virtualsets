@@ -23,10 +23,10 @@ record _∖_ (A : ℕ) (a : Fin A) : Type where
 open _∖_
 
 s_—0 : {A : ℕ} (a : Fin A) → suc A ∖ fzero 
-s a —0 = fsuc a — fzero≢fsuc a
+s a —0 = fsuc a — fzero≢fsuc {i = a}
 
 0—s_ : {A : ℕ} (a : Fin A) → suc A ∖ fsuc a
-0—s a = fzero — fsuc≢fzero a
+0—s a = fzero — fsuc≢fzero {i = a}
 
 ∖-suc : {A : ℕ} {a : Fin A} → A ∖ a → suc A ∖ fsuc a
 ∖-suc {suc A} (b — a≢b) = fsuc b — ≢cong pred a≢b
@@ -40,8 +40,8 @@ sa∖0≡a (fzero — 0≢0) = absurd (0≢0 refl)
 sa∖0≡a (fsuc a — _) = a
 
 ins : {x : ℕ} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖ a)
-ins {suc x} fzero b = fsuc b — fzero≢fsuc b
-ins {suc x} (fsuc a) fzero = fzero — fsuc≢fzero a
+ins {suc x} fzero b = fsuc b — fzero≢fsuc
+ins {suc x} (fsuc a) fzero = fzero — fsuc≢fzero
 ins {suc x} (fsuc a) (fsuc b) =
   fsuc c — λ sa≡sc →
     let a≡c = fsuc-injective {suc x} {a} {c} sa≡sc

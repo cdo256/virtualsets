@@ -20,11 +20,11 @@ splice→cross
   → fsplice (fsplice b c) d ≡ b
   → d ≡ fcross c b
 splice→cross fzero fzero fzero eq' = refl
-splice→cross fzero fzero (fsuc d) eq' = absurd (fsuc≢fzero (fsuc d) eq')
+splice→cross fzero fzero (fsuc d) eq' = absurd (fsuc≢fzero eq')
 splice→cross fzero (fsuc c) fzero eq' = refl
-splice→cross fzero (fsuc c) (fsuc d) eq' = absurd (fsuc≢fzero (fsplice (fsuc c) d) eq')
+splice→cross fzero (fsuc c) (fsuc d) eq' = absurd (fsuc≢fzero eq')
 splice→cross (fsuc b) fzero d eq' = fsuc-injective eq'
-splice→cross (fsuc b) (fsuc c) fzero eq' = absurd (fzero≢fsuc b eq')
+splice→cross (fsuc b) (fsuc c) fzero eq' = absurd (fzero≢fsuc eq')
 splice→cross (fsuc b) (fsuc c) (fsuc d) eq' = cong fsuc (splice→cross b c d (fsuc-injective eq'))
 
 b∉bubble : ∀ {m n : ℕ} → (b : Fin (suc n)) → (f : Inj m n) → b ∉ʲ bubble b f

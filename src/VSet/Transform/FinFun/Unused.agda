@@ -23,9 +23,9 @@ inc-injective : ∀ {X Y : ℕ} → (f : [ X ↣ Y ])
 inc-injective (f , inj) fzero fzero f0≡f0 =
   refl
 inc-injective (f , inj) fzero (fsuc y) f0≡fsy =
-  absurd (fzero≢fsuc (f y) f0≡fsy)
+  absurd (fzero≢fsuc f0≡fsy)
 inc-injective (f , inj) (fsuc x) fzero fsx≡f0 =
-  absurd (fsuc≢fzero (f x) fsx≡f0) 
+  absurd (fsuc≢fzero fsx≡f0) 
 inc-injective (f , inj) (fsuc x) (fsuc y) shx≡shy =
   cong fsuc (inj x y (fsuc-injective shx≡shy))
 

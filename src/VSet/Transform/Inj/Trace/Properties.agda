@@ -102,7 +102,7 @@ f0≡0→remove0≡pred
   → apply f f0 ≡ f0
   → remove f0 f ≡ pred f
 f0≡0→remove0≡pred (inc fzero f) f'0≡0 = sym (pred-0 f)
-f0≡0→remove0≡pred (inc (fsuc b) f) f'0≡0 = absurd (fsuc≢fzero b f'0≡0)
+f0≡0→remove0≡pred (inc (fsuc b) f) f'0≡0 = absurd (fsuc≢fzero f'0≡0)
 
 f⁻¹0≡∅→remove0≡pred 
   : (f : Inj (suc m) (suc n)) (c : Fin n)
