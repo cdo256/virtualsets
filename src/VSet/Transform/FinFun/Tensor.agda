@@ -9,106 +9,61 @@ open import Cubical.Data.Nat.Properties
 
 open import VSet.Data.Nat using (ℕ; zero; suc; _+_)
 open import VSet.Data.Fin renaming (pred to fpred)
+open import VSet.Data.Sum.Properties
 open import VSet.Data.FinFun.Injection
 open import VSet.Data.FinFun.Equality
 open import VSet.Data.Fin.SumSplit
 open import VSet.Transform.FinFun.Pred
+open import VSet.Transform.FinFun.Compose
 
-tensor : ∀ {W X Y Z : ℕ} → [ W ↣ X ] → [ Y ↣ Z ] → [ W + Y ↣ X + Z ]
-tensor {W} {X} {Y} {Z} f g = ↔to↣ (⊎↔+ X Z) ↣∘↣ ↣-map-⊎ f g ↣∘↣ ↔to↣ (flip-↔ (⊎↔+ W Y))
 
-[id] : {X : ℕ} → [ X ↣ X ]
-[id] {X} = ↣-id ⟦ X ⟧
+tensor : ∀ {k l m n : ℕ} → [ k ↣ l ] → [ m ↣ n ] → [ k + m ↣ l + n ]
+tensor {k} {l} {m} {n} f g = ↔to↣ (⊎↔+ l n) ↣∘↣ ↣-map-⊎ f g ↣∘↣ ↔to↣ (flip-↔ (⊎↔+ k m))
 
 𝟘 : [ 0 ↣ 0 ]
 𝟘 = ↣-id ⟦ 0 ⟧
 
-
 infixl 30 _⊕_
 
-_⊕_ : ∀ {W X Y Z : ℕ} → [ W ↣ X ] → [ Y ↣ Z ] → [ W + Y ↣ X + Z ]
+_⊕_ : ∀ {k l m n : ℕ} → [ k ↣ l ] → [ m ↣ n ] → [ k + m ↣ l + n ]
 f ⊕ g = tensor f g
-
-ladd : ∀ {X Y : ℕ} → (A : ℕ) → [ X ↣ Y ] → [ A + X ↣ A + Y ]
-ladd {X} {Y} A f = (↣-id ⟦ A ⟧) ⊕ f
-
-radd : ∀ {X Y : ℕ} → (A : ℕ) → [ X ↣ Y ] → [ X + A ↣ Y + A ]
-radd {X} {Y} A f = f ⊕ (↣-id ⟦ A ⟧)
-
-transport-tensor : ∀ {W X Y Z : ℕ}
-                   → (f : [ W ↣ X ]) → (g : [ Y ↣ Z ])
-                   → is-transport f → is-transport g
-                   → is-transport (f ⊕ g)
-transport-tensor {W} {X} {Y} {Z} f g (p , f≡transport) (q , g≡transport) =
-  W+Y≡X+Z , f⊕g≡transport
+ 
+𝟙⊕𝟙≡𝟙 : {m n : ℕ} → 𝟙 {m} ⊕ 𝟙 {n} ≈ 𝟙 {m + n}
+𝟙⊕𝟙≡𝟙 {m} {n} = record { p = refl ; q = refl ; path = r }
   where
-    W+Y≡X+Z : W + Y ≡ X + Z
-    W+Y≡X+Z = cong₂ _+_ p q
+    r : (⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n) ≡ id
+    r =
+      ⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n
+        ≡⟨ cong (λ ○ → ⊎→+ m n ∘ ○ ∘ +→⊎ m n) ⊎-map-id≡id ⟩
+      ⊎→+ m n ∘ +→⊎ m n
+        ≡⟨ funExt (sect m n) ⟩
+      id ▯
 
-    shrink-subst : ∀ {U V : ℕ} (p : U ≡ V)
-                 → subst Fin p ∘ id ∘ subst Fin refl ≡ subst Fin p
-    shrink-subst {U} {V} p =
-      subst Fin p ∘ id ∘ subst Fin refl ≡⟨ (cong (λ ○ → subst Fin p ∘ id ∘ ○)) (funExt transportRefl) ⟩
-      subst Fin p ∘ id ∘ id ≡⟨ refl ⟩
-      subst Fin p ▯
+ladd : ∀ {l m : ℕ} → (A : ℕ) → [ l ↣ m ] → [ A + l ↣ A + m ]
+ladd {l} {m} A f = (↣-id ⟦ A ⟧) ⊕ f
 
-    ⊎-map-respects-transport
-      : ∀ {W X Y Z : ℕ} (p : W ≡ X) (q : Y ≡ Z) (u : ⟦ W + Y ⟧)
-      → ⊎→+ X Z (⊎-map (subst Fin p) (subst Fin q) (+→⊎ W Y u))
-      ≡ subst Fin (cong₂ _+_ p q) u
-    ⊎-map-respects-transport {zero} {zero} {suc Y} {suc Z} p q fzero =
-      ⊎→+ zero (suc Z) (⊎-map (subst Fin p) (subst Fin q) (+→⊎ zero (suc Y) fzero))
-        ≡⟨ refl ⟩
-      ⊎→+ zero (suc Z) (⊎-map (subst Fin p) (subst Fin q) (inr fzero))
-        ≡⟨ refl ⟩
-      ⊎→+ zero (suc Z) (inr (subst Fin q (fzero {Y})))
-        ≡⟨ cong (⊎→+ zero (suc Z) ∘ inr)
-                (sym {!fzero≡subst-fzero ?!}) ⟩
-      ⊎→+ zero (suc Z) (inr (fzero {Z}))
-        ≡⟨ refl ⟩
-      fshift zero {suc Z} (fzero {Z})
-        ≡⟨ refl ⟩
-      fzero {0 + Z}
-        ≡⟨ fzero≡subst-fzero (injSuc q) ⟩
-      subst (Fin ∘ suc) (injSuc q) fzero
-        ≡⟨ refl ⟩
-      subst Fin (cong suc (injSuc q)) fzero
-        ≡⟨ cong (λ ○ → subst Fin (cong suc ○) fzero) {!pred∘suc≡id!} ⟩
-      subst Fin (cong suc (injSuc q)) fzero
-        ≡⟨ {!fzero≡subst-fzero ?!} ⟩
-      subst Fin (cong₂ _+_ p q) fzero ▯
-    ⊎-map-respects-transport {zero} {zero} {Y} {Z} p q (fsuc u) = {!!}
-    ⊎-map-respects-transport {suc W} {suc X} {Y} {Z} p q u = {!!}
-    ⊎-map-respects-transport {zero} {suc X} {Y} {Z} p q u = absurd (znots p)
-    ⊎-map-respects-transport {suc W} {zero} {Y} {Z} p q u = absurd (snotz p)
-    ⊎-map-respects-transport {zero} {zero} {Y} {Z} p q fzero = {!!}
-    
-    --   with +→⊎ W Y u | inspect (+→⊎ W Y) u 
-    -- ... | inl x | [ path ]ᵢ = {!!}
+radd : ∀ {l m : ℕ} → (A : ℕ) → [ l ↣ m ] → [ l + A ↣ m + A ]
+radd {l} {m} A f = f ⊕ (↣-id ⟦ A ⟧)
 
-
-      -- ⊎→+ (⊎-map (subst Fin p) (subst Fin q) (inl x))
-      --   ≡⟨ refl ⟩
-      -- ⊎→+ (inl (subst Fin p x))
-      --   ≡⟨ refl ⟩
-      -- finject Z (subst Fin p x)
-      --   ≡⟨ sym (subst-finject-reorder Z p x) ⟩
-      -- transport (λ i → ⟦ p i + Z ⟧) (finject Z x)
-      --   ≡⟨ (let A' = A in {!!}) ⟩
-      -- subst Fin (cong₂ _+_ p q) u ▯
-      --   where u≡x : u ≡ finject Y x
-      --         u≡x =
-    -- ... | inr x | [ A ]ᵢ = {!!}
-
-    f⊕g≡transport : fst (f ⊕ g) ≡ subst Fin W+Y≡X+Z
-    f⊕g≡transport =
-      fst (f ⊕ g)
+⊕-preserves-∘
+  : ∀ {m m' m'' n n' n''}
+  → (f : [ m ↣ m' ]) (f' : [ m' ↣ m'' ]) (g : [ n ↣ n' ]) (g' : [ n' ↣ n'' ])
+  → (f' ∘ʲ f) ⊕ (g' ∘ʲ g) ≈ (f' ⊕ g') ∘ʲ (f ⊕ g)
+⊕-preserves-∘ {m} {m'} {m''} {n} {n'} {n''} f f' g g' =
+  record { p = refl ; q = refl ; path = e }
+  where
+    e : ⊎→+ m'' n'' ∘ ⊎-map (fst f' ∘ fst f) (fst g' ∘ fst g) ∘ +→⊎ m n
+      ≡ (⊎→+ m'' n'' ∘ ⊎-map (fst f') (fst g') ∘ +→⊎ m' n')
+      ∘  (⊎→+ m' n' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ m n)
+    e =
+      ⊎→+ m'' n'' ∘ ⊎-map (fst f' ∘ fst f) (fst g' ∘ fst g) ∘ +→⊎ m n
+        ≡⟨ cong (λ ○ → ⊎→+ m'' n'' ∘ ○ ∘ +→⊎ m n)
+                (sym (⊎-map-∘ (fst f) (fst f') (fst g) (fst g'))) ⟩
+      ⊎→+ m'' n'' ∘ (⊎-map (fst f') (fst g') ∘ ⊎-map (fst f) (fst g)) ∘ +→⊎ m n
+        ≡⟨ cong (λ ○ → ⊎→+ m'' n'' ∘ (⊎-map (fst f') (fst g') ∘ ○ ∘ ⊎-map (fst f) (fst g)) ∘ +→⊎ m n)
+                (sym (funExt (retr m' n'))) ⟩
+      ⊎→+ m'' n'' ∘ ⊎-map (fst f') (fst g') ∘ (+→⊎ m' n' ∘
+        ⊎→+ m' n') ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ m n
         ≡⟨ refl ⟩
-      fst (↔to↣ (⊎↔+ X Z) ↣∘↣ ↣-map-⊎ f g ↣∘↣ ↔to↣ (flip-↔ (⊎↔+ W Y)))
-        ≡⟨ refl ⟩
-      ⊎→+ X Z ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ W Y
-        ≡⟨ cong₂ (λ ○ □ → ⊎→+ X Z ∘ ⊎-map ○ □ ∘ +→⊎ W Y) f≡transport g≡transport ⟩
-      ⊎→+ X Z ∘ ⊎-map (subst Fin p) (subst Fin q) ∘ +→⊎ W Y
-        ≡⟨ {!!} ⟩
-      subst Fin W+Y≡X+Z ▯
-
+      (⊎→+ m'' n'' ∘ ⊎-map (fst f') (fst g') ∘ +→⊎ m' n') ∘
+        ⊎→+ m' n' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ m n ▯
