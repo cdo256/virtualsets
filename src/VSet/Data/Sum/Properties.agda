@@ -27,3 +27,20 @@ inr-injective {A} {B} x y p = subst P p refl
     P : A ⊎ B → Type
     P (inl a) = ⊥
     P (inr b) = x ≡ b
+
+⊎-map-id≡id : {A B : Type} → ⊎-map (id {A = A}) (id {A = B}) ≡ id 
+⊎-map-id≡id {A = A} {B} = funExt e
+  where
+    e : (x : A ⊎ B) → ⊎-map id id x ≡ id x
+    e (inl x) = refl
+    e (inr x) = refl
+
+⊎-map-∘ : {A A' A'' B B' B'' : Type}
+        → (f : A → A') (f' : A' → A'') (g : B → B') (g' : B' → B'')
+        → ⊎-map f' g' ∘ ⊎-map f g ≡ ⊎-map (f' ∘ f) (g' ∘ g)
+⊎-map-∘ f f' g g' = funExt e
+  where
+    e : (x : _) →
+         (⊎-map f' g' ∘ ⊎-map f g) x ≡ ⊎-map (f' ∘ f) (g' ∘ g) x
+    e (inl x) = refl
+    e (inr x) = refl
