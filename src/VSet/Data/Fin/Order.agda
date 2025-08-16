@@ -61,6 +61,9 @@ fsuc≉fzero ()
 ≈fsuc-injective : fsuc a ≈ᶠ fsuc b → a ≈ᶠ b
 ≈fsuc-injective (≈fsuc a≈b) = a≈b
 
+≉fpred : fsuc a ≉ᶠ fsuc b → a ≉ᶠ b
+≉fpred a'≉b' a≈b = a'≉b' (≈fsuc a≈b)
+
 _≤ᶠ_ : (a : Fin x) (b : Fin y) → Type
 _≤ᶠ_ {x = x} {y = y} a b = (a <ᶠ b) ⊎ (a ≈ᶠ b)
 

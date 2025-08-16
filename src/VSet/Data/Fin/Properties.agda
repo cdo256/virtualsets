@@ -400,6 +400,13 @@ fjoin-fsplice-fsplice-fcross-fsplice b c ne i
   = fjoin (fsplice-fsplice-fcross b c i) (fsplice b c)
               (subst-filler (fsplice b c ≉ᶠ_) (fsplice-fsplice-fcross b c) ne i)
 
+fin-restrict-<-a≈a
+  : ∀ {x} {b : Fin (suc x)} (a : Fin y)
+  → (a<b : a <ᶠ b) → fin-restrict-< a a<b ≈ᶠ a
+fin-restrict-<-a≈a {x = suc x} fzero <fzero = ≈fzero
+fin-restrict-<-a≈a {x = suc x} (fsuc a) (<fsuc a<b) =
+  ≈fsuc (fin-restrict-<-a≈a a a<b)
+
 fjoin-fsplice'
   : ∀ {n} → (b : Fin (suc n))
   → (c : Fin (suc (suc n))) 
@@ -697,3 +704,73 @@ ins-inj = {!!}
 -- ... | fsuc a' | fsuc b' | fsuc c' =
 --   cong fsuc (ins-inj a' b' c' (fsuc-inj a+b≡a+c))
 
+fjoin≡fcross : {n : ℕ} → (a : Fin n) (b : Fin (suc n)) → (b≉a : b ≉ᶠ finj a)
+             → fjoin (finj a) b b≉a ≡ fcross a b
+fjoin≡fcross fzero fzero 0≉0 = absurd (0≉0 ≈refl)
+fjoin≡fcross fzero (fsuc b) b'≉0 =
+  fjoin (finj f0) (fsuc b) b'≉0
+    ≡⟨ refl ⟩
+  fjoin-cases (finj f0) (fsuc b) b'≉0 (fsuc b ≟ᶠ finj f0)
+    ≡⟨ refl ⟩
+  fjoin-cases (finj f0) (fsuc b) b'≉0 (fgt <fzero)
+    ≡⟨ refl ⟩
+  b
+    ≡⟨ refl ⟩
+  fcross f0 (fsuc b) ▯
+fjoin≡fcross (fsuc a) fzero b≉a = refl
+fjoin≡fcross (fsuc a) (fsuc b) b'≉a' =
+  fjoin (finj (fsuc a)) (fsuc b) b'≉a'
+    ≡⟨ fjoin-irrelevant (fsuc (finj a)) (fsuc b) b'≉a' (≉fsuc (≉fpred b'≉a')) ⟩
+  fjoin (fsuc (finj a)) (fsuc b) (≉fsuc (≉fpred b'≉a'))
+    ≡⟨ fsuc-fjoin (finj a) b (≉fpred b'≉a') ⟩
+  fsuc (fjoin (finj a) b (≉fpred b'≉a'))
+    ≡⟨ cong fsuc (fjoin≡fcross a b (≉fpred b'≉a')) ⟩
+  fsuc (fcross a b)
+    ≡⟨ refl ⟩
+  fcross (fsuc a) (fsuc b) ▯
+
+fjoin-isInjective : {n : ℕ} → (a b c : Fin (suc n)) → (b≉a : b ≉ᶠ a) → (c≉a : c ≉ᶠ a)
+                  → fjoin a b b≉a ≡ fjoin a c c≉a → b ≡ c
+fjoin-isInjective fzero fzero c 0≉0 c≉0 q = absurd (0≉0 ≈refl)
+fjoin-isInjective fzero (fsuc b) fzero b'≉0 0≉0 q = absurd (0≉0 ≈refl)
+fjoin-isInjective {suc n} fzero (fsuc b) (fsuc c) b'≉a c'≉a q =
+  cong fsuc p
+  where p : b ≡ c
+        p = b
+              ≡⟨ sym (fjoin≡fcross f0 (fsuc b) b'≉a) ⟩
+            fjoin f0 (fsuc b) b'≉a
+              ≡⟨ q ⟩
+            fjoin f0 (fsuc c) c'≉a
+              ≡⟨ fjoin≡fcross f0 (fsuc c) c'≉a ⟩
+            c ▯
+fjoin-isInjective (fsuc a) fzero fzero 0≉a' _ q = refl
+fjoin-isInjective {suc n} (fsuc a) fzero (fsuc c) 0≉a' c'≉a' q
+  with (fsuc c) ≟ᶠ (fsuc a)
+... | flt (<fsuc c<a) = ≈ᶠ→≡ $ ≈ᶠ-trans ≈fzero $ ≈ᶠ-trans (≡→≈ᶠ q)
+                      $ ≈fsuc (fin-restrict-<-a≈a c c<a)
+... | feq (≈fsuc c≈a) = absurd (c'≉a' (≈fsuc c≈a))
+fjoin-isInjective {suc n} (fsuc a) fzero (fsuc (fsuc c)) 0≉a' c'≉a' q
+    | fgt (<fsuc c>a) = absurd (fzero≢fsuc q)
+fjoin-isInjective {suc n} (fsuc a) (fsuc b) fzero b'≉a' 0≉a' q
+  with (fsuc b) ≟ᶠ (fsuc a)
+... | flt (<fsuc b<a) = sym $ ≈ᶠ→≡ $ ≈ᶠ-trans ≈fzero $ ≈ᶠ-trans (≡→≈ᶠ (sym q))
+                      $ ≈fsuc (fin-restrict-<-a≈a b b<a)
+... | feq (≈fsuc b≈a) = absurd (b'≉a' (≈fsuc b≈a))
+fjoin-isInjective {suc n} (fsuc a) (fsuc (fsuc b)) fzero b'≉a' 0≉a' q
+    | fgt (<fsuc b>a) = absurd (fzero≢fsuc (sym q))
+fjoin-isInjective {n = suc n} (fsuc a) (fsuc b) (fsuc c) b≉a c≉a q =
+  cong fsuc (fjoin-isInjective a b c (≉fpred b≉a) (≉fpred c≉a) r)
+  where
+    r : fjoin a b (≉fpred b≉a) ≡ fjoin a c (≉fpred c≉a)
+    r = fsuc-injective (
+      fsuc (fjoin a b (≉fpred b≉a))
+        ≡⟨ sym (fsuc-fjoin a b (≉fpred b≉a)) ⟩
+      fjoin (fsuc a) (fsuc b) (≉fsuc (≉fpred b≉a))
+        ≡⟨ fjoin-irrelevant (fsuc a) (fsuc b) (≉fsuc (≉fpred b≉a)) b≉a ⟩
+      fjoin (fsuc a) (fsuc b) b≉a
+        ≡⟨ q ⟩
+      fjoin (fsuc a) (fsuc c) c≉a
+        ≡⟨ fjoin-irrelevant (fsuc a) (fsuc c) c≉a (≉fsuc (≉fpred c≉a)) ⟩
+      fjoin (fsuc a) (fsuc c) (≉fsuc (≉fpred c≉a))
+        ≡⟨ fsuc-fjoin a c (≉fpred c≉a) ⟩
+      fsuc (fjoin a c (≉fpred c≉a)) ▯)
