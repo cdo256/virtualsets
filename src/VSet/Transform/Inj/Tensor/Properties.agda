@@ -76,23 +76,6 @@ shift≡shift' {suc m} {suc n} (suc l) (inc b f) =
     p = +-suc l n
     q = +-suc (suc l) n 
 
-⊕-pivot-l : {m m' n n' : ℕ} (f : Inj m m') (g : Inj n n')
-          → (a : Fin (m + n)) → toℕ a < m
-          → toℕ (apply (f ⊕ g) a) < m'
-⊕-pivot-l {zero} {m'} {n} {n'} (nul m') g a a<0 =
-  absurd (¬-<-zero a<0)
-⊕-pivot-l {suc m} {suc m'} {n} {n'} (inc b f) g fzero 0<sm =
-  toℕ-finject-< n' b
-⊕-pivot-l {suc m} {suc m'} {n} {n'} (inc b f) g (fsuc a) sa<sm =
-  v
-  where
-    u : fsplice (finject n' b) (apply (f ⊕ g) a) ≡ {!!}
-    u = fsplice (finject n' b) (apply (f ⊕ g) a) ≡⟨ {!!} ⟩
-        fsplice (finject n' b) (apply (f ⊕ g) a) ≡⟨ {!!} ⟩
-        {!!} ▯
-    v : toℕ (fsplice (finject n' b) (apply (tensor f g) a)) < suc m'
-    v = {!!}
-    
 
 𝟙⊕𝟙≡𝟙 : 𝟙 {m} ⊕ 𝟙 {n} ≡ 𝟙 {m + n}
 𝟙⊕𝟙≡𝟙 {zero} {n} = refl
@@ -107,48 +90,6 @@ nul-⊕-nul {suc m} {n} =
 
 ∘ʲ-nul : {m n : ℕ} → (f : Inj m n) → f ∘ʲ nul m ≡ nul n
 ∘ʲ-nul f = refl
-
--- w : ?
--- g'  : Inj (suc n') (suc n'')
--- g   : Inj n n'
--- b   : Fin (suc n')
--- f'  : Inj m' m''
--- n'' : ℕ
--- n'  : ℕ
--- n   : ℕ
--- m'' : ℕ
--- m'  : ℕ
--- subst2 Inj refl (sym q)
---         (subst2 Inj p q g
---         ∘ʲ inc (subst Fin p (fshift m' b)) (shift' m' g))
---   ≡⟨ {!!} ⟩
--- (f' ⊕ g') ∘ʲ subst2 Inj refl (sym p) (inc (subst Fin p (fshift m' b)) (shift' m' g))
-
-w : {l m n : ℕ} → (b : Fin (suc n))
-  → (g : Inj m n)
-  → inc (subst Fin (+-suc l n) (fshift l b)) (shift' l g)
-  ≡ {!!}
-w {zero} {m} {n} b g = {!!}
-w {suc l} {m} {n} b g = {!!}
-
--- comp-shift1 : {k l m n : ℕ} (g : Inj m n) (f : Inj l m) (c : Fin (suc n))
---             → toℕ c < k
---             → inc c g ∘ʲ shift k f ≡ shift k (g ∘ʲ f)
--- comp-shift1 {zero} {m} {n} g (nul _) c =
---   inc c g ∘ʲ shift1 (nul _) ≡⟨ refl ⟩
---   inc c g ∘ʲ nul _ ≡⟨ refl ⟩
---   nul _ ≡⟨ {!!} ⟩
---   {!!} ▯
--- comp-shift1 {suc l} {suc m} {suc n} g (inc b f) c =
---   inc c g ∘ʲ shift1 (inc b f)
---     ≡⟨ refl ⟩
---   inc c g ∘ʲ inc (fsuc b) (shift1 f)
---     ≡⟨ refl ⟩
---   inc (apply (inc c g) (fsuc b)) (remove (fsuc b) (inc c g) ∘ʲ shift1 f)
---     ≡⟨ refl ⟩
---   inc (fsplice c (apply g b)) (inc (fcross (apply g b) c) (remove b g) ∘ʲ shift1 f)
---     ≡⟨ {!!} ⟩
---   {!!} ▯
 
 apply-shift1 : {m n : ℕ} (f : Inj m n) (a : Fin m)
              → apply (shift1 f) a ≡ fsuc (apply f a)
