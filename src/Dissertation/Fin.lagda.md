@@ -54,6 +54,15 @@ private
 open ℕ.ℕ
 ```
 
+# Finite Sets `Fin`.
+
+This section contains definitions and lemmas about finite sets,
+abbreviated 'Fin'. Specifically, for an natural `n : ℕ`, `Fin n` is a
+canonical finite set of size `n`. In terms of containers, it is the
+container with shape ℕ, and positions `Fin`. TODO: CITE
+
+## Basic definition of Fin
+
 We choose to define our own definition of Fin, which is identical to
 the one in the standard library (but not in the cubical library).
 We also define an alias with semantic brackets which is used in our
@@ -209,78 +218,7 @@ fsuc-injective {zero} {()} {()}
 fsuc-injective {suc n} {i} {j} p = cong pred p
 ```
 
-Next we define a subtraction operator. This has the effect of removing a certain element from the domain of some `Fin`.
-
-TODO: Remove this?
-
-```
--- \setminus
-record _∖_ (A : ℕ) (a : Fin A) : Type where
-  constructor _—_
-  field
-    val : Fin A
-    ne : a ≢ val
-open _∖_
-```
-
-```
-s_—0 : {A : ℕ} (a : Fin A) → suc A ∖ fzero 
-s a —0 = fsuc a — fzero≢fsuc {i = a}
-```
-
-```
-0—s_ : {A : ℕ} (a : Fin A) → suc A ∖ fsuc a
-0—s a = fzero — fsuc≢fzero {i = a}
-```
-
-```
-∖-suc : {A : ℕ} {a : Fin A} → A ∖ a → suc A ∖ fsuc a
-∖-suc {suc A} (b — a≢b) = fsuc b — ≢cong pred a≢b
-```
-
-```
-∖-pred : {A : ℕ} {a : Fin A} → (b : suc A ∖ fsuc a) → (val b ≢ fzero) → A ∖ a
-∖-pred {suc A} (fzero — a≢b) 0≢0 = absurd (0≢0 refl)
-∖-pred {suc A} (fsuc b — a≢b) _ = b — ≢cong fsuc a≢b
-```
-
-```
-sa∖0≡a : {A : ℕ} → (a : suc A ∖ fzero) → ⟦ A ⟧
-sa∖0≡a (fzero — 0≢0) = absurd (0≢0 refl)
-sa∖0≡a (fsuc a — _) = a
-```
-
-```
-ins : {x : ℕ} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖ a)
-ins {suc x} fzero b = fsuc b — fzero≢fsuc
-ins {suc x} (fsuc a) fzero = fzero — fsuc≢fzero
-ins {suc x} (fsuc a) (fsuc b) =
-  fsuc c — λ sa≡sc →
-    let a≡c = fsuc-injective {suc x} {a} {c} sa≡sc
-    in ne (ins a b) a≡c
-  where
-    c = val (ins a b)
-```
-
-```
-|Fin1|≡1 : (a b : ⟦ 1 ⟧) → a ≡ b
-|Fin1|≡1 = isContr→isProp (fzero , f)
-  where
-    f : (y : ⟦ 1 ⟧) → fzero ≡ y
-    f fzero = refl
-```
-
-```
-del : {x : ℕ} → (a : ⟦ suc x ⟧) → (suc x ∖ a) → ⟦ x ⟧
-del {ℕ.zero} fzero (fzero — 0≢0) = absurd (0≢0 refl)
-del {suc x} fzero (fzero — 0≢0) = absurd (0≢0 refl)
-del {suc x} fzero (fsuc b — a≢b) = b
-del {suc x} (fsuc a) (fzero — a≢b) = fzero
-del {suc x} (fsuc a) (fsuc b — a'≢b') =
-  fsuc (del {x} a (b — ≢cong fsuc a'≢b'))
-```
-
-# Trichotomy on `Fin`
+## Trichotomy on `Fin`
 
 <!--
 ```
@@ -300,6 +238,7 @@ private
     c : Fin z
 \end{verbatim}
 
+### A Total Order on `Fin`
 
 Next we define an order operator on Fin. My plan was to make a type
 that is *propositional* for any two pairs of `Fin` using *trichotomy*,
@@ -314,6 +253,8 @@ We desire an type `Trichotomyᶠ` with the following properties:
  3. It is decidable for any two pairs of `Fin`.
  4. It is heterongeneous: It can compare Fin with distinct types.
 
+The following inductive types satisfy all four desiderata above. We
+redefine an equivalence for heterogenity (point 4).
 ```
 data _<ᶠ_ : {x y : ℕ} (a : Fin x) → (b : Fin y) → Type where
   <fzero : {b : Fin y} → (fzero {x}) <ᶠ fsuc b
@@ -324,143 +265,84 @@ data _≈ᶠ_ : {x y : ℕ} (a : Fin x) → (b : Fin y) → Type where
   ≈fsuc : {a : Fin x} {b : Fin y} → a ≈ᶠ b → fsuc a ≈ᶠ fsuc b
 ```
 
+We also define a negation type in the usual way.
 ```
 _≉ᶠ_ : Fin x → Fin y → Type
 a ≉ᶠ b = ¬ a ≈ᶠ b
 ```
 
+### Properties on Order and Equivalence in `Fin`
+
+We wll show that `_≈ᶠ_` is an equivalence relation (for transitivity
+see below `≈ᶠ-trans`), and prove some baisc properties inductively.
+
+First, we symmetric and reflexivity of `≈ᶠ`.
 ```
 ≈fsym : a ≈ᶠ b → b ≈ᶠ a
 ≈fsym ≈fzero = ≈fzero
 ≈fsym (≈fsuc a≈b) = ≈fsuc (≈fsym a≈b)
-```
 
-```
 ≉fsym : a ≉ᶠ b → b ≉ᶠ a
 ≉fsym a≉b b≈a = a≉b (≈fsym b≈a)
-```
 
-```
 ≈refl : a ≈ᶠ a
 ≈refl {a = fzero} = ≈fzero
 ≈refl {a = fsuc a} = ≈fsuc (≈refl {a = a})
 ```
 
+Next we show that `≈ᶠ` and `≡` are bi-converable.
 ```
 ≡→≈ᶠ : {a b : Fin x} → a ≡ b → a ≈ᶠ b 
 ≡→≈ᶠ {a = a} a≡b = subst (a ≈ᶠ_) a≡b ≈refl
-```
 
-```
 ≈ᶠ→≡ : {a b : Fin x} → a ≈ᶠ b → a ≡ b
 ≈ᶠ→≡ ≈fzero = refl
 ≈ᶠ→≡ (≈fsuc a≈b) = cong fsuc (≈ᶠ→≡ a≈b)
 ```
 
+And likewise for their complement,
 ```
 ≢→≉ᶠ : {a b : Fin x} → a ≢ b → a ≉ᶠ b 
 ≢→≉ᶠ {a = a} a≢b a≈b = a≢b (≈ᶠ→≡ a≈b)
-```
 
-```
 ≉ᶠ→≢ : {a b : Fin x} → a ≉ᶠ b → a ≢ b
 ≉ᶠ→≢ a≉b a≡b = a≉b (≡→≈ᶠ a≡b)
 ```
 
+We redefine `fzero≢fsuc` and `fsuc≢fzero` for `≈ᶠ`. Noteice that here
+we can immediately discharge the input as no inductive cases match.
 ```
 fzero≉fsuc : fzero {x} ≉ᶠ fsuc b
 fzero≉fsuc ()
-```
 
-```
 fsuc≉fzero : fsuc a ≉ᶠ fzero {y}
 fsuc≉fzero ()
 ```
 
+Injectivity of ≈fsuc, and the negation of the predecessor.
 ```
 ≈fsuc-injective : fsuc a ≈ᶠ fsuc b → a ≈ᶠ b
 ≈fsuc-injective (≈fsuc a≈b) = a≈b
-```
 
-```
 ≉fpred : fsuc a ≉ᶠ fsuc b → a ≉ᶠ b
 ≉fpred a'≉b' a≈b = a'≉b' (≈fsuc a≈b)
 ```
 
+Now we define a weak order simply by summing the posibilities.
 ```
 _≤ᶠ_ : (a : Fin x) (b : Fin y) → Type
 _≤ᶠ_ {x = x} {y = y} a b = (a <ᶠ b) ⊎ (a ≈ᶠ b)
 ```
 
-```
-data Trichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
-  flt : a <ᶠ b → Trichotomyᶠ a b
-  feq : a ≈ᶠ b → Trichotomyᶠ a b
-  fgt : b <ᶠ a → Trichotomyᶠ a b
-```
-
-```
-open Trichotomyᶠ
-```
-
-```
-data Bichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
-  fle : a ≤ᶠ b → Bichotomyᶠ a b
-  fgt : b <ᶠ a → Bichotomyᶠ a b
-```
-
-```
-open Bichotomyᶠ
-```
-
-```
-_≟ᶠ-suc_ : ∀ {x} → (a : Fin x) (b : Fin y)
-          → Trichotomyᶠ a b → Trichotomyᶠ (fsuc a) (fsuc b) 
-(a ≟ᶠ-suc b) (flt a<b) = flt (<fsuc a<b)
-(a ≟ᶠ-suc b) (feq a≈b) = feq (≈fsuc a≈b)
-(a ≟ᶠ-suc b) (fgt b<a) = fgt (<fsuc b<a)
-```
-
-```
-_≟ᶠ_ : ∀ (a : Fin x) (b : Fin y) → Trichotomyᶠ a b 
-fzero ≟ᶠ fzero = feq (≈fzero)
-fzero ≟ᶠ fsuc b = flt <fzero
-fsuc a ≟ᶠ fzero = fgt <fzero
-fsuc a ≟ᶠ fsuc b = (a ≟ᶠ-suc b) (a ≟ᶠ b)
-```
-
-```
-Trichotomy→Bichotomyᶠ
-  : ∀ {x} {a : Fin x} {b : Fin y}
-  → Trichotomyᶠ a b → Bichotomyᶠ a b 
-Trichotomy→Bichotomyᶠ (flt a<b) = fle (inl a<b)
-Trichotomy→Bichotomyᶠ (feq a≈b) = fle (inr a≈b)
-Trichotomy→Bichotomyᶠ (fgt b<a) = fgt b<a
-```
-
-```
-_≤?ᶠ_ : (a : Fin x) (b : Fin y) → Bichotomyᶠ a b 
-a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
-```
-
-```
-fsuc∘pred≡id : a ≉ᶠ fzero {y} → fsuc (pred a) ≡ a
-fsuc∘pred≡id {a = fzero} 0≉0 = absurd (0≉0 ≈fzero)
-fsuc∘pred≡id {a = fsuc a} a'≉0 = refl
-```
-
+TODO: Cut these lemmas?
 ```
 <ᶠ-respects-pred : {a : Fin x} {b : Fin y} → fsuc a <ᶠ fsuc b → a <ᶠ b
 <ᶠ-respects-pred (<fsuc a'<b') = a'<b'
-```
 
-```
 ≤ᶠ-respects-pred : {a : Fin x} {b : Fin y} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
 ≤ᶠ-respects-pred (inl a'<b') = inl (<ᶠ-respects-pred a'<b')
 ≤ᶠ-respects-pred (inr a'≈b') = inr (≈fsuc-injective a'≈b')
-```
 
-```
 ≤ᶠ-respects-fsuc : {a : Fin x} {b : Fin y} → a ≤ᶠ b → fsuc a ≤ᶠ fsuc b 
 ≤ᶠ-respects-fsuc (inl a<b) = inl (<fsuc a<b)
 ≤ᶠ-respects-fsuc (inr a≈b) = inr (≈fsuc a≈b)
@@ -532,14 +414,14 @@ fsuc≤fsuc (inl a<b) = inl (<fsuc a<b)
 fsuc≤fsuc (inr a≈b) = inr (≈fsuc a≈b)
 ```
 
+
+we can convert between `a < fsuc b` and `a ≤ᶠ b`.
 ```
 ≤ᶠ→<ᶠ : {a : Fin x} {b : Fin y} → a ≤ᶠ b → a <ᶠ fsuc b
 ≤ᶠ→<ᶠ {b = b} (inl a<b) = <ᶠ-trans a<b (<-suc b) 
 ≤ᶠ→<ᶠ (inr ≈fzero) = <fzero
 ≤ᶠ→<ᶠ (inr (≈fsuc a≈b)) = <fsuc (≤ᶠ→<ᶠ (inr a≈b))
-```
 
-```
 <ᶠ→≤ᶠ : {a : Fin x} {b : Fin y} → a <ᶠ fsuc b → a ≤ᶠ b
 <ᶠ→≤ᶠ {a = fzero} {fzero} a<b' = inr ≈fzero
 <ᶠ→≤ᶠ {a = fzero} {fsuc b} 0<b' = inl <fzero
@@ -552,48 +434,42 @@ fsuc≤fsuc (inr a≈b) = inr (≈fsuc a≈b)
 ```
 
 ```
-<ᶠ→≉ : {a : Fin x} {b : Fin y} → a <ᶠ b → a ≉ᶠ b
-<ᶠ→≉ {a = fzero} {b = fsuc b} <fzero a≈b = fzero≉fsuc a≈b
-<ᶠ→≉ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≈b =
-  <ᶠ→≉ {a = a} {b = b} a<b (≈fsuc-injective a≈b)
-```
-
-```
-<ᶠ→≢ : {a b : Fin x} → a <ᶠ b → a ≢ b
-<ᶠ→≢ a<b = ≉ᶠ→≢ (<ᶠ→≉ a<b)
-```
-
-```
-≤ᶠ→≯ᶠ : {a : Fin x} {b : Fin y} → a ≤ᶠ b → ¬ b <ᶠ a
-≤ᶠ→≯ᶠ (inl (<fsuc a<b)) (<fsuc a>b) = ≤ᶠ→≯ᶠ (inl a<b) a>b
-≤ᶠ→≯ᶠ (inr a≈b) a>b = <ᶠ→≉ a>b (≈fsym a≈b)
-```
-
-```
-<ᶠ→≯ᶠ : {a : Fin x} {b : Fin y} → a <ᶠ b → ¬ b <ᶠ a
-<ᶠ→≯ᶠ a<b b<a = ¬a<a  (<ᶠ-trans a<b b<a)
-```
-
-```
 fsuc≤fsuc→<fsuc : (a≤b : a ≤ᶠ b) → ≤ᶠ→<ᶠ (fsuc≤fsuc a≤b) ≡ <fsuc (≤ᶠ→<ᶠ a≤b)
 fsuc≤fsuc→<fsuc (inl x) = refl
 fsuc≤fsuc→<fsuc (inr x) = refl
 ```
 
+
+Now we will show mutual exclusion of the three cases:
+```
+<ᶠ→≉ : {a : Fin x} {b : Fin y} → a <ᶠ b → a ≉ᶠ b
+<ᶠ→≉ {a = fzero} {b = fsuc b} <fzero a≈b = fzero≉fsuc a≈b
+<ᶠ→≉ {a = fsuc a} {b = fsuc b} (<fsuc a<b) a≈b =
+  <ᶠ→≉ {a = a} {b = b} a<b (≈fsuc-injective a≈b)
+
+<ᶠ→≢ : {a b : Fin x} → a <ᶠ b → a ≢ b
+<ᶠ→≢ a<b = ≉ᶠ→≢ (<ᶠ→≉ a<b)
+
+≤ᶠ→≯ᶠ : {a : Fin x} {b : Fin y} → a ≤ᶠ b → ¬ b <ᶠ a
+≤ᶠ→≯ᶠ (inl (<fsuc a<b)) (<fsuc a>b) = ≤ᶠ→≯ᶠ (inl a<b) a>b
+≤ᶠ→≯ᶠ (inr a≈b) a>b = <ᶠ→≉ a>b (≈fsym a≈b)
+
+<ᶠ→≯ᶠ : {a : Fin x} {b : Fin y} → a <ᶠ b → ¬ b <ᶠ a
+<ᶠ→≯ᶠ a<b b<a = ¬a<a  (<ᶠ-trans a<b b<a)
+```
+
+
+Next we define restrictions of Fin to a smaller domain.
 ```
 fin-restrict-< : ∀ {x} {b : Fin (suc x)} (a : Fin y)
                → a <ᶠ b → Fin x
 fin-restrict-< {x = suc x} fzero <fzero = fzero
 fin-restrict-< {x = suc x} (fsuc a) (<fsuc a<b) = fsuc (fin-restrict-< a a<b)
-```
 
-```
 fin-restrict-≤ : ∀ {x} {b : Fin x} (a : Fin y)
                → a ≤ᶠ b → Fin x
 fin-restrict-≤ a a≤b = fin-restrict-< a (≤ᶠ→<ᶠ a≤b)
-```
 
-```
 fin-restrict-<≡fin-restrict-≤ 
   : ∀ {x} {y} → {b : Fin x} (a : Fin y) → (a≤b : a ≤ᶠ b)
   → fin-restrict-< a (≤ᶠ→<ᶠ a≤b) ≡ fin-restrict-≤ a a≤b
@@ -601,17 +477,63 @@ fin-restrict-<≡fin-restrict-≤ a a≤b =
   refl
 ```
 
+### Definition of Trichotomy
+
+Finally we are ready to define `Trichotomyᶠ`. This is an inductive
+type that is one of the 3 possibilites: less than, equal, or greater than.
 ```
-fin-restrict' : ∀ {x} {b : Fin x} (a : Fin (suc x))
-              → a ≤ᶠ b → Fin x
-fin-restrict' {x = 0} {b} a x = b
-fin-restrict' {x = suc x} {b = fsuc b} fzero (inl 0<b') = fzero
-fin-restrict' {x = suc x} fzero (inr 0≈b) = fzero
-fin-restrict' {x = suc x} {b = fsuc b} (fsuc a) (inl (<fsuc a<b)) = fsuc (fin-restrict' a (inl a<b))
-fin-restrict' {x = suc x} {b = fzero} (fsuc a) (inr a'≈0) = absurd (fsuc≉fzero a'≈0)
-fin-restrict' {x = suc x} {b = fsuc b} (fsuc a) (inr a'≈b') = fsuc (fin-restrict' a (inr (≈fsuc-injective a'≈b')))
+data Trichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
+  flt : a <ᶠ b → Trichotomyᶠ a b
+  feq : a ≈ᶠ b → Trichotomyᶠ a b
+  fgt : b <ᶠ a → Trichotomyᶠ a b
+
+open Trichotomyᶠ
 ```
 
+We also will make use of bichotomy, which in this context splits on less or equal (`fle`), or greather than (`fgt`).
+```
+data Bichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
+  fle : a ≤ᶠ b → Bichotomyᶠ a b
+  fgt : b <ᶠ a → Bichotomyᶠ a b
+
+open Bichotomyᶠ
+```
+
+Now we will write a function that will decide which of the three cases
+apply. This is done by handling the base cases in `_≟ᶠ_`, and in the
+successor-successor case, recursing and passing the result into the
+successor function `_≟ᶠ-suc_`.
+```
+_≟ᶠ-suc_ : ∀ {x} → (a : Fin x) (b : Fin y)
+          → Trichotomyᶠ a b → Trichotomyᶠ (fsuc a) (fsuc b) 
+(a ≟ᶠ-suc b) (flt a<b) = flt (<fsuc a<b)
+(a ≟ᶠ-suc b) (feq a≈b) = feq (≈fsuc a≈b)
+(a ≟ᶠ-suc b) (fgt b<a) = fgt (<fsuc b<a)
+```
+
+```
+_≟ᶠ_ : ∀ (a : Fin x) (b : Fin y) → Trichotomyᶠ a b 
+fzero ≟ᶠ fzero = feq (≈fzero)
+fzero ≟ᶠ fsuc b = flt <fzero
+fsuc a ≟ᶠ fzero = fgt <fzero
+fsuc a ≟ᶠ fsuc b = (a ≟ᶠ-suc b) (a ≟ᶠ b)
+```
+
+There is an obvious map for `Trichotomyᶠ` to `Bichotomyᶠ`, which we
+can immediately use to decide bichotomy.
+```
+Trichotomy→Bichotomyᶠ
+  : ∀ {x} {a : Fin x} {b : Fin y}
+  → Trichotomyᶠ a b → Bichotomyᶠ a b 
+Trichotomy→Bichotomyᶠ (flt a<b) = fle (inl a<b)
+Trichotomy→Bichotomyᶠ (feq a≈b) = fle (inr a≈b)
+Trichotomy→Bichotomyᶠ (fgt b<a) = fgt b<a
+
+_≤?ᶠ_ : (a : Fin x) (b : Fin y) → Bichotomyᶠ a b 
+a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
+```
+
+Case splitting on 
 ```
 case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
 case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
@@ -625,35 +547,41 @@ case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
 ≤?ᶠ-suc (fgt a>b) = fgt (<fsuc a>b)
 ```
 
+# Proof of Propositionality of `Trichotomyᶠ`
+
+We now prove the desired property for this trichotomy:
+
+For any two pairs of `Fin`-elements, of possibly differing types,
+their trichotomy type is propositional, meaning that there is at most one
+of the three cases that holds for a given pair, and that has size at most 1.
+
+We can go one step further, using the fact that a *contraction* is an
+inhabited *proposition*, and that *decidability* implies there is an
+inhabited case, we can conclude that `Trichotomyᶠ a b` is a
+contraction for any `Fin`-elements `a`, and `b`. These details are
+left omitted, as they weren't required for this project.
+
 ```
 isProp≈ᶠ : {a : Fin x} {b : Fin y} → isProp (a ≈ᶠ b)
 isProp≈ᶠ ≈fzero ≈fzero = refl
 isProp≈ᶠ (≈fsuc u) (≈fsuc v) = cong ≈fsuc (isProp≈ᶠ u v)
-```
 
-```
 isProp<ᶠ : {a : Fin x} {b : Fin y} → isProp (a <ᶠ b)
 isProp<ᶠ <fzero <fzero = refl
 isProp<ᶠ (<fsuc u) (<fsuc v) = cong <fsuc (isProp<ᶠ u v)
-```
 
-```
 isProp≤ᶠ : {a : Fin x} {b : Fin y} → isProp (a ≤ᶠ b)
 isProp≤ᶠ (inl u) (inl v) = cong inl (isProp<ᶠ u v)
 isProp≤ᶠ (inl u) (inr v) = absurd (<ᶠ→≉ u v)
 isProp≤ᶠ (inr u) (inl v) = absurd (<ᶠ→≉ v u)
 isProp≤ᶠ (inr u) (inr v) = cong inr (isProp≈ᶠ u v)
-```
 
-```
 isPropBichotomyᶠ : {a : Fin x} {b : Fin y} → isProp (Bichotomyᶠ a b)
 isPropBichotomyᶠ (fle u) (fle v) = cong fle (isProp≤ᶠ u v)
 isPropBichotomyᶠ (fle u) (fgt v) = absurd (≤ᶠ→≯ᶠ u v)
 isPropBichotomyᶠ (fgt u) (fle v) = absurd (≤ᶠ→≯ᶠ v u)
 isPropBichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
-```
 
-```
 isPropTrichotomyᶠ : {a : Fin x} {b : Fin y} → isProp (Trichotomyᶠ a b)
 isPropTrichotomyᶠ (flt u) (flt v) = cong flt (isProp<ᶠ u v)
 isPropTrichotomyᶠ (flt u) (feq v) = absurd (<ᶠ→≉ u v)
@@ -708,76 +636,6 @@ isPropTrichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
   <ᶠ-respects-≈ᶠ (≈ᶠ-inj _) a<b (≈refl)
 import Cubical.Data.Nat as ℕ
 open ℕ.ℕ
-```
-
-```
-toℕ∘fromℕ≡id : {m : ℕ} → (n : ℕ) → (n<m : n < m) → toℕ {m} (fromℕ n n<m) ≡ n
-toℕ∘fromℕ≡id {zero} n n<0 =
-  absurd (¬-<-zero {n} n<0)
-toℕ∘fromℕ≡id {suc m} zero 0<sm = refl
-toℕ∘fromℕ≡id {suc m} (suc n) sn<sm =
-  cong suc (toℕ∘fromℕ≡id n (pred-<-pred sn<sm))
-```
-
-```
-toℕ<m : ∀ {m : ℕ} → (a : Fin m) → toℕ a < m 
-toℕ<m {suc m} fzero = 0<suc m
-toℕ<m {suc m} (fsuc a) = suc-<-suc (toℕ<m a)
-```
-
-```
-finject-fsuc-reorder : ∀ {x y : ℕ} → (a : Fin x)
-                      → finject y (fsuc a) ≡ fsuc (finject y a)
-finject-fsuc-reorder {suc x} {zero} a = refl
-finject-fsuc-reorder {suc x} {suc y} a = refl
-finject-fsuc-reorder {zero} {suc y} a = refl
-```
-
-```
--- Like subst but computes on constructors. See std library.
-fcast : (x ≡ y) → Fin x → Fin y
-fcast {x = zero} {y = zero} p a = a
-fcast {x = zero} {y = suc y} p a = absurd (ℕ.znots p)
-fcast {x = suc x} {y = zero} p a = absurd (ℕ.snotz p)
-fcast {x = suc x} {y = suc y} p fzero = fzero
-fcast {x = suc x} {y = suc y} p (fsuc a) = fsuc (fcast (ℕ.injSuc p) a)
-```
-
-```
-fcast-loop : (p : x ≡ x) → (a : Fin x) → fcast p a ≡ a
-fcast-loop p fzero = refl
-fcast-loop p (fsuc a) =
-  cong fsuc (fcast-loop (cong ℕ.predℕ p) a)
-```
-
-```
-fcast-irrelevant : (p q : x ≡ y) → (a : Fin x) → fcast p a ≡ fcast q a
-fcast-irrelevant {x = zero} {y = zero} p q a = refl
-fcast-irrelevant {x = zero} {y = suc y} p q a = absurd (ℕ.znots p)
-fcast-irrelevant {x = suc x} {y = zero} p q a = absurd (ℕ.snotz p)
-fcast-irrelevant {x = suc x} {y = suc y} p q fzero = refl
-fcast-irrelevant {x = suc x} {y = suc y} p q (fsuc a) =
-  cong fsuc (fcast-irrelevant (ℕ.injSuc p) (ℕ.injSuc q) a)
-```
-
-```
-finject0≡fcast : {x : ℕ} (a : Fin x)
-               → finject {x} zero a ≡ fcast (sym (+-zero x)) a
-finject0≡fcast fzero = refl
-finject0≡fcast (fsuc a) = cong fsuc (finject0≡fcast a)
-```
-
-```
-finject0≡subst : {x : ℕ} (a : Fin x)
-               → finject {x} zero a ≡ subst Fin (sym (+-zero x)) a
-finject0≡subst {suc x} fzero =
-  resubst (Fin ∘ suc) (λ z → fzero {z}) (sym (+-zero x))
-finject0≡subst {suc x} (fsuc a) =
-  finject zero (fsuc a) ≡⟨ finject-fsuc-reorder a ⟩
-  fsuc (finject zero a) ≡⟨ cong fsuc (finject0≡subst a) ⟩
-  fsuc (subst Fin (sym (+-zero x)) a)
-    ≡⟨ sym (transport-reorder Fin suc fsuc (sym (+-zero x)) a) ⟩
-  subst Fin (sym (+-zero (suc x))) (fsuc a) ▯
 ```
 
 ```
@@ -873,14 +731,16 @@ fzero≡subst-fzero {x} {y} p = resubst (Fin ∘ suc) (λ z → fzero {z}) p
 ```
 
 ```
-fzero≡cast-fzero : {x y : ℕ} (p : x ≡ y)
-                 → fzero {y} ≡ fcast (cong suc p) (fzero {x})
-fzero≡cast-fzero p = refl
+ℕ+1 : ∀ {x : ℕ} → x ℕ.+ 1 ≡ suc x
+ℕ+1 {x} = ℕ.+-comm x 1
 ```
 
 ```
-ℕ+1 : ∀ {x : ℕ} → x ℕ.+ 1 ≡ suc x
-ℕ+1 {x} = ℕ.+-comm x 1
+finject-fsuc-reorder : ∀ {x y : ℕ} → (a : Fin x)
+                      → finject y (fsuc a) ≡ fsuc (finject y a)
+finject-fsuc-reorder {suc x} {zero} a = refl
+finject-fsuc-reorder {suc x} {suc y} a = refl
+finject-fsuc-reorder {zero} {suc y} a = refl
 ```
 
 ```
@@ -893,20 +753,6 @@ finject1≡finj {suc x} (fsuc a) =
   fsuc (subst Fin (sym ℕ+1) (finj a)) ≡⟨ sym (subst-fsuc-reorder (sym ℕ+1) (finj a)) ⟩
   subst Fin (sym ℕ+1) (fsuc (finj a)) ≡⟨ refl ⟩
   subst Fin (sym ℕ+1) (finj (fsuc a)) ▯
-```
-
-```
-finject1≡finj' : {x : ℕ} (a : Fin x)
-              → finject 1 a ≡ fcast (ℕ.+-comm 1 x) (finj a)
-finject1≡finj' {zero} ()
-finject1≡finj' {suc x} fzero = refl
-finject1≡finj' {suc x} (fsuc a) =
-  finject 1 (fsuc a) ≡⟨ refl ⟩
-  fsuc (finject 1 a) ≡⟨ cong fsuc (finject1≡finj' a) ⟩
-  fsuc (fcast (ℕ.+-comm 1 x) (finj a))
-    ≡⟨ cong fsuc ((fcast-irrelevant (ℕ.+-comm 1 x) ((ℕ.injSuc ((λ i → suc (suc x)) ∙ (λ i → suc (ℕ.+-comm 1 x i))))) (finj a))) ⟩
-  fcast (ℕ.+-comm 1 (suc x)) (fsuc (finj a)) ≡⟨ refl ⟩
-  fcast (ℕ.+-comm 1 (suc x)) (finj (fsuc a)) ▯
 ```
 
 ```
@@ -928,6 +774,20 @@ finj-injective fzero (fsuc y) fx≡fy = absurd (fzero≢fsuc fx≡fy)
 finj-injective (fsuc x) fzero fx≡fy = absurd (fsuc≢fzero fx≡fy)
 finj-injective (fsuc x) (fsuc y) fx≡fy =
   cong fsuc (finj-injective x y (fsuc-injective fx≡fy))
+```
+
+```
+finject0≡subst : {x : ℕ} (a : Fin x)
+               → finject {x} zero a ≡ subst Fin (sym (+-zero x)) a
+finject0≡subst {suc x} fzero =
+  resubst (Fin ∘ suc) (λ z → fzero {z}) (sym (+-zero x))
+finject0≡subst {suc x} (fsuc a) =
+  finject zero (fsuc a) ≡⟨ finject-fsuc-reorder a ⟩
+  fsuc (finject zero a) ≡⟨ cong fsuc (finject0≡subst a) ⟩
+  fsuc (subst Fin (sym (+-zero x)) a)
+    ≡⟨ sym (transport-reorder Fin suc fsuc (sym (+-zero x)) a) ⟩
+  subst Fin (sym (+-zero (suc x))) (fsuc a) ▯
+
 ```
 
 ```
@@ -1030,128 +890,10 @@ finject-+ (suc x) (suc y) z (fsuc a) =
   finject z (fsuc (finject (suc y) a))
     ≡⟨ refl ⟩
   fsuc (finject z (finject (suc y) a))
-    ≡⟨ {!refl!} ⟩
+    ≡⟨ cong fsuc (finject-+ x (suc y) z a)  ⟩
   fsuc (subst Fin (ℕ.+-assoc x (suc y) z) (finject (suc y +ℕ z) a))
     ≡⟨ sym (subst-fsuc-reorder (ℕ.+-assoc x (suc y) z) (finject (suc y +ℕ z) a)) ⟩
   subst Fin (ℕ.+-assoc (suc x) (suc y) z) (fsuc (finject (suc y +ℕ z) a))
     ≡⟨ refl ⟩
   subst Fin (ℕ.+-assoc (suc x) (suc y) z) (finject (suc y +ℕ z) (fsuc a)) ▯
-```
-
-```
-subst0≡fcast0 : {x y : ℕ} (p : x ≡ y)
-              → subst (Fin ∘ suc) p (fzero {x}) ≡ fcast (cong suc p) (fzero {x})
-subst0≡fcast0 p = sym (fzero≡subst-fzero p)
-```
-
-```
-subst≡fcast : ∀ {x y : ℕ} (p : x ≡ y) (a : Fin x)
-            → subst Fin p a ≡ fcast p a 
-subst≡fcast {suc x} {zero} p a = absurd (ℕ.snotz p)
-subst≡fcast {suc x} {suc y} p fzero =
-  subst (λ ○ → subst Fin ○ f0 ≡ fcast ○ f0) (path-suc-pred p) base
-  where
-    x≡y : x ≡ y
-    x≡y = cong ℕ.predℕ p
-    base : subst Fin (cong suc x≡y) f0 ≡ fcast (cong suc x≡y) f0
-    base = subst0≡fcast0 {x = x} {y = y} x≡y
-subst≡fcast {suc x} {suc y} p (fsuc a) =
-  subst Fin p (fsuc a)
-    ≡⟨ cong (λ ○ → subst Fin ○ (fsuc a)) (sym (path-suc-pred p)) ⟩
-  subst Fin (cong suc q) (fsuc a)
-    ≡⟨ subst-fsuc-reorder (cong ℕ.predℕ p) a ⟩
-  fsuc (subst Fin q a)
-    ≡⟨ cong fsuc (subst≡fcast q a) ⟩
-  fsuc (fcast q a)
-    ≡⟨ refl ⟩
-  fcast (cong suc q) (fsuc a)
-    ≡⟨ refl ⟩
-  fcast p (fsuc a) ▯ 
-  where
-    q : x ≡ y
-    q = ℕ.injSuc p
-```
-
-```
-finject-+' : ∀ (x y z : ℕ) → (a : Fin x)
-           → finject z (finject y a)
-           ≡ fcast (ℕ.+-assoc x y z) (finject (y ℕ.+ z) a)
-finject-+' x y z a = {!!}
-```
-
-```
-open _∖_
-```
-
-```
-module DelZeroSuc {x : ℕ} (b :  ⟦ x ⟧) where
-  B : (suc x ∖ fzero)
-  B = fsuc b — fzero≢fsuc {i = b}
-```
-
-```
-  del-zero-suc : del fzero B ≡ b
-  del-zero-suc with (del fzero B) | inspect (del fzero) B
-  ... | fzero | [ p ]ᵢ = sym p
-  ... | fsuc A | [ p ]ᵢ = sym p
-```
-
-```
-open DelZeroSuc using (del-zero-suc)
-```
-
-```
-del-suc-zero : ∀ {x} (a : ⟦ suc x ⟧)
-             → del (fsuc a) (fzero — fsuc≢fzero {i = a}) ≡ fzero
-del-suc-zero a = refl
-```
-
-```
-del-suc-suc : ∀ {x} (a b : ⟦ suc x ⟧) → (a'≢b' : fsuc a ≢ fsuc b)
-             → del (fsuc a) (fsuc b — a'≢b')
-             ≡ fsuc (del a (b — ≢cong fsuc a'≢b'))
-del-suc-suc {zero} fzero fzero a'≢b' =
-  absurd (a'≢b' refl)
-del-suc-suc {suc x} a b a'≢b' = refl
-```
-
-```
-del-inj : {x : ℕ} → (a : ⟦ suc x ⟧)
-        → (B C : (suc x ∖ a))
-        → del a B ≡ del a C
-        → val B ≡ val C
-del-inj {x = zero} fzero (fzero — a≢b) _ _ =
-  absurd (a≢b refl)
-del-inj {x = suc x} fzero (fzero — a≢b) _ _ =
-  absurd (a≢b refl)
-del-inj {x = suc x} fzero (fsuc _ — _) (fzero — a≢c) _ =
-  absurd (a≢c refl)
-del-inj {x = suc x} fzero (fsuc b — a≢b) (fsuc c — a≢c) b'≡c' =
-  cong fsuc b'≡c'
-del-inj {x = suc x} (fsuc a) (fzero — a≢b) (fzero — a≢c) b'≡c' =
-  refl
-del-inj {x = suc x} (fsuc a) (fzero — a≢b) (fsuc c — a≢c) b'≡c' =
-  absurd (fzero≢fsuc b'≡c')
-del-inj {x = suc x} (fsuc a) (fsuc b — a≢b) (fzero — a≢c) b'≡c'
-  = absurd (fsuc≢fzero b'≡c')
-del-inj {x = suc x} (fsuc a) (fsuc b — a≢b) (fsuc c — a≢c) b'≡c'
-  = cong fsuc (del-inj {x = x} a (b — ≢cong fsuc a≢b) (c — {!!}) {!!})
-```
-
-```
-ins-inj : {x : ℕ} → (a : ⟦ suc x ⟧)
-        → (b c : Fin x)
-        → val (ins a b) ≡ val (ins a c)
-        → b ≡ c
-ins-inj {x = zero} a b c a+b≡a+c = absurd (Fin0-absurd b)
-ins-inj {x = suc x} a b c a+b≡a+c with a | b | c
-... | fzero | fzero | fzero = refl
-... | fzero | fzero | fsuc c' = absurd (fzero≢fsuc (fsuc-injective a+b≡a+c))
-... | fzero | fsuc b' | fzero = absurd (fsuc≢fzero (fsuc-injective a+b≡a+c))
-... | fzero | fsuc b' | fsuc c' = fsuc-injective a+b≡a+c
-... | fsuc a' | fzero | fzero = refl
-... | fsuc a' | fzero | fsuc c' = absurd (fzero≢fsuc a+b≡a+c)
-... | fsuc a' | fsuc b' | fzero = absurd (fsuc≢fzero a+b≡a+c)
-... | fsuc a' | fsuc b' | fsuc c' =
-  cong fsuc (ins-inj a' b' c' (fsuc-injective a+b≡a+c))
 ```

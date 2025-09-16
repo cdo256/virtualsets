@@ -530,12 +530,12 @@ finject-+ (suc x) (suc y) z (fsuc a) =
   finject z (fsuc (finject (suc y) a))
     ≡⟨ refl ⟩
   fsuc (finject z (finject (suc y) a))
-    ≡⟨ {!refl!} ⟩
+    ≡⟨ cong fsuc (finject-+ x (suc y) z a)  ⟩
   fsuc (subst Fin (ℕ.+-assoc x (suc y) z) (finject (suc y +ℕ z) a))
     ≡⟨ sym (subst-fsuc-reorder (ℕ.+-assoc x (suc y) z) (finject (suc y +ℕ z) a)) ⟩
   subst Fin (ℕ.+-assoc (suc x) (suc y) z) (fsuc (finject (suc y +ℕ z) a))
     ≡⟨ refl ⟩
-  subst Fin (ℕ.+-assoc (suc x) (suc y) z) (finject (suc y +ℕ z) (fsuc a)) ▯ 
+  subst Fin (ℕ.+-assoc (suc x) (suc y) z) (finject (suc y +ℕ z) (fsuc a)) ▯
 
 
 subst0≡fcast0 : {x y : ℕ} (p : x ≡ y)
