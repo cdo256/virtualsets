@@ -15,8 +15,17 @@ open import Cubical.Foundations.Function
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Transport
+open import VSet.Function.Iso using (_↔_; linv; rinv)
 open import VSet.Prelude
 open import VSet.Data.Sum.Properties
+
+private
+  variable
+    a b c d : Level
+    A : Type a
+    B : Type b
+    C : Type c
+    D : Type d
 ```
 -->
 
@@ -36,13 +45,10 @@ open import Cubical.Foundations.Function
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Transport
+open import VSet.Function.Iso using (_↔_; linv; rinv)
 open import VSet.Prelude
 open import VSet.Data.Sum.Properties
-\end{verbatim}
 
-# Function
-
-```
 private
   variable
     a b c d : Level
@@ -50,7 +56,9 @@ private
     B : Type b
     C : Type c
     D : Type d
-```
+\end{verbatim}
+
+# Function
 
 ## Injectivity
 
@@ -103,13 +111,14 @@ g ↔∘↔ f = compIso f g
 
 ```
 module _ where
+  open Iso
   double-flip : ∀ {A B} (R : A ↔ B) → (flip-↔ {B} {A} (flip-↔ {A} {B} R)) ≡ R
   double-flip R i .fun = fun R
   double-flip R i .inv = inv R
   double-flip R i .rightInv = rightInv R
   double-flip R i .leftInv = leftInv R
 
-  flip-IsId : ∀ {A B} (R : A ↔ B) → ((flip-↔ R) ↔∘↔ R) ^ ≡ id
+  flip-IsId : ∀ {A B} (R : A ↔ B) → fun ((flip-↔ R) ↔∘↔ R) ≡ id
   flip-IsId R i x = leftInv R x i
 ```
 
@@ -131,6 +140,8 @@ module _ where
           ≡⟨ cong (λ ○ → ○ y) (linv f) ⟩
         y ▯
   in fun f , inj
+  where
+    open Iso
 ```
 
 ```
