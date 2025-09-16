@@ -334,34 +334,6 @@ _≤ᶠ_ : (a : Fin x) (b : Fin y) → Type
 _≤ᶠ_ {x = x} {y = y} a b = (a <ᶠ b) ⊎ (a ≈ᶠ b)
 ```
 
-TODO: Cut these lemmas?
-```
-<ᶠ-respects-pred : {a : Fin x} {b : Fin y} → fsuc a <ᶠ fsuc b → a <ᶠ b
-<ᶠ-respects-pred (<fsuc a'<b') = a'<b'
-
-≤ᶠ-respects-pred : {a : Fin x} {b : Fin y} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
-≤ᶠ-respects-pred (inl a'<b') = inl (<ᶠ-respects-pred a'<b')
-≤ᶠ-respects-pred (inr a'≈b') = inr (≈fsuc-injective a'≈b')
-
-≤ᶠ-respects-fsuc : {a : Fin x} {b : Fin y} → a ≤ᶠ b → fsuc a ≤ᶠ fsuc b 
-≤ᶠ-respects-fsuc (inl a<b) = inl (<fsuc a<b)
-≤ᶠ-respects-fsuc (inr a≈b) = inr (≈fsuc a≈b)
-```
-
-```
-fzero≤a : ∀ {x : ℕ} → (a : Fin (suc x)) → fzero {y} ≤ᶠ a
-fzero≤a fzero = inr ≈fzero
-fzero≤a (fsuc a) = inl <fzero
-```
-
-```
-weaken<-pred : ∀ {x} {a : Fin (suc x)} {b : Fin x}
-             → a <ᶠ fsuc b → a ≤ᶠ finj b 
-weaken<-pred {a = a} {b = b} <fzero = fzero≤a (finj b)
-weaken<-pred {a = fsuc a} {b = fsuc b} (<fsuc a<b) =
-  ≤ᶠ-respects-fsuc (weaken<-pred a<b)
-```
-
 ```
 ≈ᶠ-trans : ∀ {x} {a : Fin x} {b : Fin y} {c : Fin z} → a ≈ᶠ b → b ≈ᶠ c → a ≈ᶠ c
 ≈ᶠ-trans ≈fzero ≈fzero = ≈fzero
@@ -374,41 +346,16 @@ weaken<-pred {a = fsuc a} {b = fsuc b} (<fsuc a<b) =
 <ᶠ-trans (<fsuc a<b) (<fsuc b<c) = <fsuc (<ᶠ-trans a<b b<c)
 ```
 
-```
-<≤ᶠ-trans : ∀ {x} {a : Fin x} {b : Fin y} {c : Fin z} → a <ᶠ b → b ≤ᶠ c → a <ᶠ c
-<≤ᶠ-trans a<b (inl b<c) = <ᶠ-trans a<b b<c
-<≤ᶠ-trans <fzero (inr (≈fsuc b≈c)) = <fzero
-<≤ᶠ-trans (<fsuc a<b) (inr (≈fsuc b≈c)) = <fsuc (<≤ᶠ-trans a<b (inr b≈c))
-```
-
-```
-≤<ᶠ-trans : ∀ {x} {a : Fin x} {b : Fin y} {c : Fin z} → a ≤ᶠ b → b <ᶠ c → a <ᶠ c
-≤<ᶠ-trans (inl a<b) b<c = <ᶠ-trans a<b b<c
-≤<ᶠ-trans (inr ≈fzero) <fzero = <fzero
-≤<ᶠ-trans (inr (≈fsuc a≈b)) (<fsuc b<c) = <fsuc (≤<ᶠ-trans (inr a≈b) b<c)
-```
-
-```
-≤ᶠ-trans : ∀ {x} {a : Fin x} {b : Fin y} {c : Fin z} → a ≤ᶠ b → b ≤ᶠ c → a ≤ᶠ c
-≤ᶠ-trans (inl a<b) (inl b<c) = inl (<ᶠ-trans a<b b<c)
-≤ᶠ-trans (inl a<b) (inr b≈c) = inl (<≤ᶠ-trans a<b (inr b≈c))
-≤ᶠ-trans (inr a≈b) (inl b<c) = inl (≤<ᶠ-trans (inr a≈b) b<c)
-≤ᶠ-trans (inr a≈b) (inr b≈c) = inr (≈ᶠ-trans a≈b b≈c)
-```
-
+Weakening of `<ᶠ`,
 ```
 <-suc : ∀ (a : Fin x) → a <ᶠ fsuc a 
 <-suc fzero = <fzero
 <-suc (fsuc a) = <fsuc (<-suc a)
-```
 
-```
 ≤-pred : ∀ {a : Fin x} {b : Fin y} → fsuc a ≤ᶠ fsuc b → a ≤ᶠ b
 ≤-pred (inl (<fsuc a<b)) = inl a<b
 ≤-pred (inr (≈fsuc a≈b)) = inr a≈b
-```
 
-```
 fsuc≤fsuc : a ≤ᶠ b → fsuc a ≤ᶠ fsuc b
 fsuc≤fsuc (inl a<b) = inl (<fsuc a<b)
 fsuc≤fsuc (inr a≈b) = inr (≈fsuc a≈b)
