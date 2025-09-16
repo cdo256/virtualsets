@@ -15,20 +15,20 @@ private
 
 ↔to↣ : (A ↔ B) → (A ↣ B)
 ↔to↣ f =
-  let inj : is-injective (f ^)
+  let inj : is-injective (fun f)
       inj x y eq = 
         x
           ≡⟨ sym (cong (λ ○ → ○ x) (linv f)) ⟩
-        (f ⁻¹ ∘ f ^) x
+        (inv f ∘ fun f) x
           ≡⟨ refl ⟩
-        (f ⁻¹) ((f ^) x)
-          ≡⟨ cong (f ⁻¹) eq ⟩
-        (f ⁻¹) ((f ^) y)
+        inv f (fun f x)
+          ≡⟨ cong (inv f) eq ⟩
+        inv f (fun f y)
           ≡⟨ refl ⟩
-        (f ⁻¹ ∘ f ^) y
+        (inv f ∘ fun f) y
           ≡⟨ cong (λ ○ → ○ y) (linv f) ⟩
         y ▯ 
-  in f ^ , inj
+  in fun f , inj
 
 ≡to↣ : ∀ {A B} → A ≡ B → A ↣ B
 ≡to↣ p = transport p , λ x y q → transport-inj p q
@@ -67,6 +67,15 @@ _↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
       $ inr-injective (fst g c₁) (fst g c₂)
       $ hx≡hy
 
+↣∘↣-idR : ∀ {X Y : Type} (f : X ↣ Y) → f ↣∘↣ ↣-id X ≡ f
+↣∘↣-idR (f , f-inj) = refl
+
+↣∘↣-idL : ∀ {X Y : Type} (f : X ↣ Y) → ↣-id Y ↣∘↣ f ≡ f
+↣∘↣-idL (f , f-inj) = refl
+
+↣∘↣-assoc : ∀ {A B C D : Type} (h : C ↣ D) (g : B ↣ C) (f : A ↣ B)
+          → h ↣∘↣ (g ↣∘↣ f) ≡ (h ↣∘↣ g) ↣∘↣ f
+↣∘↣-assoc h g f = refl
 
 id≡transport : ∀ {ℓ} {A B : Type ℓ} (p : A ≡ B)
              → (λ i → A → p i) [ id ≡ transport p ]
