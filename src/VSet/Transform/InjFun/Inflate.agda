@@ -1,4 +1,4 @@
-module VSet.Transform.FinFun.Inflate where
+module VSet.Transform.InjFun.Inflate where
 
 open import VSet.Prelude
 

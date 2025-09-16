@@ -1,4 +1,4 @@
-module VSet.Transform.FinFun.Properties where
+module VSet.Transform.InjFun.Properties where
 
 open import VSet.Prelude
 open import VSet.Data.Fin hiding (pred)
@@ -6,12 +6,12 @@ open import VSet.Data.Fin hiding (pred)
 open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties
-open import VSet.Data.FinFun.Injection
-open import VSet.Data.FinFun.Equality
-open import VSet.Transform.FinFun.Sub
-open import VSet.Transform.FinFun.Tensor
+open import VSet.Data.InjFun.Injection
+open import VSet.Data.InjFun.Equality
+open import VSet.Transform.InjFun.Sub
+open import VSet.Transform.InjFun.Tensor
 open import VSet.Data.Fin.SumSplit using (⊎↔+; ⊎→+; +→⊎)
-open import VSet.Transform.FinFun.Pred
+open import VSet.Transform.InjFun.Pred
 
 open import Cubical.Data.Nat.Properties
 

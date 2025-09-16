@@ -1,5 +1,5 @@
 -- Functions proven but not currently needed
-module VSet.Transform.FinFun.Unused where
+module VSet.Transform.InjFun.Unused where
 
 open import VSet.Prelude
 open import VSet.Function.Injection
@@ -10,9 +10,9 @@ open import Cubical.Data.Nat.Properties
 
 open import VSet.Data.Nat using (ℕ; zero; suc; _+_)
 open import VSet.Data.Fin renaming (pred to fpred)
-open import VSet.Data.FinFun.Injection
+open import VSet.Data.InjFun.Injection
 open import VSet.Data.Fin.SumSplit using (⊎↔+)
-open import VSet.Transform.FinFun.Pred
+open import VSet.Transform.InjFun.Pred
 
 inc-func : ∀ {X Y : ℕ} → (⟦ X ⟧ → ⟦ Y ⟧) → (⟦ suc X ⟧ → ⟦ suc Y ⟧)
 inc-func f fzero = fzero

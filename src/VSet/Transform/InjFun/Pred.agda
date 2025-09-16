@@ -1,4 +1,4 @@
-module VSet.Transform.FinFun.Pred where
+module VSet.Transform.InjFun.Pred where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Core.Primitives
@@ -14,7 +14,7 @@ open import VSet.Function.Properties
 
 open import VSet.Data.Nat
 open import VSet.Data.Fin
-open import VSet.Data.FinFun.Injection
+open import VSet.Data.InjFun.Injection
 open import VSet.Data.Fin.Minus
 
 

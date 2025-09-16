@@ -1,4 +1,4 @@
-module VSet.Data.FinFun.Quotiented where
+module VSet.Data.InjFun.Quotiented where
 
 open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Properties
@@ -9,12 +9,12 @@ open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties
 open import VSet.Data.Fin.Base
-open import VSet.Data.FinFun.Injection
+open import VSet.Data.InjFun.Injection
 
 open import Cubical.Foundations.Equiv.Base 
 open import Cubical.HITs.PropositionalTruncation
 
-record FinFunQ (n m : ℕ) : Type where
+record InjFunQ (n m : ℕ) : Type where
   constructor finFunQ
   field
     fun : ⟦ m ⟧ → ⟦ n ⟧

@@ -1,4 +1,4 @@
-module VSet.Transform.FinFun.Compose where
+module VSet.Transform.InjFun.Compose where
 
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Function
@@ -17,8 +17,8 @@ open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties
 
-open import VSet.Data.FinFun.Injection
-open import VSet.Transform.FinFun.Pred
+open import VSet.Data.InjFun.Injection
+open import VSet.Transform.InjFun.Pred
 
 infixl 10 _∘ʲ_
 

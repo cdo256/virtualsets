@@ -1,4 +1,4 @@
-module VSet.Data.FinFun.Injection where
+module VSet.Data.InjFun.Injection where
 
 open import Cubical.Data.Nat.Properties
 
@@ -15,9 +15,9 @@ open import VSet.Function.Properties
 id↣ : ∀ {A} → A ↣ A
 id↣ {A} = id , λ x y z → z
 
-FinFun : ∀ (A B : ℕ) → Type
-FinFun A B = Fin A → Fin B
+InjFun : ∀ (A B : ℕ) → Type
+InjFun A B = Fin A → Fin B
 
-FinFun' : ℕ × ℕ → Type
-FinFun' (A , B) = FinFun A B
+InjFun' : ℕ × ℕ → Type
+InjFun' (A , B) = InjFun A B
 

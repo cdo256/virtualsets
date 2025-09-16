@@ -1,4 +1,4 @@
-module VSet.Transform.FinFun.Flatten where
+module VSet.Transform.InjFun.Flatten where
 
 open import VSet.Prelude
 
