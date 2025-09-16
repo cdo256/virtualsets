@@ -36,6 +36,7 @@
             ifmtarg
             lazylist
             newunicodechar
+            catchfilebetweentags
             ;
         };
       };

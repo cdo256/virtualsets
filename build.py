@@ -54,15 +54,10 @@ def build_pdf():
     proc = sp.run(cmd, stdout=sp.PIPE, stderr=sp.PIPE, text=True)
     if proc.returncode != 0:
         print("PDF Build failed :(")
-
-
-def commit():
-    sp.run(["git", "add", "."], check=True)
-    sp.run(["git", "commit", "-m", "Update pdf file"], check=True)
+        exit(1)
 
 
 if __name__ == "__main__":
     init()
     build_tex()
     build_pdf()
-    commit()
