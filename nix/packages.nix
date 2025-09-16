@@ -13,6 +13,31 @@
           inherit agda;
           inherit (pkgs.emacsPackages) agda2-mode;
         };
+        tex = pkgs.texlive.combine {
+          inherit (pkgs.texlive)
+            scheme-medium
+            latexmk
+            standalone
+            pgf
+            amsmath
+            biblatex
+            tikz-cd
+            latex-bin
+            minted
+            #ifxetex
+            #ifluatex
+            xifthen
+            xcolor
+            polytable
+            etoolbox
+            environ
+            #xparse
+            xkeyval
+            ifmtarg
+            lazylist
+            newunicodechar
+            ;
+        };
       };
     };
 }
