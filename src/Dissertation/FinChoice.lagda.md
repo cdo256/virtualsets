@@ -25,6 +25,9 @@ open import Cubical.Data.Sum
 
 # Choice of Finite Set Representation
 
+*This project is a modification of an email I sent to Thorsten
+Altenkirch and Mark Williams on 30th June 2025.*
+
 In this project, finite sets have initially been defined in terms of
 the inductive type `Fin`. However, this representation does not carry
 over cleanly to cubical Agda. While the 1Lab library provides some
@@ -32,7 +35,8 @@ support, it is considerably less developed than Agda’s cubical
 library. Time was therefore spent transferring definitions from the
 1Lab library to Agda cubical.
 
-An import theorem that we want to prove is the equivalence of two ways of composing finite sets,
+An import theorem that we want to prove is the equivalence of two ways
+of composing finite sets,
 
 ```
 +↔⊎ : ∀ {x y} → Fin x ⊎ Fin y ≅ Fin (x + y)
@@ -57,7 +61,10 @@ irr-subst : ∀ (a x y : ℕ) → (ix : Irr (a < x)) → (iy : Irr (a < y)) → 
 irr-subst = {!!}
 ```
 
-Here, the central challenge lies in the fact that `ix` and `iy` are considered to have different types, which prevents even the statement of the goal. One potential direction is to employ the dependent form of `ap`, namely `apd`:
+Here, the central challenge lies in the fact that `ix` and `iy` are
+considered to have different types, which prevents even the statement
+of the goal. One potential direction is to employ the dependent form
+of `ap`, namely `apd`:
 
 ```
 apd : ∀ {a b} {A : I → Type a} {B : (i : I) → A i → Type b}
