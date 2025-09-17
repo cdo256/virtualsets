@@ -7,24 +7,27 @@
 \begin{document}
 \maketitle
 \begin{abstract}
-	This dissertation explores the categorical and computational structure of
-	virtual sets by formalizing them as bivariate species in Agda. The central
-	question is whether the category of finite sets and injections, equipped
-	with a suitable tensor and trace operator, forms a traced monoidal category.
-	Traced monoidal categories provide an abstract setting for feedback and
-	recursion, and connect species theory to broader themes in categorical
-	semantics. We develop the required background in type theory, homotopy type
-	theory, and category theory, before implementing the construction in Agda.
-	Our formalization establishes the monoidal structure of Inj and verifies key
-	trace axioms, while also exposing challenges in mechanizing categorical
-	coherence. The results demonstrate both a concrete contribution to species
-	theory and a methodological contribution to the practice of mechanized
-	mathematics.
+  This dissertation explores the categorical and computational structure of
+  virtual sets by formalizing them as bivariate species in Agda. The central
+  question is whether the category of finite sets and injections, equipped
+  with a suitable tensor and trace operator, forms a traced monoidal category.
+  Traced monoidal categories provide an abstract setting for feedback and
+  recursion, and connect species theory to broader themes in categorical
+  semantics. We develop the required background in type theory, homotopy type
+  theory, and category theory, before implementing the construction in Agda.
+  Our formalization establishes the monoidal structure of Inj and verifies key
+  trace axioms, while also exposing challenges in mechanizing categorical
+  coherence. The results demonstrate both a concrete contribution to species
+  theory and a methodological contribution to the practice of mechanized
+  mathematics.
 \end{abstract}
 \tableofcontents
 \listoffigures
 \listoftables
 
+\include{latex/chapters/introduction}
+\include{latex/chapters/prelim}
+\include{latex/chapters/lit-review}
 \include{latex/chapters/formalization}
 
 \appendix
@@ -32,5 +35,5 @@
 \bibliographystyle{plain}
 \bibliography{report}
 \chapter{Agda Source Listings}
-\chapter{Additional Material}
+% \chapter{Additional Material}
 \end{document}
