@@ -18,6 +18,3 @@ open import Cubical.Data.Sum public
 
 open import VSet.Path public
 
-infix 12 _≅_
-_≅_ : ∀ {ℓ ℓ'} (A : Type ℓ) (B : Type ℓ') → Type (ℓ-max ℓ ℓ')
-_≅_ = Iso
