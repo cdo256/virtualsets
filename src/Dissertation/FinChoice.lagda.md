@@ -37,7 +37,7 @@ support, it is considerably less developed than Agda’s cubical
 library. Time was therefore spent transferring definitions from the
 1Lab library to Agda cubical.
 
-An import theorem that we want to prove is the equivalence of two ways
+An important theorem that we want to prove is the equivalence of two ways
 of composing finite sets,
 
 ```
@@ -59,7 +59,8 @@ this in turn lead to obstacles in proving the following property:
 The difficulty reduces to showing,
 
 ```
-irr-subst : ∀ (a x y : ℕ) → (ix : Irr (a < x)) → (iy : Irr (a < y)) → x ≡ y → {!ix ≡ iy!}
+irr-subst : ∀ (a x y : ℕ) → (ix : Irr (a < x)) → (iy : Irr (a < y))
+          → x ≡ y → {!ix ≡ iy!}
 irr-subst = {!!}
 ```
 
@@ -79,7 +80,7 @@ apd f p i = f i (p i)
 At present, the use of `apd` does not seem natural, which likely
 reflects a lack of experience reasoning in explicitly homotopical
 terms. To address this, time was taken to review the HoTT book and
-Robert Harper’s lecture series on homotopy type theory.
+Robert Harper’s lecture series on homotopy type theory. CITE
 
 It is worth noting that the analogous property is trivial to prove
 when `x` and `y` are of the same type, which suggests that the
@@ -169,4 +170,5 @@ rewriting a substantial portion of the work completed so far, much of the
 necessary material already exists in the cubical library. The
 remaining work of porting was relatively straightforward. Before
 beginning this process, I took some time to familiarise fully with
-the cubical library’s definitions.
+the cubical library’s definitions to avoid reimplementing existing
+lemmas.
