@@ -420,11 +420,11 @@ open Trichotomyᶠ
 
 We also will make use of bichotomy, which in this context splits on less or equal (`fle`), or greather than (`fgt`).
 ```
-data Bichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
-  fle : a ≤ᶠ b → Bichotomyᶠ a b
-  fgt : b <ᶠ a → Bichotomyᶠ a b
+data Dichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
+  fle : a ≤ᶠ b → Dichotomyᶠ a b
+  fgt : b <ᶠ a → Dichotomyᶠ a b
 
-open Bichotomyᶠ
+open Dichotomyᶠ
 ```
 
 Now we will write a function that will decide which of the three cases
@@ -445,22 +445,22 @@ fsuc a ≟ᶠ fzero = fgt <fzero
 fsuc a ≟ᶠ fsuc b = (a ≟ᶠ-suc b) (a ≟ᶠ b)
 ```
 
-There is an obvious map for `Trichotomyᶠ` to `Bichotomyᶠ`, which we
+There is an obvious map for `Trichotomyᶠ` to `Dichotomyᶠ`, which we
 can immediately use to decide bichotomy.
 ```
-Trichotomy→Bichotomyᶠ
+Trichotomy→Dichotomyᶠ
   : ∀ {x} {a : Fin x} {b : Fin y}
-  → Trichotomyᶠ a b → Bichotomyᶠ a b 
-Trichotomy→Bichotomyᶠ (flt a<b) = fle (inl a<b)
-Trichotomy→Bichotomyᶠ (feq a≈b) = fle (inr a≈b)
-Trichotomy→Bichotomyᶠ (fgt b<a) = fgt b<a
+  → Trichotomyᶠ a b → Dichotomyᶠ a b 
+Trichotomy→Dichotomyᶠ (flt a<b) = fle (inl a<b)
+Trichotomy→Dichotomyᶠ (feq a≈b) = fle (inr a≈b)
+Trichotomy→Dichotomyᶠ (fgt b<a) = fgt b<a
 
-_≤?ᶠ_ : (a : Fin x) (b : Fin y) → Bichotomyᶠ a b 
-a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
+_≤?ᶠ_ : (a : Fin x) (b : Fin y) → Dichotomyᶠ a b 
+a ≤?ᶠ b = Trichotomy→Dichotomyᶠ (a ≟ᶠ b)
 ```
 
 Finally we define case splitting on bichotomy, which works like an if
-statement on bichotmy.
+statement on bichotomy.
 ```
 case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
 case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
@@ -468,7 +468,7 @@ case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
    ; (fgt _) → y }
 ```
 
-# Proof of Propositionality of `Trichotomyᶠ`
+## Proof of Propositionality of `Trichotomyᶠ`
 
 We now prove the desired property for this trichotomy:
 
@@ -483,7 +483,7 @@ inhabited case, we can conclude that `Trichotomyᶠ a b` is a
 are left omitted, as they weren't required for this project.
 
 `isPropTrichotomyᶠ` follows from the mutual exclusions proven above.
-Propositionality of Bichotomy follows from this, but that has also
+Propositionality of Dichotomy follows from this, but that has also
 been omitted for space.
 
 ```

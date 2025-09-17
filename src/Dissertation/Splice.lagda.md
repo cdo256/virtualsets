@@ -102,7 +102,7 @@ fsplice (fsuc b) (fsuc a) = fsuc (fsplice b a)
 
 ```
 -- Alternate definition.
-fsplice'-cases : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x) → (Bichotomyᶠ b a)
+fsplice'-cases : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x) → (Dichotomyᶠ b a)
                → Fin (suc x)
 fsplice'-cases _ a (fle _) = fsuc a
 fsplice'-cases _ a (fgt _) = finj a
@@ -111,7 +111,7 @@ fsplice'-cases _ a (fgt _) = finj a
 ```
 fsplice'-cases-eq
    : ∀ {x} → {b : Fin (suc x)} → {a : Fin x}
-   → (u v : Bichotomyᶠ b a)
+   → (u v : Dichotomyᶠ b a)
    → fsplice'-cases b a u ≡ fsplice'-cases b a v
 fsplice'-cases-eq (fle u) (fle v) = refl
 fsplice'-cases-eq (fle u) (fgt v) = absurd (≤ᶠ→≯ᶠ u v)
@@ -178,7 +178,7 @@ fcross₂ {suc x} (fsuc b) (fsuc a) =
 ```
 fcross'-cases
   : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
-  → Bichotomyᶠ a b
+  → Dichotomyᶠ a b
   → Fin (suc x)
 fcross'-cases b a (fle a≤b) = fin-restrict-≤ a a≤b
 fcross'-cases b a (fgt a>b) = pred a
@@ -241,7 +241,7 @@ fcross≡fcross' {x = suc x} (fsuc b) (fsuc a) with a ≤?ᶠ b
   fsuc (fcross b a)
     ≡⟨ cong fsuc (fcross≡fcross' b a) ⟩
   fsuc (fcross'-cases b a (a ≤?ᶠ b))
-    ≡⟨ cong (fsuc ∘ fcross'-cases b a) (isPropBichotomyᶠ (a ≤?ᶠ b) (fle a≤b)) ⟩
+    ≡⟨ cong (fsuc ∘ fcross'-cases b a) (isPropDichotomyᶠ (a ≤?ᶠ b) (fle a≤b)) ⟩
   fsuc (fcross'-cases b a (fle a≤b))
     ≡⟨ refl ⟩
   fsuc (fin-restrict-≤ a a≤b)
@@ -254,7 +254,7 @@ fcross≡fcross' {x = suc x} (fsuc b) (fsuc a) with a ≤?ᶠ b
     ≡⟨ refl ⟩
   fcross'-cases (fsuc b) (fsuc a) (≤?ᶠ-suc (fle a≤b))
     ≡⟨ cong (fcross'-cases (fsuc b) (fsuc a))
-            (isPropBichotomyᶠ (≤?ᶠ-suc (fle a≤b)) (fsuc a ≤?ᶠ fsuc b)) ⟩
+            (isPropDichotomyᶠ (≤?ᶠ-suc (fle a≤b)) (fsuc a ≤?ᶠ fsuc b)) ⟩
   fcross'-cases (fsuc b) (fsuc a) (fsuc a ≤?ᶠ fsuc b) ▯
 ... | fgt a>b =
   fcross (fsuc b) (fsuc a)
@@ -262,7 +262,7 @@ fcross≡fcross' {x = suc x} (fsuc b) (fsuc a) with a ≤?ᶠ b
   fsuc (fcross b a)
     ≡⟨ cong fsuc (fcross≡fcross' b a) ⟩
   fsuc (fcross'-cases b a (a ≤?ᶠ b))
-    ≡⟨ cong (fsuc ∘ fcross'-cases b a) (isPropBichotomyᶠ (a ≤?ᶠ b) (fgt a>b)) ⟩
+    ≡⟨ cong (fsuc ∘ fcross'-cases b a) (isPropDichotomyᶠ (a ≤?ᶠ b) (fgt a>b)) ⟩
   fsuc (fcross'-cases b a (fgt a>b))
     ≡⟨ refl ⟩
   fsuc (pred a)
@@ -271,7 +271,7 @@ fcross≡fcross' {x = suc x} (fsuc b) (fsuc a) with a ≤?ᶠ b
     ≡⟨ refl ⟩
   fcross'-cases (fsuc b) (fsuc a) (≤?ᶠ-suc (fgt a>b))
     ≡⟨ cong (fcross'-cases (fsuc b) (fsuc a))
-            (isPropBichotomyᶠ (≤?ᶠ-suc (fgt a>b)) (fsuc a ≤?ᶠ fsuc b)) ⟩
+            (isPropDichotomyᶠ (≤?ᶠ-suc (fgt a>b)) (fsuc a ≤?ᶠ fsuc b)) ⟩
   fcross'-cases (fsuc b) (fsuc a) (fsuc a ≤?ᶠ fsuc b) ▯
 open Iso
 ```

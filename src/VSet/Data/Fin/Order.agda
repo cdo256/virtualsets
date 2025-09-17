@@ -75,11 +75,11 @@ data Trichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
 
 open Trichotomyᶠ
 
-data Bichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
-  fle : a ≤ᶠ b → Bichotomyᶠ a b
-  fgt : b <ᶠ a → Bichotomyᶠ a b
+data Dichotomyᶠ {x y} (a : Fin x) (b : Fin y) : Type where
+  fle : a ≤ᶠ b → Dichotomyᶠ a b
+  fgt : b <ᶠ a → Dichotomyᶠ a b
 
-open Bichotomyᶠ
+open Dichotomyᶠ
 
 _≟ᶠ-suc_ : ∀ {x} → (a : Fin x) (b : Fin y)
           → Trichotomyᶠ a b → Trichotomyᶠ (fsuc a) (fsuc b) 
@@ -93,15 +93,15 @@ fzero ≟ᶠ fsuc b = flt <fzero
 fsuc a ≟ᶠ fzero = fgt <fzero
 fsuc a ≟ᶠ fsuc b = (a ≟ᶠ-suc b) (a ≟ᶠ b)
 
-Trichotomy→Bichotomyᶠ
+Trichotomy→Dichotomyᶠ
   : ∀ {x} {a : Fin x} {b : Fin y}
-  → Trichotomyᶠ a b → Bichotomyᶠ a b 
-Trichotomy→Bichotomyᶠ (flt a<b) = fle (inl a<b)
-Trichotomy→Bichotomyᶠ (feq a≈b) = fle (inr a≈b)
-Trichotomy→Bichotomyᶠ (fgt b<a) = fgt b<a
+  → Trichotomyᶠ a b → Dichotomyᶠ a b 
+Trichotomy→Dichotomyᶠ (flt a<b) = fle (inl a<b)
+Trichotomy→Dichotomyᶠ (feq a≈b) = fle (inr a≈b)
+Trichotomy→Dichotomyᶠ (fgt b<a) = fgt b<a
 
-_≤?ᶠ_ : (a : Fin x) (b : Fin y) → Bichotomyᶠ a b 
-a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
+_≤?ᶠ_ : (a : Fin x) (b : Fin y) → Dichotomyᶠ a b 
+a ≤?ᶠ b = Trichotomy→Dichotomyᶠ (a ≟ᶠ b)
 
 fsuc∘pred≡id : a ≉ᶠ fzero {y} → fsuc (pred a) ≡ a
 fsuc∘pred≡id {a = fzero} 0≉0 = absurd (0≉0 ≈fzero)
@@ -225,7 +225,7 @@ case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
   λ{ (fle _) → x
    ; (fgt _) → y }
 
-≤?ᶠ-suc : {a : Fin x} {b : Fin y} → Bichotomyᶠ a b → Bichotomyᶠ (fsuc a) (fsuc b)  
+≤?ᶠ-suc : {a : Fin x} {b : Fin y} → Dichotomyᶠ a b → Dichotomyᶠ (fsuc a) (fsuc b)  
 ≤?ᶠ-suc (fle a≤b) = fle (fsuc≤fsuc a≤b)
 ≤?ᶠ-suc (fgt a>b) = fgt (<fsuc a>b)
 
@@ -243,11 +243,11 @@ isProp≤ᶠ (inl u) (inr v) = absurd (<ᶠ→≉ u v)
 isProp≤ᶠ (inr u) (inl v) = absurd (<ᶠ→≉ v u)
 isProp≤ᶠ (inr u) (inr v) = cong inr (isProp≈ᶠ u v)
 
-isPropBichotomyᶠ : {a : Fin x} {b : Fin y} → isProp (Bichotomyᶠ a b)
-isPropBichotomyᶠ (fle u) (fle v) = cong fle (isProp≤ᶠ u v)
-isPropBichotomyᶠ (fle u) (fgt v) = absurd (≤ᶠ→≯ᶠ u v)
-isPropBichotomyᶠ (fgt u) (fle v) = absurd (≤ᶠ→≯ᶠ v u)
-isPropBichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
+isPropDichotomyᶠ : {a : Fin x} {b : Fin y} → isProp (Dichotomyᶠ a b)
+isPropDichotomyᶠ (fle u) (fle v) = cong fle (isProp≤ᶠ u v)
+isPropDichotomyᶠ (fle u) (fgt v) = absurd (≤ᶠ→≯ᶠ u v)
+isPropDichotomyᶠ (fgt u) (fle v) = absurd (≤ᶠ→≯ᶠ v u)
+isPropDichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
 
 isPropTrichotomyᶠ : {a : Fin x} {b : Fin y} → isProp (Trichotomyᶠ a b)
 isPropTrichotomyᶠ (flt u) (flt v) = cong flt (isProp<ᶠ u v)

@@ -35,11 +35,11 @@ data Trichotomyʲ {m n : ℕ} (f g : Inj m n) : Type where
 
 open Trichotomyʲ
 
-data Bichotomyʲ {m n : ℕ} (f g : Inj m n) : Type where
-  jle : f ≤ʲ g → Bichotomyʲ f g
-  jgt : g <ʲ f → Bichotomyʲ f g
+data Dichotomyʲ {m n : ℕ} (f g : Inj m n) : Type where
+  jle : f ≤ʲ g → Dichotomyʲ f g
+  jgt : g <ʲ f → Dichotomyʲ f g
 
-open Bichotomyʲ
+open Dichotomyʲ
 
 _≟ʲ-suc_ : ∀ {m n} → {b c : Fin (suc n)} → (f g : Inj m n)
           → Trichotomyᶠ b c → Trichotomyʲ f g
@@ -54,15 +54,15 @@ _≟ʲ_ : ∀ {m n} → (f g : Inj m n) → Trichotomyʲ f g
 nul _ ≟ʲ nul _ = jeq refl
 inc b f ≟ʲ inc c g = (f ≟ʲ-suc g) (b ≟ᶠ c) (f ≟ʲ g)
 
-Trichotomy→Bichotomyʲ
+Trichotomy→Dichotomyʲ
   : ∀ {m n} → {f g : Inj m n}
-  → Trichotomyʲ f g → Bichotomyʲ f g 
-Trichotomy→Bichotomyʲ (jlt f<g) = jle (inl f<g)
-Trichotomy→Bichotomyʲ (jeq f≡g) = jle (inr f≡g)
-Trichotomy→Bichotomyʲ (jgt g<f) = jgt g<f
+  → Trichotomyʲ f g → Dichotomyʲ f g 
+Trichotomy→Dichotomyʲ (jlt f<g) = jle (inl f<g)
+Trichotomy→Dichotomyʲ (jeq f≡g) = jle (inr f≡g)
+Trichotomy→Dichotomyʲ (jgt g<f) = jgt g<f
 
-_≤?ʲ_ : ∀ {m n} → (f g : Inj m n) → Bichotomyʲ f g 
-f ≤?ʲ g = Trichotomy→Bichotomyʲ (f ≟ʲ g)
+_≤?ʲ_ : ∀ {m n} → (f g : Inj m n) → Dichotomyʲ f g 
+f ≤?ʲ g = Trichotomy→Dichotomyʲ (f ≟ʲ g)
 
 ¬f<f : ∀ {f : Inj m n} → ¬ f <ʲ f
 ¬f<f {f = inc b g} (<j-suc g<g) = ¬f<f g<g
