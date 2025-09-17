@@ -2,6 +2,7 @@
 ```
 module Dissertation.FinChoice where
 open import VSet.Prelude
+open import VSet.Function.Iso
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Nat.Order
 open import Cubical.Data.Fin hiding (fzero; fsuc)
@@ -14,6 +15,7 @@ open import Cubical.Data.Sum
 \begin{verbatim}[hide]
 module DissertationTex.FinChoice where
 open import VSet.Prelude
+open import VSet.Function.Iso
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Nat.Order
 open import Cubical.Data.Fin hiding (fzero; fsuc)
