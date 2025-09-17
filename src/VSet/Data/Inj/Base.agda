@@ -60,12 +60,12 @@ idInj zero = nul zero
 idInj (suc m) = inc fzero (idInj m)
 
 -- Alternate name
-𝟙 : ∀ {m} → Inj m m
-𝟙 {m} = idInj m
+Id : ∀ {m} → Inj m m
+Id {m} = idInj m
 
-𝟙-isId : ∀ m → (a : Fin m) → apply (𝟙 {m}) a ≡ a
-𝟙-isId m fzero = refl
-𝟙-isId (suc m) (fsuc a) = cong fsuc (𝟙-isId m a)
+Id-isId : ∀ m → (a : Fin m) → apply (Id {m}) a ≡ a
+Id-isId m fzero = refl
+Id-isId (suc m) (fsuc a) = cong fsuc (Id-isId m a)
 
 cross : Inj 2 2
 cross = inc (fsuc fzero) $ inc fzero $ nul 0

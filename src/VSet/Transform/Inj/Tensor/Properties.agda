@@ -77,9 +77,9 @@ shift≡shift' {suc m} {suc n} (suc l) (inc b f) =
     q = +-suc (suc l) n 
 
 
-𝟙⊕𝟙≡𝟙 : 𝟙 {m} ⊕ 𝟙 {n} ≡ 𝟙 {m + n}
-𝟙⊕𝟙≡𝟙 {zero} {n} = refl
-𝟙⊕𝟙≡𝟙 {suc m} {n} = cong (inc f0) (𝟙⊕𝟙≡𝟙 {m} {n})
+Id⊕Id≡Id : Id {m} ⊕ Id {n} ≡ Id {m + n}
+Id⊕Id≡Id {zero} {n} = refl
+Id⊕Id≡Id {suc m} {n} = cong (inc f0) (Id⊕Id≡Id {m} {n})
 
 nul-⊕-nul : {m n : ℕ} → nul m ⊕ nul n ≡ nul (m + n)
 nul-⊕-nul {zero} = refl

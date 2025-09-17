@@ -70,11 +70,3 @@ data HITTree : Type where
 ⟦ 𝟘 ⟧ = ⊥
 ⟦ 𝟙 ⟧ = ⊤
 ⟦ A ⊕ B ⟧ = ⟦ A ⟧ ⊎ ⟦ B ⟧
-
-{-
-
-Inject : ⟦ BitTree ⟧ → 《 HITTree 》
-Inject 𝟘 = 𝟘
-Inject 𝟙 = 𝟙
-Inject (A ⊕ A₁) = {!!}
--}

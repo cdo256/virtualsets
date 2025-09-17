@@ -84,23 +84,6 @@ _≈∘_ : {A B C X Y Z : ℕ}
 f≈g ≈∘ g≈h = ≈trans g≈h f≈g
 
 
--- ≈⁻∘≈ : ∀ {A B X Y : ℕ} {f : [ A ↣ X ]} {g : [ B ↣ Y ]}
---      → (f≈g : f ≈ g) → f≈g ∘≈ ≈sym f≈g ≡ ≈refl f
--- ≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.p = refl i
--- ≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.q = refl i
--- ≈⁻∘≈ {A = A} {B = B} {X = X} {f = f} f≈g i ._≈_.path = refl 
-
-
--- step-≈ : {A B C X Y Z : ℕ}
---        → (f : [ A ↣ X ]) → {g : [ B ↣ Y ]} → {h : [ C ↣ Z ]}
---        → f ≈ g → g ≈ h → f ≈ h
--- step-≈ _ f≈g g≈h =  g≈h ∘≈ f≈g
-
--- syntax step-≈ f g f≈g = f ≈⟨ f≈g ⟩ g
-
--- infixr 2 ≈⟨⟩-syntax
--- syntax ≈⟨⟩-syntax f g (λ i → B) = f ≈[ i ]⟨ B ⟩ g
-
 infixr 2 _≈⟨_⟩_
 _≈⟨_⟩_ : {A B C X Y Z : ℕ}
        → (f : [ A ↣ X ]) → {g : [ B ↣ Y ]} → {h : [ C ↣ Z ]}

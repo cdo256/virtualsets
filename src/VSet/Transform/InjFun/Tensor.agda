@@ -28,8 +28,8 @@ infixl 30 _⊕_
 _⊕_ : ∀ {k l m n : ℕ} → [ k ↣ l ] → [ m ↣ n ] → [ k + m ↣ l + n ]
 f ⊕ g = tensor f g
  
-𝟙⊕𝟙≡𝟙 : {m n : ℕ} → 𝟙 {m} ⊕ 𝟙 {n} ≈ 𝟙 {m + n}
-𝟙⊕𝟙≡𝟙 {m} {n} = record { p = refl ; q = refl ; path = r }
+Id⊕Id≈Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≈ Id {m + n}
+Id⊕Id≈Id {m} {n} = record { p = refl ; q = refl ; path = r }
   where
     r : (⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n) ≡ id
     r =
@@ -38,6 +38,9 @@ f ⊕ g = tensor f g
       ⊎→+ m n ∘ +→⊎ m n
         ≡⟨ funExt (sect m n) ⟩
       id ▯
+
+Id⊕Id≡Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≈ Id {m + n}
+Id⊕Id≡Id {m} {n} = ≈→
 
 ladd : ∀ {l m : ℕ} → (A : ℕ) → [ l ↣ m ] → [ A + l ↣ A + m ]
 ladd {l} {m} A f = (↣-id ⟦ A ⟧) ⊕ f

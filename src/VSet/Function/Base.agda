@@ -2,7 +2,7 @@
 module VSet.Function.Base where
 
 open import VSet.Prelude
-open import Function.Base public
+open import Function.Base public hiding (_∘_; id)
 
 private
   variable
@@ -23,3 +23,6 @@ f -×- g = f -⟪ _×_ ⟫- g
 
 _-,-_ : (A → B → C) → (A → B → D) → (A → B → C × D)
 f -,- g = f -⟪ _,_ ⟫- g
+
+Fun : {ℓ ℓ' : Level} → (A : Type ℓ) → (B : Type ℓ') → Type _
+Fun A B = A → B
