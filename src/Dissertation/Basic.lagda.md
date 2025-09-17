@@ -25,6 +25,10 @@ open import VSet.Function.Injection
 open import Cubical.Data.Sum
 open import VSet.Data.Fin.Base
 open import Cubical.Data.Nat.Base
+private
+  variable
+    ℓ ℓ' ℓ'' : Level
+    A : Type ℓ
 ```
 -->
 
@@ -55,31 +59,23 @@ open import VSet.Function.Injection
 open import Cubical.Data.Sum
 open import VSet.Data.Fin.Base
 open import Cubical.Data.Nat.Base
-\end{verbatim}
-
-# Foundational Definitions
-
-We start by declaring some variables, some universe levels `ℓ`, `ℓ'`, `ℓ''`,
-as well as an arbitrary type `A`.
-
-```
 private
   variable
     ℓ ℓ' ℓ'' : Level
     A : Type ℓ
-```
+\end{verbatim}
+
+# Foundational Definitions
 
 ## Path Utilities
 
-For ease of reading, we define an isomorphism synonym using the
-mathematical notation.
-```
-infix 12 _≅_
-_≅_ : ∀ {ℓ ℓ'} (A : Type ℓ) (B : Type ℓ') → Type (ℓ-max ℓ ℓ')
-_≅_ = Iso
-```
+We will now begin the construction, starting with functions related to
+paths. In homotopy type theory, a path is essentially a proof of
+equality. Here `ℓ` is a *level* of Grothenieck universe. It can safely
+be ignored on first reading. `Type` is a generalization of `Set`. For
+our purposes the distinction doesn't mattter.
 
-Next we define the negation of a path in the standard way, as a proof
+We define the negation of a path in the standard way, as a proof
 that the existence of the path is absurd.
 ```
 _≢_ : ∀ {ℓ} {A : Type ℓ} → (x y : A) → Type ℓ
@@ -269,7 +265,8 @@ subst2-reorder B B' g p q a =
 
 This is the last use of the pattern. This states that a constructor in
 some variable `y` is equivalent to constructing in an equivalent value
-`x` and then substituting along the path between `x` and `y`. We will use this for base case constructors such as `fzero`.
+`x` and then substituting along the path between `x` and `y`. We will
+use this for base case constructors such as `fzero`.
 ```
 resubst : ∀ {ℓ ℓ'} {A : Type ℓ} (B : A → Type ℓ')
         → (c : (z : A) → B z)
