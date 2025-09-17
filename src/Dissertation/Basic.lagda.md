@@ -67,16 +67,17 @@ private
 
 # Foundational Definitions
 
-## Path Utilities
+## Operations on Paths
 
 We will now begin the construction, starting with functions related to
-paths. In homotopy type theory, a path is essentially a proof of
-equality. Here `ℓ` is a *level* of Grothenieck universe. It can safely
+paths. In homotopy type theory CITE, a path is essentially a proof of
+equality. Here `ℓ` is a *level* of Grothenieck universe CITE. It can safely
 be ignored on first reading. `Type` is a generalization of `Set`. For
 our purposes the distinction doesn't mattter.
 
 We define the negation of a path in the standard way, as a proof
-that the existence of the path is absurd.
+that the existence of the path leads to absurdity (that the empty type
+is inhabited).
 ```
 _≢_ : ∀ {ℓ} {A : Type ℓ} → (x y : A) → Type ℓ
 x ≢ y = x ≡ y → ⊥
@@ -93,10 +94,10 @@ and conjugation, which uses `cong` to show that `≢` is injective.
 ```
 
 Next we introduce some foundational functions that are present in the
-Agda Cubical library.
+Agda Cubical library CITE.
 Transport is the operation used to map along paths. Is says that if
 you have some type, then you can explicitly map every element of `A`
-to some equivalent element in `B`. (Type below copied from Agda
+to some equivalent element in `B`. (CITE: Type below copied from Agda
 Cubical library Cublical/Foundations/Prelude).
 ```
 transport : {A B : Type ℓ} → A ≡ B → A → B
@@ -106,11 +107,14 @@ transport = _
 Transport filler is a dependent path between a certain `x` in `A` and
 the explicit transport of `x` along a path. We will use this to
 construct a paths between objects and transports of those objects.
-(Type below copied from Agda Cubical library
+(CITE: Type below copied from Agda Cubical library
 Cublical/Foundations/Prelude). It amounts to constructing a triangle
 where the bottom left and right vertices are `x`, the top right vertex
 is `transport p x`. The bottom edge is `refl` on `x`, the right edge is `p`
-and the contents of the triangle, the 'fill' form the dependent path. 
+and the contents of the triangle \footnote{Strictly everying in
+cubical type theory but it is often more convenient to ignore that
+fact and think about aribitrary homotopy spaces} the 'fill' form the
+dependent path. DIAGRAM
 ```
 transport-filler : ∀ {ℓ} {A B : Type ℓ} (p : A ≡ B) (x : A)
                  → PathP (λ i → p i) x (transport p x)
@@ -118,7 +122,7 @@ transport-filler = _
 ```
 
 Returning to my definitions, we introduce a simple lemma that states
-that cancels a `subst` with `subst` on the inverse path.
+that `subst` cancels a with `subst` on the inverse path.
 ```
 subst-inv : ∀ {A : Type} {x y : A} (B : A → Type) (p : x ≡ y) → (pa : B y)
           → subst B p (subst B (sym p) pa) ≡ pa
@@ -129,11 +133,12 @@ subst-inv {A} {x} {y} B p a =
   a ▯
 ```
 
-Then we define a Singleton type. A singleton is HoTT is an element `x` in
-a type `A` together with a proof that all other elements in the type are
-equal to that element. Note that this is exactly the same as saying
-that `A` is contractable with an explicit witness `x`. (Definition
-copied from 1Lab).
+Then we define a Singleton type. A singleton is HoTT \footnote{HoTT =
+Homotopy Type Theory} is an element `x` in a type `A` together with a
+proof that all other elements in the type are equal to that
+element. Note that this is exactly the same as saying that `A` is
+contractable with an explicit witness `x`. (CITE: Definition copied from
+1Lab).
 ```
 Singleton : ∀ {ℓ} {A : Type ℓ} → A → Type _
 Singleton x = Σ[ y ∈ _ ] x ≡ y

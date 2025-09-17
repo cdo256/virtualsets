@@ -368,7 +368,6 @@ fsuc≤fsuc→<fsuc (inl x) = refl
 fsuc≤fsuc→<fsuc (inr x) = refl
 ```
 
-
 Now we will show mutual exclusion of the three cases:
 ```
 <ᶠ→≉ : {a : Fin x} {b : Fin y} → a <ᶠ b → a ≉ᶠ b
@@ -480,8 +479,12 @@ of the three cases that holds for a given pair, and that has size at most 1.
 We can go one step further, using the fact that a *contraction* is an
 inhabited *proposition*, and that *decidability* implies there is an
 inhabited case, we can conclude that `Trichotomyᶠ a b` is a
-contraction for any `Fin`-elements `a`, and `b`. These details are
-left omitted, as they weren't required for this project.
+*contraction* for any `Fin`-elements `a`, and `b`. These details
+are left omitted, as they weren't required for this project.
+
+`isPropTrichotomyᶠ` follows from the mutual exclusions proven above.
+Propositionality of Bichotomy follows from this, but that has also
+been omitted for space.
 
 ```
 isProp≈ᶠ : {a : Fin x} {b : Fin y} → isProp (a ≈ᶠ b)
@@ -491,18 +494,6 @@ isProp≈ᶠ (≈fsuc u) (≈fsuc v) = cong ≈fsuc (isProp≈ᶠ u v)
 isProp<ᶠ : {a : Fin x} {b : Fin y} → isProp (a <ᶠ b)
 isProp<ᶠ <fzero <fzero = refl
 isProp<ᶠ (<fsuc u) (<fsuc v) = cong <fsuc (isProp<ᶠ u v)
-
-isProp≤ᶠ : {a : Fin x} {b : Fin y} → isProp (a ≤ᶠ b)
-isProp≤ᶠ (inl u) (inl v) = cong inl (isProp<ᶠ u v)
-isProp≤ᶠ (inl u) (inr v) = absurd (<ᶠ→≉ u v)
-isProp≤ᶠ (inr u) (inl v) = absurd (<ᶠ→≉ v u)
-isProp≤ᶠ (inr u) (inr v) = cong inr (isProp≈ᶠ u v)
-
-isPropBichotomyᶠ : {a : Fin x} {b : Fin y} → isProp (Bichotomyᶠ a b)
-isPropBichotomyᶠ (fle u) (fle v) = cong fle (isProp≤ᶠ u v)
-isPropBichotomyᶠ (fle u) (fgt v) = absurd (≤ᶠ→≯ᶠ u v)
-isPropBichotomyᶠ (fgt u) (fle v) = absurd (≤ᶠ→≯ᶠ v u)
-isPropBichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
 
 isPropTrichotomyᶠ : {a : Fin x} {b : Fin y} → isProp (Trichotomyᶠ a b)
 isPropTrichotomyᶠ (flt u) (flt v) = cong flt (isProp<ᶠ u v)
@@ -515,6 +506,10 @@ isPropTrichotomyᶠ (fgt u) (flt v) = absurd (<ᶠ→≯ᶠ v u)
 isPropTrichotomyᶠ (fgt u) (feq v) = absurd (<ᶠ→≉ u (≈fsym v))
 isPropTrichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
 ```
+
+Further results used relating to `Fin` are omitted from this report,
+but found in the repository under .
+<!--
 
 ```
 ≈ᶠ-inj : ∀ (a : Fin x) → finj a ≈ᶠ a
@@ -548,8 +543,6 @@ isPropTrichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
 <ᶠ-inj-l : {a : Fin x} {b : Fin y} → a <ᶠ b → finj a <ᶠ b 
 <ᶠ-inj-l a<b =
   <ᶠ-respects-≈ᶠ (≈ᶠ-inj _) a<b (≈refl)
-import Cubical.Data.Nat as ℕ
-open ℕ.ℕ
 ```
 
 ```
@@ -811,3 +804,4 @@ finject-+ (suc x) (suc y) z (fsuc a) =
     ≡⟨ refl ⟩
   subst Fin (ℕ.+-assoc (suc x) (suc y) z) (finject (suc y +ℕ z) (fsuc a)) ▯
 ```
+-->
