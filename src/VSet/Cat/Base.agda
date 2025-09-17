@@ -18,28 +18,5 @@ open import VSet.Data.InjFun.Equality
 open import VSet.Data.InjFun.Injection
 open import VSet.Data.InjFun.Properties 
 
-VSetCat : Category _ _
-VSetCat = record
-  { ob = ℕ
-  ; Hom[_,_] = Inj
-  ; id = λ {n} → idInj n
-  ; _⋆_ = _∘⁻ʲ_
-  ; ⋆IdL = ∘ʲ-idR
-  ; ⋆IdR = ∘ʲ-idL
-  ; ⋆Assoc = λ x y z → ∘ʲ-assoc z y x
-  ; isSetHom = isSetInj
-  }
-
-InjFunCat : Category _ _
-InjFunCat = record
-  { ob = ℕ
-  ; Hom[_,_] = [_↣_]
-  ; id = id↣
-  ; _⋆_ = (λ f g → g ↣∘↣ f)
-  ; ⋆IdL = ↣∘↣-idR
-  ; ⋆IdR = ↣∘↣-idL
-  ; ⋆Assoc = λ f g h → ↣∘↣-assoc h g f
-  ; isSetHom = isSetInjFun
-  }
 
 -- Conjecture that these categories are equivalent.
