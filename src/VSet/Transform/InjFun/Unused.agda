@@ -11,7 +11,7 @@ open import Cubical.Data.Nat.Properties
 open import VSet.Data.Nat using (ℕ; zero; suc; _+_)
 open import VSet.Data.Fin renaming (pred to fpred)
 open import VSet.Data.InjFun.Injection
-open import VSet.Data.Fin.SumSplit using (⊎↔+)
+open import VSet.Data.Fin.SumSplit using (⊎≅+)
 open import VSet.Transform.InjFun.Pred
 
 inc-func : ∀ {X Y : ℕ} → (⟦ X ⟧ → ⟦ Y ⟧) → (⟦ suc X ⟧ → ⟦ suc Y ⟧)

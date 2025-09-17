@@ -15,7 +15,7 @@ open import Cubical.Foundations.Function
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Transport
-open import VSet.Function.Iso using (_↔_; linv; rinv)
+open import VSet.Function.Iso using (_≅_; linv; rinv)
 open import VSet.Prelude
 open import VSet.Data.Sum.Properties
 
@@ -45,7 +45,7 @@ open import Cubical.Foundations.Function
 open import Cubical.Foundations.Isomorphism
 open import Cubical.Foundations.Prelude
 open import Cubical.Foundations.Transport
-open import VSet.Function.Iso using (_↔_; linv; rinv)
+open import VSet.Function.Iso using (_≅_; linv; rinv)
 open import VSet.Prelude
 open import VSet.Data.Sum.Properties
 

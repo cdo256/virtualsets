@@ -10,7 +10,7 @@ open import VSet.Data.InjFun.Injection
 open import VSet.Data.InjFun.Equality
 open import VSet.Transform.InjFun.Sub
 open import VSet.Transform.InjFun.Tensor
-open import VSet.Data.Fin.SumSplit using (⊎↔+; ⊎→+; +→⊎)
+open import VSet.Data.Fin.SumSplit using (⊎≅+; ⊎→+; +→⊎)
 open import VSet.Transform.InjFun.Pred
 
 open import Cubical.Data.Nat.Properties
@@ -31,7 +31,7 @@ open import Cubical.Data.Nat.Properties
 -- ... | inl ()
 -- ... | inr x' = {!!}
 --   -- fst (𝟘 ⊕ f) x ≡⟨ {!refl!} ⟩
-  -- fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x ≡⟨ refl ⟩
+  -- fst (≅to↣ ⊎≅+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ≅to↣ (flip-≅ ⊎≅+)) x ≡⟨ refl ⟩
   -- ⊎→+ (⊎-map (λ ()) (fst f) (+→⊎ x)) ≡⟨ {!!} ⟩
   -- ⊎→+ (⊎-map (λ ()) (fst f) (inr x')) ≡⟨ {!!} ⟩
   -- fst (≈transport (λ _ → X) (λ _ → Y) f) x ▯ 
@@ -46,7 +46,7 @@ open import Cubical.Data.Nat.Properties
   where
     b : fst (𝟘 ⊕ f) ≡ fst (≈transport refl refl f)
     b = fst (𝟘 ⊕ f) ≡⟨ refl ⟩
-        fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) ≡⟨ refl ⟩
+        fst (≅to↣ ⊎≅+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ≅to↣ (flip-≅ ⊎≅+)) ≡⟨ refl ⟩
         ⊎→+ ∘ ⊎-map (λ ()) (fst f) ∘ +→⊎ ≡⟨ {!!} ⟩
         ⊎→+ ∘ ⊎-map (λ ()) (fst f) ∘ +→⊎ ≡⟨ {!!} ⟩
         fst (≈transport (λ _ → X) (λ _ → Y) f) ▯ 
@@ -59,7 +59,7 @@ open import Cubical.Data.Nat.Properties
 --   where
 --     b : fst (𝟘 ⊕ f) ≡ fst (≈transport (λ _ → X) (λ _ → Y) f)
 --     b = fst (𝟘 ⊕ f) ≡⟨ refl ⟩
---         fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) ≡⟨ refl ⟩
+--         fst (≅to↣ ⊎≅+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ≅to↣ (flip-≅ ⊎≅+)) ≡⟨ refl ⟩
 --         ⊎→+ ∘ ⊎-map (λ ()) (fst f) ∘ +→⊎ ≡⟨ {!!} ⟩
 --         ⊎→+ ∘ ⊎-map (λ ()) (fst f) ∘ +→⊎ ≡⟨ {!!} ⟩
 --         fst (≈transport (λ _ → X) (λ _ → Y) f) ▯ 
@@ -128,7 +128,7 @@ lemma1 {suc X} {Y} f (fsuc x) | inl x' | W = {!!}
           ≡⟨ refl ⟩
         (⊎→+ ∘ ⊎-map (fst f) (λ (z : Fin 0) → z) ∘ +→⊎) x
           ≡⟨ refl ⟩
-        fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x
+        fst (≅to↣ ⊎≅+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ≅to↣ (flip-≅ ⊎≅+)) x
           ≡⟨ refl ⟩
         fst (f ⊕ 𝟘) x ▯)
   where
@@ -149,7 +149,7 @@ lemma1 {suc X} {Y} f (fsuc x) | inl x' | W = {!!}
             ≡⟨ {!!} ⟩
           ⊎→+ (⊎-map (fst f) (fst 𝟘) (+→⊎ x))
             ≡⟨ refl ⟩
-          fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x
+          fst (≅to↣ ⊎≅+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ≅to↣ (flip-≅ ⊎≅+)) x
             ≡⟨ refl ⟩
           fst (f ⊕ 𝟘) x ▯)
       }
@@ -179,8 +179,8 @@ lemma1 {suc X} {Y} f (fsuc x) | inl x' | W = {!!}
     
 -- 𝟘⊕≈id {X} {Y} f x = 
 --   fst (𝟘 ⊕ f) x ≡⟨ refl ⟩
---   fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x ≡⟨ refl ⟩
---   (fst (↔to↣ ⊎↔+) ∘ fst (↣-map-⊎ 𝟘 f) ∘ fst (↔to↣ (flip-↔ ⊎↔+))) x ≡⟨ refl ⟩
+--   fst (≅to↣ ⊎≅+ ↣∘↣ ↣-map-⊎ 𝟘 f ↣∘↣ ≅to↣ (flip-≅ ⊎≅+)) x ≡⟨ refl ⟩
+--   (fst (≅to↣ ⊎≅+) ∘ fst (↣-map-⊎ 𝟘 f) ∘ fst (≅to↣ (flip-≅ ⊎≅+))) x ≡⟨ refl ⟩
 --   ⊎→+ (⊎-map (λ ()) (fst f) (+→⊎ x)) ≡⟨ refl ⟩
 --   ⊎→+ (inr (fst f x)) ≡⟨ refl ⟩
 --   fst f x ▯
@@ -214,8 +214,8 @@ foo n m f g = PathP (λ i → (x : Fin n) → (Fin (m + 0)))
 -- ⊕𝟘≈id : ∀ {X Y : ℕ} → (f : [ X ↣ Y ]) → f ⊕ 𝟘 ≈ f
 -- ⊕𝟘≈id {X} {Y} f x =  ?
 --   -- fst (f ⊕ 𝟘) x ≡⟨ refl ⟩
-  -- fst (↔to↣ ⊎↔+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ↔to↣ (flip-↔ ⊎↔+)) x ≡⟨ refl ⟩
-  -- (fst (↔to↣ ⊎↔+) ∘ fst (↣-map-⊎ f 𝟘) ∘ fst (↔to↣ (flip-↔ ⊎↔+))) x ≡⟨ refl ⟩
+  -- fst (≅to↣ ⊎≅+ ↣∘↣ ↣-map-⊎ f 𝟘 ↣∘↣ ≅to↣ (flip-≅ ⊎≅+)) x ≡⟨ refl ⟩
+  -- (fst (≅to↣ ⊎≅+) ∘ fst (↣-map-⊎ f 𝟘) ∘ fst (≅to↣ (flip-≅ ⊎≅+))) x ≡⟨ refl ⟩
   -- ⊎→+ (⊎-map (λ ()) (fst f) {!+→⊎ x!}) ≡⟨ refl ⟩
   -- ⊎→+ (inl (fst f x)) ≡⟨ refl ⟩
   -- fst f x ▯

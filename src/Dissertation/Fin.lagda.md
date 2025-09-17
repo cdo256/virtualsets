@@ -145,7 +145,7 @@ fromℕ {suc n} (suc a) sa<sn = fsuc (fromℕ {n} a (pred-<-pred {a} {n} sa<sn))
 
 Next we define some operations on `Fin`. `fshift` and `finject` are
 complementary functions that have ranges that don't overlap but do
-cover the codomain. We will use this property when defining `⊎↔+`.
+cover the codomain. We will use this property when defining `⊎≅+`.
 finj is a single step injection, which is useful because it can be
 composed in certain cases to avoid having to `subst` across finite
 indexes.

@@ -13,8 +13,8 @@ private
     A B C D : Type
 
 
-↔to↣ : (A ↔ B) → (A ↣ B)
-↔to↣ f =
+≅to↣ : (A ≅ B) → (A ↣ B)
+≅to↣ f =
   let inj : is-injective (fun f)
       inj x y eq = 
         x

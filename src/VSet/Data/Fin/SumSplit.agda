@@ -102,8 +102,8 @@ retr (suc X) Y (inr a) =
   inc X Y (inr a) ≡⟨ refl ⟩
   inr a ▯
 
-⊎↔+ : ∀ (X Y : ℕ) → Iso (⟦ X ⟧ ⊎ ⟦ Y ⟧) ⟦ X + Y ⟧
-⊎↔+ X Y = iso (⊎→+ X Y) (+→⊎ X Y) (sect X Y) (retr X Y)
+⊎≅+ : ∀ (X Y : ℕ) → Iso (⟦ X ⟧ ⊎ ⟦ Y ⟧) ⟦ X + Y ⟧
+⊎≅+ X Y = iso (⊎→+ X Y) (+→⊎ X Y) (sect X Y) (retr X Y)
 
 {-
 split : ∀ (X Y : ℕ) → (u : ⟦ X +ℕ Y ⟧)

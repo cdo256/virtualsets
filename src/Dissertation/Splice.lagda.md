@@ -383,8 +383,8 @@ retr (suc X) Y (inr a) =
 ```
 
 ```
-⊎↔+ : ∀ (X Y : ℕ) → Iso (⟦ X ⟧ ⊎ ⟦ Y ⟧) ⟦ X + Y ⟧
-⊎↔+ X Y = iso (⊎→+ X Y) (+→⊎ X Y) (sect X Y) (retr X Y)
+⊎≅+ : ∀ (X Y : ℕ) → Iso (⟦ X ⟧ ⊎ ⟦ Y ⟧) ⟦ X + Y ⟧
+⊎≅+ X Y = iso (⊎→+ X Y) (+→⊎ X Y) (sect X Y) (retr X Y)
 ```
 
 ```

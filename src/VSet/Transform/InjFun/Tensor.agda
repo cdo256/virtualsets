@@ -18,7 +18,7 @@ open import VSet.Transform.InjFun.Compose
 open import VSet.Data.InjFun.Properties
 
 tensor : ∀ {k l m n : ℕ} → [ k ↣ l ] → [ m ↣ n ] → [ k + m ↣ l + n ]
-tensor {k} {l} {m} {n} f g = ↔to↣ (⊎↔+ l n) ↣∘↣ ↣-map-⊎ f g ↣∘↣ ↔to↣ (flip-↔ (⊎↔+ k m))
+tensor {k} {l} {m} {n} f g = ≅to↣ (⊎≅+ l n) ↣∘↣ ↣-map-⊎ f g ↣∘↣ ≅to↣ (flip-≅ (⊎≅+ k m))
 
 𝟘 : [ 0 ↣ 0 ]
 𝟘 = ↣-id ⟦ 0 ⟧

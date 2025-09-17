@@ -39,14 +39,14 @@ An import theorem that we want to prove is the equivalence of two ways
 of composing finite sets,
 
 ```
-+↔⊎ : ∀ {x y} → Fin x ⊎ Fin y ≅ Fin (x + y)
-+↔⊎ = _
++≅⊎ : ∀ {x y} → Fin x ⊎ Fin y ≅ Fin (x + y)
++≅⊎ = _
 ```
 
 Progress has been made up to Lemma 1.3. However, difficulties arose in
 the definition of `+→⊎`, where the use of a `with` clause obscured
 information required for type checking. This caused proof complexity
-to grow substantially. To address the issue, `+↔⊎` was redefined, but
+to grow substantially. To address the issue, `+≅⊎` was redefined, but
 this in turn lead to obstacles in proving the following property:
 
 ```
