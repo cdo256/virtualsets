@@ -20,6 +20,8 @@
 \setmainfont{DejaVu Serif}
 \setsansfont{Liberation Sans}
 \setmonofont{JuliaMono}
+\let\oldttfamily\ttfamily
+\renewcommand{\ttfamily}{\footnotesize\oldttfamily}
 
 % Agda code style
 \renewcommand{\AgdaCodeStyle}{%
