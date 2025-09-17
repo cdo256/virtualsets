@@ -50,29 +50,23 @@ private
     x y z : ℕ
 \end{verbatim}
 
-# Finite Sets `Fin`.
+# Definition of `Fin`
 
 This section contains definitions and lemmas about finite sets,
 abbreviated 'Fin'. Specifically, for an natural `n : ℕ`, `Fin n` is a
-canonical finite set of size `n`. In terms of containers, it is the
-container with shape ℕ, and positions `Fin`. TODO: CITE
+canonical finite set of size `n`.
 
 ## Basic definition of Fin
 
 We choose to define our own definition of Fin, which is identical to
 the one in the standard library (but not in the cubical library).
-We also define an alias with semantic brackets which is used in our
-definition of `InjFun`.
 
 Unless otherwise stated, all definitions in this section originate
-from the standard librar.
+from the standard library.
 ```
 data Fin : ℕ → Type where
   fzero : {n : ℕ} → Fin (suc n)
   fsuc : {n : ℕ} → Fin n → Fin (suc n)
-
-⟦_⟧ : ℕ → Type
-⟦_⟧ = Fin
 ```
 
 Next we define some numerals, which will make it easier to construct
@@ -167,8 +161,9 @@ Next we turn to absurdities and negations. `fzero≢fsuc` and
 `fsuc≢fzero` state the fact that we cannot have a value that is
 constructed two distinct ways. This is a fact that is true for all
 inductive types in general, but in Cubical Agda, an explicit transport
-is required to demonstrate this. We transport the elemnt in `⊤`
-(unit), into an element in `⊥` (empty) which is an absurdity as required.
+is required to demonstrate this. We transport the element `tt : ⊤`
+(unit), into an inhabitant in `⊥` (the uninhabited type) which is an
+absurdity as required.
 ```
 fzero≢fsuc : ∀ {x : ℕ} {i : Fin x} → fzero ≢ fsuc i
 fzero≢fsuc {x} p = transport (cong P p) tt
@@ -191,7 +186,7 @@ Fin0-absurd : {A : Type ℓ} → Fin 0 → A
 Fin0-absurd ()
 ```
 
-Next we prove that `fsuc` is an injective. This is another property of
+Finally, we prove that `fsuc` is an injective function. This is another property of
 inductive definitions: *There is only one way to construct an element
 of an inductive type*.
 ```
