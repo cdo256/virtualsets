@@ -114,11 +114,11 @@ InjProdCat = InjCat ×C InjCat
 ⊕-id {(m , n)} =
   ⊕-hom {x = (m , n)} {y = (m , n)} (InjProdCat .id)
     ≡⟨ refl ⟩
-  ⊕-hom {x = (m , n)} {y = (m , n)} (𝟙 , 𝟙)
+  ⊕-hom {x = (m , n)} {y = (m , n)} (Id , Id)
     ≡⟨ refl ⟩
-  𝟙 {m} ⊕ 𝟙 {n}
-    ≡⟨ 𝟙⊕𝟙≡𝟙 {m} {n} ⟩
-  𝟙 {m + n} ▯
+  Id {m} ⊕ Id {n}
+    ≡⟨ Id⊕Id≡Id {m} {n} ⟩
+  Id {m + n} ▯
 ```
 
 ```

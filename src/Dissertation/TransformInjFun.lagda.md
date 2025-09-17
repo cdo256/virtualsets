@@ -28,6 +28,7 @@ open import VSet.Data.Nat.WellFounded
 open import VSet.Data.Sum.Properties
 open import VSet.Data.SumTree.Base hiding (α; α⁻¹)
 open import VSet.Data.SumTree.Metrics
+open import VSet.Function.Base
 open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties
@@ -67,6 +68,7 @@ open import VSet.Data.Nat.WellFounded
 open import VSet.Data.Sum.Properties
 open import VSet.Data.SumTree.Base hiding (α; α⁻¹)
 open import VSet.Data.SumTree.Metrics
+open import VSet.Function.Base
 open import VSet.Function.Injection
 open import VSet.Function.Iso
 open import VSet.Function.Properties
@@ -76,98 +78,47 @@ open import VSet.Relation.WellFounded.Base
 open import VSet.Relation.WellFounded.Lex
 \end{verbatim}
 
-# Composition on `InjFun`
+# Tensor Product on `InjFun`
 
 We now move to detail operations and properties on `InjFun`.
 
-Composition is defined as simply the composition of the functions
-paired with the composition of the injectivity proofs, given by `↣∘↣`. We define an identiy function trivially and construct the tensor product.
-```
-𝟙 : ∀ {X} → [ X ↣ X ]
-𝟙 = (λ x → x) , λ x y eq' → eq'
-```
+First we define compositional identity (`Id`) and monoidal unit (`𝟘`).
 
 ```
-tensor : ∀ {k l m n : ℕ} → [ k ↣ l ] → [ m ↣ n ] → [ k + m ↣ l + n ]
-tensor {k} {l} {m} {n} f g = ≅to↣ (⊎≅+ l n) ↣∘↣ ↣-map-⊎ f g ↣∘↣ ≅to↣ (flip-≅ (⊎≅+ k m))
+Id : ∀ {X} → [ X ↣ X ]
+Id = (λ x → x) , λ x y eq' → eq'
 
 𝟘 : [ 0 ↣ 0 ]
 𝟘 = ↣-id ⟦ 0 ⟧
+```
+
+We use additive notation (`𝟘` and `⊕`) for the tensor product and
+identity because our tensor operation merges two injections via the
+coproduct map `↣-map-⊎`, summing both domain and codomain sizes. The
+tensor is defined as a composition of three steps (which appear from
+right to left in the definition):
+- `≅to↣ (flip-≅ (⊎≅+ k m))` splits the input into `Fin k` or `Fin m`.
+- `↣-map-⊎ f g` applies `f` or `g`, depending on the split.
+- `≅to↣ (⊎≅+ l n)` combines the outputs.
+
+The Agda code is:
+```
+tensor : ∀ {k l m n : ℕ} → [ k ↣ l ] → [ m ↣ n ] → [ k + m ↣ l + n ]
+tensor {k} {l} {m} {n} f g = ≅to↣ (⊎≅+ l n) ↣∘↣ ↣-map-⊎ f g ↣∘↣ ≅to↣ (flip-≅ (⊎≅+ k m))
 
 infixl 30 _⊕_
 _⊕_ : ∀ {k l m n : ℕ} → [ k ↣ l ] → [ m ↣ n ] → [ k + m ↣ l + n ]
 f ⊕ g = tensor f g
 ```
 
-```
-module Pred {x y : ℕ} (f : [ suc x ↣ suc y ]) where
-  open _∖_
-  f-inj : is-injective (fst f)
-  f-inj = snd f
-```
+`⊕` forms a coproduct structure on the category of injective functions.
 
+We then prove some properties about this tensor. `Id⊕Id≡Id` states
+that placing two identity arrows 'side by side' results in another
+identity arrow.
 ```
-  g^ : ⟦ x ⟧ → ⟦ y ⟧
-  g^ i =
-    let (j — 0≢j) = ins fzero i 
-    in del (fst f fzero) (fst f j — λ f0≡fj → 0≢j (f-inj fzero j f0≡fj))
-```
-
-```
-  composition : (ai : (b₁ b₂ : ⟦ x ⟧) → val (ins fzero b₁) ≡ val (ins fzero b₂) → b₁ ≡ b₂)
-       → (di : (B₁ B₂ : (suc y) ∖ fst f fzero)
-             → del (fst f fzero) B₁ ≡ del (fst f fzero) B₂ → val B₁ ≡ val B₂)
-       → is-injective g^
-  composition ai di b₁ b₂ f'b₁≡f'b₂ =
-    let
-      (c₁ — z≢c₁) = ins fzero b₁
-      (c₂ — z≢c₂) = ins fzero b₂
-    in
-    ai b₁ b₂
-       (f-inj c₁ c₂
-         (di (fst f c₁ — λ fz≡fc₁ → z≢c₁ (f-inj fzero c₁ fz≡fc₁))
-             (fst f c₂ — λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
-             f'b₁≡f'b₂))
-```
-
-```
-  g-inj : is-injective g^
-  g-inj b₁ b₂ gb₁≡gb₂ = 
-    let
-      ai : (b₁ b₂ : ⟦ x ⟧) → val (ins fzero b₁) ≡ val (ins fzero b₂) → b₁ ≡ b₂
-      ai = ins-inj fzero
-      di : (B₁ B₂ : (suc y) ∖ fst f fzero)
-         → del (fst f fzero) B₁ ≡ del (fst f fzero) B₂
-         → val B₁ ≡ val B₂
-      di = del-inj (fst f fzero)
-      (c₁ — z≢c₁) = ins fzero b₁
-      (c₂ — z≢c₂) = ins fzero b₂
-    in
-    ai b₁ b₂
-       (f-inj c₁ c₂
-         (di (fst f c₁ — λ fz≡fc₁ → z≢c₁ (f-inj fzero c₁ fz≡fc₁))
-             (fst f c₂ — λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
-             gb₁≡gb₂))
-```
-
-```
-  g : [ x ↣ y ]
-  g = g^ , g-inj
-```
-
-```
-open Pred using () renaming (g to pred) public
-```
-
-```
-sub : {X Y : ℕ} (A : ℕ) → (f : [ A + X ↣ A + Y ]) → [ X ↣ Y ]
-sub zero f = f
-sub (suc A) f = sub A (pred f)
-```
-
-```
-𝟙⊕𝟙≡𝟙 : {m n : ℕ} → 𝟙 {m} ⊕ 𝟙 {n} ≈ 𝟙 {m + n}
-𝟙⊕𝟙≡𝟙 {m} {n} = record { p = refl ; q = refl ; path = r }
+Id⊕Id≡Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≈ Id {m + n}
+Id⊕Id≡Id {m} {n} = record { p = refl ; q = refl ; path = r }
   where
     r : (⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n) ≡ id
     r =
@@ -178,15 +129,36 @@ sub (suc A) f = sub A (pred f)
       id ▯
 ```
 
+For convenience we have a short-hand for adding an identity arrow on
+the left or right.
 ```
 ladd : ∀ {l m : ℕ} → (A : ℕ) → [ l ↣ m ] → [ A + l ↣ A + m ]
-ladd {l} {m} A f = (↣-id ⟦ A ⟧) ⊕ f
+ladd {l} {m} A f = (Id {A}) ⊕ f
+
+radd : ∀ {l m : ℕ} → (A : ℕ) → [ l ↣ m ] → [ l + A ↣ m + A ]
+radd {l} {m} A f = f ⊕ (Id {A})
 ```
 
-```
-radd : ∀ {l m : ℕ} → (A : ℕ) → [ l ↣ m ] → [ l + A ↣ m + A ]
-radd {l} {m} A f = f ⊕ (↣-id ⟦ A ⟧)
-```
+\begin{figure}[h]
+  \centering
+  \begin{tikzcd}
+    m + n \arrow[r, "f \oplus g", tail]
+    \arrow[rr, "{(f' \circ f) \oplus (g' \circ g')}"', bend right] &
+    m'+n' \arrow[r, "f' \oplus g'", tail] & m''+n''
+  \end{tikzcd}
+  \caption{Direct sum of injections preserves composition: the composition of direct sums matches the direct sum of compositions, i.e., this diagram commutes.}
+  \label{fig:sum-preserves-composition}
+\end{figure}
+
+Next we show that for the operation `_⊕_`: The property
+`⊕-preserves-∘` demonstrates that the direct sum (coproduct) of
+injective functions is compatible with composition: composing two
+pairs of injections separately and then taking their direct sum yields
+the same result as first taking the direct sums and then composing
+those. Formally, for injections `f`, `f'`, `g`, `g'`, the equation
+`(f' ∘ f) ⊕ (g' ∘ g) = (f' ⊕ g') ∘ (f ⊕ g)` ensures the tensor operation
+respects function composition, and that the sum operation acts
+functorially on the category of injective functions. See figure \ref{fig:sum-preserves-composition}.
 
 ```
 ⊕-preserves-∘
@@ -197,8 +169,8 @@ radd {l} {m} A f = f ⊕ (↣-id ⟦ A ⟧)
   record { p = refl ; q = refl ; path = e }
   where
     e : ⊎→+ m'' n'' ∘ ⊎-map (fst f' ∘ fst f) (fst g' ∘ fst g) ∘ +→⊎ m n
-      ≡ (⊎→+ m'' n'' ∘ ⊎-map (fst f') (fst g') ∘ +→⊎ m' n')
-      ∘  (⊎→+ m' n' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ m n)
+      ≡   (⊎→+ m'' n'' ∘ ⊎-map (fst f') (fst g') ∘ +→⊎ m' n')
+        ∘ (⊎→+ m'  n'  ∘ ⊎-map (fst f)  (fst g)  ∘ +→⊎ m  n)
     e =
       ⊎→+ m'' n'' ∘ ⊎-map (fst f' ∘ fst f) (fst g' ∘ fst g) ∘ +→⊎ m n
         ≡⟨ cong (λ ○ → ⊎→+ m'' n'' ∘ ○ ∘ +→⊎ m n)
@@ -212,6 +184,8 @@ radd {l} {m} A f = f ⊕ (↣-id ⟦ A ⟧)
       (⊎→+ m'' n'' ∘ ⊎-map (fst f') (fst g') ∘ +→⊎ m' n') ∘
         ⊎→+ m' n' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ m n ▯
 ```
+
+
 
 ```
 module _ {l l' m m' n n' : ℕ} where
@@ -227,7 +201,7 @@ module _ {l l' m m' n n' : ℕ} where
 
   α-p-fun : (Fin (l + (m + n)) → Fin (l' + (m' + n')))
           ≡ (Fin ((l + m) + n) → Fin ((l' + m') + n'))
-  α-p-fun = {!!}
+  α-p-fun = {!cong₂ (λ A B → A → B) α-p-dom α-p-cod!}
 
   α-iso : Iso [ (l + (m + n)) ↣ (l' + (m' + n')) ]
               [ ((l + m) + n) ↣ ((l' + m') + n') ]

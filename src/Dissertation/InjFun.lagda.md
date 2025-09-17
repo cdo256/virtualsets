@@ -7,7 +7,7 @@ open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Properties
 open import Cubical.Foundations.Equiv.Base
 open import Cubical.Foundations.HLevels
-open import VSet.Data.Fin.Base
+open import VSet.Data.Fin.Base hiding (⟦_⟧)
 open import VSet.Data.Fin.Properties
 open import VSet.Data.Sum.Properties
 open import VSet.Function.Iso using (linv; rinv; _^; _⁻¹)
@@ -27,7 +27,7 @@ open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Properties
 open import Cubical.Foundations.Equiv.Base
 open import Cubical.Foundations.HLevels
-open import VSet.Data.Fin.Base
+open import VSet.Data.Fin.Base hiding (⟦_⟧)
 open import VSet.Data.Fin.Properties
 open import VSet.Data.Sum.Properties
 open import VSet.Function.Iso using (linv; rinv; _^; _⁻¹)
@@ -154,7 +154,7 @@ isSetInjFun {m} {n} =
          (λ f → isProp→isSet (isProp-is-injective f))
 ```
 
-# Equivalence Relation on InjFun
+## Equivalence Relation on InjFun
 
 We define a heterogeneous relation on `InjFun` that allows us to
 compare two injective functions across equal types which might not be
@@ -385,22 +385,18 @@ injections.
 
 ```
 
-## 'Lifting' Injections Across Sums
+## Coproduct Map for Injective Functions
 
-Here we lift injections componentwise to a sum. The function part is
-`⊎-map` and the injectivity proof is a case split using: (a)
-disjointness of `inl`/`inr`, and (b) injectivity of each branch plus
-the injectivity of the constructors themselves (`inl` and
-`inr` injectivity). This relies on lemmas established previously about
-sums.
-
-Note that I have assumed the universe level is `ℓ-zero`, since
-no higher levels were used in any place this function is
-referenced. This is deliberate choice simplicity over generalizability
-outside of the main construction.
-
+This construction defines an injection on a sum type by combining
+injections for each summand. The mapping function, `⊎-map`, applies
+the respective injections to either side of the sum. Injectivity is
+proven by a case analysis: (a) `inl` and `inr` are disjoint, so their
+images can't clash; (b) if both inputs come from the same side,
+injectivity follows from the branch's injectivity and the fact that
+constructors themselves are injective. The proof utilizes previously
+established lemmas about sums.
 ```
-↣-map-⊎ : {A B C D : Type ℓ-zero} → (A ↣ B) → (C ↣ D) → ((A ⊎ C) ↣ (B ⊎ D))
+↣-map-⊎ : {A B C D : Type} → (A ↣ B) → (C ↣ D) → ((A ⊎ C) ↣ (B ⊎ D))
 ↣-map-⊎ {A} {B} {C} {D} f g = h , inj
   where
     h : (A ⊎ C) → (B ⊎ D)
@@ -423,12 +419,13 @@ outside of the main construction.
       $ hx≡hy
 ```
 
-## Relating Identity Functions `transport`.
+## Relating Identity Functions to `transport`
 
-These final equalities of this section export the idea that `transport p`
-and `subst B p` are *paths of functions* (i.e., the identity deforms into the
-transport operator). These are obtained from `transport-filler` using
-the function extensionality principle `funExt`.
+Te final equalities of this section export the idea that `transport p`
+and `subst B p` are *paths of functions* (i.e., the identity deforms
+into the transport operator). These are obtained from
+`transport-filler` using the function extensionality principle
+(`funExt`).
 
 ```
 id≡transport : ∀ {ℓ} {A B : Type ℓ} (p : A ≡ B)

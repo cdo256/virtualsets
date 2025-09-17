@@ -109,9 +109,9 @@ apply (inc b inj) (fsuc a) =
 We can the define identity like so,
 
 ```
-𝟙 : ∀ {m} → Inj m m
-𝟙 {zero} = nul zero
-𝟙 {suc m} = inc fzero (𝟙 {m})
+Id : ∀ {m} → Inj m m
+Id {zero} = nul zero
+Id {suc m} = inc fzero (Id {m})
 ```
 
 We then define some elementary operations that we will build on to
