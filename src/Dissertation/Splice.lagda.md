@@ -62,6 +62,37 @@ private
     b : Fin y
 \end{verbatim}
 
+# 'Splice' operations on `Fin`
+
+In my final definition of `Inj`, I have taken the approach of using a
+basic inductive definition for injective functions. This was because
+the previous way (`InjFun`) of doing it was messy, and ultimately hid
+the true behaviour that I wanted to extract with a trace. This meant
+that all of the proofs relied on a long chain of isomorphisms that
+weren't strong enough to capture the behaviour that we cared about,
+namely adding and removing links to modify a funciton.
+
+Additionally carrying around the proof meant they had to be modified
+together, and may have been the reason I was experiencing performance
+reduction when type checking Agda.
+
+I noticed that I wasn't getting the benefit I expected from all of
+these abstractions and that ultimately proved these isomorphisms were
+distracting from the main aim which is ensure that a trace structure
+is formed from Virtual Sets. I do think this method could have worked
+if I had enough time, but the problem is that I didn't have the time
+to spare. Additionally techniques I've learnt made it clear that
+there were much better ways of structuring things so that . (?)
+
+In the aid of this simplicity, I decided to switch to the following
+structure to represent injective Fin funcitons.
+
+
+
+
+There are certain operations needed to construct and work with an
+inductive definition of injective finite functions.
+
 ```
 fsplice : ∀ {x} → Fin (suc x) → Fin x → Fin (suc x)
 fsplice fzero a = fsuc a
