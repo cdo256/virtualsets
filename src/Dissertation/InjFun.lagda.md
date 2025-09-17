@@ -50,6 +50,8 @@ X ↣ Y = Σ (X → Y) is-injective
 ↣-id : (X : Type) → X ↣ X
 ↣-id X = (λ x → x) , (λ x y p → p)
 ```
+
+
 Next we apply that in the conext of `Fin`-injective functions. This
 makes up our alternative definition to `Inj` of an injective
 function. I believe that these two definitions are isomorphic, however
