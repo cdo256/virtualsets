@@ -1,12 +1,8 @@
 \usepackage{amsmath,amssymb}
-% \usepackage{verbatim}
-% \newenvironment{code}{\verbatim}{\endverbatim}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{amsmath}
 \usepackage{amsthm}
 \usepackage{amsfonts}
-\usepackage{amssymb}
 \usepackage{cite}
 \usepackage{tikz-cd}
 \usepackage{stmaryrd}
@@ -15,18 +11,45 @@
 \usepackage{fontspec}
 \usepackage[references]{latex/agda}
 \usepackage{unicode-math}
+\usepackage{tikz}
+\usetikzlibrary{positioning,chains,fit,shapes,calc,arrows.meta}
+\usepackage{ucharclasses}
+\usepackage{newunicodechar}
+
+% Font setup
 \setmainfont{DejaVu Serif}
 \setsansfont{Liberation Sans}
 \setmonofont{JuliaMono}
-\renewcommand{\AgdaCodeStyle}{%
-	\setmainfont{JuliaMono}
-	\setsansfont{JuliaMono}
-	\setmonofont{JuliaMono}
-        \footnotesize % Make the code smaller to fin within the width.
-}
 
+% Agda code style
+\renewcommand{\AgdaCodeStyle}{%
+  \setmainfont{JuliaMono}
+  \setsansfont{JuliaMono}
+  \setmonofont{JuliaMono}
+  \footnotesize % Make the code smaller to fit within width.
+}
 \setlength{\mathindent}{0pt}
 
+% TikZ helper
+\newcommand{\dotrow}[3]{% end, label, labelpos
+  \begin{scope}[start chain=going right]
+    \foreach \i in {0,...,#1}
+      \node[on chain, dotnode, label=#3:{\i}] (#2\i) {};
+  \end{scope}
+}
+
+\tikzset{
+  dotnode/.style = {circle, fill, inner sep=0.5mm},
+  thickedge/.style  = {thick},
+  largestep/.style = {
+    ultra thick,
+    -{>[length=8mm, width=8mm]},
+    shorten >=1cm,
+    shorten <=1cm},
+  pivot/.style={circle, fill=white, inner sep=0.5mm, draw=red}
+}
+
+% Theorem styles/environments
 \theoremstyle{plain}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
@@ -38,6 +61,7 @@
 \newtheorem{note}{Note}
 \newtheorem{question}{Research Question}
 
+% Pandoc expects this to be defined.
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}
 }
