@@ -20,7 +20,7 @@ private
 -- Sum of leaves
 Σ∥_∥ : Tree ℕ → ℕ
 Σ∥ ⟨ X ⟩ₜ ∥ = X
-Σ∥ A ＋ B ∥ = Σ∥ A ∥ + Σ∥ B ∥
+Σ∥ A & B ∥ = Σ∥ A ∥ + Σ∥ B ∥
 
 forkℕ : {A : Type ℓ} → A → A → ℕ → A
 forkℕ az as zero = az
@@ -30,18 +30,18 @@ forkℕ az as (suc _) = as
 0L∥_∥ : Tree ℕ → ℕ
 0L∥ ⟨ zero ⟩ₜ ∥ = 0
 0L∥ ⟨ suc _ ⟩ₜ ∥ = 0
-0L∥ A ＋ B ∥ = forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
+0L∥ A & B ∥ = forkℕ (suc 0L∥ B ∥) (suc 0L∥ A ∥) Σ∥ A ∥
 
 -- Number of zero leaves
 0∥_∥ : Tree ℕ → ℕ
 0∥ ⟨ zero ⟩ₜ ∥ = 1
 0∥ ⟨ suc _ ⟩ₜ ∥ = 0
-0∥ A ＋ B ∥ = 0∥ A ∥ + 0∥ B ∥
+0∥ A & B ∥ = 0∥ A ∥ + 0∥ B ∥
 
 -- Number of nodes
 #∥_∥ : Tree ℕ → ℕ
 #∥ ⟨ _ ⟩ₜ ∥ = 1
-#∥ A ＋ B ∥ = #∥ A ∥ + #∥ B ∥
+#∥ A & B ∥ = #∥ A ∥ + #∥ B ∥
 
 -- Refinement types
 TreeΣ[_] : ℕ → Type

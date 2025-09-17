@@ -14,21 +14,21 @@ open import VSet.Data.Fin.SumSplit hiding (sect; retr)
 
 flatten : (A : Tree ℕ) → ⟦ A ⟧ₛ → ⟦ Σ∥ A ∥ ⟧
 flatten ⟨ X ⟩ₜ a = a
-flatten (A ＋ B) (inl x) = ⊎→+ Σ∥ A ∥ Σ∥ B ∥ (inl (flatten A x))
-flatten (A ＋ B) (inr y) = ⊎→+ Σ∥ A ∥ Σ∥ B ∥ (inr (flatten B y))
+flatten (A & B) (inl x) = ⊎→+ Σ∥ A ∥ Σ∥ B ∥ (inl (flatten A x))
+flatten (A & B) (inr y) = ⊎→+ Σ∥ A ∥ Σ∥ B ∥ (inr (flatten B y))
 
 unflatten : (A : Tree ℕ) → ⟦ Σ∥ A ∥ ⟧ → ⟦ A ⟧ₛ
 unflatten ⟨ X ⟩ₜ a = a
-unflatten (A ＋ B) a with +→⊎ Σ∥ A ∥ Σ∥ B ∥ a
+unflatten (A & B) a with +→⊎ Σ∥ A ∥ Σ∥ B ∥ a
 ... | inl x = inl (unflatten A x)
 ... | inr y = inr (unflatten B y)
 
 drop-0-base : (A : Tree ℕ) → Tree ℕ
 drop-0-base ⟨ X ⟩ₜ = ⟨ X ⟩ₜ
-drop-0-base (A ＋ B) with Σ∥ A ∥ | Σ∥ B ∥
+drop-0-base (A & B) with Σ∥ A ∥ | Σ∥ B ∥
 ... | zero | bn = drop-0-base B
 ... | suc an | zero = drop-0-base A
-... | suc an | suc bn = drop-0-base A ＋ drop-0-base B
+... | suc an | suc bn = drop-0-base A & drop-0-base B
 
 {-
 drop-0-no-0 : (A : Tree ℕ) → (an : ℕ) → Σ∥ A ∥ ≡ suc an → no-0 (drop-0-base A)
@@ -37,10 +37,10 @@ drop-0-drops-0 : (A : Tree ℕ) → ∥ A ∥ₜ ≥ 1 → no-0 (drop-0-base A)
 drop-0-no-0 A an a≡ = drop-0-drops-0 A (subst (_≥ 1) (sym a≡) (suc≥1 an))
 
 drop-0-drops-0 ⟨ X ⟩ₜ ge = ge
-drop-0-drops-0 (A ＋ B) ge
+drop-0-drops-0 (A & B) ge
   with ∥ A ∥ₜ | inspect ∥_∥ₜ A | ∥ B ∥ₜ | inspect ∥_∥ₜ B
 ... | zero | [ a≡ ]ᵢ | zero | [ b≡ ]ᵢ =
-  absurd {A = λ _ → no-0 (drop-0-base (⟨ zero ⟩ₜ ＋ B))} (¬-<-zero ge) 
+  absurd {A = λ _ → no-0 (drop-0-base (⟨ zero ⟩ₜ & B))} (¬-<-zero ge) 
 ... | zero | [ a≡ ]ᵢ | suc bn | [ b≡ ]ᵢ = drop-0-drops-0 B 
   (subst (_≥ 1) (sym b≡) (suc≥1 bn)) 
 ... | suc an | [ a≡ ]ᵢ | zero | [ b≡ ]ᵢ = drop-0-drops-0 A 
@@ -54,7 +54,7 @@ drop-0-drops-0 (A ＋ B) ge
 
 drop-0-preserves-size : (A : Tree ℕ) → ∥ drop-0-base A ∥ₜ ≡ ∥ A ∥ₜ
 drop-0-preserves-size ⟨ X ⟩ₜ = refl
-drop-0-preserves-size (A ＋ B)
+drop-0-preserves-size (A & B)
   with ∥ A ∥ₜ | inspect ∥_∥ₜ A | ∥ B ∥ₜ | inspect ∥_∥ₜ B
 ... | zero | [ a≡ ]ᵢ | bn | [ b≡ ]ᵢ =
   drop-0-preserves-size B ∙ b≡
@@ -79,10 +79,10 @@ Tree+∖0→Tree+ : (A : Tree+) → ⟦ fst (drop-0 A) ⟧ₛ → ⟦ fst A ⟧�
 Tree+∖0→Tree+ (⟨ zero ⟩ₜ , 0≥1) _ =
   absurd {A = λ _ → ⟦ ⟨ zero ⟩ₜ ⟧ₛ} (0≱1 0≥1)
 Tree+∖0→Tree+ (⟨ suc X ⟩ₜ , ge) a = a
-Tree+∖0→Tree+ ((A ＋ B) , ge) a =
+Tree+∖0→Tree+ ((A & B) , ge) a =
   helper ∥ A ∥ₜ (inspect ∥_∥ₜ A) (∥ B ∥ₜ) (inspect ∥_∥ₜ B)
   where
-    helper : (an : ℕ) → Reveal ∥_∥ₜ · A is an → (bn : ℕ) → Reveal ∥_∥ₜ · B is bn →  ⟦ A ＋ B ⟧ₛ  
+    helper : (an : ℕ) → Reveal ∥_∥ₜ · A is an → (bn : ℕ) → Reveal ∥_∥ₜ · B is bn →  ⟦ A & B ⟧ₛ  
     helper zero [ A≡an ]ᵢ bn [ B≡bn ]ᵢ = {!!}
     helper (suc an) [ A≡an ]ᵢ bn [ B≡bn ]ᵢ = {!!}
 
@@ -101,11 +101,11 @@ Tree+∖0→Tree+ ((A ＋ B) , ge) a =
 drop-1L : (A : Tree ℕ) → no-0 A → Tree ℕ
 drop-1L ⟨ zero ⟩ₜ no0 = absurd {A = λ _ → Tree ℕ} (¬-<-zero no0)
 drop-1L ⟨ suc X ⟩ₜ no0 = ⟨ X ⟩ₜ
-drop-1L (A ＋ B) (A-no0 , _) = drop-1L A A-no0 ＋ B
+drop-1L (A & B) (A-no0 , _) = drop-1L A A-no0 & B
 
 sect : (A : Tree ℕ) → section (flatten A) (unflatten A)
 sect ⟨ x ⟩ₜ b = refl
-sect (A ＋ B) b = {!!}
+sect (A & B) b = {!!}
   -- flatten A (unflatten A b) ≡⟨ {!!} ⟩
   -- flatten A (unflatten A b) ≡⟨ {!!} ⟩
   -- b ▯
