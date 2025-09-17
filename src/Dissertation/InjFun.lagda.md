@@ -7,11 +7,15 @@ open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Properties
 open import Cubical.Foundations.Equiv.Base
 open import Cubical.Foundations.HLevels
-open import VSet.Data.Fin
 open import VSet.Data.Fin.Base
-open import VSet.Function.Iso
-open import VSet.Function.Properties
+open import VSet.Data.Fin.Properties
+open import VSet.Data.Sum.Properties
+open import VSet.Function.Iso using (linv; rinv; _^; _⁻¹)
+open import VSet.Function.Injection using (transport-inj)
 open import VSet.Prelude
+private
+  variable
+    A B C D : Type
 ```
 -->
 
@@ -23,14 +27,20 @@ open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
 open import Cubical.Data.Nat.Properties
 open import Cubical.Foundations.Equiv.Base
 open import Cubical.Foundations.HLevels
-open import VSet.Data.Fin
 open import VSet.Data.Fin.Base
-open import VSet.Function.Iso
-open import VSet.Function.Properties
+open import VSet.Data.Fin.Properties
+open import VSet.Data.Sum.Properties
+open import VSet.Function.Iso using (linv; rinv; _^; _⁻¹)
+open import VSet.Function.Injection using (transport-inj)
 open import VSet.Prelude
+private
+  variable 
+    A B C D : Type
 \end{verbatim}
 
 # Depdendent Sum Representation of Injective Functions
+
+## Definition of `InjFun`
 
 We begin by defining the concept of injectivity. The standard way to
 define a injective function in type theory is to construct, using
@@ -50,9 +60,15 @@ X ↣ Y = Σ (X → Y) is-injective
 ↣-id X = (λ x → x) , (λ x y p → p)
 ```
 
-Now we can define the type which we will call `InjFun`:
+Now we can define an alias for `Fin` and a type constructor call
+`InjFun`, with a square-bracket syntax, which is the function represention of finite injective
+functions:
 
 ```
+⟦_⟧ : ℕ → Type
+⟦_⟧ = Fin
+
+-- 'InjFun'
 [_↣_] : ℕ → ℕ → Type
 [ X ↣ Y ] = ⟦ X ⟧ ↣ ⟦ Y ⟧
 ```
@@ -69,6 +85,48 @@ We construct a helper function for the function part of `[_↣_]`.
 FinFun : ∀ (A B : ℕ) → Type
 FinFun A B = ⟦ A ⟧ → ⟦ B ⟧
 ```
+
+## Composition of Injective Function
+
+We define composition on injective functions, `↣`, by composing the
+underlying functions and chaining the injectivity proof. The unit and
+associativity laws hold by definitional equality in this encoding, so
+the proofs are `refl`. This is intentional: we picked a representation
+that makes the algebra easy, and Agda is powerful enough to recognize
+this. These four lemmas are most of what we need to construct a category of
+injective functions.
+
+```
+infixl 5 _↣∘↣_
+
+_↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
+(f , inj₁) ↣∘↣ (g , inj₂) = (f ∘ g) , λ x y eq → inj₂ _ _ (inj₁ _ _ eq)
+
+↣∘↣-idR : ∀ {X Y : Type} (f : X ↣ Y) → f ↣∘↣ ↣-id X ≡ f
+↣∘↣-idR (f , f-inj) = refl
+
+↣∘↣-idL : ∀ {X Y : Type} (f : X ↣ Y) → ↣-id Y ↣∘↣ f ≡ f
+↣∘↣-idL (f , f-inj) = refl
+
+↣∘↣-assoc : ∀ {A B C D : Type} (h : C ↣ D) (g : B ↣ C) (f : A ↣ B)
+          → h ↣∘↣ (g ↣∘↣ f) ≡ (h ↣∘↣ g) ↣∘↣ f
+↣∘↣-assoc h g f = refl
+```
+
+We additionally write a function to convert between *paths* and injections.
+```
+≡to↣ : ∀ {A B} → A ≡ B → A ↣ B
+≡to↣ p = transport p , λ x y q → transport-inj p q
+
+refl-to-↣-is-id : ∀ {A} → fst (≡to↣ (refl {x = A})) ≡ id
+refl-to-↣-is-id =
+  funExt (λ x →
+    fst (≡to↣ refl) x ≡⟨ refl ⟩
+    transport refl x ≡⟨ transportRefl x ⟩
+    x ▯)
+```
+
+## Properties of `InjFun`
 
 Next we show that `is-injective` is a proposition when applied to a
 `FinFun`. This is done by making use of a chain of library lemmas that
@@ -308,62 +366,23 @@ injections.
 ```
 ≅to↣ : (A ≅ B) → (A ↣ B)
 ≅to↣ f =
-  let inj : is-injective (fun f)
-      inj x y eq =
-        x
-          ≡⟨ sym (cong (λ ○ → ○ x) (linv f)) ⟩
-        (inv f ∘ fun f) x
-          ≡⟨ refl ⟩
-        inv f (fun f x)
-          ≡⟨ cong (inv f) eq ⟩
-        inv f (fun f y)
-          ≡⟨ refl ⟩
-        (inv f ∘ fun f) y
-          ≡⟨ cong (λ ○ → ○ y) (linv f) ⟩
-        y ▯
-  in fun f , inj
+  fun f , inj
   where
     open Iso
-```
+    inj : is-injective (fun f)
+    inj x y eq =
+      x
+        ≡⟨ sym (cong (λ ○ → ○ x) (linv f)) ⟩
+      (inv f ∘ fun f) x
+        ≡⟨ refl ⟩
+      inv f (fun f x)
+        ≡⟨ cong (inv f) eq ⟩
+      inv f (fun f y)
+        ≡⟨ refl ⟩
+      (inv f ∘ fun f) y
+        ≡⟨ cong (λ ○ → ○ y) (linv f) ⟩
+      y ▯
 
-We additionally write a function to convert between *paths* and injections.
-```
-≡to↣ : ∀ {A B} → A ≡ B → A ↣ B
-≡to↣ p = transport p , λ x y q → transport-inj p q
-
-refl-to-↣-is-id : ∀ {A} → fst (≡to↣ (refl {x = A})) ≡ id
-refl-to-↣-is-id =
-  funExt (λ x →
-    fst (≡to↣ refl) x ≡⟨ refl ⟩
-    transport refl x ≡⟨ transportRefl x ⟩
-    x ▯)
-```
-
-## Composition of Injective Function
-
-We define composition on injective functions, `↣`, by composing the
-underlying functions and chaining the injectivity proof. The unit and
-associativity laws hold by definitional equality in this encoding, so
-the proofs are `refl`. This is intentional: we picked a representation
-that makes the algebra easy, and Agda is powerful enough to recognize
-this. These four lemmas are most of what we need to construct a category of
-injective functions.
-
-```
-infixl 5 _↣∘↣_
-
-_↣∘↣_ : (B ↣ C) → (A ↣ B) → (A ↣ C)
-(f , inj₁) ↣∘↣ (g , inj₂) = (f ∘ g) , λ x y eq → inj₂ _ _ (inj₁ _ _ eq)
-
-↣∘↣-idR : ∀ {X Y : Type} (f : X ↣ Y) → f ↣∘↣ ↣-id X ≡ f
-↣∘↣-idR (f , f-inj) = refl
-
-↣∘↣-idL : ∀ {X Y : Type} (f : X ↣ Y) → ↣-id Y ↣∘↣ f ≡ f
-↣∘↣-idL (f , f-inj) = refl
-
-↣∘↣-assoc : ∀ {A B C D : Type} (h : C ↣ D) (g : B ↣ C) (f : A ↣ B)
-          → h ↣∘↣ (g ↣∘↣ f) ≡ (h ↣∘↣ g) ↣∘↣ f
-↣∘↣-assoc h g f = refl
 ```
 
 ## 'Lifting' Injections Across Sums
