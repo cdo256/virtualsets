@@ -50,10 +50,6 @@ private
     x y z : ℕ
 \end{verbatim}
 
-```
-open ℕ.ℕ
-```
-
 # Finite Sets `Fin`.
 
 This section contains definitions and lemmas about finite sets,
@@ -102,20 +98,6 @@ f8 : Fin (9 ℕ.+ x)
 f8 = fsuc f7
 f9 : Fin (10 ℕ.+ x)
 f9 = fsuc f8
-```
-
-We also use the `DISPLAY` pragma mainly for terser debugging. 
-```
-{-# DISPLAY fzero = f0 #-}
-{-# DISPLAY fsuc fzero = f1 #-}
-{-# DISPLAY fsuc (fsuc fzero) = f2 #-}
-{-# DISPLAY fsuc (fsuc (fsuc fzero)) = f3 #-}
-{-# DISPLAY fsuc (fsuc (fsuc (fsuc fzero))) = f4 #-}
-{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc fzero)))) = f5 #-}
-{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc (fsuc fzero))))) = f6 #-}
-{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc fzero)))))) = f7 #-}
-{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc fzero))))))) = f8 #-}
-{-# DISPLAY fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc (fsuc fzero)))))))) = f9 #-}
 ```
 
 Next we construct an eliminator for `Fin`, that is a function that
@@ -449,16 +431,14 @@ open Bichotomyᶠ
 Now we will write a function that will decide which of the three cases
 apply. This is done by handling the base cases in `_≟ᶠ_`, and in the
 successor-successor case, recursing and passing the result into the
-successor function `_≟ᶠ-suc_`.
+successor function `_≟ᶠ-suc_`, which handles the induction case.
 ```
 _≟ᶠ-suc_ : ∀ {x} → (a : Fin x) (b : Fin y)
           → Trichotomyᶠ a b → Trichotomyᶠ (fsuc a) (fsuc b) 
 (a ≟ᶠ-suc b) (flt a<b) = flt (<fsuc a<b)
 (a ≟ᶠ-suc b) (feq a≈b) = feq (≈fsuc a≈b)
 (a ≟ᶠ-suc b) (fgt b<a) = fgt (<fsuc b<a)
-```
 
-```
 _≟ᶠ_ : ∀ (a : Fin x) (b : Fin y) → Trichotomyᶠ a b 
 fzero ≟ᶠ fzero = feq (≈fzero)
 fzero ≟ᶠ fsuc b = flt <fzero
@@ -480,18 +460,13 @@ _≤?ᶠ_ : (a : Fin x) (b : Fin y) → Bichotomyᶠ a b
 a ≤?ᶠ b = Trichotomy→Bichotomyᶠ (a ≟ᶠ b)
 ```
 
-Case splitting on 
+Finally we define case splitting on bichotomy, which works like an if
+statement on bichotmy.
 ```
 case≤?ᶠ : {A : Type} {m : ℕ} (a b : Fin m) → A → A → A
 case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
   λ{ (fle _) → x
    ; (fgt _) → y }
-```
-
-```
-≤?ᶠ-suc : {a : Fin x} {b : Fin y} → Bichotomyᶠ a b → Bichotomyᶠ (fsuc a) (fsuc b)  
-≤?ᶠ-suc (fle a≤b) = fle (fsuc≤fsuc a≤b)
-≤?ᶠ-suc (fgt a>b) = fgt (<fsuc a>b)
 ```
 
 # Proof of Propositionality of `Trichotomyᶠ`
@@ -539,14 +514,6 @@ isPropTrichotomyᶠ (feq u) (fgt v) = absurd (<ᶠ→≉ v (≈fsym u))
 isPropTrichotomyᶠ (fgt u) (flt v) = absurd (<ᶠ→≯ᶠ v u)
 isPropTrichotomyᶠ (fgt u) (feq v) = absurd (<ᶠ→≉ u (≈fsym v))
 isPropTrichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
-```
-
-```
-≤?ᶠ-pred : (a : Fin x) (b : Fin y) → fsuc a ≤?ᶠ fsuc b ≡ ≤?ᶠ-suc (a ≤?ᶠ b)
-≤?ᶠ-pred a b with a ≟ᶠ b
-... | flt a<b = refl
-... | feq a≈b = refl
-... | fgt a>b = refl
 ```
 
 ```
