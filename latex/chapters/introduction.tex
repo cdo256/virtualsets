@@ -4,6 +4,29 @@
 \chapter{Introduction}
 \section{Motivation and Scope}
 
+The motivation for this project is mainly exploritory. It was observed
+by Mark Williams (CITE preprint) that the category of finite sets and
+injective function (\textrm{Inj}) admits a trace operator, as
+introduced in Joyal-Steet-Verity et. al. (CITE). A trace operator acts
+like a subtraction on morphisms, and in the case of finite sets, it
+literally removes elements from the map, decreasing the size of the
+domain and codomain by the same amount.
+
+The intuition is then that if we have a tensor that acts as an
+addition, and a trace acting as a subtract operator, then can we
+construct an extension that is closed under traced using these
+operations? To put another way, can we construct a category in
+which every map has an inverse. It was proven by JSV CITE that a
+category with a trace satisfying certain coherence conditions XREF can
+be used to construct a category closed under trace in which the
+original category forms a sub-category. In other words, it forms an
+extension to the original category, that is closed under trace.
+
+This construction has not been formalized to date in any major proof
+assistant (Agda, Coq, Isabel/HOL, LEAN) CITE. The original plan was to
+implement it here, however it was found after some time developing
+this, that the process was more complex that initially expected.
+
 \section{Informal Problem Statement}
 At a high level, this dissertation investigates whether an injective function
 on finite sets can be operated on by a certain 'trace' operator, satisfies the

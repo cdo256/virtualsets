@@ -1,25 +1,21 @@
 \documentclass[4pt,a4paper]{report}
 \input{latex/preamble.tex}
 
-\title{Construction of Virtual Sets as Bivariate Species in Agda}
+\title{Toward A Formalization of 'Virtual Sets'}
 \author{Christina O'Donnell}
 \date{September 2025}
 \begin{document}
 \maketitle
 \begin{abstract}
-  This dissertation explores the categorical and computational structure of
-  virtual sets by formalizing them as bivariate species in Agda. The central
-  question is whether the category of finite sets and injections, equipped
-  with a suitable tensor and trace operator, forms a traced monoidal category.
-  Traced monoidal categories provide an abstract setting for feedback and
-  recursion, and connect species theory to broader themes in categorical
-  semantics. We develop the required background in type theory, homotopy type
-  theory, and category theory, before implementing the construction in Agda.
-  Our formalization establishes the monoidal structure of Inj and verifies key
-  trace axioms, while also exposing challenges in mechanizing categorical
-  coherence. The results demonstrate both a concrete contribution to species
-  theory and a methodological contribution to the practice of mechanized
-  mathematics.
+This dissertation documents the exploration of methods to represent
+the monoidal category of finite sets and injective functions, and whether a
+certain operation presents a 'trace' over this category. A trace is a
+categorical generalization of feedback structures such as recursion,
+or feedback in quantum systems. The category of virtual sets is
+roughly equivalent to sets that have negative as well as positive
+membership. Such a structure is of interest in simplicial type theory,
+where all inclusion map between simplicial complexes must necessarily
+be injective.
 \end{abstract}
 \tableofcontents
 \listoffigures
