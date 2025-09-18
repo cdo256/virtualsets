@@ -206,6 +206,25 @@ funPath→InjFunPath : {m m' : ℕ} → (f g : [ m ↣ m' ])
                    → fst f ≡ fst g → f ≡ g
 ```
 
+<!--
+```
+funPath→InjFunPath {m} {m'} (f , f-inj) (g , g-inj) f≡g =
+  f , f-inj
+    ≡⟨ cong₂ _,_ f≡g (subst-filler is-injective f≡g f-inj) ⟩
+  g , f-inj'
+    ≡⟨ cong (g ,_)
+            (isProp-is-injective
+              g f-inj' g-inj) ⟩
+  g , g-inj ▯
+  where
+    f-inj' : is-injective g
+    f-inj' = subst is-injective f≡g f-inj
+```
+-->
+
+
+We will need ⊎-assoc. 
+
 ```
 ⊎-assoc : {A B C : Type} → A ⊎ (B ⊎ C) ≅ (A ⊎ B) ⊎ C
 ⊎-assoc = record
@@ -219,6 +238,10 @@ funPath→InjFunPath : {m m' : ℕ} → (f g : [ m ↣ m' ])
     f (inl a) = inl (inl a)
     f (inr (inl b)) = inl (inr b)
     f (inr (inr c)) = inr c
+```
+
+<!--
+```
     g : {A B C : Type} → (A ⊎ B) ⊎ C → A ⊎ (B ⊎ C) 
     g (inl (inl a)) = inl a
     g (inl (inr b)) = inr (inl b)
@@ -232,6 +255,7 @@ funPath→InjFunPath : {m m' : ℕ} → (f g : [ m ↣ m' ])
     retr (inr (inl b)) = refl
     retr (inr (inr c)) = refl
 ```
+-->
 
 Proving tensor associativity in the general case requires proving this.
 ```
@@ -252,15 +276,27 @@ assoc-ext' : {l l' m m' n n' : ℕ}
          (+→⊎ l (m +ℕ n)
           (subst Fin (sym α-p-dom)
            (x))))))))
-assoc-ext' f g h x = {!!}
 ```
+
+I expect that proving this should be relatively straight-forward by
+splitting it into parts, however this was a lemma that I I never had
+time to return to.
+
+<!--
+```
+assoc-ext' f g h x = _
+```
+-->
 
 ```
 assoc : {l l' m m' n n' : ℕ}
   → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
   → ((f ⊕ g) ⊕ h) ≡ α {l} {l'} (f ⊕ (g ⊕ h))
 assoc {l} {l'} {m} {m'} {n} {n'} f g h =
-  funPath→InjFunPath ((f ⊕ g) ⊕ h) (α (f ⊕ (g ⊕ h))) {!fun-assoc!}
+  funPath→InjFunPath ((f ⊕ g) ⊕ h) (α (f ⊕ (g ⊕ h))) fun-assoc
+  where
+    fun-assoc : fst ((f ⊕ g) ⊕ h) ≡ fst (α (f ⊕ (g ⊕ h)))
+    fun-assoc = {!expand-l!} ∙ {!!} ∙{! exand-r!}
 ```
 
 ```
