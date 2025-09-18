@@ -25,7 +25,7 @@ open import VSet.Data.Nat hiding (_+_; ¬-<-zero)
 open import VSet.Data.Nat hiding (¬-<-zero)
 open import VSet.Data.Nat using (ℕ; zero; suc; _+_)
 open import VSet.Data.Nat.WellFounded
-open import VSet.Data.Sum.Properties
+open import VSet.Data.Sum.Properties hiding (⊎-assoc)
 open import VSet.Data.SumTree.Base hiding (α; α⁻¹)
 open import VSet.Data.SumTree.Metrics
 open import VSet.Function.Base
@@ -171,6 +171,10 @@ functorially on the category of injective functions. See figure \ref{fig:sum-pre
   : ∀ {m m' m'' n n' n''}
   → (f : [ m ↣ m' ]) (f' : [ m' ↣ m'' ]) (g : [ n ↣ n' ]) (g' : [ n' ↣ n'' ])
   → ((f' ↣∘↣ f) ⊕ (g' ↣∘↣ g)) ≈ ((f' ⊕ g') ↣∘↣ (f ⊕ g))
+```
+
+<!--
+```
 ⊕-preserves-∘ {m} {m'} {m''} {n} {n'} {n''} f f' g g' =
   record { p = refl ; q = refl ; path = e }
   where
@@ -190,6 +194,7 @@ functorially on the category of injective functions. See figure \ref{fig:sum-pre
       (⊎→+ m'' n'' ∘ ⊎-map (fst f') (fst g') ∘ +→⊎ m' n') ∘
         ⊎→+ m' n' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ m n ▯
 ```
+-->
 
 Now we begin defining the associator `α` for tensor products:
 
@@ -215,7 +220,7 @@ module _ {l l' m m' n n' : ℕ} where
 
   α-p-fun : (Fin (l + (m + n)) → Fin (l' + (m' + n')))
           ≡ (Fin ((l + m) + n) → Fin ((l' + m') + n'))
-  α-p-fun = cong₂ FinFun {!α-p-dom !} {!α-p-cod!}
+  α-p-fun = cong₂ FinFun α-p-dom  α-p-cod
 
   α-iso : Iso [ (l + (m + n)) ↣ (l' + (m' + n')) ]
               [ ((l + m) + n) ↣ ((l' + m') + n') ]
@@ -230,113 +235,42 @@ module _ {l l' m m' n n' : ℕ} where
   α⁻¹ = Iso.inv α-iso
 ```
 
+We make use of a handy result: For a pair of `InjFun`'s to be
+equal, it is sufficient that their function parts are equal.
+
 ```
 funPath→InjFunPath : {m m' : ℕ} → (f g : [ m ↣ m' ])
                    → fst f ≡ fst g → f ≡ g
-funPath→InjFunPath {m} {m'} (f , f-inj) (g , g-inj) f≡g =
-  f , f-inj
-    ≡⟨ cong₂ _,_ f≡g (subst-filler is-injective f≡g f-inj) ⟩
-  g , f-inj'
-    ≡⟨ cong (g ,_)
-            (isProp-is-injective
-              g f-inj' g-inj) ⟩
-  g , g-inj ▯
+```
+
+```
+⊎-assoc : {A B C : Type} → A ⊎ (B ⊎ C) ≅ (A ⊎ B) ⊎ C
+⊎-assoc = record
+  { fun = f
+  ; inv = g
+  ; leftInv = retr
+  ; rightInv = sect
+  }
   where
-    f-inj' : is-injective g
-    f-inj' = subst is-injective f≡g f-inj
+    f : {A B C : Type} → A ⊎ (B ⊎ C) → (A ⊎ B) ⊎ C
+    f (inl a) = inl (inl a)
+    f (inr (inl b)) = inl (inr b)
+    f (inr (inr c)) = inr c
+    g : {A B C : Type} → (A ⊎ B) ⊎ C → A ⊎ (B ⊎ C) 
+    g (inl (inl a)) = inl a
+    g (inl (inr b)) = inr (inl b)
+    g (inr c) = inr (inr c)
+    sect : section f g
+    sect (inl (inl a)) = refl
+    sect (inl (inr b)) = refl
+    sect (inr c) = refl
+    retr : retract f g
+    retr (inl a) = refl
+    retr (inr (inl b)) = refl
+    retr (inr (inr c)) = refl
 ```
 
-```
-mapsplit-l
-  : {l l' m m' n n' : ℕ}
-  → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
-  → ⊎-map (⊎→+ l' m' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ l m) (fst h)
-  ≡   ⊎-map (⊎→+ l' m') id
-    ∘ ⊎-map (⊎-map (fst f) (fst g)) (fst h)
-    ∘ ⊎-map (+→⊎ l m) id
-mapsplit-l {l} {l'} {m} {m'} {n} {n'} f g h =
-  ⊎-map (⊎→+ l' m' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ l m) (id ∘ fst h ∘ id)
-    ≡⟨ sym (⊎-map-∘ _ _ _ _) ⟩
-    ⊎-map (⊎→+ l' m') id
-  ∘ ⊎-map (⊎-map (fst f) (fst g) ∘ +→⊎ l m) (fst h)
-    ≡⟨ sym (cong (⊎-map (⊎→+ l' m') id ∘_) (⊎-map-∘ _ _ _ _)) ⟩
-    ⊎-map (⊎→+ l' m') id
-  ∘ ⊎-map (⊎-map (fst f) (fst g)) (fst h)
-  ∘ ⊎-map (+→⊎ l m) id ▯
-```
-
-```
-mapsplit-r
-  : {l l' m m' n n' : ℕ}
-  → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
-  → ⊎-map (fst f) (⊎→+ m' n' ∘ ⊎-map (fst g) (fst h) ∘ +→⊎ m n)
-  ≡   ⊎-map id (⊎→+ m' n')
-    ∘ ⊎-map (fst f) (⊎-map (fst g) (fst h))
-    ∘ ⊎-map id (+→⊎ m n)
-mapsplit-r {l} {l'} {m} {m'} {n} {n'} f g h =
-  ⊎-map (id ∘ fst f ∘ id) (⊎→+ m' n' ∘ ⊎-map (fst g) (fst h) ∘ +→⊎ m n)
-    ≡⟨ sym (⊎-map-∘ _ _ _ _) ⟩
-    ⊎-map id (⊎→+ m' n')
-  ∘ ⊎-map (fst f) (⊎-map (fst g) (fst h) ∘ +→⊎ m n)
-    ≡⟨ sym (cong (⊎-map id (⊎→+ m' n') ∘_) (⊎-map-∘ _ _ _ _)) ⟩
-    ⊎-map id (⊎→+ m' n')
-  ∘ ⊎-map (fst f) (⊎-map (fst g) (fst h))
-  ∘ ⊎-map id (+→⊎ m n) ▯
-```
-
-```
-expand-l
-  : {l l' m m' n n' : ℕ}
-  → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
-  → fst ((f ⊕ g) ⊕ h) ≡
-      ⊎→+ (l' +ℕ m') n'
-    ∘ ⊎-map (⊎→+ l' m') id
-    ∘ ⊎-map (⊎-map (fst f) (fst g)) (fst h)
-    ∘ ⊎-map (+→⊎ l m) id
-    ∘ +→⊎ (l +ℕ m) n
-expand-l {l} {l'} {m} {m'} {n} {n'} f g h =
-  fst ((f ⊕ g) ⊕ h)
-    ≡⟨ refl ⟩
-  ⊎→+ (l' +ℕ m') n' ∘ ⊎-map (fst (f ⊕ g)) (fst h) ∘ +→⊎ (l +ℕ m) n
-    ≡⟨ refl ⟩
-    ⊎→+ (l' +ℕ m') n'
-  ∘ ⊎-map (⊎→+ l' m' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ l m) (fst h)
-  ∘ +→⊎ (l +ℕ m) n
-    ≡⟨ (cong (λ ○ → _ ∘ ○ ∘ _) (mapsplit-l f g h)) ⟩
-    ⊎→+ (l' +ℕ m') n'
-  ∘ ⊎-map (⊎→+ l' m') id
-  ∘ ⊎-map (⊎-map (fst f) (fst g)) (fst h)
-  ∘ ⊎-map (+→⊎ l m) id
-  ∘ +→⊎ (l +ℕ m) n ▯
-```
-
-```
-expand-r
-  : {l l' m m' n n' : ℕ}
-  → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
-  → fst (f ⊕ (g ⊕ h)) ≡
-      ⊎→+ l' (m' +ℕ n')
-    ∘ ⊎-map id (⊎→+ m' n')
-    ∘ ⊎-map (fst f) (⊎-map (fst g) (fst h))
-    ∘ ⊎-map id (+→⊎ m n)
-    ∘ +→⊎ l (m +ℕ n)
-expand-r {l} {l'} {m} {m'} {n} {n'} f g h =
-  fst (f ⊕ (g ⊕ h))
-    ≡⟨ refl ⟩
-  ⊎→+ l' (m' +ℕ n') ∘ ⊎-map (fst f) (fst (g ⊕ h)) ∘ +→⊎ l (m +ℕ n)
-    ≡⟨ refl ⟩
-  ⊎→+ l' (m' +ℕ n')
-  ∘ ⊎-map (fst f)
-           (⊎→+ m' n' ∘ ⊎-map (fst g) (fst h) ∘ +→⊎ m n)
-  ∘ +→⊎ l (m +ℕ n)
-    ≡⟨ (cong (λ ○ → _ ∘ ○ ∘ _) (mapsplit-r f g h)) ⟩
-  ⊎→+ l' (m' +ℕ n')
-  ∘ ⊎-map id (⊎→+ m' n')
-  ∘ ⊎-map (fst f) (⊎-map (fst g) (fst h))
-  ∘ ⊎-map id (+→⊎ m n)
-  ∘ +→⊎ l (m +ℕ n) ▯
-```
-
+Proving tensor associativity in the general case requires proving this.
 ```
 assoc-ext' : {l l' m m' n n' : ℕ}
   → (f : Fin l → Fin l') (g : Fin m → Fin m') (h : Fin n → Fin n')
@@ -355,38 +289,7 @@ assoc-ext' : {l l' m m' n n' : ℕ}
          (+→⊎ l (m +ℕ n)
           (subst Fin (sym α-p-dom)
            (x))))))))
-assoc-ext' {zero} {l'} {zero} {m'} {suc n} {n'} f g h fzero =
-  ⊎→+ (l' +ℕ m') n'
-   (⊎-map (⊎→+ l' m') id
-    (⊎-map (⊎-map f g) h
-     (⊎-map (+→⊎ 0 0) id
-      (+→⊎ 0 (suc n)
-       (f0)))))
-    ≡⟨ {!!} ⟩
-  (subst Fin α-p-cod
-   (⊎→+ l' (m' +ℕ n')
-    (⊎-map id (⊎→+ m' n')
-     (⊎-map f (⊎-map g h)
-      (⊎-map id (+→⊎ 0 (suc n))
-       (+→⊎ 0 (0 +ℕ (suc n))
-        (subst Fin (sym α-p-dom)
-         (f0)))))))) ▯
-assoc-ext' {zero} {l'} {zero} {m'} {suc n} {n'} f g h (fsuc x) = {!!}
-assoc-ext' {zero} {l'} {suc m} {m'} {n} {n'} f g h x = {!!}
-assoc-ext' {suc l} {l'} {m} {m'} {n} {n'} f g h x = {!!}
-```
-
-```
-assoc-ext : {l l' m m' n n' : ℕ}
-  → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
-  → ∀ x → fst ((f ⊕ g) ⊕ h) x ≡ fst (α {l} {l'} (f ⊕ (g ⊕ h))) x
-assoc-ext {zero} {l'} {zero} {m'} {suc n} {n'} f g h fzero =
-  fst ((f ⊕ g) ⊕ h) f0
-    ≡⟨ refl ⟩
-  fst (α (f ⊕ (g ⊕ h))) f0 ▯
-assoc-ext {zero} {l'} {zero} {m'} {suc n} {n'} f g h (fsuc x) = {!!}
-assoc-ext {zero} {l'} {suc m} {m'} {n} {n'} f g h x = {!!}
-assoc-ext {suc l} {l'} {m} {m'} {n} {n'} f g h x = {!!}
+assoc-ext' f g h x = {!!}
 ```
 
 ```
@@ -410,15 +313,4 @@ unassoc {l} {l'} {m} {m'} {n} {n'} f g h =
     (transport α-p (f ⊕ (g ⊕ h)))
     ≡⟨ sym (cong (transport (sym α-p)) (assoc f g h)) ⟩
   transport (sym α-p) ((f ⊕ g) ⊕ h) ▯
-```
-
-```
--- α₁ : ∀ {m m' m'' n n' n''}
---    → (f : [ m ↣ n ]) (g : [ m' ↣ n' ]) (h : [ m'' ↣ n'' ])
---    → f ⊕ (g ⊕ h) → {!(f ⊕ g) ⊕ h!}
-```
-
-```
--- ⊕-triangle : ∀ {m m' n n'} → (f : [ m ↣ n ]) (g : [ m' ↣ n' ])
---            → {!!}
 ```
