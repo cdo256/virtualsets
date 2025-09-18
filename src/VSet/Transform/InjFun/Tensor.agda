@@ -27,20 +27,25 @@ infixl 30 _⊕_
 
 _⊕_ : ∀ {k l m n : ℕ} → [ k ↣ l ] → [ m ↣ n ] → [ k + m ↣ l + n ]
 f ⊕ g = tensor f g
- 
-Id⊕Id≈Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≈ Id {m + n}
-Id⊕Id≈Id {m} {n} = record { p = refl ; q = refl ; path = r }
-  where
-    r : (⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n) ≡ id
-    r =
-      ⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n
-        ≡⟨ cong (λ ○ → ⊎→+ m n ∘ ○ ∘ +→⊎ m n) ⊎-map-id≡id ⟩
-      ⊎→+ m n ∘ +→⊎ m n
-        ≡⟨ funExt (sect m n) ⟩
-      id ▯
 
-Id⊕Id≡Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≈ Id {m + n}
-Id⊕Id≡Id {m} {n} = ≈→
+id⊕id≡id : {m n : ℕ} → ⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n ≡ id
+id⊕id≡id {m} {n} =
+  ⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n
+    ≡⟨ cong (λ ○ → ⊎→+ m n ∘ ○ ∘ +→⊎ m n) ⊎-map-id≡id ⟩
+  ⊎→+ m n ∘ +→⊎ m n
+    ≡⟨ funExt (sect m n) ⟩
+  id ▯
+
+Id⊕Id≈Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≈ Id {m + n}
+Id⊕Id≈Id {m} {n} = record { p = refl ; q = refl ; path = id⊕id≡id }
+
+Id⊕Id≡Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≡ Id {m + n}
+Id⊕Id≡Id {m} {n} = cong₂ _,_ id⊕id≡id s
+  where r : subst is-injective id⊕id≡id (snd (Id {m} ⊕ Id {n})) ≡ snd (Id {m + n})
+        r = isProp-is-injective id (subst is-injective id⊕id≡id (snd (Id {m} ⊕ Id {n}))) (snd (Id {m + n}))
+        s : (λ i → is-injective (id⊕id≡id i))
+          [ snd (Id {m} ⊕ Id {n}) ≡ snd (Id {m + n}) ]
+        s = compPathP' (subst-filler is-injective id⊕id≡id (snd (Id {m} ⊕ Id {n}))) r
 
 ladd : ∀ {l m : ℕ} → (A : ℕ) → [ l ↣ m ] → [ A + l ↣ A + m ]
 ladd {l} {m} A f = (↣-id ⟦ A ⟧) ⊕ f
@@ -84,7 +89,7 @@ module _ {l l' m m' n n' : ℕ} where
 
   α-p-fun : (Fin (l + (m + n)) → Fin (l' + (m' + n')))
           ≡ (Fin ((l + m) + n) → Fin ((l' + m') + n'))
-  α-p-fun = {!!}
+  α-p-fun = {!cong₂ FinFun!}
 
   α-iso : Iso [ (l + (m + n)) ↣ (l' + (m' + n')) ]
               [ ((l + m) + n) ↣ ((l' + m') + n') ]

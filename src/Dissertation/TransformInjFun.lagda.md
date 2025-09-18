@@ -115,18 +115,24 @@ f ⊕ g = tensor f g
 
 We then prove some properties about this tensor. `Id⊕Id≡Id` states
 that placing two identity arrows 'side by side' results in another
-identity arrow.
+identity arrow. We define the function part first, and then use the fact that `is-injective` is a proposition to show the equality holds for the dependent sum. 
 ```
-Id⊕Id≡Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≈ Id {m + n}
-Id⊕Id≡Id {m} {n} = record { p = refl ; q = refl ; path = r }
-  where
-    r : (⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n) ≡ id
-    r =
-      ⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n
-        ≡⟨ cong (λ ○ → ⊎→+ m n ∘ ○ ∘ +→⊎ m n) ⊎-map-id≡id ⟩
-      ⊎→+ m n ∘ +→⊎ m n
-        ≡⟨ funExt (⊎+sect m n) ⟩
-      id ▯
+id⊕id≡id : {m n : ℕ} → ⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n ≡ id
+id⊕id≡id {m} {n} =
+  ⊎→+ m n ∘ ⊎-map id id ∘ +→⊎ m n
+    ≡⟨ cong (λ ○ → ⊎→+ m n ∘ ○ ∘ +→⊎ m n) ⊎-map-id≡id ⟩
+  ⊎→+ m n ∘ +→⊎ m n
+    ≡⟨ funExt (⊎+sect m n) ⟩
+  id ▯
+
+
+Id⊕Id≡Id : {m n : ℕ} → Id {m} ⊕ Id {n} ≡ Id {m + n}
+Id⊕Id≡Id {m} {n} = cong₂ _,_ id⊕id≡id s
+  where r : subst is-injective id⊕id≡id (snd (Id {m} ⊕ Id {n})) ≡ snd (Id {m + n})
+        r = isProp-is-injective id (subst is-injective id⊕id≡id (snd (Id {m} ⊕ Id {n}))) (snd (Id {m + n}))
+        s : (λ i → is-injective (id⊕id≡id i))
+          [ snd (Id {m} ⊕ Id {n}) ≡ snd (Id {m + n}) ]
+        s = compPathP' (subst-filler is-injective id⊕id≡id (snd (Id {m} ⊕ Id {n}))) r
 ```
 
 For convenience we have a short-hand for adding an identity arrow on
@@ -185,8 +191,16 @@ functorially on the category of injective functions. See figure \ref{fig:sum-pre
         ⊎→+ m' n' ∘ ⊎-map (fst f) (fst g) ∘ +→⊎ m n ▯
 ```
 
+Now we begin defining the associator `α` for tensor products:
 
-
+- `α-p-dom` and `α-p-cod` is the domain and codomain indexes respectively.
+- `α-p` is the path between the type of the right associated function
+  and the left associated depdendent sum.
+- `α-p-fun` is the same as `α-p` but for just the function part.
+- `α-iso` is the map as an isomorphism, which is for proving
+  associator is a natural isomorphism.
+- Finally, `α` is the right-to-left transport, and `α⁻¹` is the left-to-right
+  transport.
 ```
 module _ {l l' m m' n n' : ℕ} where
   α-p-dom : l + (m + n) ≡ (l + m) + n
@@ -201,7 +215,7 @@ module _ {l l' m m' n n' : ℕ} where
 
   α-p-fun : (Fin (l + (m + n)) → Fin (l' + (m' + n')))
           ≡ (Fin ((l + m) + n) → Fin ((l' + m') + n'))
-  α-p-fun = {!cong₂ (λ A B → A → B) α-p-dom α-p-cod!}
+  α-p-fun = cong₂ FinFun {!α-p-dom !} {!α-p-cod!}
 
   α-iso : Iso [ (l + (m + n)) ↣ (l' + (m' + n')) ]
               [ ((l + m) + n) ↣ ((l' + m') + n') ]
