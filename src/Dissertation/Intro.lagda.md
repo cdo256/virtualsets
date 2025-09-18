@@ -12,8 +12,8 @@ module DissertationTex.Intro where
 The formalization was performed in Cubical Agda. This chapter
 documents the development of the formalization, building up from basic
 lemmas to more complex results. It is generated from type-checked
-literate Agda files, so all definitions included have been formally
-checked to match their type declarations.
+literate Agda files, allowing formal verifications of the definitions
+included.
 
 There are three main approaches I tried:
 
