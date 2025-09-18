@@ -32,38 +32,6 @@ private
 ```
 -->
 
-\begin{verbatim}[hide]
-module DissertationTex.Basic where
-
-open import Agda.Primitive
-open import Cubical.Core.Primitives
-open import Cubical.Core.Primitives
-open import Cubical.Data.Empty renaming (rec to absurd) hiding (elim)
-open import Cubical.Data.Equality.Base public using (id)
-open import Cubical.Data.Maybe
-open import Cubical.Data.Prod hiding (map)
-open import Cubical.Data.Sum public renaming (rec to ⊎-rec; elim to ⊎-elim; map to ⊎-map)
-open import Cubical.Data.Unit.Base public renaming (Unit to ⊤)
-open import Cubical.Foundations.Equiv public
-open import Cubical.Foundations.Function public hiding (flip)
-open import Cubical.Foundations.GroupoidLaws
-open import Cubical.Foundations.Isomorphism
-open import Cubical.Foundations.Path
-open import Cubical.Foundations.Prelude renaming (_∎ to _▯)
-  hiding (transport; transport-filler)
-open import Cubical.Foundations.Transport
-  hiding (transpEquiv)
-open import Cubical.Relation.Nullary
-open import VSet.Function.Iso
-open import VSet.Function.Injection
-open import Cubical.Data.Sum
-open import VSet.Data.Fin.Base
-open import Cubical.Data.Nat.Base
-private
-  variable
-    ℓ ℓ' ℓ'' : Level
-    A : Type ℓ
-\end{verbatim}
 
 # Foundational Definitions
 

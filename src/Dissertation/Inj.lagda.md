@@ -20,25 +20,6 @@ private
 ```
 -->
 
-\begin{verbatim}[hide]
-module DissertationTex.Inj where
-
-open import Cubical.Data.List.Base hiding ([_])
-open import Cubical.Data.Nat.Base
-open import Cubical.Data.Nat.Order
-open import Cubical.Data.Nat.Properties
-open import Cubical.Data.Prod.Base hiding (map)
-open import VSet.Data.Fin.Base
-open import VSet.Data.Fin.Order
-open import VSet.Data.Fin.Properties
-open import VSet.Data.Fin.Splice
-open import VSet.Function.Injection
-open import VSet.Prelude
-
-private
-  variable
-    m n : ℕ
-\end{verbatim}
 
 ## Definition of Inj
 

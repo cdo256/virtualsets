@@ -12,17 +12,6 @@ open import Cubical.Data.Sum
 ```
 -->
 
-\begin{verbatim}[hide]
-module DissertationTex.FinChoice where
-open import VSet.Prelude
-open import VSet.Function.Iso
-open import Cubical.Data.Nat.Base
-open import Cubical.Data.Nat.Order
-open import Cubical.Data.Fin hiding (fzero; fsuc)
-open import Compat.1Lab.Data.Fin renaming (Fin to Fin′)
-open import Compat.1Lab.Data.Irr
-open import Cubical.Data.Sum
-\end{verbatim}
 
 
 # Choice of Finite Set Representation

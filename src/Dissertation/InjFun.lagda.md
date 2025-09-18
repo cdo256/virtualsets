@@ -19,24 +19,6 @@ private
 ```
 -->
 
-\begin{verbatim}[hide]
-module DissertationTex.InjFun where
-
-open import Compat.1Lab.Path using (cong₂-∙)
-open import Cubical.Data.Nat.Base renaming (_+_ to _+ℕ_)
-open import Cubical.Data.Nat.Properties
-open import Cubical.Foundations.Equiv.Base
-open import Cubical.Foundations.HLevels
-open import VSet.Data.Fin.Base hiding (⟦_⟧)
-open import VSet.Data.Fin.Properties
-open import VSet.Data.Sum.Properties
-open import VSet.Function.Iso using (linv; rinv; _^; _⁻¹)
-open import VSet.Function.Injection using (transport-inj)
-open import VSet.Prelude
-private
-  variable 
-    A B C D : Type
-\end{verbatim}
 
 # Depdendent Sum Representation of Injective Functions
 

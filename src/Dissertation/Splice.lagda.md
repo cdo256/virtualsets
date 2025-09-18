@@ -31,36 +31,6 @@ private
 ```
 -->
 
-\begin{verbatim}[hide]
-module DissertationTex.Splice where
-
-open import Cubical.Data.Maybe
-open import Cubical.Data.Nat
-  using (ℕ; _+_; +-zero; +-suc; zero; suc;
-        +-assoc; +-comm)
-open import VSet.Data.Fin.Base
-open import VSet.Data.Fin.Minus
-open import VSet.Data.Fin.Order
-open import VSet.Data.Fin.Properties
-  using (fzero≡subst-fzero;
-         subst-fsuc-reorder;
-         finject-fsuc-reorder;
-         finject0≡subst;
-         ≉fsuc)
-open import VSet.Data.Nat.Order
-open import VSet.Data.Nat.Properties
-open import VSet.Function.Injection
-open import VSet.Function.Iso
-open import VSet.Function.Properties
-open import VSet.Prelude
-
-private
-  variable
-    ℓ : Level
-    x y z : ℕ
-    a : Fin x
-    b : Fin y
-\end{verbatim}
 
 # 'Splice' operations on `Fin`
 

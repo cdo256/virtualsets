@@ -25,30 +25,6 @@ private
 ```
 -->
 
-\begin{verbatim}[hide]
-module DissertationTex.Fin where
-
-open import Cubical.Core.Primitives
-open import Cubical.Data.Nat as ℕ hiding (elim)
-open import Cubical.Data.Nat using (ℕ; +-zero; +-suc) renaming (_+_ to _+ℕ_)
-open import Cubical.Data.Nat.Order
-open import Cubical.Data.Nat.Properties
-open import Cubical.Data.Sum hiding (elim)
-open import Cubical.Data.Unit renaming (Unit to ⊤)
-open import Cubical.Foundations.Prelude
-open import VSet.Data.Nat.Order
-open import VSet.Data.Nat.Properties
-open import VSet.Function.Injection
-open import VSet.Function.Iso
-open import VSet.Function.Properties
-open import VSet.Path
-open import VSet.Prelude
-
-private
-  variable
-    ℓ : Level
-    x y z : ℕ
-\end{verbatim}
 
 # Definition of `Fin`
 
@@ -207,13 +183,6 @@ private
 ```
 -->
 
-\begin{verbatim}[hide]
-private
-  variable
-    a : Fin x
-    b : Fin y
-    c : Fin z
-\end{verbatim}
 
 ### A Total Order on `Fin`
 

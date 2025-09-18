@@ -4,9 +4,6 @@ module Dissertation.Intro where
 ```
 -->
 
-\begin{verbatim}[hide]
-module DissertationTex.Intro where
-\end{verbatim}
 
 
 The formalization was performed in Cubical Agda. This chapter

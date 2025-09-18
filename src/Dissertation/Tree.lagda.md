@@ -38,43 +38,6 @@ open import VSet.Relation.WellFounded.Lex
 ```
 -->
 
-\begin{verbatim}[hide]
-module DissertationTex.Tree where
-
-open import Cubical.Core.Primitives
-open import Cubical.Data.Empty renaming (elim to absurd)
-open import Cubical.Data.Fin.Properties
-open import Cubical.Data.Nat.Base
-open import Cubical.Data.Nat.Order
-open import Cubical.Data.Nat.Properties
-open import Cubical.Data.Unit renaming (Unit to ⊤)
-open import Cubical.Foundations.Function
-open import Cubical.Foundations.Prelude
-open import Cubical.Induction.WellFounded
-open import Cubical.Relation.Binary.Base
-open import VSet.Data.Fin renaming (pred to fpred)
-open import VSet.Data.Fin.Minus
-open import VSet.Data.Fin.SumSplit
-  using (⊎≅+; ⊎→+; +→⊎) renaming (sect to ⊎+sect; retr to ⊎+retr)
-open import VSet.Data.InjFun.Equality
-open import VSet.Data.InjFun.Injection
-open import VSet.Data.InjFun.Properties
-open import VSet.Data.Nat
-open import VSet.Data.Nat hiding (_+_; ¬-<-zero)
-open import VSet.Data.Nat hiding (¬-<-zero)
-open import VSet.Data.Nat using (ℕ; zero; suc; _+_)
-open import VSet.Data.Nat.WellFounded
-open import VSet.Data.Sum.Properties
-open import VSet.Data.SumTree.Base hiding (α; α⁻¹)
-open import VSet.Data.SumTree.Metrics
-open import VSet.Function.Injection
-open import VSet.Function.Iso
-open import VSet.Function.Properties
-open import VSet.Path
-open import VSet.Prelude
-open import VSet.Relation.WellFounded.Base
-open import VSet.Relation.WellFounded.Lex
-\end{verbatim}
 
 
 ```
