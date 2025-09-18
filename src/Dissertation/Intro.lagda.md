@@ -4,8 +4,6 @@ module Dissertation.Intro where
 ```
 -->
 
-
-
 The formalization was performed in Cubical Agda. This chapter
 documents the development of the formalization, building up from basic
 lemmas to more complex results. It is generated from type-checked

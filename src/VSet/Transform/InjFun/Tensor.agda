@@ -201,20 +201,6 @@ expand-r {l} {l'} {m} {m'} {n} {n'} f g h =
   ∘ +→⊎ l (m +ℕ n) ▯
 
 
-assoc' : {l l' m m' n n' : ℕ}
-  → (f : Fin l → Fin l') (g : Fin m → Fin m') (h : Fin n → Fin n')
-  →   ⊎→+ (l' +ℕ m') n'
-    ∘ ⊎-map (⊎→+ l' m') id
-    ∘ ⊎-map (⊎-map f g) h 
-    ∘ ⊎-map (+→⊎ l m) id
-    ∘ +→⊎ (l +ℕ m) n
-  ≡   subst Fin α-p-cod
-    ∘ ⊎→+ l' (m' +ℕ n')
-    ∘ ⊎-map id (⊎→+ m' n')
-    ∘ ⊎-map f (⊎-map g h)
-    ∘ ⊎-map id (+→⊎ m n)
-    ∘ +→⊎ l (m +ℕ n)
-    ∘ subst Fin (sym α-p-dom)
 assoc : {l l' m m' n n' : ℕ}
   → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
   → ((f ⊕ g) ⊕ h) ≡ α {l} {l'} (f ⊕ (g ⊕ h))

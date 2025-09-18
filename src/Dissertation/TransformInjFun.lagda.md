@@ -41,7 +41,7 @@ open import VSet.Transform.InjFun.Tensor using (expand-l; expand-r)
 -->
 
 
-# Tensor Product on `InjFun`
+## Tensor Product on `InjFun`
 
 We now move to detail operations and properties on `InjFun`.
 
@@ -223,7 +223,9 @@ funPath→InjFunPath {m} {m'} (f , f-inj) (g , g-inj) f≡g =
 -->
 
 
-We will need ⊎-assoc. 
+We will need ⊎-assoc which gives an isomorphism between the two ways of
+associating sums three values with a sum. We abbreviate the
+definition, which is spelled out fully in VSet.Data.Sum CITE.
 
 ```
 ⊎-assoc : {A B C : Type} → A ⊎ (B ⊎ C) ≅ (A ⊎ B) ⊎ C
@@ -235,22 +237,22 @@ We will need ⊎-assoc.
   }
   where
     f : {A B C : Type} → A ⊎ (B ⊎ C) → (A ⊎ B) ⊎ C
-    f (inl a) = inl (inl a)
-    f (inr (inl b)) = inl (inr b)
-    f (inr (inr c)) = inr c
+    g : {A B C : Type} → (A ⊎ B) ⊎ C → A ⊎ (B ⊎ C) 
+    sect : section f g
+    retr : retract f g
 ```
 
 <!--
 ```
-    g : {A B C : Type} → (A ⊎ B) ⊎ C → A ⊎ (B ⊎ C) 
+    f (inl a) = inl (inl a)
+    f (inr (inl b)) = inl (inr b)
+    f (inr (inr c)) = inr c
     g (inl (inl a)) = inl a
     g (inl (inr b)) = inr (inl b)
     g (inr c) = inr (inr c)
-    sect : section f g
     sect (inl (inl a)) = refl
     sect (inl (inr b)) = refl
     sect (inr c) = refl
-    retr : retract f g
     retr (inl a) = refl
     retr (inr (inl b)) = refl
     retr (inr (inr c)) = refl
@@ -279,7 +281,7 @@ assoc-ext' : {l l' m m' n n' : ℕ}
 ```
 
 I expect that proving this should be relatively straight-forward by
-splitting it into parts, however this was a lemma that I I never had
+splitting it into parts, however this was a lemma that I haven't had
 time to return to.
 
 <!--
@@ -287,29 +289,3 @@ time to return to.
 assoc-ext' f g h x = _
 ```
 -->
-
-```
-assoc : {l l' m m' n n' : ℕ}
-  → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
-  → ((f ⊕ g) ⊕ h) ≡ α {l} {l'} (f ⊕ (g ⊕ h))
-assoc {l} {l'} {m} {m'} {n} {n'} f g h =
-  funPath→InjFunPath ((f ⊕ g) ⊕ h) (α (f ⊕ (g ⊕ h))) fun-assoc
-  where
-    fun-assoc : fst ((f ⊕ g) ⊕ h) ≡ fst (α (f ⊕ (g ⊕ h)))
-    fun-assoc = {!expand-l!} ∙ {!!} ∙{! exand-r!}
-```
-
-```
-unassoc : {l l' m m' n n' : ℕ}
-  → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
-  → (f ⊕ (g ⊕ h)) ≡ (α⁻¹ {l} {l'}) ((f ⊕ g) ⊕ h)
-unassoc {l} {l'} {m} {m'} {n} {n'} f g h =
-  let α-p = α-p {l} {l'} {m} {m'} {n} {n'}
-  in
-  (f ⊕ (g ⊕ h))
-    ≡⟨ sym (transport⁻Transport α-p (f ⊕ (g ⊕ h))) ⟩
-  transport (sym α-p )
-    (transport α-p (f ⊕ (g ⊕ h)))
-    ≡⟨ sym (cong (transport (sym α-p)) (assoc f g h)) ⟩
-  transport (sym α-p) ((f ⊕ g) ⊕ h) ▯
-```
