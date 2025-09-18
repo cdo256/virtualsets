@@ -15,9 +15,9 @@ open import VSet.Function.Properties
 id↣ : ∀ {A} → A ↣ A
 id↣ {A} = id , λ x y z → z
 
-InjFun : ∀ (A B : ℕ) → Type
-InjFun A B = Fin A → Fin B
+FinFun : ∀ (A B : ℕ) → Type
+FinFun A B = Fin A → Fin B
 
-InjFun' : ℕ × ℕ → Type
-InjFun' (A , B) = InjFun A B
+FinFun' : ℕ × ℕ → Type
+FinFun' (A , B) = FinFun A B
 
