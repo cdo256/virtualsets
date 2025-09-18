@@ -44,3 +44,28 @@ inr-injective {A} {B} x y p = subst P p refl
          (⊎-map f' g' ∘ ⊎-map f g) x ≡ ⊎-map (f' ∘ f) (g' ∘ g) x
     e (inl x) = refl
     e (inr x) = refl
+
+⊎-assoc : {A B C : Type} → A ⊎ (B ⊎ C) ≅ (A ⊎ B) ⊎ C
+⊎-assoc = record
+  { fun = f
+  ; inv = g
+  ; leftInv = retr
+  ; rightInv = sect
+  }
+  where
+    f : {A B C : Type} → A ⊎ (B ⊎ C) → (A ⊎ B) ⊎ C
+    f (inl a) = inl (inl a)
+    f (inr (inl b)) = inl (inr b)
+    f (inr (inr c)) = inr c
+    g : {A B C : Type} → (A ⊎ B) ⊎ C → A ⊎ (B ⊎ C) 
+    g (inl (inl a)) = inl a
+    g (inl (inr b)) = inr (inl b)
+    g (inr c) = inr (inr c)
+    sect : section f g
+    sect (inl (inl a)) = refl
+    sect (inl (inr b)) = refl
+    sect (inr c) = refl
+    retr : retract f g
+    retr (inl a) = refl
+    retr (inr (inl b)) = refl
+    retr (inr (inr c)) = refl
