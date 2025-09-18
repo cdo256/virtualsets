@@ -89,7 +89,7 @@ module _ {l l' m m' n n' : ℕ} where
 
   α-p-fun : (Fin (l + (m + n)) → Fin (l' + (m' + n')))
           ≡ (Fin ((l + m) + n) → Fin ((l' + m') + n'))
-  α-p-fun = {!cong₂ FinFun!}
+  α-p-fun = cong₂ FinFun (+-assoc l m n) (+-assoc l' m' n')
 
   α-iso : Iso [ (l + (m + n)) ↣ (l' + (m' + n')) ]
               [ ((l + m) + n) ↣ ((l' + m') + n') ]
