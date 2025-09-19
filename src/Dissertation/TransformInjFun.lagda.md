@@ -34,6 +34,7 @@ open import VSet.Path
 open import VSet.Prelude
 open import VSet.Relation.WellFounded.Base
 open import VSet.Relation.WellFounded.Lex
+open import VSet.Data.Fin.Minus using (_∖_; _—_; del; ins)
 open import VSet.Transform.InjFun.Tensor using (expand-l; expand-r)
 ```
 -->
@@ -400,8 +401,8 @@ We implement this by making use of subtypes of ℕ specifically we want
 to formally define the notion of a finite set with an element taken out. We do this by defining a 'minus operator':
 
 ```
-record _∖_ (A : ℕ) (a : Fin A) : Type where
-  constructor _—_
+record _̣\̱_ (A : ℕ) (a : Fin A) : Type where
+  constructor _–_
   field
     val : Fin A
     ne : a ≢ val
@@ -438,23 +439,23 @@ goes in the opposite direction, mapping a finite set with a hole, to a
 finite set one smaller. Both maps are bijections and respect order,
 although that isn't proven here.
 ```
-ins : {x : ℕ} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖ a)
-ins {suc x} fzero b = fsuc b — fzero≢fsuc
-ins {suc x} (fsuc a) fzero = fzero — fsuc≢fzero
-ins {suc x} (fsuc a) (fsuc b) =
+inṣ : {x : ℕ} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖ a)
+inṣ {suc x} fzero b = fsuc b — fzero≢fsuc
+inṣ {suc x} (fsuc a) fzero = fzero — fsuc≢fzero
+inṣ {suc x} (fsuc a) (fsuc b) =
   fsuc c — λ sa≡sc →
     let a≡c = fsuc-injective {suc x} {a} {c} sa≡sc
-    in ne (ins a b) a≡c
+    in ne (inṣ a b) a≡c
   where
-    c = val (ins a b)
+    c = val (inṣ a b)
 
-del : {x : ℕ} → (a : ⟦ suc x ⟧) → (suc x ∖ a) → ⟦ x ⟧
-del {ℕ.zero} fzero (fzero — 0≢0) = absurd (0≢0 refl)
-del {suc x} fzero (fzero — 0≢0) = absurd (0≢0 refl)
-del {suc x} fzero (fsuc b — a≢b) = b
-del {suc x} (fsuc a) (fzero — a≢b) = fzero
-del {suc x} (fsuc a) (fsuc b — a'≢b') =
-  fsuc (del {x} a (b — ≢cong fsuc a'≢b'))
+deḷ : {x : ℕ} → (a : ⟦ suc x ⟧) → (suc x ∖ a) → ⟦ x ⟧
+deḷ {ℕ.zero} fzero (fzero — 0≢0) = absurd (0≢0 refl)
+deḷ {suc x} fzero (fzero — 0≢0) = absurd (0≢0 refl)
+deḷ {suc x} fzero (fsuc b — a≢b) = b
+deḷ {suc x} (fsuc a) (fzero — a≢b) = fzero
+deḷ {suc x} (fsuc a) (fsuc b — a'≢b') =
+  fsuc (deḷ {x} a (b — ≢cong fsuc a'≢b'))
 ```
 
 ## Definition of `Pred`
@@ -548,8 +549,7 @@ output of the trace path.
     in del (f fzero) (f (fsuc i) — f0≢fsi)
 ```
 
-Next we prove injectivity, by chaining injectivity proofs. We use the
-fact that `del` is injective: `del-inj`.
+Next we prove injectivity, by chaining injectivity proofs. `di` is a proof that del is injectivity
 
 ```
   g-inj : is-injective g
@@ -586,8 +586,7 @@ trace (suc A) f = trace A (pred f)
 ```
 
 This definition turned out to be cumbersome to work with as it
-required explicitly transporting the proof of distinctness
-around. This approach also required an additional structure than just
-injectivity. I saw that lemmas were difficult to prove and saw that an
-alternative approach using inductive types to represent inductive
-function could be used. This is what the next section details.
+required explicitly transporting the proof of distinctness around.
+
+I saw that lemmas were difficult to prove and saw that an alternative
+approach using inductive types.
