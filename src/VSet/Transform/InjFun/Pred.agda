@@ -17,54 +17,35 @@ open import VSet.Data.Fin
 open import VSet.Data.InjFun.Injection
 open import VSet.Data.Fin.Minus
 
+ins0 : {x : ℕ} → ⟦ x ⟧ → (suc x ∖ fzero)
+ins0 a = s a —0
 
-module Pred {x y : ℕ} (f : [ suc x ↣ suc y ]) where
+module Pred {x y : ℕ} (f' : [ suc x ↣ suc y ]) where
   open _∖_
-  f-inj : is-injective (fst f)
-  f-inj = snd f
+  f = fst f'
+  f-inj = snd f'
 
-  g^ : ⟦ x ⟧ → ⟦ y ⟧
-  g^ i =
-    let (j — 0≢j) = ins fzero i 
-    in del (fst f fzero) (fst f j — λ f0≡fj → 0≢j (f-inj fzero j f0≡fj))
+  g : ⟦ x ⟧ → ⟦ y ⟧
+  g i =
+    let f0≢fsi : f fzero ≢ f (fsuc i)
+        f0≢fsi f0≡fsi = fzero≢fsuc (f-inj fzero (fsuc i) f0≡fsi) 
+    in del (f fzero) (f (fsuc i) — f0≢fsi)
 
-
-  composition : (ai : (b₁ b₂ : ⟦ x ⟧) → val (ins fzero b₁) ≡ val (ins fzero b₂) → b₁ ≡ b₂)
-       → (di : (B₁ B₂ : (suc y) ∖ fst f fzero)
-             → del (fst f fzero) B₁ ≡ del (fst f fzero) B₂ → val B₁ ≡ val B₂)
-       → is-injective g^
-  composition ai di b₁ b₂ f'b₁≡f'b₂ =
-    let
-      (c₁ — z≢c₁) = ins fzero b₁
-      (c₂ — z≢c₂) = ins fzero b₂
-    in
-    ai b₁ b₂
-       (f-inj c₁ c₂
-         (di (fst f c₁ — λ fz≡fc₁ → z≢c₁ (f-inj fzero c₁ fz≡fc₁))
-             (fst f c₂ — λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
-             f'b₁≡f'b₂))
-
-  g-inj : is-injective g^
+  g-inj : is-injective g
   g-inj b₁ b₂ gb₁≡gb₂ = 
     let
-      ai : (b₁ b₂ : ⟦ x ⟧) → val (ins fzero b₁) ≡ val (ins fzero b₂) → b₁ ≡ b₂
-      ai = ins-inj fzero
-      di : (B₁ B₂ : (suc y) ∖ fst f fzero)
-         → del (fst f fzero) B₁ ≡ del (fst f fzero) B₂
-         → val B₁ ≡ val B₂
-      di = del-inj (fst f fzero)
-      (c₁ — z≢c₁) = ins fzero b₁
-      (c₂ — z≢c₂) = ins fzero b₂
+      (c₁ — z≢c₁) = s b₁ —0
+      (c₂ — z≢c₂) = s b₂ —0
     in
-    ai b₁ b₂
+    fsuc-injective {i = b₁} {j = b₂}
        (f-inj c₁ c₂
-         (di (fst f c₁ — λ fz≡fc₁ → z≢c₁ (f-inj fzero c₁ fz≡fc₁))
-             (fst f c₂ — λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
-             gb₁≡gb₂))
+         (del-inj
+           (f fzero)
+           (f c₁ — λ fz≡fc₁ → z≢c₁ (f-inj fzero c₁ fz≡fc₁))
+           (f c₂ — λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
+           gb₁≡gb₂))
 
-  g : [ x ↣ y ]
-  g = g^ , g-inj
+  g' : [ x ↣ y ]
+  g' = g , g-inj
 
-open Pred using () renaming (g to pred) public
-
--- -}
+open Pred using () renaming (g' to pred) public

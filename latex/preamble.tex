@@ -12,7 +12,7 @@
 \usepackage[references]{latex/agda}
 \usepackage{unicode-math}
 \usepackage{tikz}
-\usetikzlibrary{positioning,chains,fit,shapes,calc,arrows.meta}
+\usetikzlibrary{positioning,chains,fit,shapes,calc,arrows.meta,decorations.markings}
 \usepackage{ucharclasses}
 \usepackage{newunicodechar}
 
@@ -32,14 +32,7 @@
 }
 \setlength{\mathindent}{0pt}
 
-% TikZ helper
-\newcommand{\dotrow}[3]{% end, label, labelpos
-  \begin{scope}[start chain=going right]
-    \foreach \i in {0,...,#1}
-      \node[on chain, dotnode, label=#3:{\i}] (#2\i) {};
-  \end{scope}
-}
-
+% TikZ 
 \tikzset{
   dotnode/.style = {circle, fill, inner sep=0.5mm},
   thickedge/.style  = {thick},
@@ -48,7 +41,23 @@
     -{>[length=8mm, width=8mm]},
     shorten >=1cm,
     shorten <=1cm},
-  pivot/.style={circle, fill=white, inner sep=0.5mm, draw=red}
+  pivot/.style={circle, fill=white, inner sep=0.5mm, draw=red},
+  midarrow/.style={
+    postaction={
+      decorate,
+      decoration={
+        markings,
+        mark=at position 0.5 with {\arrow{>}}
+      }
+    }
+  }
+}
+
+\newcommand{\dotrow}[3]{% end, label, labelpos
+  \begin{scope}[start chain=going right]
+    \foreach \i in {0,...,#1}
+      \node[on chain, dotnode, label=#3:{\i}] (#2\i) {};
+  \end{scope}
 }
 
 % Theorem styles/environments

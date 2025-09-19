@@ -20,7 +20,7 @@ private
 -->
 
 
-# Depdendent Sum Representation of Injective Functions
+# `InjFun` Representation
 
 ## Definition of `InjFun`
 
@@ -54,6 +54,34 @@ functions:
 [_↣_] : ℕ → ℕ → Type
 [ X ↣ Y ] = ⟦ X ⟧ ↣ ⟦ Y ⟧
 ```
+
+We introduce the notation of representing Fin functions as a list of
+indexes. The following represents a function that maps 0 to 1, 1 to 2
+and 2 to 0. The indexes list in order of domain element, where that
+element is mapped to. This is injective since no number appears
+twice. Note that there is some ambiguity with the notation in that we
+haven't specified the size of the codomain. Figure \ref{fig:120-intro}
+is a graphical representation of the same function.
+
+$$(1\ 2\ 0)$$
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[thickedge, node distance=7mm]
+  \dotrow{2}{b}{above}
+  \begin{scope}[yshift=-2cm]
+    \dotrow{2}{a}{below}
+  \end{scope}
+  \draw (a0) -- (b1);
+  \draw (a1) -- (b2);
+  \draw (a2) -- (b0);
+ \draw[thick,->,>=stealth, line width=2pt] (3,-2) -- ++(0,2);
+\end{tikzpicture}
+\caption{Plot of $(1\ 2\ 0)$. The bottom row is the domain and the top
+row is the codomain. The arrow indicates the direction from domain to
+codomain.}
+\label{fig:120-intro}
+\end{figure}
 
 Note that the notation `⟦_⟧` is an alias for `Fin`, used to
 suggest the notion that `Fin` is a function from the objects of a
@@ -309,11 +337,11 @@ denote the isomorphism type, and have different accessors. Suppose `f
  - `rinv : f ^ ∘ f ⁻¹ ≡ id` - right inverse
  - `linv : f ⁻¹ ∘ f ^ ≡ id` - left inverse
 
-rinv and linv are the function extensionality version of the one in the definition of `Iso`.
-
+rinv and linv are the function extensionality version of the one in
+the definition of `Iso`.
+```
 infix 1 _≅_
 
-```
 _≅_ : (A B : Type) → Type
 A ≅ B = Iso A B
 ```

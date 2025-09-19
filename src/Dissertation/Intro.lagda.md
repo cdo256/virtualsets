@@ -4,6 +4,8 @@ module Dissertation.Intro where
 ```
 -->
 
+# Overview of Formalization Chapter
+
 The formalization was performed in Cubical Agda. This chapter
 documents the development of the formalization, building up from basic
 lemmas to more complex results. It is generated from type-checked
@@ -42,3 +44,4 @@ injective function, which has the drawback of obscuring somewhat the
 function, but has the benefit of keeping the order of elements fixed
 between operations, and has a relatively intuitive representation of
 the trace operator.
+

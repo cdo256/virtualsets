@@ -3,7 +3,6 @@
 module Dissertation.TransformInjFun where
 
 open import Cubical.Core.Primitives
-open import Cubical.Data.Empty renaming (elim to absurd)
 open import Cubical.Data.Fin.Properties
 open import Cubical.Data.Nat.Base
 open import Cubical.Data.Nat.Order
@@ -14,7 +13,6 @@ open import Cubical.Foundations.Prelude
 open import Cubical.Induction.WellFounded
 open import Cubical.Relation.Binary.Base
 open import VSet.Data.Fin renaming (pred to fpred)
-open import VSet.Data.Fin.Minus
 open import VSet.Data.Fin.SumSplit
   using (⊎≅+; ⊎→+; +→⊎) renaming (sect to ⊎+sect; retr to ⊎+retr)
 open import VSet.Data.InjFun.Equality
@@ -289,3 +287,307 @@ time to return to.
 assoc-ext' f g h x = _
 ```
 -->
+
+## Trace operations on `InjFun`
+
+The final construction for the dependent sum '`InjFun`' approach is
+the `trace` operator. In principle, a trace is an operator that
+decreases the domain and codomain of an injective function by the same
+amount. It will be easiest to start thinking about a trace of $1$,
+that we call `pred` (for predecessor), and then define the trace
+operator as the repeated `pred` operations.
+
+Start by considering an injective function, the graph of which is
+given by figure \ref{fig:trace-steps} as step 0. The information flows in one
+direction, indicated by the arrow on the right. This example is
+bijective but we don't require surjection. Now the predecessor
+operation ('pred' or 'trace 1') on this function is visualized as a
+backward 'feedback' edge from 0 in the codomain back to 0 in the
+domain. We consider each node to have at most one input and one
+output, meaning that 'd0' (short for domain element 0) can't be
+accessed from an input function, since it already has one output and
+one input. Likewise 'c0' (codomain element 0) already has one input
+and output, so there are no extra 'connection points' to take the
+output from. Hence the domain has been restricted to $\{1, 2\}$ and
+the range to $\{1, 2, 3\}$, as given in \ref{fig:trace-steps} step
+2. By convention, we shift all the values down by a fixed amount so
+that we always have a domain and codomain composed of a consecutive
+sequence starting from 0. The final result is given by figure
+\ref{fig:trace-steps} as step 3.
+
+```latex
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[thickedge, node distance=7mm, every node/.style={inner sep=0pt}]
+
+\matrix[matrix of nodes, column sep=4cm, row sep=5cm] (m) {
+\node[inner sep=0pt] (boxTL) {
+  \begin{tikzpicture}[thickedge, node distance=7mm]
+    \dotrow{3}{b}{above}
+    \begin{scope}[yshift=-2cm]
+      \dotrow{2}{a}{below}
+    \end{scope}
+    \draw[midarrow] (a0) -- (b2);
+    \draw[midarrow] (a1) -- (b0);
+    \draw[midarrow] (a2) -- (b3);
+  \end{tikzpicture}
+}; &
+\node[inner sep=0pt] (boxTR) {
+  \begin{tikzpicture}[thickedge, node distance=7mm]
+    \dotrow{3}{b}{above}
+    \begin{scope}[yshift=-2cm]
+      \dotrow{2}{a}{below}
+    \end{scope}
+    \draw[midarrow] (a0) -- (b2);
+    \draw[midarrow] (a1) -- (b0);
+    \draw[midarrow] (a2) -- (b3);
+    \draw[midarrow] (0,0)
+      arc [start angle=0, end angle=180, radius=5mm]
+      -- (-1,-2)
+      arc [start angle=180, end angle=360, radius=5mm];
+  \end{tikzpicture}
+}; \\
+\node[inner sep=0pt] (boxBL) {
+  \begin{tikzpicture}[thickedge, node distance=7mm]
+    \dotrow{2}{b}{above}
+    \begin{scope}[yshift=-2cm]
+      \dotrow{1}{a}{below}
+    \end{scope}
+    \draw[midarrow] (a0) -- (b1);
+    \draw[midarrow] (a1) -- (b2);
+  \end{tikzpicture}
+}; &
+\node[inner sep=0pt] (boxBR) {
+  \begin{tikzpicture}[thickedge, node distance=7mm]
+    \dotrow{2}{b}{above}
+    \begin{scope}[yshift=-2cm]
+      \dotrow{1}{a}{below}
+    \end{scope}
+    \node[dotnode] (bn1) at (-1,0) {};
+    \node[dotnode] (an1) at (-1,-2) {};
+    \draw[midarrow] (an1) -- (b1);
+    \draw[midarrow] (a0) -- (bn1);
+    \draw[midarrow] (a1) -- (b2);
+    \draw[midarrow] (-1,0)
+      arc [start angle=0, end angle=180, radius=5mm]
+      -- (-2,-2)
+      arc [start angle=180, end angle=360, radius=5mm];
+  \end{tikzpicture}
+}; \\
+};
+
+\node[below=2mm of boxTL] {Step 0};
+\node[below=2mm of boxTR] {Step 1};
+\node[below=2mm of boxBR] {Step 2};
+\node[below=2mm of boxBL] {Step 3};
+
+\draw[ultra thick,-{>[length=8mm, width=8mm]}, shorten >=6mm, shorten <=6mm]
+  (boxTL.east) -- (boxTR.west);
+\draw[ultra thick,-{>[length=8mm, width=8mm]}, shorten >=6mm, shorten <=6mm]
+  (boxTR.south) -- (boxBR.north);
+\draw[ultra thick,-{>[length=8mm, width=8mm]}, shorten >=6mm, shorten <=6mm]
+  (boxBR.west) -- (boxBL.east);
+
+\end{tikzpicture}
+\caption{Step by step procedure for $Tr₁ ((2\ 0\ 3))$. Start with the
+graph of some injective function (step 0), add a cycle (step 1), shift
+the indices (step 2), and finally join source directly up with
+destination, (step 3) to get $(1 2)$.} \label{fig:trace-steps}
+\end{figure}
+```
+
+We implement this by making use of subtypes of ℕ specifically we want
+to formally define the notion of a finite set with an element taken out. We do this by defining a 'minus operator':
+
+```
+record _∖_ (A : ℕ) (a : Fin A) : Type where
+  constructor _—_
+  field
+    val : Fin A
+    ne : a ≢ val
+open _∖_
+```
+
+The idea is that we will use this definition to TODO
+
+It is simply a pointed finite set, made up of a selected element
+`a : Fin A`, such that each instance has a value `val : Fin A` paired with a proof of distinctness with `a`: `ne : a ≢ val`. We then prove some simple properties: 
+```
+s_—0 : {A : ℕ} (a : Fin A) → suc A ∖ fzero 
+s a —0 = fsuc a — fzero≢fsuc {i = a}
+
+0—s_ : {A : ℕ} (a : Fin A) → suc A ∖ fsuc a
+0—s a = fzero — fsuc≢fzero {i = a}
+```
+
+`s a —0` removes 0 from Fin (suc A), leaving `fsuc a`, while `0—s a`
+removes a successor element `fsuc a`, leaving 0. Next we construct
+successor and predecessor functions on minus sets:
+```
+∖-suc : {A : ℕ} {a : Fin A} → A ∖ a → suc A ∖ fsuc a
+∖-suc {suc A} (b — a≢b) = fsuc b — ≢cong fpred a≢b
+
+∖-pred : {A : ℕ} {a : Fin A} → (b : suc A ∖ fsuc a) → (val b ≢ fzero) → A ∖ a
+∖-pred {suc A} (fzero — a≢b) 0≢0 = absurd (0≢0 refl)
+∖-pred {suc A} (fsuc b — a≢b) _ = b — ≢cong fsuc a≢b
+```
+
+Next we define insert and delete operations. Insert maps a finite set
+to a finite set one larger, but with a hole. Delete on the other hand
+goes in the opposite direction, mapping a finite set with a hole, to a
+finite set one smaller. Both maps are bijections and respect order,
+although that isn't proven here.
+```
+ins : {x : ℕ} → (a : ⟦ suc x ⟧) → ⟦ x ⟧ → (suc x ∖ a)
+ins {suc x} fzero b = fsuc b — fzero≢fsuc
+ins {suc x} (fsuc a) fzero = fzero — fsuc≢fzero
+ins {suc x} (fsuc a) (fsuc b) =
+  fsuc c — λ sa≡sc →
+    let a≡c = fsuc-injective {suc x} {a} {c} sa≡sc
+    in ne (ins a b) a≡c
+  where
+    c = val (ins a b)
+
+del : {x : ℕ} → (a : ⟦ suc x ⟧) → (suc x ∖ a) → ⟦ x ⟧
+del {ℕ.zero} fzero (fzero — 0≢0) = absurd (0≢0 refl)
+del {suc x} fzero (fzero — 0≢0) = absurd (0≢0 refl)
+del {suc x} fzero (fsuc b — a≢b) = b
+del {suc x} (fsuc a) (fzero — a≢b) = fzero
+del {suc x} (fsuc a) (fsuc b — a'≢b') =
+  fsuc (del {x} a (b — ≢cong fsuc a'≢b'))
+```
+
+## Definition of `Pred`
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[thickedge, node distance=7mm]
+  \begin{scope}[yshift=4cm]
+    \dotrow{2}{e}{above}
+  \end{scope}
+  \begin{scope}[yshift=2cm]
+    \dotrow{3}{d}{above}
+  \end{scope}
+  \begin{scope}[yshift=0cm]
+    \dotrow{3}{c}{below}
+  \end{scope}
+  \begin{scope}[yshift=-2cm]
+    \dotrow{2}{b}{below}
+  \end{scope}
+  \begin{scope}[yshift=-4cm]
+    \dotrow{1}{a}{below}
+  \end{scope}
+  \node[pivot, fit=(b0)] {};
+  \node[pivot, fit=(c2)] {};
+  \node[pivot, fit=(d0)] {};
+  \draw[midarrow] (d1) -- (e0);
+  \draw[midarrow] (d2) -- (e1);
+  \draw[midarrow] (d3) -- (e2);
+  \draw[
+    color=red,
+    shorten >=1.5mm, shorten <=1.5mm,
+    postaction={
+      decorate,
+      decoration={markings, mark=at position 0.7 with {\arrow{>}}} 
+    }
+  ] (c2) -- (d0);
+  \draw[
+    postaction={
+      decorate,
+      decoration={markings, mark=at position 0.6 with {\arrow{>}}} 
+    }
+  ] (c0) -- (d2);
+  \draw[
+    postaction={
+      decorate,
+      decoration={markings, mark=at position 0.4 with {\arrow{>}}} 
+    }
+  ] (c1) -- (d1);
+  \draw[midarrow] (c3) -- (d3);
+  \draw[color=red, midarrow, shorten >=1.5mm, shorten <=1.5mm] (b0) -- (c2);
+  \draw[midarrow] (b1) -- (c0);
+  \draw[midarrow] (b2) -- (c3);
+  \draw[midarrow] (a0) -- (b1);
+  \draw[midarrow] (a1) -- (b2);
+\end{tikzpicture}
+\caption{Chain of compositions to implement the trace of $(2\ 0\ 3)$.
+From bottom to top: (a) `ins fzero` inserts a hole at location f0, (b)
+The the function is applied and the hole is traced through from 0 to
+2, (c) Next the hole and position 0 are swapped. }
+\label{fig:trace-stack}
+\end{figure}
+
+We are now ready to define `Pred`. First fix a function `f'` with
+domain `suc x` and range `suc y`. The pred operator cannot apply if
+either the domain or range is empty, since it subtracts off an element
+each time.
+
+Our approach will be to chain maps, inserting a hole, mapping it with `f'`,
+swapping that location with 0 and finally removing the bubble.
+
+```
+module Pred {x y : ℕ} (f' : [ suc x ↣ suc y ]) where
+  open _∖_
+```
+
+First we split f' into its components:
+```
+  f = fst f'
+  f-inj = snd f'
+```
+
+Now we construct the function-part of `pred`, this works as follows:
+Given an input `i`, we shift it up to `fsuc i`, then, using the fact
+that `f` is injective, we show that `f (fsuc i)` is not mapped to the
+output of the trace path.
+```
+  g : ⟦ x ⟧ → ⟦ y ⟧
+  g i =
+    let f0≢fsi : f fzero ≢ f (fsuc i)
+        f0≢fsi f0≡fsi = fzero≢fsuc (f-inj fzero (fsuc i) f0≡fsi) 
+    in del (f fzero) (f (fsuc i) — f0≢fsi)
+```
+
+Next we prove injectivity, by chaining injectivity proofs. We use the
+fact that `del` is injective: `del-inj`.
+
+```
+  g-inj : is-injective g
+  g-inj b₁ b₂ gb₁≡gb₂ = 
+    let
+      (c₁ — z≢c₁) = s b₁ —0
+      (c₂ — z≢c₂) = s b₂ —0
+    in
+    fsuc-injective {i = b₁} {j = b₂}
+       (f-inj c₁ c₂
+         (del-inj
+           (f fzero)
+           (f c₁ — λ fz≡fc₁ → z≢c₁ (f-inj fzero c₁ fz≡fc₁))
+           (f c₂ — λ fz≡fc₂ → z≢c₂ (f-inj fzero c₂ fz≡fc₂))
+           gb₁≡gb₂))
+```
+
+Finally we construct the injective function `g'`, and use a module trick to
+generate the operation `pred` from the previous construction of `g'`
+from `g'`.
+```
+  g' : [ x ↣ y ]
+  g' = g , g-inj
+
+open Pred using () renaming (g' to pred) public
+```
+
+The operator `trace` comes from repeating `pred` `A` times.
+
+```
+trace : {X Y : ℕ} (A : ℕ) → (f : [ A + X ↣ A + Y ]) → [ X ↣ Y ]
+trace zero f = f
+trace (suc A) f = trace A (pred f)
+```
+
+This definition turned out to be cumbersome to work with as it
+required explicitly transporting the proof of distinctness
+around. This approach also required an additional structure than just
+injectivity. I saw that lemmas were difficult to prove and saw that an
+alternative approach using inductive types to represent inductive
+function could be used. This is what the next section details.
