@@ -289,3 +289,7 @@ isPropTrichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
 <ᶠ-inj-l : {a : Fin x} {b : Fin y} → a <ᶠ b → finj a <ᶠ b 
 <ᶠ-inj-l a<b =
   <ᶠ-respects-≈ᶠ (≈ᶠ-inj _) a<b (≈refl)
+
+DecFin-isProp : {x y : ℕ} (a : Fin x) (b : Fin y)
+              → isProp (Dec (a ≈ᶠ b))
+DecFin-isProp a b = isPropDec isProp≈ᶠ

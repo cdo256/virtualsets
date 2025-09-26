@@ -17,6 +17,7 @@ open import VSet.Data.Inj.Properties
 open import VSet.Transform.Inj.Elementary.Base
 open import VSet.Transform.Inj.Inverse.Base
 open import VSet.Transform.Inj.Compose.Base
+open import VSet.Transform.Inj.Compose.Properties
 open import VSet.Transform.Inj.Tensor.Base
 open import Cubical.Data.Maybe.Base hiding (elim)
 
@@ -334,89 +335,95 @@ peel-r (suc k) {suc m} {suc n} f = peel-r k (jcast (+-suc m k) refl (excise fmax
     ≡⟨ refl ⟩
   (inc b f' ⊕ g') ∘ʲ shift (suc m') g ▯
 
-⊕-preserves-∘ : ∀ {m m' m'' n n' n''}
-              → (f : Inj m m') (f' : Inj m' m'') (g : Inj n n') (g' : Inj n' n'')
-              → (f' ∘ʲ f) ⊕ (g' ∘ʲ g) ≡ (f' ⊕ g') ∘ʲ (f ⊕ g)
-⊕-preserves-∘ {zero} {suc m'} {m''} {zero} {n'} {n''} (nul (suc m')) f' (nul n') g' =
-  (f' ∘ʲ nul (suc m')) ⊕ (g' ∘ʲ nul n')
+apply-⊕-fshift
+  : {k l m n : ℕ} (f : Inj k l) (g : Inj m n) (a : Fin m)
+  → apply (f ⊕ g) (fshift k a) ≡ fshift l (apply g a)
+apply-⊕-fshift {suc k} {suc l} {suc m} {suc n} (inc (fsuc b) f) g a =
+  apply (inc (fsuc b) f ⊕ g) (fshift (suc k) a)
     ≡⟨ refl ⟩
-  (nul m'') ⊕ (nul n'')
-    ≡⟨ nul-⊕-nul {m''} ⟩
-  nul (m'' + n'')
+  apply (inc (finject (suc n) (fsuc b)) (f ⊕ g)) (fshift (suc k) a)
     ≡⟨ refl ⟩
-  (f' ⊕ g') ∘ʲ nul ((suc m') + n')
-    ≡⟨ cong (tensor f' g' ∘ʲ_) (sym (nul-⊕-nul {suc m'})) ⟩
-  (f' ⊕ g') ∘ʲ (nul (suc m') ⊕ nul n') ▯
-⊕-preserves-∘ {zero} {zero} {m''} {n} {n'} {n''}
-              (nul zero) (nul m'') g g' =
-  (nul m'' ∘ʲ nul zero) ⊕ (g' ∘ʲ g)
+  apply (inc (fsuc (finject (suc n) b)) (f ⊕ g)) (fsuc (fshift k a))
     ≡⟨ refl ⟩
-  nul m'' ⊕ (g' ∘ʲ g)
-    ≡⟨ refl ⟩
-  shift m'' (g' ∘ʲ g)
-    ≡⟨ ∘ʲ-preserves-shift m'' g' g ⟩
-  shift m'' g' ∘ʲ g
-    ≡⟨ refl ⟩
-  (nul m'' ⊕ g') ∘ʲ (nul zero ⊕ g) ▯
--- ⊕-preserves-∘ {zero} {m'} {m''} {suc n} {suc n'} {suc n''} (nul m') f' (inc b g) g' =
---   (f' ∘ʲ nul m') ⊕ (g' ∘ʲ inc b g)
---     ≡⟨ refl ⟩
---   nul m'' ⊕ inc (apply g' b) (remove b g' ∘ʲ g)
---     ≡⟨ refl ⟩
---   shift m'' (inc (apply g' b) (remove b g' ∘ʲ g))
---     ≡⟨ shift≡shift' m'' (inc (apply g' b) (remove b g' ∘ʲ g)) ⟩
---   shift' m'' (inc (apply g' b) (remove b g' ∘ʲ g))
---     ≡⟨ refl ⟩
---   subst2 Inj refl (sym q)
---          (inc (subst Fin q (fshift m'' (apply g' b)))
---               (shift' m'' (remove b g' ∘ʲ g)))
---     ≡⟨ {!!} ⟩
---   subst2 Inj refl (sym q)
---          (inc (apply (subst2 Inj p q (f' ⊕ g')) (subst Fin p (fshift m' b)))
---               (remove (subst Fin p (fshift m' b)) (subst2 Inj p q (f' ⊕ g'))
---               ∘ʲ (shift' m' g)))
---     ≡⟨ {!!} ⟩
---   subst2 Inj refl (sym q)
---          (subst2 Inj p q (f' ⊕ g')
---          ∘ʲ subst (Inj (suc n)) p (subst (Inj (suc n)) (sym p)
---             (inc (subst Fin p (fshift m' b)) (shift' m' g))))
---     ≡⟨  cong (λ ○ → subst2 Inj refl (sym q)
---          (subst2 Inj p q (f' ⊕ g')
---          ∘ʲ ○)) (subst-filler (Inj (suc n)) (λ i → suc (m' + n')) {!!})  ⟩
---   subst2 Inj refl (sym q)
---          (subst2 Inj p q (f' ⊕ g')
---          ∘ʲ inc (subst Fin p (fshift m' b)) (shift' m' g))
---     ≡⟨ u ⟩
---   (f' ⊕ g') ∘ʲ subst2 Inj refl (sym p) (inc (subst Fin p (fshift m' b)) (shift' m' g))
---     ≡⟨ cong ((f' ⊕ g') ∘ʲ_) (sym (shift≡shift' m' (inc b g))) ⟩
---   (f' ⊕ g') ∘ʲ shift m' (inc b g)
---     ≡⟨ refl ⟩
---   (f' ⊕ g') ∘ʲ (nul m' ⊕ inc b g) ▯
---   where
---     p = +-suc m' n'
---     q = +-suc m'' n''
-
-⊕-preserves-∘ {zero} {suc m'} {suc m''} {suc n} {suc n'} {suc n''}
-              (nul (suc m')) (inc b' f') (inc c g) g' =
-  (inc b' f' ∘ʲ nul (suc m')) ⊕ (g' ∘ʲ inc c g)
-    ≡⟨ refl ⟩
-  nul (suc m'') ⊕ (g' ∘ʲ inc c g)
-    ≡⟨ refl ⟩
-  shift (suc m'') (g' ∘ʲ inc c g)
-    ≡⟨ refl ⟩
-  shift1 (shift m'' (g' ∘ʲ inc c g))
-    ≡⟨ cong shift1 (shift≡shift' m'' (g' ∘ʲ inc c g)) ⟩
-  shift1 (shift' m'' (g' ∘ʲ inc c g))
+  fsplice (fsuc (finject (suc n) b)) (apply (f ⊕ g) (fshift k a))
+    ≡⟨ cong (fsplice (fsuc (finject (suc n) b))) (apply-⊕-fshift f g a) ⟩
+  fsplice (fsuc (finject (suc n) b)) (fshift l (apply g a))
     ≡⟨ {!!} ⟩
-  inc (finject _ b') (f' ⊕ g') ∘ʲ shift1 (shift' m' (inc c g))
-    ≡⟨ cong (inc (finject _ b') (f' ⊕ g') ∘ʲ_ ∘ shift1)
-            (sym (shift≡shift' m' (inc c g))) ⟩
-  inc (finject _ b') (f' ⊕ g') ∘ʲ shift1 (shift m' (inc c g))
+  fsuc (fshift l (apply g a))
     ≡⟨ refl ⟩
-  inc (finject _ b') (f' ⊕ g') ∘ʲ shift (suc m') (inc c g)
+  fshift (suc l) (apply g a) ▯
+apply-⊕-fshift {zero} {l} {m} {n} (nul l) g a =
+  apply (nul l ⊕ g) a 
     ≡⟨ refl ⟩
-  (inc b' f' ⊕ g') ∘ʲ shift (suc m') (inc c g)
+  apply (shift l g) a 
+    ≡⟨ apply-shift l g a ⟩
+  fshift l (apply g a) ▯
+apply-⊕-fshift {suc k} {suc l} {suc m} {n} (inc fzero f) g a =
+  apply (inc fzero f ⊕ g) (fshift (suc k) a)
     ≡⟨ refl ⟩
-  (inc b' f' ⊕ g') ∘ʲ (nul (suc m') ⊕ inc c g) ▯
-⊕-preserves-∘ {suc m} {suc m'} {m''} {zero} {n'} {n''} (inc b f) f' (nul .n') g' = {!!}
-⊕-preserves-∘ {m} {m'} {m''} {n} {n'} {n''} (inc b f) f' (inc b₁ g) g' = {!!}
+  apply (inc fzero f ⊕ g) (fsuc (fshift k a))
+    ≡⟨ refl ⟩
+  apply (inc (finject n fzero) (f ⊕ g)) (fsuc (fshift k a))
+    ≡⟨ refl ⟩
+  fsplice (finject n fzero) (apply (f ⊕ g) (fshift k a))
+    ≡⟨ cong (fsplice (finject n fzero)) (apply-⊕-fshift f g a) ⟩
+  fsplice (finject n fzero) (fshift l (apply g a))
+    ≡⟨ refl ⟩
+  fsplice fzero (fshift l (apply g a))
+    ≡⟨ refl ⟩
+  fsuc (fshift l (apply g a))
+    ≡⟨ refl ⟩
+  fshift (suc l) (apply g a) ▯
+
+fsplice-finject
+  : {k l m n : ℕ} (a : Fin k) (b : Fin (suc k))
+  → fsplice (finject n b) (finject n a)
+  ≡ finject n (fsplice b a)
+fsplice-finject {k} {l} {m} {n} fzero fzero = refl
+fsplice-finject {k} {l} {m} {n} fzero (fsuc b) = refl
+fsplice-finject {k} {l} {m} {n} (fsuc a) fzero = refl
+fsplice-finject {k} {l} {m} {n} (fsuc a) (fsuc b) =
+  cong fsuc (fsplice-finject a b)
+
+apply-⊕-finject
+  : {k l m n : ℕ} (f : Inj k l) (g : Inj m n) (a : Fin k)
+  → apply (f ⊕ g) (finject m a) ≡ finject n (apply f a) 
+apply-⊕-finject {suc k} {suc l} {m} {n} (inc b f) g fzero =
+  apply (inc b f ⊕ g) (finject m fzero)
+    ≡⟨ refl ⟩
+  apply (inc (finject n b) (f ⊕ g)) fzero
+    ≡⟨ refl ⟩
+  finject n b
+    ≡⟨ refl ⟩
+  finject n (apply (inc b f) fzero) ▯
+apply-⊕-finject {suc k} {suc l} {m} {n} (inc b f) g (fsuc a) =
+  apply (inc b f ⊕ g) (finject m (fsuc a))
+    ≡⟨ refl ⟩
+  apply (inc (finject n b) (f ⊕ g)) (fsuc (finject m a))
+    ≡⟨ refl ⟩
+  fsplice (finject n b) (apply (f ⊕ g) (finject m a))
+    ≡⟨ cong (fsplice (finject n b)) (apply-⊕-finject f g a) ⟩
+  fsplice (finject n b) (finject n (apply f a))
+    ≡⟨ fsplice-finject (apply f a) b ⟩
+  finject n (fsplice b (apply f a))
+    ≡⟨ refl ⟩
+  finject n (apply (inc b f) (fsuc a)) ▯
+
+fsplice-finject-finject : {l m n : ℕ} → (a : Fin (suc l)) (b : Fin l)
+            → fsplice (finject n a) (finject n b)
+            ≡ finject n (fsplice a b)
+fsplice-finject-finject fzero fzero = refl
+fsplice-finject-finject fzero (fsuc b) = refl
+fsplice-finject-finject (fsuc a) fzero = refl
+fsplice-finject-finject (fsuc a) (fsuc b) =
+  cong fsuc (fsplice-finject-finject a b)
+
+shift-nul : (x y : ℕ)
+          → shift y (nul x) ≡ nul (y + x)
+shift-nul x zero = refl
+shift-nul x (suc y) =
+  shift (suc y) (nul x)
+    ≡⟨ refl ⟩
+  shift1 (shift y (nul x))
+    ≡⟨ cong shift1 (shift-nul x y) ⟩
+  nul (suc y + x) ▯
