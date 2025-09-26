@@ -25,7 +25,7 @@ private
 record LeftTrace : Type _ where
 
   field
-    -- Definition adapted from the standard library.
+    -- Definition adapted from Agda Categories library. \cite{agda-categories}
     ltrace : ∀ {X A B} → Hom[ X ⊗ A , X ⊗ B ] → Hom[ A , B ]
 
     lvanishing  : ltrace {X = unit} (id ⊗ₕ f) ≡ f
