@@ -20,9 +20,9 @@ private
 -->
 
 
-# `InjFun` Representation
+# \texttt{\large InjFun} Representation {#injfun-representation}
 
-## Definition of `InjFun`
+## Definition of \texttt{\large InjFun} {#definition-of-injfun}
 
 We begin by defining the concept of injectivity. The standard way to
 define a injective function in type theory is to construct, using
@@ -136,7 +136,7 @@ refl-to-↣-is-id =
     x ▯)
 ```
 
-## Properties of `InjFun`
+## Properties of \texttt{\large InjFun} {#properties-of-injfun}
 
 Next we show that `is-injective` is a proposition when applied to a
 `FinFun`. This is done by making use of a chain of library lemmas that
@@ -164,7 +164,7 @@ isSetInjFun {m} {n} =
          (λ f → isProp→isSet (isProp-is-injective f))
 ```
 
-## Equivalence Relation on InjFun
+## Equivalence Relation on \texttt{\large InjFun} {#equivalence-relation-on-injfun}
 
 We define a heterogeneous relation on `InjFun` that allows us to
 compare two injective functions across equal types which might not be
@@ -429,7 +429,7 @@ established lemmas about sums.
       $ hx≡hy
 ```
 
-## Relating Identity Functions to `transport`
+## Relating Identity Functions to \texttt{\large transport}
 
 Te final equalities of this section export the idea that `transport p`
 and `subst B p` are *paths of functions* (i.e., the identity deforms

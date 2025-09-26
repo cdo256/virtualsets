@@ -44,4 +44,3 @@ injective function, which has the drawback of obscuring somewhat the
 function, but has the benefit of keeping the order of elements fixed
 between operations, and has a relatively intuitive representation of
 the trace operator.
-

@@ -26,13 +26,13 @@ private
 -->
 
 
-# Definition of `Fin`
+# Definition of \texttt{\large Fin} {#definition-of-fin}
 
 This section contains definitions and lemmas about finite sets,
 abbreviated 'Fin'. Specifically, for an natural `n : ℕ`, `Fin n` is a
 canonical finite set of size `n`.
 
-## Basic definition of Fin
+## Basic definition of \texttt{\large Fin} {#basic-definition-of-fin}
 
 We choose to define our own definition of Fin, which is identical to
 the one in the standard library (but not in the cubical library).
@@ -113,26 +113,6 @@ fromℕ {suc n} zero _ = fzero
 fromℕ {suc n} (suc a) sa<sn = fsuc (fromℕ {n} a (pred-<-pred {a} {n} sa<sn))
 ```
 
-Next we define some operations on `Fin`. `fshift` and `finject` are
-complementary functions that have ranges that don't overlap but do
-cover the codomain. We will use this property when defining `⊎≅+`.
-finj is a single step injection, which is useful because it can be
-composed in certain cases to avoid having to `subst` across finite
-indexes.
-```
-fshift : (x : ℕ) → {y : ℕ} → Fin y → Fin (x +ℕ y)
-fshift zero a = a
-fshift (suc x) a = fsuc (fshift x a)
-
-finject : {x : ℕ} → (y : ℕ) → Fin x → Fin (x +ℕ y)
-finject {suc _} _ fzero = fzero
-finject {suc x} y (fsuc a) = fsuc (finject {x} y a)
-
-finj : {x : ℕ} → (a : Fin x) → Fin (suc x)
-finj fzero = fzero
-finj (fsuc a) = fsuc (finj a)
-```
-
 Next we turn to absurdities and negations. `fzero≢fsuc` and
 `fsuc≢fzero` state the fact that we cannot have a value that is
 constructed two distinct ways. This is a fact that is true for all
@@ -184,7 +164,7 @@ private
 -->
 
 
-### A Total Order on `Fin`
+### A Total Order on \texttt{\large Fin} {#a-total-order-on-fin}
 
 Next we define an order operator on Fin. My plan was to make a type
 that is *propositional* for any two pairs of `Fin` using *trichotomy*,
@@ -217,7 +197,7 @@ _≉ᶠ_ : Fin x → Fin y → Type
 a ≉ᶠ b = ¬ a ≈ᶠ b
 ```
 
-### Properties on Order and Equivalence in `Fin`
+### Properties on Order and Equivalence in \texttt{\large Fin}
 
 We wll show that `_≈ᶠ_` is an equivalence relation (for transitivity
 see below `≈ᶠ-trans`), and prove some baisc properties inductively.
@@ -432,7 +412,7 @@ case≤?ᶠ a b x y = case (a ≤?ᶠ b) of
    ; (fgt _) → y }
 ```
 
-## Proof of Propositionality of `Trichotomyᶠ`
+## Proof of Propositionality of \texttt{\large Trichotomyᶠ}
 
 We now prove the desired property for this trichotomy:
 
@@ -472,10 +452,22 @@ isPropTrichotomyᶠ (fgt u) (fgt v) = cong fgt (isProp<ᶠ u v)
 ```
 
 Further results used relating to `Fin` are omitted from this report,
-but found in the repository under .
+but found in the repository under CITE.
 <!--
-
 ```
+fshift : (x : ℕ) → {y : ℕ} → Fin y → Fin (x +ℕ y)
+fshift zero a = a
+fshift (suc x) a = fsuc (fshift x a)
+
+finject : {x : ℕ} → (y : ℕ) → Fin x → Fin (x +ℕ y)
+finject {suc _} _ fzero = fzero
+finject {suc x} y (fsuc a) = fsuc (finject {x} y a)
+
+finj : {x : ℕ} → (a : Fin x) → Fin (suc x)
+finj fzero = fzero
+finj (fsuc a) = fsuc (finj a)
+
+
 ≈ᶠ-inj : ∀ (a : Fin x) → finj a ≈ᶠ a
 ≈ᶠ-inj fzero = ≈fzero
 ≈ᶠ-inj (fsuc a) = ≈fsuc (≈ᶠ-inj a)

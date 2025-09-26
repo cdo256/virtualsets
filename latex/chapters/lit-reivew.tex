@@ -1,13 +1,8 @@
-\chapter{Literature Review}
+\chapter{Related Work} \label{related-work}
 
-This section surveys related concepts to the notion of virtual sets discussed in this dissertation.
+This chapters surveys related concepts to the notion of virtual sets
+discussed in this dissertation.
 
-\section{Virtual Species}
-% I'm going to have to keep this very breif or cut out entirely.
-\section{Simplicial and Cubical Foundations}
-% I'm going to have to keep this very breif or cut out entirely.
-
-% generated with Pandoc from ~/sync/obsidian/Traced Monoidal Categories Literate Review.md
 \subsection{Traced Monoidal Categories in the Literature}
 \subsubsection*{Abstract}
 This abridged literature review examines ten significant articles on traced
@@ -130,6 +125,35 @@ to a structure with deep connections to other categories and applications. Core
 results such as the $\mathrm{Int}$-construction and ties to compact closed and
 ribbon categories have made this an active research area. Continued work is
 likely to deepen connections with logic, computation, and quantum theory.
-Formalising these structures in Agda (cf.
-\cite{hu2021-formalizing-category-theory}) could further solidify foundations
-and provide computational verification of theorems surveyed here.
+Formalising these structures in Agda (see
+\cite{hu2021-formalizing-category-theory}) could further solidify
+foundations and provide computational verification of theorems
+surveyed here.
+
+\section{Formalization of Categories in Agda}
+
+Hu & Carette's 2021 paper \cite{hu2021-formalizing-category-theory}
+first lays out a practical design for implementing and reasoning about
+categories in Agda. They discuss the considerations of making a
+category formalization that is both extensible and easy to use. Their
+approach in MLTT \footnote{MLTT = Martin L{\"o}f Type Theory}
+\cite{martin-lof1984-mltt} interestingly they choose to ignore the
+higher $\inf$-groupoid structure
+\cite{maltsiniotis2010-grothendieck-inf-groupoids} of the hom-sets.
+
+The cubical approach \cite{vezzosi2021-cubical-agda-dependently} is
+similar, but requires that the categories are well behaved by being
+'set' like. The reason for this is something that I don't have a full
+understanding of yet.
+
+There are two major cubical libraries: the standard cubical library
+\cite{cubical-agda-lib}, and 1Lab \cite{1lab}. Neither libraries
+contain traced monoidal categories so I ported the definition over
+from the Agda categories library\cite{agda-categories,hu2021-formalizing-category-theory} to the setting of the standard cubical library.
+
+In my reasearch the formalization of traced monoidal categories in the
+Agda categories library is the only one I found in any library or
+language, including LEAN mathlib\cite{mathlib2020},
+Agda\cite{norell2009-dependently-typed-programming},
+Coq\cite{team2021-coq-proof-assistant}, and
+Isabel/HOL\nipkow2002-isabelle.

@@ -12,11 +12,9 @@ open import Cubical.Data.Sum
 ```
 -->
 
-
-
 # Choice of Finite Set Representation
 
-*This project is a modification of an email I sent to Thorsten
+*This section is a modification of an email I sent to Thorsten
 Altenkirch and Mark Williams on 30th June 2025.*
 
 In this project, finite sets have initially been defined in terms of

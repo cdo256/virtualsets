@@ -16,6 +16,7 @@ open import VSet.Data.Fin.Properties
          finject0≡subst;
          ≉fsuc )
 open import VSet.Data.Nat.Order
+open import VSet.Data.Inj.Base hiding (apply)
 open import VSet.Data.Nat.Properties
 open import VSet.Function.Injection
 open import VSet.Function.Iso
@@ -32,15 +33,15 @@ private
 -->
 
 
-# 'Splice' operations on `Fin`
+## 'Splice' operations on \texttt{\large Fin} {#splice-operations-on-fin}
 
-In my final definition of `Inj`, I have taken the approach of using a
+In the definition of `Inj`, we have taken the approach of using a
 basic inductive definition for injective functions. This was because
-the previous way (`InjFun`) of doing it was messy, and ultimately hid
-the true behaviour that I wanted to extract with a trace. This meant
-that all of the proofs relied on a long chain of isomorphisms that
-weren't strong enough to capture the behaviour that we cared about,
-namely adding and removing links to modify a funciton.
+the dependent sum representation (`InjFun`) of doing it was messy, and
+ultimately hid the true behaviour that I wanted to extract with a
+trace. This meant that all of the proofs relied on a long chain of
+isomorphisms that weren't strong enough to capture the behaviour that
+we cared about, namely adding and removing links to modify a funciton.
 
 Additionally carrying around the proof meant they had to be modified
 together, and may have been the reason I was experiencing performance
@@ -51,18 +52,75 @@ these abstractions and that ultimately proved these isomorphisms were
 distracting from the main aim which is ensure that a trace structure
 is formed from Virtual Sets. I do think this method could have worked
 if I had enough time, but the problem is that I didn't have the time
-to spare. Additionally techniques I've learnt made it clear that
-there were much better ways of structuring things so that . (?)
+to spare.
 
-In the aid of this simplicity, I decided to switch to the following
-structure to represent injective Fin funcitons.
+The first function that needs to be written for this definition to be
+usable is `apply`. Specifically from the construction of Inj function,
+we need to be able to every value from the domain into the
+codomain. To see how to construct this, suppose we have an `f : Inj m n`
+with m non-zero. For an example, consider the function,
 
+```
+f = inc f3 $ inc f0 $ inc f1 $ inc f0 $ inc f0 $ nul 0
+```
 
+This is diagrammed in Figure \ref{fig:splice-ex-f}.
 
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[thickedge, node distance=7mm]
+  \dotrow{4}{b}{above}
+  \begin{scope}[yshift=-2cm]
+    \dotrow{4}{a}{below}
+  \end{scope}
+  \draw (a0) -- (b3);
+  \draw (a1) -- (b0);
+  \draw (a2) -- (b2);
+  \draw (a3) -- (b1);
+  \draw (a4) -- (b4);
+\end{tikzpicture}
+\caption{Plot of \texttt{f = inc f3 \$ inc f0 \$ inc f1 \$ inc f0 \$ inc f0 \$ nul 0}.}
+\label{fig:splice-ex-f}
+\end{figure}
 
-There are certain operations needed to construct and work with an
-inductive definition of injective finite functions.
+For the `fzero` case, notice that `f f0` can just be read of as the
+target of the last inserted edge, it's just what the last inserted
+link associates to. For example, since we have `f ≡ inc f3 _`, we know
+that
+the first link we read off is $(0, 3)$. Thus we can fill in that case,
 
+```
+apply : ∀ {m n} → Inj m n → Fin m → Fin n
+```
+
+Let `g` stand for the the remainder of function (with `inc f3 $`
+removed), which is diagrammed suggestively for easier comparison with
+f in figure \ref{fig:splice-ex-g}. Then by construction, we have `f = inc f3 g`.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[thickedge, node distance=7mm]
+    \begin{scope}[start chain=going right]
+      \foreach \i in {0,...,2}
+        \node[on chain, dotnode, label=above:{\i}] (b\i) {};
+      \node[on chain, xshift=1cm, dotnode, label=above:3] (b3) {};
+    \end{scope}
+  \begin{scope}[yshift=-2cm,xshift=1cm]
+    \dotrow{3}{a}{below}
+  \end{scope}
+  \draw (a0) -- (b0);
+  \draw (a1) -- (b2);
+  \draw (a2) -- (b1);
+  \draw (a3) -- (b3);
+\end{tikzpicture}
+\caption{Plot of \texttt{g = inc f0 \$ inc f1 \$ inc f0 \$ inc f0 \$ nul 0}.}
+\label{fig:splice-ex-g}
+\end{figure}
+
+`fsplice b` maps `Fin x` to `Fin (suc x)` in such a way that `b` is not
+in the codomain. Essentially it increments all values equal or greater
+than b, keeping the values less than `b` unchanged. This is visualized in
+Figure \ref{fig:fsplice}. and defined below:
 ```
 fsplice : ∀ {x} → Fin (suc x) → Fin x → Fin (suc x)
 fsplice fzero a = fsuc a
@@ -70,63 +128,83 @@ fsplice (fsuc b) fzero = fzero
 fsplice (fsuc b) (fsuc a) = fsuc (fsplice b a)
 ```
 
-```
--- Alternate definition.
-fsplice'-cases : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x) → (Dichotomyᶠ b a)
-               → Fin (suc x)
-fsplice'-cases _ a (fle _) = fsuc a
-fsplice'-cases _ a (fgt _) = finj a
-```
+We call the first argument the 'pivot'. It is necessarily true that
+`fsplice b a ≢ a`, which we show below. We will use this to recurse in
+the definition of apply. The base case just reads off the target,
+which is the first `inc` expanded. The second case, recurses on `g`,
+and then uses the splice to ensure there is space for `b` in the
+codomain. This is what ensures that all `Inj` functions are injective,
+since it's not possible for fsplice to map an element to the pivot:
 
 ```
-fsplice'-cases-eq
-   : ∀ {x} → {b : Fin (suc x)} → {a : Fin x}
-   → (u v : Dichotomyᶠ b a)
-   → fsplice'-cases b a u ≡ fsplice'-cases b a v
-fsplice'-cases-eq (fle u) (fle v) = refl
-fsplice'-cases-eq (fle u) (fgt v) = absurd (≤ᶠ→≯ᶠ u v)
-fsplice'-cases-eq (fgt u) (fle v) = absurd (≤ᶠ→≯ᶠ v u)
-fsplice'-cases-eq (fgt u) (fgt v) = refl
+fsplice≉b : ∀ {x} → (b : Fin (suc x)) → (a : Fin x) → fsplice b a ≉ᶠ b
+fsplice≉b fzero a = fsuc≉fzero
+fsplice≉b (fsuc b) fzero = fzero≉fsuc
+fsplice≉b (fsuc b) (fsuc a) ne = 
+  let rec≉b = fsplice≉b b a
+  in rec≉b (≈fsuc-injective ne)
 ```
 
-```
-fsplice' : ∀ {x : ℕ} → Fin (suc x) → Fin x → Fin (suc x)
-fsplice' b a = fsplice'-cases b a (b ≤?ᶠ a)
-```
+We now have what we need to finish `apply`. To get the successor
+case, suppose we have `suc n`, we need to recurse on `g`. This gives
+us the correct values for all outputs that are less than `b`, in this
+case `f3`. The final operation we need, we call a `fsplice`, one of a
+family of operations on Fin that provide utilities for operating on
+Fin types. Putting that together we obtain:
 
 ```
-fsplice≡fsplice'
-  : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin x)
-  → fsplice b a ≡ fsplice' b a
-fsplice≡fsplice' fzero fzero = refl
-fsplice≡fsplice' fzero (fsuc a) = refl
-fsplice≡fsplice' (fsuc b) fzero = refl
-fsplice≡fsplice' (fsuc b) (fsuc a) with (fsuc b ≤?ᶠ fsuc a)
-... | fle b'≤a' = 
-  fsuc (fsplice b a)
-    ≡⟨ cong fsuc (fsplice≡fsplice' b a) ⟩
-  fsuc (fsplice' b a)
-    ≡⟨ refl ⟩
-  fsuc (fsplice'-cases b a (b ≤?ᶠ a))
-    ≡⟨ cong fsuc (fsplice'-cases-eq (b ≤?ᶠ a) (fle (≤-pred b'≤a'))) ⟩
-  fsuc (fsplice'-cases b a (fle (≤-pred b'≤a')))
-    ≡⟨ refl ⟩
-  fsuc (fsuc a)
-    ≡⟨ refl ⟩
-  fsplice'-cases (fsuc b) (fsuc a) (fle b'≤a') ▯
-... | fgt (<fsuc b>a) =
-  fsuc (fsplice b a)
-    ≡⟨ cong fsuc (fsplice≡fsplice' b a) ⟩
-  fsuc (fsplice' b a)
-    ≡⟨ refl ⟩
-  fsuc (fsplice'-cases b a (b ≤?ᶠ a))
-    ≡⟨ cong fsuc (fsplice'-cases-eq (b ≤?ᶠ a) (fgt b>a)) ⟩
-  fsuc (fsplice'-cases b a (fgt b>a))
-    ≡⟨ refl ⟩
-  fsuc (finj a)
-    ≡⟨ refl ⟩
-  fsplice'-cases (fsuc b) (fsuc a) (fgt (<fsuc b>a)) ▯
+apply (inc b g) fzero = b
+apply (inc b g) (fsuc a) = fsplice b (apply g a)
 ```
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[thickedge, node distance=7mm]
+  \begin{scope}
+    \dotrow{6}{b}{above}
+  \end{scope}
+  \begin{scope}[yshift=-2cm,xshift=5mm]
+    \dotrow{5}{a}{below}
+  \end{scope}
+  \draw (a0) -- (b0);
+  \draw (a1) -- (b1);
+  \draw (a2) -- (b2);
+  \draw (a3) -- (b4);
+  \draw (a4) -- (b5);
+  \draw (a5) -- (b6);
+\end{tikzpicture}
+\caption{Plot of \texttt{fsplice 3} on \texttt{x} = 5.}
+\label{fig:fsplice}
+\end{figure}
+
+Next we define a function `fcross` (see Figure \ref{fig:fcross}). is
+in some ways the opposite to `fsplice`. The idea is that given a pivot
+point `b`, it creates a funciton that `merges' the adjacent domain
+elements located at `b`and `b + 1`. This is useful when you want to
+swap the order of insertion of two values, the one moving out expands
+its domain by one and the pivot location encodes the relative order of
+two values. While the one moving further into the structure 'loses'
+information about the order of the two values.
+
+\begin{figure}[ht]
+\centering
+\begin{tikzpicture}[thickedge, node distance=7mm]
+  \begin{scope}
+    \dotrow{4}{b}{above}
+  \end{scope}
+  \begin{scope}[yshift=-2cm,xshift=-5mm]
+    \dotrow{5}{a}{below}
+  \end{scope}
+  \draw (a0) -- (b0);
+  \draw (a1) -- (b1);
+  \draw (a2) -- (b2);
+  \draw (a3) -- (b2);
+  \draw (a4) -- (b3);
+  \draw (a5) -- (b4);
+\end{tikzpicture}
+\caption{Plot of \textrm{fcross 2} on \textrm{x} = 4.}
+\label{fig:fcross}
+\end{figure}
 
 ```
 fcross : ∀ {x : ℕ} → (b : Fin x) → (a : Fin (suc x)) → Fin x
@@ -136,6 +214,7 @@ fcross fzero (fsuc a) = a
 fcross (fsuc b) (fsuc a) = fsuc (fcross b a)
 ```
 
+<!--
 ```
 fcross₂ : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
             → Fin (suc x)
@@ -159,6 +238,19 @@ fcross' : ∀ {x : ℕ} → (b : Fin (suc x)) → (a : Fin (suc (suc x)))
         → Fin (suc x)
 fcross' b a = fcross'-cases b a (a ≤?ᶠ b)
 ```
+-->
+
+The last major operation is called `fjoin`. The idea is that a join is
+exactly the opposite to `fsplice`. This will be used to construct an
+inverse of function. We implement by making use of 'trichotomy' on the
+pivot 'b' with the assumption that the input is distinct from the
+pivot. Then if `a` is less than the pivot, we restrict the domain with
+`fin-restrict-<` but keep the value unchanged, and if it's larger, we
+decrease it by one. It is split up into two functions for ease of
+working with `fjoin`. If the function was part of a `where` clause then
+it would be inaccessible outside the function, and if it were split on
+a `with` clause then it acts the same as a where clause, creating an
+inaccessible funciton. This is a limitation of the current version of Agda.
 
 ```
 fjoin-cases : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
@@ -166,14 +258,13 @@ fjoin-cases : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
 fjoin-cases b a a≉b (flt a<b) = fin-restrict-< a a<b
 fjoin-cases b a a≉b (feq a≈b) = absurd (a≉b a≈b)
 fjoin-cases b (fsuc a) a≉b (fgt b<a) = a
-```
 
-```
 fjoin : ∀ {x : ℕ} → (b a : Fin (suc x)) → a ≉ᶠ b
            → Fin x
 fjoin b a a≉b = fjoin-cases b a a≉b (a ≟ᶠ b)
 ```
 
+<!--
 ```
 -- Another alternate definition
 fjoinMaybe
@@ -244,126 +335,6 @@ fcross≡fcross' {x = suc x} (fsuc b) (fsuc a) with a ≤?ᶠ b
             (isPropDichotomyᶠ (≤?ᶠ-suc (fgt a>b)) (fsuc a ≤?ᶠ fsuc b)) ⟩
   fcross'-cases (fsuc b) (fsuc a) (fsuc a ≤?ᶠ fsuc b) ▯
 open Iso
-```
-
-```
-⊎→+ : ∀ (X Y : ℕ) → ⟦ X ⟧ ⊎ ⟦ Y ⟧ → ⟦ X + Y ⟧
-⊎→+ X Y (inl a) = finject Y a
-⊎→+ X Y (inr a) = fshift X a
-```
-
-```
-inc : ∀ (X Y : ℕ) → ⟦ X ⟧ ⊎ ⟦ Y ⟧ → ⟦ suc X ⟧ ⊎ ⟦ Y ⟧
-inc X Y (inl a) = inl (fsuc a)
-inc X Y (inr a) = inr a
-```
-
-```
-+→⊎ : ∀ (X Y : ℕ) → ⟦ X + Y ⟧ → ⟦ X ⟧ ⊎ ⟦ Y ⟧
-+→⊎ zero Y a = inr a
-+→⊎ (suc X) Y fzero = inl fzero
-+→⊎ (suc X) Y (fsuc a) = inc X Y (+→⊎ X Y a)
-```
-
-```
-+→⊎-X-0≡inl : (X : ℕ) (a : ⟦ X + 0 ⟧)
-            → +→⊎ X 0 a ≡ inl (subst Fin (+-zero X) a)
-+→⊎-X-0≡inl (suc X) fzero = cong inl (fzero≡subst-fzero (+-zero X))
-+→⊎-X-0≡inl (suc X) (fsuc a) =
-  +→⊎ (suc X) 0 (fsuc a)
-    ≡⟨ refl ⟩
-  inc X 0 (+→⊎ X 0 a)
-    ≡⟨ cong (inc X 0) (+→⊎-X-0≡inl X a) ⟩
-  inc X 0 (inl (subst Fin (+-zero X) a))
-    ≡⟨ refl ⟩
-  inl (fsuc (subst Fin (+-zero X) a))
-    ≡⟨ cong inl (sym (subst-fsuc-reorder (+-zero X) a)) ⟩
-  inl (subst Fin (+-zero (suc X)) (fsuc a)) ▯
-```
-
-```
-⊎→+-inc : ∀ (X Y : ℕ) (z : ⟦ X ⟧ ⊎ ⟦ Y ⟧)
-        → ⊎→+ (suc X) Y (inc X Y z) ≡ fsuc (⊎→+ X Y z)
-⊎→+-inc X Y (inl a) = finject-fsuc-reorder a
-⊎→+-inc X Y (inr a) = refl
-```
-
-```
-sect : ∀ (X Y : ℕ) → section {A = ⟦ X ⟧ ⊎ ⟦ Y ⟧} (⊎→+ X Y) (+→⊎ X Y)
-sect zero Y a = refl
-sect (suc X) zero fzero = refl
-sect (suc X) (suc Y) fzero = refl
-sect (suc X) zero (fsuc a) =
-  ⊎→+ (suc X) zero (+→⊎ (suc X) zero (fsuc a))
-    ≡⟨ cong (⊎→+ (suc X) 0) (+→⊎-X-0≡inl (suc X) (fsuc a)) ⟩
-  ⊎→+ (suc X) zero (inl (subst Fin (+-zero (suc X)) (fsuc a)))
-    ≡⟨ refl ⟩
-  finject zero (subst Fin (+-zero (suc X)) (fsuc a))
-    ≡⟨ finject0≡subst ((subst Fin (+-zero (suc X)) (fsuc a))) ⟩
-  subst Fin (sym (+-zero (suc X))) (subst Fin (+-zero (suc X)) (fsuc a))
-    ≡⟨ subst⁻Subst Fin (+-zero (suc X)) (fsuc a) ⟩
-  fsuc a ▯
-sect (suc X) (suc Y) (fsuc a) =
-  ⊎→+ (suc X) (suc Y) (+→⊎ (suc X) (suc Y) (fsuc a))
-    ≡⟨ refl ⟩
-  ⊎→+ (suc X) (suc Y) (inc X (suc Y) (+→⊎ X (suc Y) a))
-    ≡⟨ ⊎→+-inc X (suc Y) (+→⊎ X (suc Y) a) ⟩
-  fsuc (⊎→+ X (suc Y) (+→⊎ X (suc Y) a)) 
-    ≡⟨ cong fsuc (sect X (suc Y) a) ⟩
-  fsuc a ▯
-```
-
-```
-retr : ∀ (X Y : ℕ) → retract {A = ⟦ X ⟧ ⊎ ⟦ Y ⟧} (⊎→+ X Y) (+→⊎ X Y)
-retr zero Y (inr a) = refl
-retr (suc X) Y (inl fzero) =
-  +→⊎ (suc X) Y (⊎→+ (suc X) Y (inl fzero))
-    ≡⟨ refl ⟩
-  +→⊎ (suc X) Y (finject Y fzero)
-    ≡⟨ refl ⟩
-  +→⊎ (suc X) Y fzero
-    ≡⟨ refl ⟩
-  inl fzero ▯
-retr (suc X) zero (inl (fsuc a)) =
-  +→⊎ (suc X) zero (⊎→+ (suc X) zero (inl (fsuc a))) ≡⟨ refl ⟩
-  +→⊎ (suc X) zero (finject 0 (fsuc a)) ≡⟨ refl ⟩
-  +→⊎ (suc X) zero (fsuc (finject 0 a)) ≡⟨ refl ⟩
-  inc X zero (+→⊎ X zero (finject 0 a)) ≡⟨ refl ⟩
-  inc X zero (+→⊎ X zero (⊎→+ X zero (inl a)))
-    ≡⟨ cong (inc X zero) (retr X zero (inl a)) ⟩
-  inl (fsuc a) ▯
-retr (suc X) (suc Y) (inl (fsuc a)) =
-  +→⊎ (suc X) (suc Y) (⊎→+ (suc X) (suc Y) (inl (fsuc a))) ≡⟨ refl ⟩
-  +→⊎ (suc X) (suc Y) (finject {x = suc X} (suc Y) (fsuc a)) ≡⟨ refl ⟩
-  +→⊎ (suc X) (suc Y) (fsuc (finject {x = X} (suc Y) a)) ≡⟨ refl ⟩
-  +→⊎ (suc X) (suc Y) (fsuc (finject {X} (suc Y) a)) ≡⟨ refl ⟩
-  inc X (suc Y) (+→⊎ X (suc Y) (finject {X} (suc Y) a)) ≡⟨ refl ⟩
-  inc X (suc Y) (+→⊎ X (suc Y) (⊎→+ X (suc Y) (inl a)))
-    ≡⟨ cong (inc X (suc Y) ) (retr X (suc Y) (inl a)) ⟩
-  inc X (suc Y) (inl a) ≡⟨ refl ⟩
-  inl (fsuc a) ▯
-retr (suc X) Y (inr a) =
-  +→⊎ (suc X) Y (⊎→+ (suc X) Y (inr a)) ≡⟨ refl ⟩
-  +→⊎ (suc X) Y (fshift (suc X) a) ≡⟨ refl ⟩
-  +→⊎ (suc X) Y (fsuc (fshift X a)) ≡⟨ refl ⟩
-  inc X Y (+→⊎ X Y (fshift X a)) ≡⟨ refl ⟩
-  inc X Y (+→⊎ X Y (⊎→+ X Y (inr a))) ≡⟨ cong (inc X Y) (retr X Y (inr a)) ⟩
-  inc X Y (inr a) ≡⟨ refl ⟩
-  inr a ▯
-```
-
-```
-⊎≅+ : ∀ (X Y : ℕ) → Iso (⟦ X ⟧ ⊎ ⟦ Y ⟧) ⟦ X + Y ⟧
-⊎≅+ X Y = iso (⊎→+ X Y) (+→⊎ X Y) (sect X Y) (retr X Y)
-```
-
-```
-fsplice≉b : ∀ {x} → (b : Fin (suc x)) → (a : Fin x) → fsplice b a ≉ᶠ b
-fsplice≉b fzero a = fsuc≉fzero
-fsplice≉b (fsuc b) fzero = fzero≉fsuc
-fsplice≉b (fsuc b) (fsuc a) ne = 
-  let rec≉b = fsplice≉b b a
-  in rec≉b (≈fsuc-injective ne)
 ```
 
 ```
@@ -448,16 +419,6 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} fsplice-eq =
 ```
 
 ```
-≤→fsplice≈suc : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-              → a2 ≤ᶠ finj a1 → fsplice a2 a1 ≈ᶠ fsuc a1
-≤→fsplice≈suc fzero fzero a2≤a1 = ≈fsuc ≈fzero
-≤→fsplice≈suc fzero (fsuc a2) (inr a2'≈0) = absurd (fsuc≉fzero a2'≈0)
-≤→fsplice≈suc (fsuc a1) fzero a2≤a1 = {!!}
-≤→fsplice≈suc {suc m} (fsuc a1) (fsuc a2) rec-le =
-  ≈fsuc (≤→fsplice≈suc a1 a2 (≤ᶠ-respects-pred rec-le))
-```
-
-```
 >→fsplice≈id : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
              → finj a1 <ᶠ a2 → fsplice a2 a1 ≈ᶠ finj a1
 >→fsplice≈id fzero (fsuc a2) a1<a2 = ≈refl
@@ -496,23 +457,6 @@ fsplice-isInjective {a = fsuc a} {fsuc b} {fsuc c} fsplice-eq =
 >→fcross≈pred fzero (fsuc a2) a2>a1 = ≈refl
 >→fcross≈pred {suc m} (fsuc a1) (fsuc (fsuc a2)) (<fsuc a2>a1) =
   ≈fsuc (>→fcross≈pred a1 (fsuc a2) a2>a1)
-```
-
-```
-fsplice≈case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
-             → fsplice a2 a1 ≈ᶠ(case≤?ᶠ a2 (finj a1) (fsuc a1) (finj a1))
-fsplice≈case a1 a2 with (a2 ≤?ᶠ finj a1)
-... | fle a2≤a1 = ≤→fsplice≈suc a1 a2 a2≤a1
-... | fgt a2>a1 = >→fsplice≈id a1 a2 a2>a1
-```
-
-```
--- fcross≈case : ∀ {m} → (a1 : Fin (suc m)) (a2 : Fin (suc (suc m)))
---                 → fcross a1 a2
---                 ≈ᶠ case≤?ᶠ a2 (finj a1) a2 (finj (pred a2))
--- fcross≈case a1 a2 with (a2 ≤?ᶠ a1)
--- ... | fle a2≤a1 = ≤→fcross≈id a1 a2 a2≤a1
--- ... | fgt a2>a1 = cong finj (>→fcross≈pred a1 a2 a2>a1)
 ```
 
 ```
@@ -563,76 +507,7 @@ fin-restrict-<-a≈a {x = suc x} fzero <fzero = ≈fzero
 fin-restrict-<-a≈a {x = suc x} (fsuc a) (<fsuc a<b) =
   ≈fsuc (fin-restrict-<-a≈a a a<b)
 ```
-
-```
-fjoin-fsplice'
-  : ∀ {n} → (b : Fin (suc n))
-  → (c : Fin (suc (suc n))) 
-  → (ne : c ≉ᶠ fsplice' c b)
-  → (fjoin (fsplice' c b) c ne)
-  ≡ fcross' b c
-fjoin-fsplice' b c ne with c ≤?ᶠ b
-fjoin-fsplice' b c ne | fle c≤b =
-  fjoin (fsplice'-cases c b (fle c≤b)) c ne
-    ≡⟨ refl ⟩
-  fjoin-cases (fsuc b) c ne (c ≟ᶠ fsuc b)
-    ≡⟨ cong (fjoin-cases (fsuc b) c ne)
-            (isPropTrichotomyᶠ (c ≟ᶠ fsuc b) (flt (≤ᶠ→<ᶠ c≤b))) ⟩
-  fjoin-cases (fsuc b) c ne (flt (≤ᶠ→<ᶠ c≤b))
-    ≡⟨ refl ⟩
-  fin-restrict-< c (≤ᶠ→<ᶠ c≤b)
-    ≡⟨ refl ⟩
-  fin-restrict-≤ c c≤b
-    ≡⟨ refl ⟩
-  fcross'-cases b c (fle c≤b) ▯
-fjoin-fsplice' b (fsuc c) ne | fgt c>b =
-  fjoin-cases (fsplice'-cases (fsuc c) b (fgt c>b)) (fsuc c) ne
-                  (fsuc c ≟ᶠ fsplice'-cases (fsuc c) b (fgt c>b))
-    ≡⟨ refl ⟩
-  fjoin-cases (finj b) (fsuc c) ne (fsuc c ≟ᶠ finj b)
-    ≡⟨ cong (fjoin-cases (finj b) (fsuc c) ne)
-              (isPropTrichotomyᶠ (fsuc c ≟ᶠ finj b) (fgt (<ᶠ-inj-l c>b))) ⟩
-  fjoin-cases (finj b) (fsuc c) ne (fgt (<ᶠ-inj-l c>b))
-    ≡⟨ refl ⟩
-  c
-    ≡⟨ refl ⟩
-  pred (fsuc c)
-    ≡⟨ refl ⟩
-  fcross'-cases b (fsuc c) (fgt c>b) ▯
-```
-
-```
-fjoin-fsplice-fsplice-fsplice
-  : ∀ {n} → (a : Fin (suc (suc n))) → (b : Fin (suc n))
-  → (c : Fin (suc n)) 
-  → (ne : fsplice a c ≉ᶠ fsplice (fsplice a c) b)
-  → (fjoin (fsplice (fsplice a c) b) (fsplice a c) ne)
-  ≡ fcross b (fsplice a c)
-fjoin-fsplice-fsplice-fsplice a b c ne =
-  fjoin (fsplice (fsplice a c) b) (fsplice a c) ne
-    ≡⟨ fjoin-cong (fsplice≡fsplice' (fsplice a c) b) refl ne ⟩
-  fjoin (fsplice' (fsplice a c) b) (fsplice a c) _
-    ≡⟨ fjoin-fsplice' b (fsplice a c) _ ⟩
-  fcross' b (fsplice a c)
-    ≡⟨ sym (fcross≡fcross' b (fsplice a c)) ⟩
-  fcross b (fsplice a c) ▯
-```
-
-```
-fsplice-fsplice-fsplice-fcross
-  : ∀ {m} → (b : Fin (suc (suc m))) → (a : Fin m) → (c : Fin (suc m)) 
-  → fsplice (fsplice b c) (fsplice (fcross c b) a)
-  ≡ fsplice b (fsplice c a)
-fsplice-fsplice-fsplice-fcross fzero fzero fzero = refl
-fsplice-fsplice-fsplice-fcross fzero fzero (fsuc c) = refl
-fsplice-fsplice-fsplice-fcross fzero (fsuc a) fzero = refl
-fsplice-fsplice-fsplice-fcross fzero (fsuc a) (fsuc c) = refl
-fsplice-fsplice-fsplice-fcross (fsuc b) fzero fzero = refl
-fsplice-fsplice-fsplice-fcross (fsuc b) fzero (fsuc c) = refl
-fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc a) fzero = refl
-fsplice-fsplice-fsplice-fcross (fsuc b) (fsuc a) (fsuc c) =
-  cong fsuc (fsplice-fsplice-fsplice-fcross b a c)
-```
+-->
 
 ```
 fcross0≡0 : ∀ {m} → (a : Fin (suc m))
@@ -658,56 +533,7 @@ fcross-fcross-fsplice {m = suc m} (fsuc b) (fsuc c) =
   cong fsuc (fcross-fcross-fsplice b c)
 ```
 
-```
-finject-+ : ∀ (x y z : ℕ) → (a : Fin x)
-          → finject z (finject y a)
-          ≡ subst Fin (+-assoc x y z) (finject (y + z) a)
-finject-+ (suc x) zero z fzero =
-  finject z (finject zero fzero)
-    ≡⟨ refl ⟩
-  finject z fzero 
-    ≡⟨ refl ⟩
-  fzero 
-    ≡⟨ fzero≡subst-fzero (+-assoc x zero z) ⟩
-  subst Fin (+-assoc (suc x) zero z) fzero 
-    ≡⟨ refl ⟩
-  subst Fin (+-assoc (suc x) zero z) (finject (zero + z) fzero) ▯
-finject-+ (suc x) zero z (fsuc a) =
-  finject z (finject zero (fsuc a))
-    ≡⟨ refl ⟩
-  finject z (fsuc (finject zero a))
-    ≡⟨ refl ⟩
-  fsuc (finject z (finject zero a))
-    ≡⟨ cong fsuc (finject-+ x 0 z a) ⟩
-  fsuc (subst Fin (+-assoc x zero z) (finject (zero + z) a))
-    ≡⟨ sym (subst-fsuc-reorder (+-assoc x zero z) (finject (zero + z) a)) ⟩
-  subst Fin (+-assoc (suc x) zero z) (fsuc (finject (zero + z) a))
-    ≡⟨ refl ⟩
-  subst Fin (+-assoc (suc x) zero z) (finject (zero + z) (fsuc a)) ▯
-finject-+ (suc x) (suc y) z fzero =
-  finject z (finject (suc y) fzero)
-    ≡⟨ refl ⟩
-  finject z fzero
-    ≡⟨ refl ⟩
-  fzero
-    ≡⟨ fzero≡subst-fzero (+-assoc x (suc y) z) ⟩
-  subst Fin (+-assoc (suc x) (suc y) z) fzero
-    ≡⟨ refl ⟩
-  subst Fin (+-assoc (suc x) (suc y) z) (finject (suc y + z) fzero) ▯ 
-finject-+ (suc x) (suc y) z (fsuc a) =
-  finject z (finject (suc y) (fsuc a))
-    ≡⟨ refl ⟩
-  finject z (fsuc (finject (suc y) a))
-    ≡⟨ refl ⟩
-  fsuc (finject z (finject (suc y) a))
-    ≡⟨ {!refl!} ⟩
-  fsuc (subst Fin (+-assoc x (suc y) z) (finject (suc y + z) a))
-    ≡⟨ sym (subst-fsuc-reorder (+-assoc x (suc y) z) (finject (suc y + z) a)) ⟩
-  subst Fin (+-assoc (suc x) (suc y) z) (fsuc (finject (suc y + z) a))
-    ≡⟨ refl ⟩
-  subst Fin (+-assoc (suc x) (suc y) z) (finject (suc y + z) (fsuc a)) ▯
-```
-
+<!--
 ```
 fsplice-fcross-fcross-fsplice
   : {n : ℕ} → (b : Fin (suc (suc n))) (c : Fin (suc n)) (d : Fin n)
@@ -765,10 +591,20 @@ fjoin≡fcross (fsuc a) (fsuc b) b'≉a' =
     ≡⟨ refl ⟩
   fcross (fsuc a) (fsuc b) ▯
 ```
+-->
+
+A key lemma is the injectivity of fjoin. The proof is non-trivial
+requiring significant pattern matching. This is a general limitation I have found with this approach compared with the `InjFun` approach.
 
 ```
-fjoin-isInjective : {n : ℕ} → (a b c : Fin (suc n)) → (b≉a : b ≉ᶠ a) → (c≉a : c ≉ᶠ a)
-                  → fjoin a b b≉a ≡ fjoin a c c≉a → b ≡ c
+fjoin-isInjective
+  : {n : ℕ} → (a b c : Fin (suc n))
+  → (b≉a : b ≉ᶠ a) → (c≉a : c ≉ᶠ a)
+  → fjoin a b b≉a ≡ fjoin a c c≉a → b ≡ c
+```
+
+<!--
+```
 fjoin-isInjective fzero fzero c 0≉0 c≉0 q = absurd (0≉0 ≈refl)
 fjoin-isInjective fzero (fsuc b) fzero b'≉0 0≉0 q = absurd (0≉0 ≈refl)
 fjoin-isInjective {suc n} fzero (fsuc b) (fsuc c) b'≉a c'≉a q =
@@ -812,35 +648,4 @@ fjoin-isInjective {n = suc n} (fsuc a) (fsuc b) (fsuc c) b≉a c≉a q =
       fjoin (fsuc a) (fsuc c) (≉fsuc (≉fpred c≉a))
         ≡⟨ fsuc-fjoin a c (≉fpred c≉a) ⟩
       fsuc (fjoin a c (≉fpred c≉a)) ▯)
-```
-
-```
-t0 = fsplice f0 f0
-   , fsplice f0 f1
-   , fsplice f1 f0
-   , fsplice f1 f1
-_ : t0 ≡ (f1 , f2 , f0 , f2)
-_ = refl
-```
-
-```
-t1 : Fin 2 × Fin 2 × Fin 2 × Fin 2
-t1 = fjoin f0 (fsplice f0 f0) (fsplice≉b f0 f0)
-   , fjoin f0 (fsplice f0 f1) (fsplice≉b f0 f1)
-   , fjoin f1 (fsplice f1 f0) (fsplice≉b f1 f0)
-   , fjoin f1 (fsplice f1 f1) (fsplice≉b f1 f1)
-_ : t1 ≡ (f0 , f1 , f0 , f1)
-_ = refl
-```
-
-```
-t2 : Fin 2 × Fin 2 × Fin 2 × Fin 2 × Fin 2 × Fin 2
-t2 = fcross' f0 f0 -- eq
-   , fcross' f0 f1 -- pred
-   , fcross' f0 f2 -- pred
-   , fcross' f1 f0 -- eq
-   , fcross' f1 f1 -- eq
-   , fcross' f1 f2 -- pred
-_ : t2 ≡ (f0 , f0 , f1 , f0 , f1 , f1)
-_ = refl
 ```

@@ -40,7 +40,7 @@ open import VSet.Transform.InjFun.Tensor using (expand-l; expand-r)
 -->
 
 
-## Tensor Product on `InjFun`
+## Tensor Product on \texttt{\large InjFun} {#tensor-product-on-injfun}
 
 We now move to detail operations and properties on `InjFun`.
 
@@ -289,7 +289,7 @@ assoc-ext' f g h x = _
 ```
 -->
 
-## Trace operations on `InjFun`
+## Trace operations on \texttt{\large InjFun} {#trace-operations-on-injfun}
 
 The final construction for the dependent sum '`InjFun`' approach is
 the `trace` operator. In principle, a trace is an operator that
@@ -458,7 +458,7 @@ deḷ {suc x} (fsuc a) (fsuc b — a'≢b') =
   fsuc (deḷ {x} a (b — ≢cong fsuc a'≢b'))
 ```
 
-## Definition of `Pred`
+## Definition of \texttt{\large pred} {#definition-of-pred}
 
 \begin{figure}[ht]
 \centering
