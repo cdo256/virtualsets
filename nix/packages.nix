@@ -37,6 +37,8 @@
             lazylist
             newunicodechar
             catchfilebetweentags
+            titling
+            dirtree
             ;
         };
       };
