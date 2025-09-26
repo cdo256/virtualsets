@@ -1,9 +1,9 @@
 module VSet.Transform.Inj.Trace.Properties where
 
-open import VSet.Prelude
 open import Cubical.Data.Maybe.Base hiding (elim)
 open import Cubical.Data.Maybe.Properties
 open import Cubical.Data.Nat.Base hiding (elim)
+open import Cubical.Data.Nat.Properties
 open import Cubical.Relation.Nullary.Base 
 open import VSet.Data.Fin.Base renaming (pred to fpred)
 open import VSet.Data.Fin.Order
@@ -13,13 +13,17 @@ open import VSet.Data.Inj.Base
 open import VSet.Data.Inj.Order 
 open import VSet.Data.Inj.Properties 
 open import VSet.Data.Maybe
+open import VSet.Data.Nat.Properties
+open import VSet.Prelude
+open import VSet.Transform.Inj.Compose.Base
 open import VSet.Transform.Inj.Elementary.Base 
 open import VSet.Transform.Inj.Inverse.Base 
 open import VSet.Transform.Inj.Inverse.Insert
 open import VSet.Transform.Inj.Inverse.Properties
-open import VSet.Transform.Inj.Trace.Base
+open import VSet.Transform.Inj.Tensor.Associator 
 open import VSet.Transform.Inj.Tensor.Base
-open import VSet.Transform.Inj.Compose.Base
+open import VSet.Transform.Inj.Tensor.Properties
+open import VSet.Transform.Inj.Trace.Base
 
 private
   variable
@@ -210,16 +214,215 @@ subst-pred-reorder : ∀ {m m' n n'} (p : m ≡ m') (q : n ≡ n') (f : Inj (suc
 subst-pred-reorder p q f =
   subst2-reorder' Injsuc Inj (λ g → g —1) p q f
 
-    ≡⟨ refl ⟩
-    ≡⟨ refl ⟩
-  where
-    ≡⟨ refl ⟩
-    ≡⟨ refl ⟩
-  where
-    ≡⟨ refl ⟩
-    ≡⟨ refl ⟩
-  where
+pred-α⁻¹-reorder : {k l m n : ℕ} (f : Inj (((suc m) + n) + l) (((suc m) + n) + k))
+                 → pred (α⁻¹ f) ≡ α⁻¹ (pred f)
+pred-α⁻¹-reorder (inc b f) = refl
 
+vanishing₁ : {f : Inj m n} → trace 0 (nul 0 ⊕ f) ≡ f
+vanishing₁ = refl
 
+vanishing₂ : {k l m n : ℕ} → (f : Inj ((m + n) + k) ((m + n) + l))
+           → trace n (trace m (α⁻¹ f))
+           ≡ trace (m + n) f
+vanishing₂ {m = zero} f = refl
+vanishing₂ {m = suc m} {n = n} f =
+  trace n (trace m (pred (α⁻¹ f)))
+    ≡⟨ cong (trace n ∘ trace m) (pred-α⁻¹-reorder f) ⟩
+  trace n (trace m (α⁻¹ (pred  f)))
+    ≡⟨ vanishing₂ (pred f) ⟩
+  trace (m + n) (pred f)
+    ≡⟨ refl ⟩
+  trace (suc m + n) f ▯
 
+-- superposing-pred
+--   : {m n : ℕ} (l : ℕ) (f : Inj (suc m) (suc n))
+--   → pred (f ⊕ idInj l)
+--   ≡ pred f ⊕ idInj l
+-- superposing-pred {m = 0} l (inc b (nul n)) =
+--   pred (inc b (nul n) ⊕ idInj l)
+--     ≡⟨ refl ⟩
+--   pred (inc (finject l b) (tensor (nul n) (idInj l)))
+--     ≡⟨ cong pred (cong₂ inc (sym (substSubst⁻ (Fin ∘ suc) (+-zero (n + l)) (finject l b)))
+--                  (sym (transportTransport⁻ (cong₂ Inj (+-zero (0 + l)) (+-zero (n + l))) (nul n ⊕ idInj l)))) ⟩
+--   pred (inc (subst (Fin ∘ suc) (+-zero (n + l))
+--              (subst (Fin ∘ suc) (sym (+-zero (n + l)))
+--               (finject l b)))
+--             (subst2 Inj (+-zero (0 + l)) (+-zero (n + l))
+--              (subst2 Inj (sym (+-zero (0 + l))) (sym (+-zero (n + l)))
+--               (nul n ⊕ idInj l))))
+--     ≡⟨ cong pred (sym (subst2-inc-reorder (+-zero (0 + l)) (+-zero (n + l))
+--                                           (subst (Fin ∘ suc) (sym (+-zero (n + l))) (finject l b))
+--                                           (subst2 Inj (sym (+-zero (0 + l))) (sym (+-zero (n + l))) (tensor (nul n) (idInj l))))) ⟩
+--   pred (subst2 Injsuc (+-zero (0 + l)) (+-zero (n + l))
+--                (inc (subst (Fin ∘ suc) (sym (+-zero (n + l))) (finject l b))
+--                     ((subst2 Inj (sym (+-zero (0 + l))) (sym (+-zero (n + l)))
+--                              (nul n ⊕ idInj l)))))
+--     ≡⟨ {!cong pred!} ⟩
+--   (nul n) ⊕ (idInj l)
+--     ≡⟨ {!!} ⟩
+--   pred (inc b (nul n)) ⊕ idInj l ▯
+-- superposing-pred zero (inc fzero f) =
+--   pred (inc fzero f ⊕ nul 0)
+--     ≡⟨ refl ⟩
+--   pred (inc fzero (f ⊕ nul 0))
+--     ≡⟨ {!!} ⟩
+--   f ⊕ nul 0
+--     ≡⟨ {!!} ⟩
+--   pred (inc fzero f) ⊕ nul 0 ▯
+-- superposing-pred zero (inc b f) =
+--   pred (inc b f ⊕ nul 0)
+--     ≡⟨ refl ⟩
+--   pred (inc (finject 0 b) (f ⊕ nul 0))
+--     ≡⟨ {!!} ⟩
+--   pred (inc b f) ⊕ nul 0 ▯
+-- superposing-pred (suc l) f = {!!}
+
+pred-inc0 : {m n : ℕ} → (f : Inj m n)
+  → pred (inc fzero f) ≡ f
+pred-inc0 {zero} {n} (nul _) = refl
+pred-inc0 {suc m} {suc n} (inc b f) = refl
+
+pred-inc-nul : {n : ℕ} → (b : Fin (suc n))
+  → pred (inc b (nul _)) ≡ nul _
+pred-inc-nul {n} b = refl
+
+superposing-pred
+  : {m n : ℕ} (l : ℕ) (f : Inj (suc m) (suc n))
+  → pred (f ⊕ idInj l)
+  ≡ pred f ⊕ idInj l
+superposing-pred {m = 0} l (inc fzero (nul n)) =
+  pred (inc fzero (nul n) ⊕ idInj l)
+    ≡⟨ refl ⟩
+  pred (inc fzero (nul n ⊕ idInj l))
+    ≡⟨ pred-inc0 (nul n ⊕ idInj l) ⟩
+  nul n ⊕ idInj l
+    ≡⟨ refl ⟩
+  pred (inc fzero (nul n)) ⊕ idInj l ▯
+superposing-pred {m = zero} {n = n} zero (inc (fsuc b) (nul _)) =
+  pred (inc (fsuc b) (nul _) ⊕ idInj zero)
+    ≡⟨ refl ⟩
+  pred (inc (fsuc (finject zero b)) (nul _ ⊕ nul 0))
+    ≡⟨ refl ⟩
+  pred (inc (fsuc (finject zero b)) (shift _ (nul 0)))
+    ≡⟨ shift-nul 0 n ⟩
+  pred (inc (fsuc (finject zero b)) (nul (n + 0)))
+    ≡⟨ refl ⟩
+  nul (n + 0)
+    ≡⟨ sym (shift-nul 0 n) ⟩
+  shift _ (nul 0)
+    ≡⟨ refl ⟩
+  pred (inc (fsuc b) (nul _)) ⊕ nul 0 ▯
+superposing-pred {m = zero} {n = zero} (suc l) (inc (fsuc b) (nul _)) =
+  pred (inc (fsuc b) (nul _) ⊕ idInj (suc l))
+    ≡⟨ refl ⟩
+  pred (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l)))
+    ≡⟨ refl ⟩
+  pred {m = suc l} {n = suc l} (inc (fsuc (finject (suc l) b)) (shift _ (idInj (suc l))))
+    ≡⟨ refl ⟩
+  pred-cases (shift _ (idInj (suc l))) (apply-inv (inc (fsuc (finject (suc l) b)) (shift _ (idInj (suc l)))) fzero) (finject (suc l) b)
+    ≡⟨ cases ⟩
+  shift _ (idInj (suc l))
+    ≡⟨ refl ⟩
+  pred (inc (fsuc b) (nul _)) ⊕ idInj (suc l) ▯
+  where
+    cases : pred-cases (shift _ (idInj (suc l))) (apply-inv (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l))) fzero) (finject (suc l) b)
+          ≡ shift _ (idInj (suc l))
+    cases = case (apply-inv (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l))) fzero) of
+      λ{ nothing → refl
+       ; (just fzero) → refl
+       ; (just (fsuc a)) → refl
+       }
+superposing-pred {m = zero} {n = (suc n)} (suc l) (inc (fsuc b) (nul _)) =
+  pred (inc (fsuc b) (nul _) ⊕ idInj (suc l))
+    ≡⟨ refl ⟩
+  pred (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l)))
+    ≡⟨ refl ⟩
+  pred-cases (shift _ (idInj (suc l))) (apply-inv (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l))) fzero) (finject (suc l) b)
+    ≡⟨ cases ⟩
+  shift _ (idInj (suc l))
+    ≡⟨ refl ⟩
+  pred (inc (fsuc b) (nul _)) ⊕ idInj (suc l) ▯
+  where
+    cases : pred-cases (shift _ (idInj (suc l))) (apply-inv (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l))) fzero) (finject (suc l) b)
+          ≡ shift _ (idInj (suc l))
+    cases = case (apply-inv (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l))) fzero) of
+      λ{ nothing → refl
+       ; (just fzero) → refl
+       ; (just (fsuc a)) → refl
+       }
+superposing-pred {m = suc m} {n = suc n} l (inc fzero f) = refl
+superposing-pred {m = suc m} {n = suc n} l (inc (fsuc b) f) =
+  pred (inc (fsuc b) f ⊕ idInj l)
+    ≡⟨ refl ⟩
+  pred (inc (fsuc (finject l b)) (f ⊕ idInj l))
+    ≡⟨ refl ⟩
+  pred-cases (f ⊕ idInj l) (apply-inv (inc (fsuc (finject l b)) (f ⊕ idInj l)) fzero) (finject l b)
+    ≡⟨ {!cases!} ⟩
+  pred-cases f (apply-inv (inc (fsuc b) f) fzero) b ⊕ idInj l
+    ≡⟨ refl ⟩
+  pred (inc (fsuc b) f) ⊕ idInj l ▯
+  where
+    cases : pred-cases (shift _ (idInj (suc l)))
+                       (apply-inv (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l)))
+                                  fzero) (finject (suc l) b)
+          ≡ shift _ (idInj (suc l))
+    cases = case (apply-inv (inc (fsuc (finject (suc l) b)) (nul _ ⊕ idInj (suc l))) fzero) of
+      λ{ nothing → refl
+       ; (just fzero) → refl
+       ; (just (fsuc a)) → refl
+       }
+
+-- apply-inv-⊕
+--   : {k l m n : ℕ} → (b : Fin (suc l)) (f : Inj k l) (g : Inj m n)
+--   → apply-inv (inc (finject n b) (f ⊕ g)) fzero
+--   ≡ map-Maybe (finject m) (apply-inv (inc b f) fzero)
+-- apply-inv-⊕ {m = m} {n = n} fzero f g = refl
+-- apply-inv-⊕ {m = zero} {n = n} (fsuc b) f (nul n) with apply-inv (inc (fsuc b) f) fzero
+-- ... | nothing = {!!}
+-- ... | just x = {!!}
+--   -- apply-inv (inc (finject n (fsuc b)) (f ⊕ nul n)) fzero
+--   --   ≡⟨ {!!} ⟩
+--   -- map-Maybe (finject 0) x ▯
+-- apply-inv-⊕ {m = suc m} {n = suc n} (fsuc b) f (inc c g) = {!!}
+--   -- apply-inv (inc (finject n b) (f ⊕ g)) fzero
+--   --   ≡⟨ {!!} ⟩
+--   -- map-Maybe (finject m) (apply-inv (inc b f) fzero) ▯
+
+cong-suc-predℕ : {l m : ℕ} (p : suc m ≡ suc l)
+           → cong (Fin ∘ suc ∘ predℕ) p ≡ cong Fin p
+cong-suc-predℕ {l = l} {m = m} p =
+  transport (λ i → (λ j → suc-predℕ (p j) (pi≢0 j) i)
+                 ≡ (λ i → p i)) refl
+  where
+    q : ∀ (x : ℕ) (x≢0 : x ≢ 0) → suc (predℕ x) ≡ x
+    q x x≢0 = sym (suc-predℕ x x≢0)
+    p0≡pi : ∀ i → p i0 ≡ p i
+    p0≡pi i = λ j → p (i ∧ j)
+    pi≢0 : ∀ i → p i ≢ 0
+    pi≢0 i = subst (_≢ 0) (p0≡pi i) snotz
+
+fin-restrict≡subst
+  : {l m : ℕ} (b : Fin (suc l)) (a : Fin m) → (a<b : a <ᶠ b) → (p : m ≡ l)
+  → fin-restrict-< a a<b ≡ subst Fin p a
+fin-restrict≡subst {l = zero} {m = suc m} b a a<b p = absurd (snotz p)
+fin-restrict≡subst {l = suc l} {m = suc m} (fsuc b) fzero <fzero p =
+  fin-restrict-< f0 <fzero
+    ≡⟨ refl ⟩
+  fzero {l}
+    ≡⟨ fzero≡subst-fzero (cong predℕ p) ⟩
+  subst (Fin ∘ suc ∘ predℕ) p (fzero {m})
+    ≡⟨ cong (λ ○ → transport ○ (fzero {m})) (cong-suc-predℕ p) ⟩
+  subst Fin p (fzero {m}) ▯
+fin-restrict≡subst {l = zero} {m = zero} fzero () () p
+fin-restrict≡subst {l = zero} {m = zero} (fsuc b) () a<b p
+fin-restrict≡subst {l = suc l} {m = suc m} (fsuc b) (fsuc a) (<fsuc a<b) p =
+  fin-restrict-< (fsuc a) (<fsuc a<b)
+    ≡⟨ refl ⟩
+  fsuc (fin-restrict-< a a<b) 
+    ≡⟨ cong fsuc (fin-restrict≡subst b a a<b (injSuc p)) ⟩
+  fsuc (subst Fin (injSuc p) a)
+    ≡⟨ sym (subst-fsuc-reorder (cong predℕ p) a) ⟩
+  subst (Fin ∘ suc ∘ predℕ) p (fsuc a)
+    ≡⟨ cong (λ ○ → transport ○ (fsuc a)) (cong-suc-predℕ p)  ⟩
+  subst Fin p (fsuc a) ▯
 
