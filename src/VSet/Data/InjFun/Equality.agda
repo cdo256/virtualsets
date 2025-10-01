@@ -19,7 +19,7 @@ record _≈_ {A B X Y : ℕ} (f : [ A ↣ X ]) (g : [ B ↣ Y ]) : Type where
   field
     p : A ≡ B
     q : X ≡ Y
-    path : (λ i → cong₂ FinFun p q i) [ fst f ≡ fst g ]
+    path : (λ i → cong₂ InjFun p q i) [ fst f ≡ fst g ]
 
 ≈refl : {A X : ℕ} (f : [ A ↣ X ]) → f ≈ f
 ≈refl {A} {X} f = record
@@ -46,10 +46,10 @@ module Trans {A B C X Y Z : ℕ}
 
   open _≈_ f≈g renaming (p to p1; q to q1; path to path1)
   open _≈_ g≈h renaming (p to p2; q to q2; path to path2)
-  r1 : FinFun A X ≡ FinFun B Y
-  r1 i = FinFun (p1 i) (q1 i)
-  r2 : FinFun B Y ≡ FinFun C Z
-  r2 i = FinFun (p2 i) (q2 i)
+  r1 : InjFun A X ≡ InjFun B Y
+  r1 i = InjFun (p1 i) (q1 i)
+  r2 : InjFun B Y ≡ InjFun C Z
+  r2 i = InjFun (p2 i) (q2 i)
 
   open import Compat.1Lab.Path using (cong₂-∙)
 
@@ -60,12 +60,12 @@ module Trans {A B C X Y Z : ℕ}
     ; path = path'
     }
     where
-      c2 : cong₂ FinFun (p1 ∙ p2) (q1 ∙ q2) ≡
-           cong₂ FinFun p1 q1 ∙ cong₂ FinFun p2 q2
-      c2 = cong₂-∙ FinFun p1 p2 q1 q2
-      path : (λ j → (cong₂ FinFun p1 q1 ∙ cong₂ FinFun p2 q2) j) [ fst f ≡ fst h ]
+      c2 : cong₂ InjFun (p1 ∙ p2) (q1 ∙ q2) ≡
+           cong₂ InjFun p1 q1 ∙ cong₂ InjFun p2 q2
+      c2 = cong₂-∙ InjFun p1 p2 q1 q2
+      path : (λ j → (cong₂ InjFun p1 q1 ∙ cong₂ InjFun p2 q2) j) [ fst f ≡ fst h ]
       path = compPathP path1 path2
-      path' : (λ j → (cong₂ FinFun (p1 ∙ p2) (q1 ∙ q2)) j) [ fst f ≡ fst h ]
+      path' : (λ j → (cong₂ InjFun (p1 ∙ p2) (q1 ∙ q2)) j) [ fst f ≡ fst h ]
       path' = subst⁻ (λ ○ → (λ j → ○ j) [ fst f ≡ fst h ]) c2 path
 
   infixl 4 _∘≈_ 
@@ -113,12 +113,12 @@ f ∎ = ≈refl f
   where
     B↣A = ≡to↣ (cong Fin (sym p))
     X↣Y = ≡to↣ (cong Fin q)
-    P = cong₂ FinFun p q
-    path : (λ i → cong₂ FinFun p q i)
+    P = cong₂ InjFun p q
+    path : (λ i → cong₂ InjFun p q i)
       [ fst f
       ≡ subst Fin q ∘ fst f ∘ subst Fin (sym p)
       ]
-    path = subst2-filler FinFun p q (fst f)
+    path = subst2-filler InjFun p q (fst f)
 
 from≡ : ∀ {A X : ℕ} → {f g : [ A ↣ X ]}
       → fst f ≡ fst g → f ≈ g
