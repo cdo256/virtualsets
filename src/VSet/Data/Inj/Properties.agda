@@ -111,3 +111,59 @@ subst2≡jcast {suc m} {suc m'} {suc n} {suc n'} p q (inc b f) =
   where
     p' = injSuc p
     q' = injSuc q
+
+nul≡subst-nul : {m n : ℕ} (p : m ≡ n) → nul n ≡ subst (Inj 0) p (nul m)
+nul≡subst-nul {m} {n} p = resubst (Inj 0) nul p
+
+nul≡subst2-nul : {m n : ℕ} (p : 0 ≡ 0) (q : m ≡ n)
+               → nul n ≡ subst2 Inj p q (nul m)
+nul≡subst2-nul {m} {n} p q =
+  nul n
+    ≡⟨ nul≡subst-nul q ⟩
+  subst2 Inj refl q (nul m)
+    ≡⟨ cong (λ ○ → subst2 Inj ○ q (nul m)) (isSetℕ 0 0 refl p) ⟩
+  subst2 Inj p q (nul m) ▯
+
+subst2-inc-β :
+  ∀ {l m n} (p : l ≡ m) (b : Fin (suc n)) (f : Inj l n) →
+  subst2 Inj (cong suc p) refl (inc b f) ≡ inc b (subst2 Inj (p) refl f)
+subst2-inc-β p b f = subst2-inc-reorder p refl b f
+                   ∙ cong (λ ○ → inc ○ (subst2 Inj p refl f))
+                          (transportRefl b)
+
+subst-apply-reorder
+  : (x : Fin l) (f : Inj m n) (p : l ≡ m)
+  → apply f (subst Fin p x)
+    ≡ apply (subst2 Inj (sym p) refl f) x
+subst-apply-reorder {suc l} {zero} {n} x (nul n) p = absurd (snotz p)
+subst-apply-reorder {zero} {suc m} {suc n} x (inc b f) p = absurd (znots p)
+subst-apply-reorder {zero} {zero} {n} () (nul n) p
+subst-apply-reorder {suc l} {suc m} {suc n} fzero (inc b f) p =
+  apply (inc b f) (subst Fin p (f0 {l}))
+    ≡⟨ cong (apply (inc b f)) (sym (fzero≡subst-fzero' p)) ⟩
+  apply (inc b f) (f0 {m}) 
+    ≡⟨ refl ⟩
+  b
+    ≡⟨ sym (transportRefl b) ⟩
+  subst Fin refl b
+    ≡⟨ refl ⟩
+  apply (inc (subst Fin refl b)
+        (subst2 Inj (cong predℕ (sym p)) refl f)) f0
+    ≡⟨ cong (λ ○ → apply ○ (f0 {l})) (sym (subst2-inc-reorder' (sym p) refl b f)) ⟩
+  apply (subst2 Inj (sym p) refl (inc b f)) (f0 {l}) ▯
+subst-apply-reorder {suc l} {suc m} {suc n} (fsuc x) (inc b f) p =
+  apply (inc b f) (subst Fin p (fsuc x))
+    ≡⟨ cong (λ ○ → apply (inc b f) (subst Fin ○ (fsuc x))) (sym (path-suc-pred p)) ⟩
+  apply (inc b f) (subst Fin (cong (suc ∘ predℕ) p) (fsuc x))
+    ≡⟨ cong (apply (inc b f)) refl ⟩
+  apply (inc b f) (fsuc (subst Fin (cong predℕ p) x)) 
+    ≡⟨ refl ⟩
+  fsplice b (apply f (subst Fin (cong predℕ p) x))
+    ≡⟨ cong₂ fsplice (sym (transportRefl b)) (subst-apply-reorder x f (cong predℕ p)) ⟩
+  fsplice (subst Fin refl b)
+          (apply (subst2 Inj (cong predℕ (sym p)) refl f) x)
+    ≡⟨ refl ⟩
+  apply (inc (subst Fin refl b)
+        (subst2 Inj (cong predℕ (sym p)) refl f)) (fsuc x)
+    ≡⟨ cong (λ ○ → apply ○ (fsuc x)) (sym (subst2-inc-reorder' (sym p) refl b f)) ⟩
+  apply (subst2 Inj (sym p) refl (inc b f)) (fsuc x) ▯
