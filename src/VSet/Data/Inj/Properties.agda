@@ -64,6 +64,23 @@ subst2-inc-reorder {m} {m'} {n} {n'} p q a f =
                           (inc b g) (subst2 Injsuc p q (inc a f)))
            (lCancel p) (lCancel q) composite)
 
+subst2-inc-reorder'
+  : ∀ {m m' n n'} (p : suc m ≡ suc n) (q : suc m' ≡ suc n')
+  → (a : Fin (suc m'))
+  → (f : Inj m m')
+  → subst2 Inj p q (inc a f)
+  ≡ inc (subst Fin q a) (subst2 Inj (cong predℕ p) (cong predℕ q) f)
+subst2-inc-reorder' {m} {m'} {n} {n'} p q a f =
+  subst2 Inj p q (inc a f)
+    ≡⟨ cong₂ (λ ○ □ → subst2 Inj ○ □ (inc a f))
+             (sym (path-suc-pred p)) (sym (path-suc-pred q)) ⟩
+  subst2 Inj (cong (suc ∘ predℕ) p) (cong (suc ∘ predℕ) q) (inc a f) 
+    ≡⟨ subst2-inc-reorder (cong predℕ p) (cong predℕ q) a f ⟩
+  inc (subst Fin (cong (suc ∘ predℕ) q) a) (subst2 Inj (cong predℕ p) (cong predℕ q) f)
+    ≡⟨ cong (λ ○ → inc (subst Fin ○ a) (subst2 Inj (cong predℕ p) (cong predℕ q) f))
+            (path-suc-pred q) ⟩
+  inc (subst Fin q a) (subst2 Inj (cong predℕ p) (cong predℕ q) f) ▯
+
 subst2≡jcast : ∀ {m m' n n' : ℕ} → (p : m ≡ m') → (q : n ≡ n') → (f : Inj m n)
              → subst2 Inj p q f ≡ jcast p q f
 subst2≡jcast {zero} {zero} {n} {n'} p q (nul n) =
