@@ -15,13 +15,3 @@ X ↣ Y = Σ (X → Y) is-injective
 ↣-id : (X : Type) → X ↣ X
 ↣-id X = (λ x → x) , (λ x y p → p)
 
-transport-inj
-  : ∀ {ℓ} {A B : Type ℓ} {x y : A} (p : A ≡ B)
-  → transport p x ≡ transport p y
-  → x ≡ y
-transport-inj {x = x} {y = y} p q =
-  x ≡⟨ sym (transport⁻Transport p x) ⟩
-  transport (sym p) (transport p x) ≡⟨ cong (transport (sym p)) q ⟩
-  transport (sym p) (transport p y) ≡⟨ transport⁻Transport p y ⟩
-  y ∎
-

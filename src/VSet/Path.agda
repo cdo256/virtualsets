@@ -221,6 +221,15 @@ _ ∎P = refl
 
 -- ? ≡P[ ? ][ ? ∙P ? ]⟨ ? ➢ ? ⟩
 
+transport-inj
+  : ∀ {ℓ} {A B : Type ℓ} {x y : A} (p : A ≡ B)
+  → transport p x ≡ transport p y
+  → x ≡ y
+transport-inj {x = x} {y = y} p q =
+  x ≡⟨ sym (transport⁻Transport p x) ⟩
+  transport (sym p) (transport p x) ≡⟨ cong (transport (sym p)) q ⟩
+  transport (sym p) (transport p y) ≡⟨ transport⁻Transport p y ⟩
+  y ▯ 
 
 
 module Tests where
@@ -235,3 +244,4 @@ module Tests where
   foo' : (λ i → ℕ) [ 1 + 1 ≡ 2 + 0 ]
   foo' = compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} refl
         (compPathP'  {x = tt} {B = λ _ → ℕ} {p = refl} {q = refl} ((+-zero 2)) refl)
+
