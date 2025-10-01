@@ -1,26 +1,16 @@
 module VSet.Transform.Inj.Trace.Superimposing where
 
 open import Cubical.Data.Maybe.Base hiding (elim)
--- open import Cubical.Data.Maybe.Properties
 open import Cubical.Data.Nat.Base hiding (elim)
 open import Cubical.Data.Nat.Properties
--- open import Cubical.Relation.Nullary.Base 
 open import VSet.Data.Fin.Base renaming (pred to fpred)
 open import VSet.Data.Fin.Order
 open import VSet.Data.Fin.Properties
 open import VSet.Data.Fin.Splice
 open import VSet.Data.Inj.Base 
--- open import VSet.Data.Inj.Order 
 open import VSet.Data.Inj.Properties 
--- open import VSet.Data.Maybe
--- open import VSet.Data.Nat.Properties
 open import VSet.Prelude
--- open import VSet.Transform.Inj.Compose.Base
--- open import VSet.Transform.Inj.Elementary.Base 
 open import VSet.Transform.Inj.Inverse.Base 
--- open import VSet.Transform.Inj.Inverse.Insert
--- open import VSet.Transform.Inj.Inverse.Properties
--- open import VSet.Transform.Inj.Tensor.Associator 
 open import VSet.Transform.Inj.Tensor.Base
 open import VSet.Transform.Inj.Tensor.Properties
 open import VSet.Transform.Inj.Trace.Base
@@ -35,11 +25,12 @@ private
 
 apply-inv≡nothing
   : {l m n : ℕ} (b : Fin l) (c : Fin (suc n)) (g : Inj m n)
-  → apply-inv (shift l (inc c g)) (subst Fin (λ i → +-suc l n (~ i)) f0)
+  → apply-inv (shift l (inc c g)) (subst Fin (sym (+-suc l n)) f0)
   ≡ nothing
 apply-inv≡nothing {suc l} {suc m} {suc n} b c (inc d g) =
-  -- apply-inv (shift (suc l) (inc c (inc d g)))
-  --  (subst Fin (sym (+-suc (suc l) (suc n))) f0)
+  apply-inv (shift (suc l) (inc c (inc d g)))
+   (subst Fin (sym (+-suc (suc l) (suc n))) f0)
+     ≡⟨ {!!} ⟩
   --   ≡⟨ cong (apply-inv (shift (suc l) (inc c (inc d g))))
   --           (sym (fzero≡subst-fzero ((sym (+-suc l (suc n)))))) ⟩
   -- apply-inv (shift (suc l) (inc c (inc d g))) f0
@@ -54,9 +45,19 @@ apply-inv≡nothing {suc l} {suc m} {suc n} b c (inc d g) =
   --                (shift' (suc l) (inc d g))) ⟩
   apply-inv (inc (subst Fin (sym (+-suc (suc l) (suc n))) (subst Fin (+-suc (suc l) (suc n)) (fshift (suc l) c)))
                  (subst2 Inj refl (sym (+-suc l (suc n))) (shift' (suc l) (inc d g)))) f0
-    ≡⟨ cong (λ ○ → apply-inv (inc ○ (subst2 Inj refl (sym (+-suc l (suc n))) (shift' (suc l) (inc d g))) f0)) (subst⁻Subst Fin (+-suc (suc l) (suc n)) (fshift (suc l) c)) ⟩
+    ≡⟨ cong (λ ○ → apply-inv (inc ○ (subst2 Inj refl (sym (+-suc l (suc n))) (shift' (suc l) (inc d g)))) f0) (subst⁻Subst Fin (+-suc (suc l) (suc n)) (fshift (suc l) c)) ⟩
   apply-inv (inc (fshift (suc l) c)
                  (subst2 Inj refl (sym (+-suc l (suc n))) (shift' (suc l) (inc d g)))) f0
+    ≡⟨ refl ⟩
+  apply-inv-rec (subst2 Inj refl (sym (+-suc l (suc n))) (shift' (suc l) (inc d g)))
+                (fsuc (fshift l c)) f0 (no fzero≉fsuc)
+    ≡⟨ refl ⟩
+  map-Maybe fsuc (apply-inv (subst2 Inj refl (sym (+-suc l (suc n)))
+                                    (shift' (suc l) (inc d g)))
+    (fjoin (fsuc (fshift l c)) f0 fzero≉fsuc))
+    ≡⟨ cong (map-Maybe fsuc) {!!} ⟩
+  map-Maybe fsuc {!apply-inv (subst2 Inj refl (sym (+-suc l (suc n))) (shift' (suc l) (inc d g)))
+    f0!}
     ≡⟨ {!!} ⟩
   nothing ▯
 apply-inv≡nothing {suc l} {zero} {n} b c (nul _) = {!!}
