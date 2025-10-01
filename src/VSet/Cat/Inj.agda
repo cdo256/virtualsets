@@ -1,3 +1,5 @@
+{-# OPTIONS --lossy-unification #-}
+
 module VSet.Cat.Inj where
 
 open import VSet.Prelude hiding (id; isIso)
@@ -8,6 +10,7 @@ open import Cubical.Categories.Functors.Constant
 open import Cubical.Categories.NaturalTransformation.Base
 open import Cubical.Categories.Constructions.BinProduct
 open import Cubical.Data.Nat
+open import Cubical.Data.Sigma
 open import Cubical.Data.Nat.Properties
 open import VSet.Data.Fin.Base 
 open import VSet.Data.Fin.Splice 
@@ -19,14 +22,13 @@ open import VSet.Transform.Inj.Compose.Base
 open import VSet.Transform.Inj.Compose.Properties
 open import VSet.Transform.Inj.Tensor.Base
 open import VSet.Transform.Inj.Tensor.Properties
+open import VSet.Transform.Inj.Tensor.Associator 
 
 private
   variable
-    ℓ ℓ' : Level
+    ℓ ℓ' ℓC ℓC' ℓD ℓD' : Level
 
 open Category
-
-
 
 InjCat : Category _ _
 InjCat = record
@@ -158,19 +160,68 @@ InjTensor = record
   }
 
 open TensorStr InjTensor
+open NatIso
+open NatTrans
+open isIso
 
-α :  (─⊗─ ∘F (F-Id ×F ─⊗─ ))
-  ≅ᶜ (─⊗─ ∘F ((─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat))
-α = record
+α'' : (─⊗─ ∘F (F-Id ×F ─⊗─ ))
+    ≅ᶜ (─⊗─ ∘F ((─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat))
+α'' .trans .N-ob (x , y , z) = transportInj (+-assoc x y z)
+α'' .nIso (x , y , z) .inv = subst2 Inj refl (sym (+-assoc x y z)) (Id {(x + y) + z})
+α'' .nIso (x , y , z) .sec =
+   (subst2 Inj refl (+-assoc x y z) (Id {x + (y + z)})) ∘ʲ (subst2 Inj refl (sym (+-assoc x y z)) (Id {(x + y) + z})) ≡⟨ {!!} ⟩ {!!} ▯
+α'' .nIso (x , y , z) .ret = {!!} ≡⟨ {!!} ⟩ {!!} ▯
+α'' .trans .N-hom = {!!}
+
+data InductiveCat (C : Category ℓ ℓ') : Type (ℓ-suc (ℓ ⊔ ℓ')) where
+  Cᶜ : InductiveCat C
+  _×ᶜ_ : InductiveCat C → InductiveCat C → InductiveCat C
+
+⟦_⟧ᶜ : {C : Category ℓ ℓ'} → InductiveCat C → Category ℓ ℓ'
+⟦_⟧ᶜ {C = C} Cᶜ = C
+⟦ C ×ᶜ D ⟧ᶜ = ⟦ C ⟧ᶜ ×C ⟦ D ⟧ᶜ
+data InductiveFunctor (Base : Category ℓ ℓ') (_⊗_ : Functor (Base ×C Base) Base) : (C D : InductiveCat Base) → Type (ℓ-suc (ℓ ⊔ ℓ')) where
+  Idꟳ : (C : InductiveCat Base) → InductiveFunctor Base _⊗_ C C
+  Constantꟳ : (C D : InductiveCat Base) (x : ⟦ D ⟧ᶜ .ob) → InductiveFunctor Base _⊗_ C D
+  _×ꟳ_ : {C C' D D' : InductiveCat Base} (F : InductiveFunctor Base _⊗_ C D) (G : InductiveFunctor Base _⊗_ C' D')
+       → InductiveFunctor Base _⊗_ (C ×ᶜ C') (D ×ᶜ D')
+  _⊗ꟳ_ : {C D : InductiveCat Base} (F : InductiveFunctor Base _⊗_ C Cᶜ) (G : InductiveFunctor Base _⊗_ D Cᶜ)
+       → InductiveFunctor Base _⊗_ (C ×ᶜ D) Cᶜ
+
+-- data InductiveFunctor ℓo ℓh ℓo' ℓh' : Category ℓo ℓh → Category ℓo' ℓh' → Type (ℓ-suc (ℓo ⊔ ℓh ⊔ ℓo' ⊔ ℓh')) where
+--     Idꟳ : (C : Category ℓo ℓh) → InductiveFunctor ℓo ℓh ℓo ℓh C C
+--     Constantꟳ : (C D : Category ℓ ℓ') (x : D .ob) → InductiveFunctor C D
+--     _×ꟳ_ : {C C' D D' : Category ℓ ℓ'} (F : InductiveFunctor C D) (G : InductiveFunctor C' D') → InductiveFunctor (C ×C C') (D ×C D')
+--     _⊕ꟳ_ : {C D : Category ℓ ℓ'} (F : InductiveFunctor C InjCat) (G : InductiveFunctor D InjCat)
+--          → InductiveFunctor (C ×C D) InjCat
+
+-- Shouldn't be difficult to check, but Agda struggles to check performantly.
+{-# TERMINATING #-}
+⟦_⟧ꟳ : {Base : Category ℓ ℓ'} {_⊗_ : Functor (Base ×C Base) Base} {C D : InductiveCat Base}
+     → InductiveFunctor Base _⊗_ C D → Functor ⟦ C ⟧ᶜ ⟦ D ⟧ᶜ
+⟦ Idꟳ C ⟧ꟳ = F-Id
+⟦ Constantꟳ C D x ⟧ꟳ = Constant ⟦ C ⟧ᶜ ⟦ D ⟧ᶜ x
+⟦ F ×ꟳ G ⟧ꟳ = ⟦ F ⟧ꟳ ×F ⟦ G ⟧ꟳ
+⟦_⟧ꟳ {_⊗_ = _⊗_} (F ⊗ꟳ G) = _⊗_ ∘F (⟦ F ⟧ꟳ ×F ⟦ G ⟧ꟳ)
+
+⟦_⟧ꟳ⁺ : {C D : InductiveCat InjCat}
+      → InductiveFunctor InjCat ─⊗─ C D → Functor ⟦ C ⟧ᶜ ⟦ D ⟧ᶜ
+⟦ F ⟧ꟳ⁺ = ⟦_⟧ꟳ {Base = InjCat} {_⊗_ = ─⊗─} F
+
+α' :  (─⊗─ ∘F (F-Id ×F ─⊗─ ))
+   ≅ᶜ (─⊗─ ∘F ((─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat))
+α' = record
   { trans = natTrans ob-trans hom-trans
   ; nIso = {!!}
   }
   where
-    ob-trans : {!!}
+    ob-trans : (x : (InjCat ×C (InjCat ×C InjCat)) .ob) → Inj {!!} {!!}
     ob-trans = {!!}
     hom-trans :  N-hom-Type (─⊗─ ∘F (F-Id ×F ─⊗─))
       (─⊗─ ∘F (─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat) ob-trans
-    hom-trans = {!!}
+    hom-trans {x = (l , m , n)} {y = (l' , m' , n')} (f , g , h) = 
+      {!!} ≡⟨ {!!} ⟩
+      {!!} ▯
 
 η-F-l : Functor InjCat InjCat
 η-F-l = ─⊗─ ∘F (rinj InjCat InjCat unit)
@@ -181,135 +232,138 @@ open TensorStr InjTensor
 ρ-F-l : Functor InjCat InjCat
 ρ-F-l = ─⊗─ ∘F (linj InjCat InjCat unit)
 
-data PositiveFunctor : (C D : Category ℓ ℓ') → Type _ where
-    Idꟳ : (C : Category ℓ ℓ') → PositiveFunctor C C
-    Constantꟳ : (C D : Category ℓ ℓ') (x : D .ob) → PositiveFunctor C D
-    _×ꟳ_ : {C C' D D' : Category ℓ-zero ℓ-zero} (F : Functor C D) (G : Functor C' D') → PositiveFunctor (C ×C C') (D ×C D')
-    _⊕ꟳ_ : {C : Category ℓ-zero ℓ-zero} (F G : Functor C InjCat) → PositiveFunctor C InjCat
-
-⟦_⟧ꟳ : {C D : Category ℓ ℓ'} → PositiveFunctor C D → Functor C D
-⟦ Idꟳ C ⟧ꟳ = F-Id
-⟦ Constantꟳ C D x ⟧ꟳ = Constant C D x
-⟦ F ×ꟳ G ⟧ꟳ = F ×F G
-⟦ F ⊕ꟳ G ⟧ꟳ = ─⊗─ ∘F (F ,F G)
-
 -- transport→NatIso : (F G : Functor InjCat InjCat) → NatIso F G
 
-InjMonoidalCat : MonoidalCategory ℓ-zero ℓ-zero
-InjMonoidalCat = record
-  { C = InjCat
-  ; monstr = record
-    { tenstr = InjTensor
-    ; α = α
-    ; η = record
-      { trans = record
-        { N-ob = idInj
-        ; N-hom = η-hom
-        }
-      ; nIso = η-iso
-      }
-    ; ρ = record
-      { trans = record
-        { N-ob = ρ-ob
-        ; N-hom = ρ-hom
-        }
-      ; nIso = ρ-iso
-      }
-    ; pentagon = {!!}
-    ; triangle = {!!}
-    }
-  }
-  where
-    η-ob : (x : ℕ) → Inj (x + 0) x 
-    η-ob zero = nul 0
-    η-ob (suc n) = inc f0 (η-ob n)
-    η-hom : N-hom-Type (─⊗─ ∘F rinj InjCat InjCat 0) F-Id idInj 
-    η-hom {zero} {y} (nul y) = refl
-    η-hom {suc x} {suc y} (inc b f) =
-      (idInj (suc y) ∘ʲ (nul zero ⊕ inc b f))
-        ≡⟨ refl ⟩
-      idInj (suc y) ∘ʲ inc b f
-        ≡⟨ ∘ʲ-idL (inc b f) ⟩
-      inc b f
-        ≡⟨ sym (∘ʲ-idR (inc b f)) ⟩
-      inc b f ∘ʲ idInj (suc x) ▯
-    η-iso : (x : ℕ) → isIso InjCat (idInj x)
-    η-iso zero = isiso (nul 0) refl refl
-    η-iso (suc x) = isiso (idInj (suc x)) Id⊕Id≡Id Id⊕Id≡Id
-    ρ-ob : (x : ℕ) → Inj (x + 0) x 
-    ρ-ob zero = nul zero
-    ρ-ob (suc x) = inc f0 (ρ-ob x)
-    ρ⁻¹-ob : (x : ℕ) → Inj x (x + 0)
-    ρ⁻¹-ob zero = nul 0
-    ρ⁻¹-ob (suc x) = inc f0 (ρ⁻¹-ob x)
-    ρ-hom : N-hom-Type (─⊗─ ∘F linj InjCat InjCat unit) 𝟙⟨ InjCat ⟩ ρ-ob
-    ρ-hom {zero} {y} (nul y) =
-      ρ-ob y ∘ʲ ((─⊗─ ∘F linj InjCat InjCat unit) .Functor.F-hom (nul y))
-        ≡⟨ refl ⟩
-      ρ-ob y ∘ʲ ((─⊗─ ∘F (F-Id ,F Constant InjCat InjCat unit)) .Functor.F-hom (nul y))
-        ≡⟨ refl ⟩
-      ρ-ob y ∘ʲ (nul y ⊕ nul 0)
-        ≡⟨ refl ⟩
-      ρ-ob y ∘ʲ (shift y (nul 0))
-        ≡⟨ cong (ρ-ob y ∘ʲ_) (shift-nul 0 y) ⟩
-      ρ-ob y ∘ʲ (nul (y + 0))
-        ≡⟨ refl ⟩
-      nul y ∘ʲ nul zero ▯
-    ρ-hom {suc x} {suc y} (inc fzero f) =
-      ρ-ob (suc y) ∘ʲ ((─⊗─ ∘F linj InjCat InjCat unit) .Functor.F-hom (inc fzero f))
-        ≡⟨ refl ⟩
-      ρ-ob (suc y) ∘ʲ (inc fzero f ⊕ nul 0)
-        ≡⟨ refl ⟩
-      inc f0 (ρ-ob y) ∘ʲ (inc (finject 0 fzero) (f ⊕ nul 0))
-        ≡⟨ refl ⟩
-      inc (apply (inc f0 (ρ-ob y)) fzero)
-          (remove fzero (inc f0 (ρ-ob y)) ∘ʲ (f ⊕ nul 0))
-        ≡⟨ refl ⟩
-      inc fzero (ρ-ob y ∘ʲ (f ⊕ nul 0))
-        ≡⟨ cong (inc fzero) {!!} ⟩
-      inc fzero (f ∘ʲ ρ-ob x)
-        ≡⟨ refl ⟩
-      inc fzero f ∘ʲ inc f0 (ρ-ob x) ▯
-    ρ-hom {suc x} {suc y} (inc (fsuc b) f) =
-      ρ-ob (suc y) ∘ʲ ((─⊗─ ∘F linj InjCat InjCat unit) .Functor.F-hom (inc (fsuc b) f))
-        ≡⟨ refl ⟩
-      ρ-ob (suc y) ∘ʲ (inc (fsuc b) f ⊕ nul 0)
-        ≡⟨ refl ⟩
-      inc f0 (ρ-ob y) ∘ʲ (inc (finject 0 (fsuc b)) (f ⊕ nul 0))
-        ≡⟨ refl ⟩
-      inc (apply (inc f0 (ρ-ob y)) (fsuc (finject 0 b)))
-          (remove (fsuc (finject 0 b)) (inc f0 (ρ-ob y)) ∘ʲ (f ⊕ nul 0))
-        ≡⟨ refl ⟩
-      inc (fsuc (apply (ρ-ob y) (finject 0 b)))
-          (remove (fsuc (finject 0 b)) (inc f0 (ρ-ob y)) ∘ʲ (f ⊕ nul 0))
-        ≡⟨ cong₂ inc (ρ-apply (suc y) (fsuc b)) {!!} ⟩
-      inc (fsuc b) (f ∘ʲ ρ-ob x)
-        ≡⟨ refl ⟩
-      inc (fsuc b) f ∘ʲ inc f0 (ρ-ob x) ▯
-      where
-        ρ-apply : (y : ℕ) (b : Fin y) → (apply (ρ-ob y) (finject 0 b)) ≡ b
-        ρ-apply y fzero = refl
-        ρ-apply (suc y) (fsuc b) =
-          cong fsuc (ρ-apply y b)
-    ρ-iso-sect : (x : ℕ) → ρ-ob x ∘ʲ ρ⁻¹-ob x ≡ idInj x
-    ρ-iso-sect zero = refl
-    ρ-iso-sect (suc x) =
-      inc f0 (ρ-ob x) ∘ʲ inc f0 (ρ⁻¹-ob x)
-        ≡⟨ refl ⟩
-      inc f0 (remove f0 (inc f0 ( ρ-ob x)) ∘ʲ ρ⁻¹-ob x)
-        ≡⟨ refl ⟩
-      inc f0 (ρ-ob x ∘ʲ ρ⁻¹-ob x)
-        ≡⟨ cong (inc f0) (ρ-iso-sect x) ⟩
-      inc f0 (idInj x) ▯
-    ρ-iso-retr : (x : ℕ) → ρ⁻¹-ob x ∘ʲ ρ-ob x ≡ idInj (x + 0)
-    ρ-iso-retr zero = refl
-    ρ-iso-retr (suc x) =
-      inc f0 (ρ⁻¹-ob x) ∘ʲ inc f0 (ρ-ob x)
-        ≡⟨ refl ⟩
-      inc f0 (remove f0 (inc f0 (ρ⁻¹-ob x)) ∘ʲ ρ-ob x)
-        ≡⟨ refl ⟩
-      inc f0 (ρ⁻¹-ob x ∘ʲ ρ-ob x)
-        ≡⟨ cong (inc f0) (ρ-iso-retr x) ⟩
-      inc f0 (idInj (x + 0)) ▯
-    ρ-iso : (x : ℕ) → isIso InjCat (ρ-ob x)
-    ρ-iso x = isiso (ρ⁻¹-ob x) (ρ-iso-sect x) (ρ-iso-retr x)
+open MonoidalCategory
+open MonoidalStr
+
+InjMonoidalStr : MonoidalStr InjCat
+InjMonoidalStr .tenstr = InjTensor
+InjMonoidalStr .MonoidalStr.α = {!!}
+InjMonoidalStr .η = {!!}
+InjMonoidalStr .ρ = {!!}
+InjMonoidalStr .pentagon = {!!}
+InjMonoidalStr .triangle = {!!}
+
+InjMonoidalCat' : MonoidalCategory ℓ-zero ℓ-zero
+InjMonoidalCat' .C = InjCat
+InjMonoidalCat' .monstr = {!!}
+
+-- InjMonoidalCat : MonoidalCategory ℓ-zero ℓ-zero
+-- InjMonoidalCat = record
+--   { C = InjCat
+--   ; monstr = record
+--     { tenstr = InjTensor
+--     ; α = α
+--     ; η = record
+--       { trans = record
+--         { N-ob = idInj
+--         ; N-hom = η-hom
+--         }
+--       ; nIso = η-iso
+--       }
+--     ; ρ = record
+--       { trans = record
+--         { N-ob = ρ-ob
+--         ; N-hom = ρ-hom
+--         }
+--       ; nIso = ρ-iso
+--       }
+--     ; pentagon = {!!}
+--     ; triangle = {!!}
+--     }
+--   }
+--   where
+--     η-ob : (x : ℕ) → Inj (x + 0) x 
+--     η-ob zero = nul 0
+--     η-ob (suc n) = inc f0 (η-ob n)
+--     η-hom : N-hom-Type (─⊗─ ∘F rinj InjCat InjCat 0) F-Id idInj 
+--     η-hom {zero} {y} (nul y) = refl
+--     η-hom {suc x} {suc y} (inc b f) =
+--       (idInj (suc y) ∘ʲ (nul zero ⊕ inc b f))
+--         ≡⟨ refl ⟩
+--       idInj (suc y) ∘ʲ inc b f
+--         ≡⟨ ∘ʲ-idL (inc b f) ⟩
+--       inc b f
+--         ≡⟨ sym (∘ʲ-idR (inc b f)) ⟩
+--       inc b f ∘ʲ idInj (suc x) ▯
+--     η-iso : (x : ℕ) → isIso InjCat (idInj x)
+--     η-iso zero = isiso (nul 0) refl refl
+--     η-iso (suc x) = isiso (idInj (suc x)) Id⊕Id≡Id Id⊕Id≡Id
+--     ρ-ob : (x : ℕ) → Inj (x + 0) x 
+--     ρ-ob zero = nul zero
+--     ρ-ob (suc x) = inc f0 (ρ-ob x)
+--     ρ⁻¹-ob : (x : ℕ) → Inj x (x + 0)
+--     ρ⁻¹-ob zero = nul 0
+--     ρ⁻¹-ob (suc x) = inc f0 (ρ⁻¹-ob x)
+--     ρ-hom : N-hom-Type (─⊗─ ∘F linj InjCat InjCat unit) 𝟙⟨ InjCat ⟩ ρ-ob
+--     ρ-hom {zero} {y} (nul y) =
+--       ρ-ob y ∘ʲ ((─⊗─ ∘F linj InjCat InjCat unit) .Functor.F-hom (nul y))
+--         ≡⟨ refl ⟩
+--       ρ-ob y ∘ʲ ((─⊗─ ∘F (F-Id ,F Constant InjCat InjCat unit)) .Functor.F-hom (nul y))
+--         ≡⟨ refl ⟩
+--       ρ-ob y ∘ʲ (nul y ⊕ nul 0)
+--         ≡⟨ refl ⟩
+--       ρ-ob y ∘ʲ (shift y (nul 0))
+--         ≡⟨ cong (ρ-ob y ∘ʲ_) (shift-nul 0 y) ⟩
+--       ρ-ob y ∘ʲ (nul (y + 0))
+--         ≡⟨ refl ⟩
+--       nul y ∘ʲ nul zero ▯
+--     ρ-hom {suc x} {suc y} (inc fzero f) =
+--       ρ-ob (suc y) ∘ʲ ((─⊗─ ∘F linj InjCat InjCat unit) .Functor.F-hom (inc fzero f))
+--         ≡⟨ refl ⟩
+--       ρ-ob (suc y) ∘ʲ (inc fzero f ⊕ nul 0)
+--         ≡⟨ refl ⟩
+--       inc f0 (ρ-ob y) ∘ʲ (inc (finject 0 fzero) (f ⊕ nul 0))
+--         ≡⟨ refl ⟩
+--       inc (apply (inc f0 (ρ-ob y)) fzero)
+--           (remove fzero (inc f0 (ρ-ob y)) ∘ʲ (f ⊕ nul 0))
+--         ≡⟨ refl ⟩
+--       inc fzero (ρ-ob y ∘ʲ (f ⊕ nul 0))
+--         ≡⟨ cong (inc fzero) {!!} ⟩
+--       inc fzero (f ∘ʲ ρ-ob x)
+--         ≡⟨ refl ⟩
+--       inc fzero f ∘ʲ inc f0 (ρ-ob x) ▯
+--     ρ-hom {suc x} {suc y} (inc (fsuc b) f) =
+--       ρ-ob (suc y) ∘ʲ ((─⊗─ ∘F linj InjCat InjCat unit) .Functor.F-hom (inc (fsuc b) f))
+--         ≡⟨ refl ⟩
+--       ρ-ob (suc y) ∘ʲ (inc (fsuc b) f ⊕ nul 0)
+--         ≡⟨ refl ⟩
+--       inc f0 (ρ-ob y) ∘ʲ (inc (finject 0 (fsuc b)) (f ⊕ nul 0))
+--         ≡⟨ refl ⟩
+--       inc (apply (inc f0 (ρ-ob y)) (fsuc (finject 0 b)))
+--           (remove (fsuc (finject 0 b)) (inc f0 (ρ-ob y)) ∘ʲ (f ⊕ nul 0))
+--         ≡⟨ refl ⟩
+--       inc (fsuc (apply (ρ-ob y) (finject 0 b)))
+--           (remove (fsuc (finject 0 b)) (inc f0 (ρ-ob y)) ∘ʲ (f ⊕ nul 0))
+--         ≡⟨ cong₂ inc (ρ-apply (suc y) (fsuc b)) {!!} ⟩
+--       inc (fsuc b) (f ∘ʲ ρ-ob x)
+--         ≡⟨ refl ⟩
+--       inc (fsuc b) f ∘ʲ inc f0 (ρ-ob x) ▯
+--       where
+--         ρ-apply : (y : ℕ) (b : Fin y) → (apply (ρ-ob y) (finject 0 b)) ≡ b
+--         ρ-apply y fzero = refl
+--         ρ-apply (suc y) (fsuc b) =
+--           cong fsuc (ρ-apply y b)
+--     ρ-iso-sect : (x : ℕ) → ρ-ob x ∘ʲ ρ⁻¹-ob x ≡ idInj x
+--     ρ-iso-sect zero = refl
+--     ρ-iso-sect (suc x) =
+--       inc f0 (ρ-ob x) ∘ʲ inc f0 (ρ⁻¹-ob x)
+--         ≡⟨ refl ⟩
+--       inc f0 (remove f0 (inc f0 ( ρ-ob x)) ∘ʲ ρ⁻¹-ob x)
+--         ≡⟨ refl ⟩
+--       inc f0 (ρ-ob x ∘ʲ ρ⁻¹-ob x)
+--         ≡⟨ cong (inc f0) (ρ-iso-sect x) ⟩
+--       inc f0 (idInj x) ▯
+--     ρ-iso-retr : (x : ℕ) → ρ⁻¹-ob x ∘ʲ ρ-ob x ≡ idInj (x + 0)
+--     ρ-iso-retr zero = refl
+--     ρ-iso-retr (suc x) =
+--       inc f0 (ρ⁻¹-ob x) ∘ʲ inc f0 (ρ-ob x)
+--         ≡⟨ refl ⟩
+--       inc f0 (remove f0 (inc f0 (ρ⁻¹-ob x)) ∘ʲ ρ-ob x)
+--         ≡⟨ refl ⟩
+--       inc f0 (ρ⁻¹-ob x ∘ʲ ρ-ob x)
+--         ≡⟨ cong (inc f0) (ρ-iso-retr x) ⟩
+--       inc f0 (idInj (x + 0)) ▯
+--     ρ-iso : (x : ℕ) → isIso InjCat (ρ-ob x)
+--     ρ-iso x = isiso (ρ⁻¹-ob x) (ρ-iso-sect x) (ρ-iso-retr x)
