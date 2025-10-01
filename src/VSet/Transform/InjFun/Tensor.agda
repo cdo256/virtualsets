@@ -200,6 +200,53 @@ expand-r {l} {l'} {m} {m'} {n} {n'} f g h =
   ∘ ⊎-map id (+→⊎ m n)
   ∘ +→⊎ l (m +ℕ n) ▯
 
+assoc-ext' : {l l' m m' n n' : ℕ}
+  → (f : Fin l → Fin l') (g : Fin m → Fin m') (h : Fin n → Fin n')
+  → ∀ x
+  → (⊎→+ (l' +ℕ m') n'
+     (⊎-map (⊎→+ l' m') id
+      (⊎-map (⊎-map f g) h 
+       (⊎-map (+→⊎ l m) id
+        (+→⊎ (l +ℕ m) n
+         (x))))))
+  ≡ (subst Fin α-p-cod
+     (⊎→+ l' (m' +ℕ n')
+      (⊎-map id (⊎→+ m' n')
+       (⊎-map f (⊎-map g h)
+        (⊎-map id (+→⊎ m n)
+         (+→⊎ l (m +ℕ n)
+          (subst Fin (sym α-p-dom)
+           (x))))))))
+assoc-ext' {zero} {l'} {zero} {m'} {suc n} {n'} f g h fzero =
+  ⊎→+ (l' +ℕ m') n'
+   (⊎-map (⊎→+ l' m') id
+    (⊎-map (⊎-map f g) h
+     (⊎-map (+→⊎ 0 0) id
+      (+→⊎ 0 (suc n)
+       (f0)))))
+    ≡⟨ {!!} ⟩
+  (subst Fin α-p-cod
+   (⊎→+ l' (m' +ℕ n')
+    (⊎-map id (⊎→+ m' n')
+     (⊎-map f (⊎-map g h)
+      (⊎-map id (+→⊎ 0 (suc n))
+       (+→⊎ 0 (0 +ℕ (suc n))
+        (subst Fin (sym α-p-dom)
+         (f0)))))))) ▯
+assoc-ext' {zero} {l'} {zero} {m'} {suc n} {n'} f g h (fsuc x) = {!!}
+assoc-ext' {zero} {l'} {suc m} {m'} {n} {n'} f g h x = {!!}
+assoc-ext' {suc l} {l'} {m} {m'} {n} {n'} f g h x = {!!}
+
+assoc-ext : {l l' m m' n n' : ℕ}
+  → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
+  → ∀ x → fst ((f ⊕ g) ⊕ h) x ≡ fst (α {l} {l'} (f ⊕ (g ⊕ h))) x
+assoc-ext {zero} {l'} {zero} {m'} {suc n} {n'} f g h fzero =
+  fst ((f ⊕ g) ⊕ h) f0
+    ≡⟨ refl ⟩
+  fst (α (f ⊕ (g ⊕ h))) f0 ▯
+assoc-ext {zero} {l'} {zero} {m'} {suc n} {n'} f g h (fsuc x) = {!!}
+assoc-ext {zero} {l'} {suc m} {m'} {n} {n'} f g h x = {!!}
+assoc-ext {suc l} {l'} {m} {m'} {n} {n'} f g h x = {!!}
 
 assoc : {l l' m m' n n' : ℕ}
   → (f : [ l ↣ l' ]) (g : [ m ↣ m' ]) (h : [ n ↣ n' ])
