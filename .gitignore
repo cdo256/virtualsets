@@ -2,6 +2,7 @@
 _build
 result
 *~
+.#.*
 latex/generated
 src/DissertationTex/
 

@@ -45,8 +45,8 @@ def build_tex():
 def build_pdf():
     cmd = [
         "xelatex",
-        "-interaction=nonstopmode",
-        "-file-line-error",
+        "--interaction=nonstopmode",
+        "--file-line-error",
         "--jobname=dissertation",
         "./latex/main.tex",
     ]
