@@ -67,6 +67,9 @@ Id-isId : ∀ m → (a : Fin m) → apply (Id {m}) a ≡ a
 Id-isId m fzero = refl
 Id-isId (suc m) (fsuc a) = cong fsuc (Id-isId m a)
 
+transportInj : {m n : ℕ} (p : m ≡ n) → Inj m n
+transportInj {m} p = subst (Inj m) p (Id {m})
+
 cross : Inj 2 2
 cross = inc (fsuc fzero) $ inc fzero $ nul 0
 
@@ -98,3 +101,4 @@ injExt (inc b f) (inc c g) f'x≡g'x =
       apply g x ▯
     f≡g : f ≡ g
     f≡g = injExt f g fx≡gx
+
