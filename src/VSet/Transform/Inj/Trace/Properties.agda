@@ -388,19 +388,6 @@ superposing-pred {m = suc m} {n = suc n} l (inc (fsuc b) f) =
 --   --   ≡⟨ {!!} ⟩
 --   -- map-Maybe (finject m) (apply-inv (inc b f) fzero) ▯
 
-cong-suc-predℕ : {l m : ℕ} (p : suc m ≡ suc l)
-           → cong (Fin ∘ suc ∘ predℕ) p ≡ cong Fin p
-cong-suc-predℕ {l = l} {m = m} p =
-  transport (λ i → (λ j → suc-predℕ (p j) (pi≢0 j) i)
-                 ≡ (λ i → p i)) refl
-  where
-    q : ∀ (x : ℕ) (x≢0 : x ≢ 0) → suc (predℕ x) ≡ x
-    q x x≢0 = sym (suc-predℕ x x≢0)
-    p0≡pi : ∀ i → p i0 ≡ p i
-    p0≡pi i = λ j → p (i ∧ j)
-    pi≢0 : ∀ i → p i ≢ 0
-    pi≢0 i = subst (_≢ 0) (p0≡pi i) snotz
-
 fin-restrict≡subst
   : {l m : ℕ} (b : Fin (suc l)) (a : Fin m) → (a<b : a <ᶠ b) → (p : m ≡ l)
   → fin-restrict-< a a<b ≡ subst Fin p a
@@ -425,4 +412,3 @@ fin-restrict≡subst {l = suc l} {m = suc m} (fsuc b) (fsuc a) (<fsuc a<b) p =
   subst (Fin ∘ suc ∘ predℕ) p (fsuc a)
     ≡⟨ cong (λ ○ → transport ○ (fsuc a)) (cong-suc-predℕ p)  ⟩
   subst Fin p (fsuc a) ▯
-
