@@ -37,8 +37,6 @@ finj fzero = fzero
 finj (fsuc a) = fsuc (finj a)
 ```
 
-
-
 Each injective funtion funciton works by constructing the graph of the funciton injectively. This is a bit less intuitive than simply using `Fin m → Fin n`, but has some nice features:
  - There is exactly 1 Inj for every inductive Fin funciton.
  - All Inj graphs are injective by construction.
@@ -58,7 +56,7 @@ Note that `fsplice` is one of a family of operations on Fin that provide utiliti
 
 `fsplice b` maps `Fin x` to `Fin (suc x)` in such a way that b is not
 in the codomain. Essentially it increments all values above (or equal to b and
-keeps the values less than b unchanged. 
+keeps the values less than b unchanged.
 
 ```
 fsplice : ∀ {x} → (b : Fin (suc x)) → (a : Fin x) → Fin (suc x)
@@ -130,9 +128,9 @@ remove : ∀ {m n} → (a : Fin (suc m))
        → (f : Inj (suc m) (suc n)) → Inj m n
 remove fzero (inc b f) = f
 remove {suc m} {suc n} (fsuc a) (inc c f) =
-  inc (fcross (apply f a) c) (remove a f) 
+  inc (fcross (apply f a) c) (remove a f)
 
--- Splice all outputs around a pivot b 
+-- Splice all outputs around a pivot b
 bubble : ∀ {m n} → (b : Fin (suc n))
        → (f : Inj m n) → Inj m (suc n)
 bubble b (nul _) = nul _
@@ -152,7 +150,7 @@ f0 ≡ apply g b`, therefore the first link should be from f0 to `apply
 g b`. We then remove the link from the composition and recurse.
 
 ```
-_∘ʲ_ : ∀ {l m n} (g : Inj m n) (f : Inj l m) → Inj l n 
+_∘ʲ_ : ∀ {l m n} (g : Inj m n) (f : Inj l m) → Inj l n
 _∘ʲ_ g (nul _) = nul _
 _∘ʲ_ {suc l} {suc m} {suc n} g (inc b f) =
   inc (apply g b) (remove b g ∘ʲ f)
