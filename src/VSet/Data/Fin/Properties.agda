@@ -2,7 +2,7 @@ module VSet.Data.Fin.Properties where
 
 open import VSet.Prelude
 import Cubical.Data.Nat as ℕ
-open import Cubical.Data.Nat using (ℕ; +-zero; +-suc) renaming (_+_ to _+ℕ_)
+open import Cubical.Data.Nat using (ℕ; +-zero; +-suc; predℕ; suc-predℕ; snotz) renaming (_+_ to _+ℕ_)
 open import VSet.Data.Nat.Order
 open import VSet.Data.Nat.Properties
 open import VSet.Data.Fin.Base
@@ -148,6 +148,15 @@ fzero-cong {x} {y} p i = fzero {p i}
 fzero≡subst-fzero : {x y : ℕ} (p : x ≡ y)
                   → fzero {y} ≡ subst (Fin ∘ suc) p (fzero {x})
 fzero≡subst-fzero {x} {y} p = resubst (Fin ∘ suc) (λ z → fzero {z}) p
+
+fzero≡subst-fzero' : {x y : ℕ} (p : suc x ≡ suc y)
+                   → fzero {y} ≡ subst Fin p (fzero {x})
+fzero≡subst-fzero' {x} {y} p =
+  f0 {y}
+    ≡⟨ fzero≡subst-fzero (cong predℕ p) ⟩
+  subst Fin (cong (suc ∘ predℕ) p) (f0 {x})
+    ≡⟨ cong (λ ○ → subst Fin ○ (f0 {x})) (path-suc-pred p) ⟩
+  subst Fin p f0 ▯
 
 fzero≡cast-fzero : {x y : ℕ} (p : x ≡ y)
                  → fzero {y} ≡ fcast (cong suc p) (fzero {x})
@@ -725,3 +734,30 @@ fjoin-isInjective {n = suc n} (fsuc a) (fsuc b) (fsuc c) b≉a c≉a q =
       fjoin (fsuc a) (fsuc c) (≉fsuc (≉fpred c≉a))
         ≡⟨ fsuc-fjoin a c (≉fpred c≉a) ⟩
       fsuc (fjoin a c (≉fpred c≉a)) ▯)
+
+cong-suc-predℕ : {l m : ℕ} (p : suc m ≡ suc l)
+           → cong (Fin ∘ suc ∘ predℕ) p ≡ cong Fin p
+cong-suc-predℕ {l = l} {m = m} p =
+  transport (λ i → (λ j → suc-predℕ (p j) (pi≢0 j) i)
+                 ≡ (λ i → p i)) refl
+  where
+    q : ∀ (x : ℕ) (x≢0 : x ≢ 0) → suc (predℕ x) ≡ x
+    q x x≢0 = sym (suc-predℕ x x≢0)
+    p0≡pi : ∀ i → p i0 ≡ p i
+    p0≡pi i = λ j → p (i ∧ j)
+    pi≢0 : ∀ i → p i ≢ 0
+    pi≢0 i = subst (_≢ 0) (p0≡pi i) snotz
+
+fjoin-fzero : {x y : ℕ} (p : suc y ≡ x) (a : Fin x)
+            → fjoin (fsuc a) fzero fzero≉fsuc
+            ≡ subst Fin p fzero
+fjoin-fzero {suc x} {y} p a =
+  fjoin (fsuc a) f0 fzero≉fsuc
+    ≡⟨ refl ⟩
+  fin-restrict-< fzero <fzero
+    ≡⟨ refl ⟩
+  fzero {x}
+    ≡⟨ fzero≡subst-fzero (cong predℕ p) ⟩
+  subst (Fin ∘ (suc ∘ predℕ)) p (f0 {y}) 
+    ≡⟨ cong (λ ○ → transport ○ (f0 {y})) (cong-suc-predℕ p) ⟩
+  subst (Fin ∘ id) p (f0 {y}) ▯

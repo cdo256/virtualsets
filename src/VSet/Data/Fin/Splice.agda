@@ -115,7 +115,6 @@ fjoinMaybe {suc x} (fsuc b) fzero = just fzero
 fjoinMaybe {suc x} (fsuc b) (fsuc a) =
   map-Maybe fsuc (fjoinMaybe b a)
 
--- Another alternate definition
 fjoinMaybe'
   : ∀ {x : ℕ} → (b : Fin (suc (suc x))) → (a : Fin (suc (suc x)))
   → Maybe (Fin (suc x))
