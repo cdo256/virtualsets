@@ -4,6 +4,7 @@ open import Cubical.Foundations.Prelude public renaming (_∎ to _▯)
 open import Cubical.Foundations.Function public hiding (flip)
 open import Cubical.Foundations.Transport public hiding (transpEquiv)
 open import Cubical.Foundations.Equiv public
+open import Cubical.Foundations.HLevels public
 open import Cubical.Foundations.Isomorphism public
 open import Cubical.Core.Primitives public
 open import Agda.Primitive public
