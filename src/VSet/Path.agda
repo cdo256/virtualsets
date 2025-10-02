@@ -231,6 +231,23 @@ transport-inj {x = x} {y = y} p q =
   transport (sym p) (transport p y) ≡⟨ transport⁻Transport p y ⟩
   y ▯ 
 
+subst2-stack : ∀ {ℓ} {A : Type ℓ} {B : Type ℓ'} (C : A → B → Type ℓ'')
+             → {a1 a2 : A} {b1 b2 : B} (p : a1 ≡ a2) (q : b1 ≡ b2) (x : C a1 b1)
+             → subst2 C p refl (subst2 C refl q x) ≡ subst2 C p q x
+subst2-stack C p q x = J (λ b' q → subst2 C p refl (subst2 C refl q x) ≡ subst2 C p q x) r q
+  where
+    r : subst2 C p refl (subst2 C refl refl x)
+      ≡ subst2 C p refl x
+    r = cong (subst2 C p refl) (transportRefl x)
+
+subst2-stack' : ∀ {ℓ} {A : Type ℓ} {B : Type ℓ'} (C : A → B → Type ℓ'')
+             → {a1 a2 : A} {b1 b2 : B} (p : a1 ≡ a2) (q : b1 ≡ b2) (x : C a1 b1)
+             → subst2 C refl q (subst2 C p refl x) ≡ subst2 C p q x
+subst2-stack' C p q x = J (λ _ q → subst2 C refl q (subst2 C p refl x) ≡ subst2 C p q x) r q
+  where
+    r : subst2 C refl refl (subst2 C p refl x)
+      ≡ subst2 C p refl x
+    r = transportRefl (subst2 C p refl x)
 
 module Tests where
   open import Cubical.Data.Nat
