@@ -164,14 +164,67 @@ open NatIso
 open NatTrans
 open isIso
 
-α'' : (─⊗─ ∘F (F-Id ×F ─⊗─ ))
-    ≅ᶜ (─⊗─ ∘F ((─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat))
-α'' .trans .N-ob (x , y , z) = transportInj (+-assoc x y z)
-α'' .nIso (x , y , z) .inv = subst2 Inj refl (sym (+-assoc x y z)) (Id {(x + y) + z})
-α'' .nIso (x , y , z) .sec =
-   (subst2 Inj refl (+-assoc x y z) (Id {x + (y + z)})) ∘ʲ (subst2 Inj refl (sym (+-assoc x y z)) (Id {(x + y) + z})) ≡⟨ {!!} ⟩ {!!} ▯
-α'' .nIso (x , y , z) .ret = {!!} ≡⟨ {!!} ⟩ {!!} ▯
-α'' .trans .N-hom = {!!}
+η-trans :  (─⊗─ ∘F linj InjCat InjCat 0)
+        ≅ᶜ F-Id
+η-trans .trans .N-ob x = transportInj (+-zero x)
+η-trans .nIso x .inv = transportInj (sym (+-zero x))
+η-trans .nIso x .sec = transportInj-cancel (+-zero x)
+η-trans .nIso x .ret = transportInj-cancel (sym (+-zero x))
+η-trans .trans .N-hom {x = x} {y = y} f = w
+  where
+    v : subst2 Inj refl (+-zero y) (f ⊕ 𝟘)
+      ≡ subst2 Inj (sym (+-zero x)) refl f
+    v = {!!}
+    w : transportInj (+-zero y) ∘ʲ (f ⊕ 𝟘)
+      ≡ f ∘ʲ transportInj (+-zero x) 
+    w =
+      transportInj (+-zero y) ∘ʲ (f ⊕ 𝟘)
+        ≡⟨ transportInj-idR (+-zero y) (f ⊕ 𝟘) ⟩
+      subst2 Inj refl (+-zero y) (f ⊕ 𝟘)
+        ≡⟨ cong (subst2 Inj refl (+-zero y)) {!!} ⟩
+      (subst2 Inj refl (+-zero y) $
+       subst2 Inj (sym (+-zero x)) (sym (+-zero y)) f)
+        ≡⟨ cong (subst2 Inj refl (+-zero y)) (sym (subst2-stack' Inj (sym (+-zero x)) (sym (+-zero y)) f)) ⟩
+      (subst2 Inj refl (+-zero y) $
+       subst2 Inj refl (sym (+-zero y)) $
+       subst2 Inj (sym (+-zero x)) refl f)
+        ≡⟨ transportTransport⁻ (cong₂ Inj refl (+-zero y)) (subst2 Inj (sym (+-zero x)) refl f) ⟩
+      subst2 Inj (sym (+-zero x)) refl f
+        ≡⟨ sym (transportInj-idL (+-zero x) f) ⟩
+      f ∘ʲ transportInj (+-zero x) ▯
+
+α-trans :  (─⊗─ ∘F (F-Id ×F ─⊗─ ))
+        ≅ᶜ (─⊗─ ∘F ((─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat))
+α-trans .trans .N-ob (x , y , z) = transportInj (+-assoc x y z)
+α-trans .nIso (x , y , z) .inv = transportInj (sym (+-assoc x y z))
+α-trans .nIso (x , y , z) .sec = transportInj-cancel (+-assoc x y z)
+α-trans .nIso (x , y , z) .ret = transportInj-cancel (sym (+-assoc x y z))
+α-trans .trans .N-hom {x = (l , m , n)} {y = (l' , m' , n')} (f , g , h) =
+    transportInj (+-assoc l' m' n') ∘ʲ (f ⊕ (g ⊕ h))
+      ≡⟨ transportInj-idR (+-assoc l' m' n') (f ⊕ (g ⊕ h)) ⟩
+    subst2 Inj refl (+-assoc l' m' n') (f ⊕ (g ⊕ h))
+      ≡⟨ sym (transport⁻Transport (cong₂ Inj (+-assoc l m n) refl)
+               (subst2 Inj (λ _ → l + (m + n)) (+-assoc l' m' n') (f ⊕ (g ⊕ h)))) ⟩
+    subst2 Inj (sym (+-assoc l m n)) refl
+     (subst2 Inj (+-assoc l m n) refl
+       (subst2 Inj refl (+-assoc l' m' n') (f ⊕ (g ⊕ h))))
+      ≡⟨ cong (subst2 Inj (sym (+-assoc l m n)) refl) v ⟩
+    subst2 Inj (sym (+-assoc l m n)) refl ((f ⊕ g) ⊕ h)
+      ≡⟨ sym (transportInj-idL (+-assoc l m n) ((f ⊕ g) ⊕ h)) ⟩
+    ((f ⊕ g) ⊕ h) ∘ʲ transportInj (+-assoc l m n) ▯
+  where
+  v : (subst2 Inj (+-assoc l m n) refl $
+       subst2 Inj refl (+-assoc l' m' n') $
+       (f ⊕ (g ⊕ h)))
+    ≡ (f ⊕ g) ⊕ h
+  v =
+    (subst2 Inj (+-assoc l m n) refl $
+     subst2 Inj refl (+-assoc l' m' n') $
+     f ⊕ (g ⊕ h))
+      ≡⟨ subst2-stack Inj (+-assoc l m n) (+-assoc l' m' n') (f ⊕ (g ⊕ h)) ⟩
+    subst2 Inj (+-assoc l m n) (+-assoc l' m' n') (f ⊕ (g ⊕ h))
+      ≡⟨ sym (assoc f g h) ⟩
+    (f ⊕ g) ⊕ h ▯
 
 data InductiveCat (C : Category ℓ ℓ') : Type (ℓ-suc (ℓ ⊔ ℓ')) where
   Cᶜ : InductiveCat C
@@ -208,21 +261,6 @@ data InductiveFunctor (Base : Category ℓ ℓ') (_⊗_ : Functor (Base ×C Base
       → InductiveFunctor InjCat ─⊗─ C D → Functor ⟦ C ⟧ᶜ ⟦ D ⟧ᶜ
 ⟦ F ⟧ꟳ⁺ = ⟦_⟧ꟳ {Base = InjCat} {_⊗_ = ─⊗─} F
 
-α' :  (─⊗─ ∘F (F-Id ×F ─⊗─ ))
-   ≅ᶜ (─⊗─ ∘F ((─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat))
-α' = record
-  { trans = natTrans ob-trans hom-trans
-  ; nIso = {!!}
-  }
-  where
-    ob-trans : (x : (InjCat ×C (InjCat ×C InjCat)) .ob) → Inj {!!} {!!}
-    ob-trans = {!!}
-    hom-trans :  N-hom-Type (─⊗─ ∘F (F-Id ×F ─⊗─))
-      (─⊗─ ∘F (─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat) ob-trans
-    hom-trans {x = (l , m , n)} {y = (l' , m' , n')} (f , g , h) = 
-      {!!} ≡⟨ {!!} ⟩
-      {!!} ▯
-
 η-F-l : Functor InjCat InjCat
 η-F-l = ─⊗─ ∘F (rinj InjCat InjCat unit)
 η-F-r : Functor InjCat InjCat
@@ -239,9 +277,9 @@ open MonoidalStr
 
 InjMonoidalStr : MonoidalStr InjCat
 InjMonoidalStr .tenstr = InjTensor
-InjMonoidalStr .MonoidalStr.α = {!!}
-InjMonoidalStr .η = {!!}
-InjMonoidalStr .ρ = {!!}
+InjMonoidalStr .MonoidalStr.α = α-trans
+InjMonoidalStr .MonoidalStr.η = {!!}
+InjMonoidalStr .MonoidalStr.ρ = {!!}
 InjMonoidalStr .pentagon = {!!}
 InjMonoidalStr .triangle = {!!}
 
