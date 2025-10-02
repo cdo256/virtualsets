@@ -213,91 +213,59 @@ transportInj-peel {l} {m} p =
     r : subst Fin (cong (suc ∘ predℕ) p) f0 ≡ f0
     r = sym (fzero≡subst-fzero (cong predℕ p))
 
+-- These unsolved metas can't be solved by specifying a `P`.
+-- Using J might work, but I couldn't get it working.
 transportInj-isId
   : ∀ {l m : ℕ} (p : l ≡ m) (x : Fin l)
   → apply (transportInj p) x ≡ subst Fin p x
-transportInj-isId {suc l} {zero} p x = absurd (snotz p)
-transportInj-isId {suc l} {suc m} p fzero =
-  apply (transportInj p) fzero
-    ≡⟨ cong (λ ○ → apply ○ fzero) (transportInj-peel p) ⟩
-  apply (inc fzero (transportInj (cong predℕ p))) fzero
-    ≡⟨ refl ⟩
-  fzero {m}
-    ≡⟨ fzero≡subst-fzero (cong predℕ p) ⟩
-  subst Fin (cong (suc ∘ predℕ) p) (fzero {l})
-    ≡⟨ cong (λ ○ → subst Fin ○ (fzero {l})) (path-suc-pred p) ⟩
-  subst Fin p (fzero {l}) ▯
-transportInj-isId {suc (suc l)} {suc zero} p (fsuc x) = absurd (snotz (cong predℕ p))
-transportInj-isId {suc (suc l)} {suc (suc m)} p (fsuc x) =
-  apply (transportInj p) (fsuc x)
-    ≡⟨ cong (λ ○ → apply ○ (fsuc x)) (transportInj-peel p) ⟩
-  apply (inc fzero (transportInj (cong predℕ p))) (fsuc x)
-    ≡⟨ refl ⟩
-  fsplice fzero (apply (transportInj (cong predℕ p)) x)
-    ≡⟨ refl ⟩
-  fsuc (apply (transportInj (cong predℕ p)) x)
-    ≡⟨ cong fsuc (transportInj-isId (cong predℕ p) x) ⟩
-  fsuc (subst Fin (cong predℕ p) x)
-    ≡⟨ sym (subst-fsuc-reorder (cong predℕ p) x) ⟩
-  subst Fin (cong (suc ∘ predℕ) p) (fsuc x)
-    ≡⟨ cong (λ ○ → subst Fin ○ (fsuc x)) (path-suc-pred p) ⟩
-  subst Fin p (fsuc x) ▯
+transportInj-isId {l} {m} = (J> r) m 
+  where
+    r : (x : Fin l) → _ ≡ _
+    r x =
+      apply (transportInj refl) x
+        ≡⟨ cong (λ ○ → apply ○ x) (transportRefl Id) ⟩
+      apply Id x
+        ≡⟨ Id-isId l x ⟩
+      x
+        ≡⟨ sym (transportRefl x) ⟩
+      subst Fin refl x ▯
 
-transportInj-idR-ext
-  : ∀ {l m n : ℕ} (p : l ≡ m) (f : Inj m n) (x : Fin l)
-  → apply (f ∘ʲ transportInj p) x ≡ apply (subst2 Inj (sym p) refl f) x
-transportInj-idR-ext {l} {m} {n} p f x =
-  apply (f ∘ʲ transportInj p) x
-    ≡⟨ sym (apply-apply f (transportInj p) x) ⟩
-  apply f (apply (transportInj p) x)
-    ≡⟨ cong (apply f) (transportInj-isId p x) ⟩
-  apply f (subst Fin p x)
-    ≡⟨ {!!} ⟩
-  apply (subst2 Inj (sym p) refl f) x ▯
+transportInj-idL
+  : ∀ {l m n : ℕ} (p : l ≡ m) (f : Inj m n)
+  → f ∘ʲ transportInj p ≡ subst2 Inj (sym p) refl f
+transportInj-idL {l} {m} {n} = (J> r) m
+  where
+    r : (f : Inj l n) → _ ≡ _
+    r f =
+      f ∘ʲ transportInj refl
+        ≡⟨ cong (f ∘ʲ_) (transportRefl Id) ⟩
+      f ∘ʲ Id
+        ≡⟨ ∘ʲ-idR f ⟩
+      f
+        ≡⟨ sym (transportRefl f) ⟩
+      transport refl f ▯
 
--- transportInj-idR-ext : ∀ {l m n : ℕ} (p : l ≡ m) (f : Inj m n) (x : Fin l)
---                 → apply (f ∘ʲ transportInj p) x ≡ apply (subst2 Inj (sym p) refl f) x
--- transportInj-idR-ext {suc l} {0} {n} p (nul n) x = absurd (snotz p)
--- transportInj-idR-ext {suc l} {suc m} {suc n} p (inc b f) fzero =
---   apply (inc b f ∘ʲ transportInj p) fzero
---     ≡⟨ sym (apply-apply (inc b f) (transportInj p) fzero) ⟩
---   apply (inc b f) (apply (transportInj p) fzero)
---     ≡⟨ {!!} ⟩
---   subst Fin refl b
---     ≡⟨ refl ⟩
---   apply (inc (subst Fin refl b) f) fzero
---     ≡⟨ cong (λ ○ → apply ○ fzero)
---             (sym (subst2-inc-reorder
---               (sym (cong predℕ p)) refl b f)) ⟩
---   apply (transport (λ i → Inj (suc (predℕ (p (~ i)))) (suc n)) (inc b f)) fzero
---     ≡⟨ (λ j → apply (transport (λ i → Inj (path-suc-pred (sym p) j i) (suc n)) (inc b f)) fzero) ⟩
---   apply (subst2 Inj (sym p) refl (inc b f)) fzero ▯
--- transportInj-idR-ext {suc l} {m} {n} p f (fsuc x) = {!!}
+transportInj-idR
+  : ∀ {l m n : ℕ} (p : m ≡ n) (f : Inj l m)
+  → transportInj p ∘ʲ f ≡ subst2 Inj refl p f
+transportInj-idR {l} {m} {n} = (J> r) n
+  where
+    r : (f : Inj l m) → _ ≡ _
+    r f =
+      transportInj refl ∘ʲ f
+        ≡⟨ cong (_∘ʲ f) (transportRefl Id) ⟩
+      Id ∘ʲ f
+        ≡⟨ ∘ʲ-idL f ⟩
+      f
+        ≡⟨ sym (transportRefl f) ⟩
+      transport refl f ▯
 
--- transportInj-idR : ∀ {l m n : ℕ} (p : l ≡ m) (f : Inj m n)
---                 → f ∘ʲ transportInj p ≡ subst2 Inj (sym p) refl f
--- transportInj-idR {l} {m} {n} p f =
---   injExt (f ∘ʲ transportInj p) (subst2 Inj (sym p) refl f)
---          (transportInj-idR-ext p f )
-
--- FinFun : ℕ → ℕ → Type _
--- FinFun m n = Fin m → Fin n
-
--- -- transportInj-idR' : ∀ {l m n : ℕ} (p : l ≡ m) (f : Fin m → Fin n)
--- --                 → subst (λ x → FinFun x n) (sym p) (f ∘ id)
--- --                 ≡ f ∘ subst (FinFun l) p (id {A = Fin l})
--- -- transportInj-idR' {l} {m} {n} p f =
--- --   substCommSlice Fin (λ x → FinFun x n) {!!} {!!} {!!}
-
--- -- transportInj-idR {zero} {zero} p (nul n) with inspect' (transportInj p)
--- -- ... | nul 0 , q = 
--- --   nul n ∘ʲ transportInj p ≡⟨ cong (nul n ∘ʲ_) q ⟩
--- --   nul n ∘ʲ nul 0 ≡⟨ refl ⟩
--- --   nul n ≡⟨ nul≡subst2-nul (sym p) refl ⟩
--- --   subst2 Inj (sym p) refl (nul n) ▯
--- -- transportInj-idR {suc l} {zero} p (nul n) = absurd (snotz p)
--- -- transportInj-idR {zero} {suc m} p f = absurd (znots p)
--- -- transportInj-idR {suc l} {suc m} p f =
--- --   f ∘ʲ transportInj p ≡⟨ {!!} ⟩
--- --   subst2 Inj (sym p) refl f ▯
-
+transportInj-cancel
+  : ∀ {m n : ℕ} (p : m ≡ n)
+  → transportInj p ∘ʲ transportInj (sym p) ≡ Id
+transportInj-cancel {m} {n} p =
+  transportInj p ∘ʲ transportInj (sym p)
+    ≡⟨ transportInj-idR p (transportInj (sym p)) ⟩
+  subst2 Inj refl p (subst2 Inj refl (sym p) Id)
+    ≡⟨ transportTransport⁻ (cong (Inj n) p) Id ⟩
+  Id ▯
