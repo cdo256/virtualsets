@@ -24,8 +24,10 @@ module _ (C : Category ℓ ℓ') where
   transportHom-idL
     : {x y z : ob} (p : x ≡ y) (f : Hom[ y , z ])
     → transportHom p ⋆ f ≡ subst2 Hom[_,_] (sym p) refl f
-  transportHom-idL {x} {y} {z} = (J> r) y
+  transportHom-idL {x} {y} {z} = J P r
     where
+      P : (y : ob) → x ≡ y → Type ℓ'
+      P y q = (f : Hom[ y , z ]) → transportHom q ⋆ f ≡ subst2 Hom[_,_] (sym q) refl f
       r : (f : Hom[ x , z ]) → _ ≡ _
       r f =
         transportHom refl ⋆ f
@@ -39,8 +41,10 @@ module _ (C : Category ℓ ℓ') where
   transportHom-idR
     : {x y z : ob} (p : y ≡ z) (f : Hom[ x , y ])
     → f ⋆ transportHom p ≡ subst2 Hom[_,_] refl p f
-  transportHom-idR {x} {y} {z} = (J> r) z
+  transportHom-idR {x} {y} {z} = J P r
     where
+      P : (z : ob) → y ≡ z → Type ℓ'
+      P z q = (f : Hom[ x , y ]) → f ⋆ transportHom q ≡ subst2 Hom[_,_] refl q f
       r : (f : Hom[ x , y ]) → _ ≡ _
       r f =
         f ⋆ transportHom refl
@@ -67,7 +71,7 @@ open NatTrans
 open NatIso
 open isIso
 
-module TransportNatIso {C : Category ℓC ℓC'} {D : Category ℓD ℓD'}
+module TransportNatIso {C : Category ℓC (ℓC' ⊔ ℓC)} {D : Category ℓD (ℓD' ⊔ ℓD)}
                        (F G : Functor C D) (s : F ≡ G) where
 
   open Category D
@@ -80,11 +84,11 @@ module TransportNatIso {C : Category ℓC ℓC'} {D : Category ℓD ℓD'}
   r : (x : C .ob) → F .F-ob x ≡ G .F-ob x
   r = obPath s 
 
-  P : (G' : Functor C D) → F ≡ G' → Type (ℓC ⊔ ℓC' ⊔ ℓD')
-  P G' p =
-      {x y : C .ob} (f : C [ x , y ])
-    → F .F-hom f ⋆ᴰ transportHom D (obPath p y)
-    ≡ transportHom D (obPath p x) ⋆ᴰ G' .F-hom f
+  P : (G' : Functor C D) → F ≡ G' → Type _
+  P G' p = 
+       {x y : C .ob} (f : C [ x , y ])
+     → F .F-hom f ⋆ᴰ transportHom D (obPath p y)
+     ≡ transportHom D (obPath p x) ⋆ᴰ G' .F-hom f
 
   transport→natIso
     : NatIso F G
@@ -93,8 +97,7 @@ module TransportNatIso {C : Category ℓC ℓC'} {D : Category ℓD ℓD'}
   transport→natIso .nIso x .sec = transportHom-cancel D (r x)
   transport→natIso .nIso x .ret = transportHom-cancel D (sym (r x))
   transport→natIso .trans .N-hom = 
-      -- (J>_ {P = {!P!}} t) G s
-      J {!P!} t s
+      J P t s
     where
       t : P F refl
       t f = 
