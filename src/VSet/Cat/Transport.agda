@@ -19,7 +19,7 @@ module _ (C : Category ℓ ℓ') where
 
   -- Transport the codomain of identity.
   transportHom : {a b : ob} (p : a ≡ b) → Hom[ a , b ]
-  transportHom {a} {b} p = subst (Hom[ a ,_]) p (id {a})
+  transportHom {a} {b} p = subst Hom[ a ,_] p (id {a})
 
   transportHom-idL
     : {x y z : ob} (p : x ≡ y) (f : Hom[ y , z ])
@@ -76,7 +76,7 @@ module TransportNatIso {C : Category ℓC (ℓC' ⊔ ℓC)} {D : Category ℓD (
 
   open Category D
     using ()
-    renaming (_⋆_ to _⋆ᴰ_; ⋆IdL to ∙IdLᴰ; ⋆IdR to ∙IdRᴰ)
+    renaming (_⋆_ to _⋆ᴰ_; ⋆IdL to ⋆IdLᴰ; ⋆IdR to ⋆IdRᴰ)
 
   obPath : {F G : Functor C D} (p : F ≡ G) → (x : C .ob) → F .F-ob x ≡ G .F-ob x
   obPath p = funExt⁻ (cong F-ob p)
@@ -96,19 +96,19 @@ module TransportNatIso {C : Category ℓC (ℓC' ⊔ ℓC)} {D : Category ℓD (
   transport→natIso .nIso x .inv = transportHom D (sym (r x))
   transport→natIso .nIso x .sec = transportHom-cancel D (r x)
   transport→natIso .nIso x .ret = transportHom-cancel D (sym (r x))
-  transport→natIso .trans .N-hom = 
+  transport→natIso .trans .N-hom =
       J P t s
     where
       t : P F refl
       t f = 
         F .F-hom f ⋆ᴰ transport refl (D .id)
-          ≡⟨ cong (F .F-hom f ⋆ᴰ_) (transportRefl (id D)) ⟩
+          ≡⟨ cong (F .F-hom f ⋆ᴰ_) (transportRefl (D .id)) ⟩
         F .F-hom f ⋆ᴰ (D .id)
-          ≡⟨ ∙IdRᴰ (F .F-hom f) ⟩
+          ≡⟨ ⋆IdRᴰ (F .F-hom f) ⟩
         F .F-hom f
-          ≡⟨ sym (∙IdLᴰ (F .F-hom f)) ⟩
+          ≡⟨ sym (⋆IdLᴰ (F .F-hom f)) ⟩
         (D .id) ⋆ᴰ F .F-hom f
-          ≡⟨ cong (_⋆ᴰ F .F-hom f) (sym (transportRefl (id D))) ⟩
+          ≡⟨ cong (_⋆ᴰ F .F-hom f) (sym (transportRefl (D .id))) ⟩
         transport refl (D .id) ⋆ᴰ F .F-hom f ▯
 
 open TransportNatIso using (transport→natIso)
