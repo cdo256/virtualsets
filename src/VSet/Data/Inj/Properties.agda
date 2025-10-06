@@ -175,3 +175,7 @@ Inj→m≤n {suc m} {suc n} (inc _ f) = suc-≤-suc (Inj→m≤n f)
 
 Inj-Inj⁻¹→m≡n : {m n : ℕ} → Inj m n → Inj n m → m ≡ n
 Inj-Inj⁻¹→m≡n f g = ≤∧≥→≡ (Inj→m≤n f) (Inj→m≤n g)
+
+apply-transportInj : ∀ {m n : ℕ} → (a : Fin m) (p : m ≡ n)
+                   → apply (transportInj p) a ≡ subst Fin p a
+apply-transportInj = {!!}

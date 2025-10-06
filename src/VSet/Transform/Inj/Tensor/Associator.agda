@@ -108,6 +108,9 @@ module _ {l l' m m' n n' : ℕ} where
   α⁻¹ : Inj ((l + m) + n) ((l' + m') + n') → Inj (l + (m + n)) (l' + (m' + n')) 
   α⁻¹ = Iso.inv α-iso 
 
+αInj : ∀ l m n → Inj (l + (m + n)) ((l + m) + n)
+αInj l m n = transportInj (+-assoc l m n)
+
 assoc : {l l' m m' n n' : ℕ} → (f : Inj l l') (g : Inj m m') (h : Inj n n')
   → ((f ⊕ g) ⊕ h) ≡ transport (α-p {l} {l'}) (f ⊕ (g ⊕ h))
 assoc {zero} {l'} {m} {m'} {n} {n'} (nul _) g h =

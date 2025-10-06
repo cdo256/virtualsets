@@ -13,8 +13,9 @@ open import Cubical.Data.Nat
 open import Cubical.Data.Sigma
 open import Cubical.Data.Nat.Properties
 open import VSet.Cat.Transport
-open import VSet.Data.Fin.Base 
+open import VSet.Data.Fin.Base hiding (⟦_⟧)
 open import VSet.Data.Fin.Splice 
+open import VSet.Data.Fin.Properties
 open import VSet.Data.Inj.Base 
 open import VSet.Data.Inj.Order 
 open import VSet.Data.Inj.Properties 
@@ -165,33 +166,6 @@ open NatIso
 open NatTrans
 open isIso
 
--- η-trans .trans .N-ob x = transportInj (+-zero x)
--- η-trans .nIso x .inv = transportInj (sym (+-zero x))
--- η-trans .nIso x .sec = transportInj-cancel (+-zero x)
--- η-trans .nIso x .ret = transportInj-cancel (sym (+-zero x))
--- η-trans .trans .N-hom {x = x} {y = y} f = w
---   where
---     v : subst2 Inj refl (+-zero y) (f ⊕ 𝟘)
---       ≡ subst2 Inj (sym (+-zero x)) refl f
---     v = {!!}
---     w : transportInj (+-zero y) ∘ʲ (f ⊕ 𝟘)
---       ≡ f ∘ʲ transportInj (+-zero x) 
---     w =
---       transportInj (+-zero y) ∘ʲ (f ⊕ 𝟘)
---         ≡⟨ transportInj-idR (+-zero y) (f ⊕ 𝟘) ⟩
---       subst2 Inj refl (+-zero y) (f ⊕ 𝟘)
---         ≡⟨ cong (subst2 Inj refl (+-zero y)) {!!} ⟩
---       (subst2 Inj refl (+-zero y) $
---        subst2 Inj (sym (+-zero x)) (sym (+-zero y)) f)
---         ≡⟨ cong (subst2 Inj refl (+-zero y)) (sym (subst2-stack' Inj (sym (+-zero x)) (sym (+-zero y)) f)) ⟩
---       (subst2 Inj refl (+-zero y) $
---        subst2 Inj refl (sym (+-zero y)) $
---        subst2 Inj (sym (+-zero x)) refl f)
---         ≡⟨ transportTransport⁻ (cong₂ Inj refl (+-zero y)) (subst2 Inj (sym (+-zero x)) refl f) ⟩
---       subst2 Inj (sym (+-zero x)) refl f
---         ≡⟨ sym (transportInj-idL (+-zero x) f) ⟩
---       f ∘ʲ transportInj (+-zero x) ▯
-
 α-trans :  (─⊗─ ∘F (F-Id ×F ─⊗─ ))
         ≅ᶜ (─⊗─ ∘F ((─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat))
 α-trans = transport→natIso (─⊗─ ∘F (F-Id ×F ─⊗─)) (─⊗─ ∘F (─⊗─ ×F F-Id) ∘F ×C-assoc InjCat InjCat InjCat) F≡G
@@ -267,9 +241,51 @@ InjMonoidalStr .tenstr = InjTensor
 InjMonoidalStr .MonoidalStr.α = α-trans
 InjMonoidalStr .MonoidalStr.η = η-trans
 InjMonoidalStr .MonoidalStr.ρ = ρ-trans
-InjMonoidalStr .pentagon = {!!}
-InjMonoidalStr .triangle = {!!}
+InjMonoidalStr .pentagon = u
+  where
+    ti = transportInj
+    u : (w x y z : ℕ) →
+         ((αInj w x y ⊕ Id) ∘ʲ (αInj w (x + y) z)) ∘ʲ (Id ⊕ αInj  x y z)
+         ≡ (αInj (w + x) y z) ∘ʲ (αInj  w x (y + z))
+    u w x y z =
+      ((αInj w x y ⊕ Id) ∘ʲ αInj w (x + y) z) ∘ʲ (Id ⊕ αInj x y z)
+        ≡⟨ cong₂ (λ ○ □ → ((αInj w x y ⊕ ○) ∘ʲ αInj w (x + y) z) ∘ʲ (□ ⊕ αInj x y z))
+                          (sym (transportRefl Id)) (sym (transportRefl Id)) ⟩
+      ((αInj w x y ⊕ ti refl) ∘ʲ αInj w (x + y) z) ∘ʲ (ti refl ⊕ αInj x y z)
+        ≡⟨ cong₂ _∘ʲ_ (cong₂ _∘ʲ_ (transport-⊕-transport (+-assoc w x y) refl ) refl)
+                                  (transport-⊕-transport refl (+-assoc x y z)) ⟩
+      (transportInj (cong₂ _+_ (+-assoc w x y) refl) ∘ʲ αInj w (x + y) z) ∘ʲ transportInj (cong₂ _+_ refl (+-assoc x y z))
+        ≡⟨ cong₂ _∘ʲ_ (transport-∘ʲ-transport (λ i → +-assoc w (x + y) z i) (λ i → +-assoc w x y i + z)) refl ⟩
+      transportInj ((λ i → +-assoc w (x + y) z i) ∙ (λ i → +-assoc w x y i + z)) ∘ʲ transportInj (cong₂ _+_ refl (+-assoc x y z))
+        ≡⟨ transport-∘ʲ-transport (λ i → w + +-assoc x y z i) ((λ i → +-assoc w (x + y) z i) ∙ (λ i → +-assoc w x y i + z)) ⟩
+      transportInj ((λ i → w + +-assoc x y z i) ∙ (λ i → +-assoc w (x + y) z i) ∙ (λ i → +-assoc w x y i + z))
+        ≡⟨ cong transportInj (isSetℕ (w + (x + (y + z))) (((w + x) + y) + z) _ _) ⟩
+      transportInj ((λ i → +-assoc w x (y + z) i) ∙ (λ i → +-assoc (w + x) y z i))
+        ≡⟨ sym (transport-∘ʲ-transport (λ i → +-assoc w x (y + z) i) (λ i → +-assoc (w + x) y z i)) ⟩
+      αInj (w + x) y z ∘ʲ αInj w x (y + z) ▯
+InjMonoidalStr .triangle x y = w
+  where
+    u : +-assoc x 0 y ∙ (cong₂ _+_ (+-zero x) (λ _ → y)) ≡ refl
+    u = isSetℕ (x + (0 + y)) (x + y) (+-assoc x 0 y ∙ cong₂ _+_ (+-zero x) (λ _ → y)) refl
+    w : ((transportInj (+-zero x)) ⊕ (idInj y))
+      ∘ʲ (transportInj (+-assoc x 0 y)) 
+      ≡ idInj x ⊕ transportInj refl
+    w =
+      (transportInj (+-zero x) ⊕ idInj y) ∘ʲ transportInj (+-assoc x 0 y)
+        ≡⟨ cong (λ ○ → (_ ⊕ ○) ∘ʲ transportInj (+-assoc x 0 y))
+                (sym (transportRefl (idInj y))) ⟩
+      (transportInj (+-zero x) ⊕ transportInj (λ _ → y)) ∘ʲ transportInj (+-assoc x 0 y)
+        ≡⟨ cong₂ _∘ʲ_ (transport-⊕-transport (+-zero x) (λ _ → y)) refl ⟩
+      transportInj (cong₂ _+_ (+-zero x) (λ _ → y)) ∘ʲ transportInj (+-assoc x 0 y)
+        ≡⟨ transport-∘ʲ-transport (+-assoc x 0 y) (λ i → +-zero x i + y) ⟩
+      transportInj (+-assoc x 0 y ∙ (cong₂ _+_ (+-zero x) (λ _ → y)))  
+        ≡⟨ cong transportInj u ⟩
+      transportInj refl
+        ≡⟨ sym (transport-⊕-transport (λ _ → x) (λ _ → 0 + y)) ⟩
+      transportInj refl ⊕ transportInj refl
+        ≡⟨ cong (_⊕ transportInj refl) ((transportRefl (idInj x))) ⟩
+      idInj x ⊕ transportInj refl ▯
 
-InjMonoidalCat' : MonoidalCategory ℓ-zero ℓ-zero
-InjMonoidalCat' .C = InjCat
-InjMonoidalCat' .monstr = {!!}
+InjMonoidalCat : MonoidalCategory ℓ-zero ℓ-zero
+InjMonoidalCat .C = InjCat
+InjMonoidalCat .monstr = InjMonoidalStr

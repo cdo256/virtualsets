@@ -269,3 +269,27 @@ transportInj-cancel {m} {n} p =
   subst2 Inj refl p (subst2 Inj refl (sym p) Id)
     ≡⟨ transportTransport⁻ (cong (Inj n) p) Id ⟩
   Id ▯
+
+transport-∘ʲ-transport
+  : ∀ {l m n} (p : l ≡ m) (q : m ≡ n)
+  → transportInj q ∘ʲ transportInj p ≡ transportInj (p ∙ q)
+transport-∘ʲ-transport {zero} {m} {n} p q =
+  injExt (transportInj q ∘ʲ transportInj p) (transportInj (p ∙ q)) λ ()
+transport-∘ʲ-transport {suc l} {m} {n} p q =
+  injExt (transportInj q ∘ʲ transportInj p) (transportInj (p ∙ q)) ext 
+  where
+    ext : (x : Fin (suc l)) →
+           apply (transportInj q ∘ʲ transportInj p) x ≡
+           apply (transportInj (p ∙ q)) x
+    ext x =
+      apply (transportInj q ∘ʲ transportInj p) x
+        ≡⟨ sym (apply-apply (transportInj q) (transportInj p) x) ⟩
+      apply (transportInj q) (apply (transportInj p) x)
+        ≡⟨ cong (apply (transportInj q)) (apply-transportInj x p) ⟩
+      apply (transportInj q) (subst Fin p x)
+        ≡⟨ apply-transportInj (subst Fin p x) q ⟩
+      subst Fin q (subst Fin p x)
+        ≡⟨ sym (substComposite Fin p q x) ⟩
+      subst Fin (p ∙ q) x
+        ≡⟨ sym (apply-transportInj x (p ∙ q)) ⟩
+      apply (transportInj (p ∙ q)) x ▯

@@ -427,3 +427,40 @@ shift-nul x (suc y) =
   shift1 (shift y (nul x))
     ≡⟨ cong shift1 (shift-nul x y) ⟩
   nul (suc y + x) ▯
+
+transport-⊕-transport
+  : ∀ {l l' m m'} (p : l ≡ l') (q : m ≡ m')
+  → transportInj p ⊕ transportInj q ≡ transportInj (cong₂ _+_ p q)
+transport-⊕-transport {zero} {suc l'} {m} {m'} p q = absurd (znots p)
+transport-⊕-transport {suc l} {zero} {m} {m'} p q = absurd (snotz p)
+transport-⊕-transport {zero} {zero} {m} {m'} p q =
+  subst (Inj 0) p (nul 0) ⊕ transportInj q
+    ≡⟨ cong (_⊕ transportInj q) (sym (nul≡subst2-nul refl p)) ⟩
+  nul 0 ⊕ transportInj q
+    ≡⟨ refl ⟩
+  transportInj q 
+    ≡⟨ cong transportInj (isSetℕ m m' q (cong₂ _+_ p q)) ⟩
+  transportInj (cong₂ _+_ p q) ▯
+transport-⊕-transport {suc l} {suc l'} {m} {m'} p q =
+    subst2 Inj refl p (inc f0 (idInj l)) ⊕ transportInj q
+      ≡⟨ cong (λ ○ → subst2 Inj refl ○ (inc f0 (idInj l)) ⊕ transportInj q)
+              (isSetℕ (suc l) (suc l') p (cong suc p')) ⟩
+    subst2 Inj refl (cong suc p') (inc f0 (idInj l)) ⊕ transportInj q
+      ≡⟨ cong (λ ○ → (○ ⊕ transportInj q))
+              (subst2-inc-reorder refl (cong predℕ p) f0 (idInj l)) ⟩
+    inc (subst Fin (cong suc p') f0)
+        (transportInj (λ i → predℕ (p i))) ⊕ transportInj q
+      ≡⟨ cong₂ inc (cong (finject m') (sym (fzero≡subst-fzero p'))) (transport-⊕-transport p' q) ⟩
+    inc f0 (transportInj (cong₂ _+_ p' q))
+      ≡⟨ cong₂ inc (fzero≡subst-fzero (cong₂ _+_ p' q)) refl ⟩
+    inc (subst Fin (cong₂ _+_ (cong suc p') q) f0) (transportInj (cong₂ _+_ p' q))
+      ≡⟨ sym (subst2-inc-reorder refl (cong₂ _+_ p' q) f0 (idInj (l + m))) ⟩
+    subst (Inj _) (cong₂ _+_ (cong suc p') q) (inc f0 Id)
+      ≡⟨ refl ⟩
+    transportInj (cong₂ _+_ (cong suc p') q)
+      ≡⟨ cong (λ ○ → transportInj (cong₂ _+_ ○ q)) (isSetℕ (suc l) (suc l') (cong suc p') p) ⟩
+    transportInj (cong₂ _+_ p q)  ▯
+    where
+      p' : l ≡ l'
+      p' = λ i → predℕ (p i)
+
