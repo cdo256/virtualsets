@@ -59,3 +59,9 @@ suc≥1 x = x , +-comm x 1
 ≢0→≥1 : (x : ℕ) → x ≢ 0 → x ≥ 1
 ≢0→≥1 zero 0≢0 = absurd (0≢0 refl)
 ≢0→≥1 (suc x) x≢0 = suc≥1 x
+
+≤∧≥→≡ : {m n : ℕ} → m ≤ n → m ≥ n → m ≡ n
+≤∧≥→≡ {zero} {zero} m≤n m≥n = refl
+≤∧≥→≡ {zero} {suc n} m≤n m≥n = absurd (¬-<-suc m≥n (suc-≤-suc zero-≤))
+≤∧≥→≡ {suc m} {zero} m≤n m≥n = absurd (¬-<-suc m≤n (suc-≤-suc zero-≤))
+≤∧≥→≡ {suc m} {suc n} m≤n m≥n = cong suc (≤∧≥→≡ (pred-≤-pred m≤n) (pred-≤-pred m≥n))

@@ -9,6 +9,7 @@ open import Cubical.Data.Nat.Properties
 open import Cubical.Data.List.Base hiding (elim; [_])
 open import Cubical.Data.Maybe.Base hiding (elim)
 open import VSet.Data.Nat.Properties
+open import VSet.Data.Nat.Order
 open import VSet.Data.Fin.Base
 open import VSet.Data.Fin.Order
 open import VSet.Data.Fin.Splice
@@ -167,3 +168,10 @@ subst-apply-reorder {suc l} {suc m} {suc n} (fsuc x) (inc b f) p =
         (subst2 Inj (cong predℕ (sym p)) refl f)) (fsuc x)
     ≡⟨ cong (λ ○ → apply ○ (fsuc x)) (sym (subst2-inc-reorder' (sym p) refl b f)) ⟩
   apply (subst2 Inj (sym p) refl (inc b f)) (fsuc x) ▯
+
+Inj→m≤n : {m n : ℕ} → Inj m n → m ≤ n
+Inj→m≤n {zero} {n} f = zero-≤
+Inj→m≤n {suc m} {suc n} (inc _ f) = suc-≤-suc (Inj→m≤n f)
+
+Inj-Inj⁻¹→m≡n : {m n : ℕ} → Inj m n → Inj n m → m ≡ n
+Inj-Inj⁻¹→m≡n f g = ≤∧≥→≡ (Inj→m≤n f) (Inj→m≤n g)

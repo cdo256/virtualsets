@@ -111,4 +111,4 @@ module TransportNatIso {C : Category ℓC (ℓC' ⊔ ℓC)} {D : Category ℓD (
           ≡⟨ cong (_⋆ᴰ F .F-hom f) (sym (transportRefl (D .id))) ⟩
         transport refl (D .id) ⋆ᴰ F .F-hom f ▯
 
-open TransportNatIso using (transport→natIso)
+open TransportNatIso using (transport→natIso) public

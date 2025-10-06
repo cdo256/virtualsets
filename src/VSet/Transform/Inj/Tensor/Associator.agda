@@ -59,13 +59,13 @@ shift-tensor-cast {m} {m'} {n} {n'} (suc l') f g =
 
 -- jcast-reorder
 --   : ∀ {m m' n n' : ℕ}
---   → (ϕ : ℕ → ℕ) (ψ : ℕ → ℕ) (η : {x y : ℕ} → Inj x y → Inj (ϕ x) (ψ y))
+--   → (ϕ : ℕ → ℕ) (ψ : ℕ → ℕ) (ρ : {x y : ℕ} → Inj x y → Inj (ϕ x) (ψ y))
 --   → (p : m ≡ m') (q : n ≡ n') (f : Inj m n)
---   → jcast (cong ϕ p) (cong ψ q) (η f)
---   ≡ η (jcast p q f)
--- jcast-reorder {zero} {zero} {n} {n'} ϕ ψ η p q (nul _) = {!!}
--- jcast-reorder {zero} {suc m'} {n} {n'} ϕ ψ η p q (nul _) = {!!}
--- jcast-reorder {suc m} {m'} {n} {n'} ϕ ψ η p q (inc b f) = {!!}
+--   → jcast (cong ϕ p) (cong ψ q) (ρ f)
+--   ≡ ρ (jcast p q f)
+-- jcast-reorder {zero} {zero} {n} {n'} ϕ ψ ρ p q (nul _) = {!!}
+-- jcast-reorder {zero} {suc m'} {n} {n'} ϕ ψ ρ p q (nul _) = {!!}
+-- jcast-reorder {suc m} {m'} {n} {n'} ϕ ψ ρ p q (inc b f) = {!!}
 
 shift-tensor : (l' : ℕ) (f : Inj m m') (g : Inj n n')
              → (shift l' f) ⊕ g ≡ subst2 Inj refl (+-assoc l' m' n') (shift l' (f ⊕ g))
@@ -149,3 +149,87 @@ unassoc {l} {l'} {m} {m'} {n} {n'} f g h =
     (transport α-p (f ⊕ (g ⊕ h))) 
     ≡⟨ sym (cong (transport (sym α-p)) (assoc f g h)) ⟩
   transport (sym α-p) ((f ⊕ g) ⊕ h) ▯
+
+module _ {m m' : ℕ} where
+  ρ-p-dom : m + 0 ≡ m
+  ρ-p-dom = +-zero m
+
+  ρ-p-cod : m' + 0 ≡ m'
+  ρ-p-cod = +-zero m'
+
+  ρ-p : Inj (m + 0) (m' + 0) ≡ Inj m m'
+  ρ-p =
+    cong₂ Inj ρ-p-dom ρ-p-cod
+
+  ρ-iso : Iso (Inj (m + 0) (m' + 0))
+              (Inj m m')
+  ρ-iso = pathToIso ρ-p
+
+  ρ : Inj (m + 0) (m' + 0) → Inj m m'
+  ρ = Iso.fun ρ-iso 
+
+  ρ⁻¹ : Inj m m' → Inj (m + 0) (m' + 0)
+  ρ⁻¹ = Iso.inv ρ-iso 
+
+right-unit : {m m' : ℕ} → (f : Inj m m')
+           → f ≡ transport ρ-p (f ⊕ 𝟘)
+right-unit (nul m') =
+  nul m'
+    ≡⟨ nul≡subst-nul (+-zero m') ⟩
+  transport ρ-p (nul (m' + 0))
+    ≡⟨ cong (transport ρ-p) refl ⟩
+  transport ρ-p (nul m' ⊕ 𝟘) ▯
+right-unit {suc m} {suc m'} (inc fzero f) =
+  inc fzero f
+    ≡⟨ cong₂ inc (fzero≡subst-fzero (+-zero m'))
+                 (right-unit f) ⟩
+  inc (subst (Fin ∘ suc) (+-zero m') fzero)
+      (subst2 Inj (+-zero m) (+-zero m') (f ⊕ 𝟘))
+    ≡⟨ sym (subst2-inc-reorder (+-zero m) (+-zero m') fzero (f ⊕ 𝟘)) ⟩
+  transport ρ-p (inc fzero (f ⊕ 𝟘))
+    ≡⟨ refl ⟩
+  transport ρ-p (inc (finject 0 fzero) (f ⊕ 𝟘))
+    ≡⟨ refl ⟩
+  transport ρ-p (inc fzero f ⊕ 𝟘) ▯
+right-unit {suc m} {suc m'} (inc (fsuc b) f) =
+  inc (fsuc b) f
+    ≡⟨ cong (λ ○ → inc (fsuc ○) f) (sym (substSubst⁻ Fin (+-zero m') b)) ⟩
+  inc (fsuc (subst Fin (+-zero m') (subst Fin (sym (+-zero m')) b))) f
+    ≡⟨ cong (λ ○ → inc (fsuc (subst Fin (+-zero m') ○)) f) (sym (finject0≡subst b)) ⟩
+  inc (fsuc (subst Fin (+-zero m') (finject 0 b))) f
+    ≡⟨ cong₂ inc (sym (subst-fsuc-reorder (+-zero m') (finject 0 b)))
+                 (right-unit f) ⟩
+  inc (subst (Fin ∘ suc) (+-zero m') (fsuc (finject 0 b)))
+      (subst2 Inj (+-zero m) (+-zero m') (f ⊕ 𝟘))
+    ≡⟨ sym (subst2-inc-reorder (+-zero m) (+-zero m') (fsuc (finject 0 b)) (f ⊕ 𝟘)) ⟩
+  transport ρ-p (inc (fsuc (finject 0 b)) (f ⊕ 𝟘))
+    ≡⟨ refl ⟩
+  transport ρ-p (inc (finject 0 (fsuc b)) (f ⊕ 𝟘))
+    ≡⟨ refl ⟩
+  transport ρ-p (inc (fsuc b) f ⊕ 𝟘) ▯
+
+module _ {m m' : ℕ} where
+  η-p-dom : 0 + m ≡ m
+  η-p-dom = refl
+
+  η-p-cod : 0 + m' ≡ m'
+  η-p-cod = refl
+
+  η-p : Inj (0 + m) (0 + m') ≡ Inj m m'
+  η-p =
+    cong₂ Inj η-p-dom η-p-cod
+
+  η-iso : Iso (Inj (0 + m) (0 + m'))
+              (Inj m m')
+  η-iso = pathToIso η-p
+
+  η : Inj (0 + m) (0 + m') → Inj m m'
+  η = Iso.fun η-iso 
+
+  η⁻¹ : Inj m m' → Inj (0 + m) (0 + m')
+  η⁻¹ = Iso.inv η-iso 
+
+left-unit : {m m' : ℕ} → (f : Inj m m')
+          → f ≡ transport η-p (𝟘 ⊕ f)
+left-unit f = sym (transportRefl f)
+
