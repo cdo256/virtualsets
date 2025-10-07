@@ -18,10 +18,10 @@ SetU : ∀ ℓ → Type (ℓ-suc ℓ)
 SetU ℓ = Σ (Type ℓ) isSet
 
 Subset : (S : Type ℓ) → Type _ 
-Subset {ℓ = ℓ} S = Σ (S → Type) PropU (ℓ-suc ℓ)
+Subset {ℓ = ℓ} S = Σ (S → Type) {!PropU (ℓ-suc ℓ)!}
 
 Subset-isSet : (S : SetU ℓ) → isSet (Subset (S .fst))
-Subset-isSet (X , isSetX) = isSetΠ λ x → {!!}
+Subset-isSet (X , isSetX) = {!isSetΠ λ x → {!!}!}
 
 -- SubsetU : (S : SetU ℓ) → SetU _ 
 -- SubsetU {ℓ = ℓ} S = fst S → PropU (ℓ-suc ℓ)

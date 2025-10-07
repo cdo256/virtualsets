@@ -13,6 +13,9 @@ open import Cubical.Data.List.Base hiding ([_])
 open import VSet.Data.Inj.Base
 open import VSet.Transform.Inj.Elementary.Base 
 
+infixr 20 _∘ʲ_
+infixr 20 _∘⁻ʲ_
+
 _∘ʲ_ : ∀ {l m n} (g : Inj m n) (f : Inj l m) → Inj l n 
 _∘ʲ_ g (nul _) = nul _
 _∘ʲ_ {suc l} {suc m} {suc n} g (inc b f) =

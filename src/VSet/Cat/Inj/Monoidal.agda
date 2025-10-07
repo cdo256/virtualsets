@@ -1,6 +1,6 @@
 {-# OPTIONS --lossy-unification #-}
 
-module VSet.Cat.Inj where
+module VSet.Cat.Inj.Monoidal where
 
 open import VSet.Prelude hiding (id; isIso; _×_; pathToIso)
 open import Cubical.Categories.Category
@@ -13,6 +13,7 @@ open import Cubical.Data.Nat
 open import Cubical.Data.Sigma
 open import Cubical.Data.Nat.Properties
 open import VSet.Cat.Transport
+open import VSet.Cat.Inj.Base
 open import VSet.Data.Fin.Base hiding (⟦_⟧)
 open import VSet.Data.Fin.Splice 
 open import VSet.Data.Fin.Properties
@@ -31,21 +32,6 @@ private
     ℓ ℓ' ℓC ℓC' ℓD ℓD' : Level
 
 open Category
-
-InjCat : Category _ _
-InjCat = record
-  { ob = ℕ
-  ; Hom[_,_] = Inj
-  ; id = λ {n} → idInj n
-  ; _⋆_ = _∘⁻ʲ_
-  ; ⋆IdL = ∘ʲ-idR
-  ; ⋆IdR = ∘ʲ-idL
-  ; ⋆Assoc = λ x y z → ∘ʲ-assoc z y x
-  ; isSetHom = isSetInj
-  }
-
-InjProdCat : Category _ _
-InjProdCat = InjCat ×C InjCat
 
 ⊕-ob : InjProdCat .ob → InjCat .ob
 ⊕-ob (m , n) = m + n

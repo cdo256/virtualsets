@@ -148,7 +148,3 @@ apply-inv≡0→b≈y f b y p with y ≈?ᶠ b
 ... | no y≉b with apply-inv f (fjoin b y y≉b)
 ...      | nothing = absurd (¬nothing≡just p)
 ...      | just x = absurd (fsuc≢fzero (just-inj (fsuc x) f0 p))
-
-DecFin-isProp : {x y : ℕ} (a : Fin x) (b : Fin y)
-              → isProp (Dec (a ≈ᶠ b))
-DecFin-isProp a b = isPropDec isProp≈ᶠ

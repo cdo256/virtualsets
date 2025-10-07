@@ -212,7 +212,7 @@ subst-pred-reorder : ∀ {m m' n n'} (p : m ≡ m') (q : n ≡ n') (f : Inj (suc
                    → subst2 Inj p q (f —1)
                    ≡ subst2 Inj (cong suc p) (cong suc q) f —1
 subst-pred-reorder p q f =
-  subst2-reorder' Injsuc Inj (λ g → g —1) p q f
+  subst2-reorder' Injsuc Inj pred p q f
 
 pred-α⁻¹-reorder : {k l m n : ℕ} (f : Inj (((suc m) + n) + l) (((suc m) + n) + k))
                  → pred (α⁻¹ f) ≡ α⁻¹ (pred f)

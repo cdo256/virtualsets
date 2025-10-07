@@ -260,6 +260,18 @@ transportInj-idR {l} {m} {n} = (J> r) n
         ≡⟨ sym (transportRefl f) ⟩
       transport refl f ▯
 
+transportInj-idRL
+  : ∀ {k l m n : ℕ} (p : k ≡ l) (q : m ≡ n) (f : Inj l m)
+  → transportInj q ∘ʲ f ∘ʲ transportInj p ≡ subst2 Inj (sym p) q f
+transportInj-idRL p q f =
+  transportInj q ∘ʲ f ∘ʲ transportInj p
+    ≡⟨ cong₂ _∘ʲ_ refl (transportInj-idL p f) ⟩
+  transportInj q ∘ʲ subst2 Inj (sym p) refl f
+    ≡⟨ transportInj-idR q (subst2 Inj (sym p) refl f) ⟩
+  subst2 Inj refl q (subst2 Inj (sym p) refl f)
+    ≡⟨ subst2-stack' Inj (sym p) q f ⟩
+  subst2 Inj (sym p) q f ▯
+
 transportInj-cancel
   : ∀ {m n : ℕ} (p : m ≡ n)
   → transportInj p ∘ʲ transportInj (sym p) ≡ Id
@@ -269,6 +281,9 @@ transportInj-cancel {m} {n} p =
   subst2 Inj refl p (subst2 Inj refl (sym p) Id)
     ≡⟨ transportTransport⁻ (cong (Inj n) p) Id ⟩
   Id ▯
+
+transportInj-refl : ∀ {m : ℕ} → transportInj {m = m} refl ≡ Id
+transportInj-refl = transportRefl Id
 
 transport-∘ʲ-transport
   : ∀ {l m n} (p : l ≡ m) (q : m ≡ n)
