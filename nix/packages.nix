@@ -9,10 +9,6 @@
           ps.standard-library
           ps.cubical
         ]);
-        just-agda = inputs.just-agda.packages.${system}.default.override {
-          inherit agda;
-          inherit (pkgs.emacsPackages) agda2-mode;
-        };
         tex = pkgs.texlive.combine {
           inherit (pkgs.texlive)
             scheme-medium
